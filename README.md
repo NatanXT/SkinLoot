@@ -1,2 +1,2 @@
 # SkinLoot
-Projeto desenvolvido para criação de um marketplace de skins.
+Projeto desenvolvido para criação de uma plataforma de venda de skins entre usuários
