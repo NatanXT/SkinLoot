@@ -14,7 +14,7 @@ import java.util.Optional;
 @RequestMapping("/skins") // Define o endpoint base para skins
 public class SkinController {
 
-    @Autowired // Injeta o repositório automaticamente
+    @Autowired // Injeta automaticamente a dependência do repositório
     private SkinRepository skinRepository;
 
     @GetMapping // Lista todas as skins

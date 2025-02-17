@@ -15,7 +15,7 @@ import java.util.UUID;
 @RequestMapping("/jogos") // Define a rota base para o controlador
 public class JogoController {
 
-    @Autowired
+    @Autowired // Injeta automaticamente a dependência do repositório
     private JogoRepository jogoRepository;
 
     @PostMapping // Endpoint para criar um novo jogo
