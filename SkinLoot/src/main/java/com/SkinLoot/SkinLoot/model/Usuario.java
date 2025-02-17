@@ -12,16 +12,27 @@ public class Usuario {
     private UUID id;
 
     @Column(nullable = false) // Nome obrigatório
+    @NotNull(message = "O nome não pode ser nulo")// Garante que o nome não seja nulo
+    @Size(min = 3, max = 65, message = "O nome deve ter entre 3 a 65 caracteres")// Restrição do tamanho do nome
     private String nome;
 
     @Column(nullable = false, unique = true) // E-mail único e obrigatório
+    @NotNull(message = "O e-mail não pode ser nulo") // Garante que o e-mail não seja nulo
+    @Email(message = "E-mail inválido ou inexistente") // Validação de e-mail
     private String email;
 
     @Column(nullable = false) // Senha obrigatória
+    @NotNull(message = "A senha não pode ser nula") // Garante que a senha não seja nula
+    @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres") // Define um tamanho mínimo para senha
     private String senha;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true) 
-    // Relacionamento de um usuário para várias skins, remoção em cascata
+    
+    @OneToMany(mappedBy = "usuario", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY) 
+    // Um usuário pode possuir várias skins associadas a ele
+    // CascadeType.PERSIST: Permite que novas skins sejam salvas automaticamente ao serem associadas a um usuário
+    // CascadeType.MERGE: Permite que skins existentes sejam atualizadas ao serem associadas a um usuário
+    // orphanRemoval = true: Remove skins órfãs automaticamente ao serem desvinculadas do usuário
+    // FetchType.LAZY: As skins só são carregadas quando necessário, otimizando a performance
     private List<Skin> skins;
     
 
