@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@Service // Define esta classe como um serviço gerenciado pelo Spring
 public class SkinService {
 
-    @Autowired
+    @Autowired // Injeta automaticamente a dependência do repositório
     private SkinRepository skinRepository;
 
     // Listar todas as skins
