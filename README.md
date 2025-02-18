@@ -1,4 +1,4 @@
-### **SkinLoot**  
+### 🏪 **SkinLoot**  
 Uma plataforma para compra, venda e troca de skins de jogos entre usuários.  
 
 ---
