@@ -1,0 +1,10 @@
+<div class="skin-grid">
+  <div *ngFor="let skin of skins" class="skin-card" [ngClass]="skin.raridade">
+    <img [src]="skin.imagem" [alt]="skin.nome" class="skin-imagem">
+      <div class="skin-info">
+        <h3 class="skin-nome">{{skin.nome}}</h3>
+        <p class="skin-preco">{{skin.preco}}</p>
+      </div>
+    <button class="buy-button">Comprar</button>
+  </div>
+</div>

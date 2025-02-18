@@ -1,0 +1,8 @@
+.dark-theme {
+  background-color: #121212;
+  min-height: 100vh;
+  color: #ffffff;
+}
+.content {
+  padding: 24px;
+}
