@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@RestController
-@RequestMapping("/jogos") // Define a rota base para o controlador
+@RestController // Define esta classe como um controlador REST
+@RequestMapping("/jogos") // Define o endpoint base para esse controlador
 public class JogoController {
 
     @Autowired // Injeta automaticamente a dependência do repositório

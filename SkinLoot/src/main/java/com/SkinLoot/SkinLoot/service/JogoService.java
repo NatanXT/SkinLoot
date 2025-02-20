@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
+@Service // Define esta classe como um serviço gerenciado pelo Spring
 public class JogoService {
     
-    @Autowired
+    @Autowired // Injeta automaticamente a dependência do repositório
     private JogoRepository jogoRepository;
     
     // Criar um novo jogo

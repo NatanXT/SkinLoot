@@ -62,14 +62,3 @@ public class Jogo {
         this.skins = skins;
     }
 }
-
-// Enum para definir os tipos de jogos
-enum CategoriaJogo {
-    FPS, 
-    MOBA, 
-    RPG, 
-    BATTLE_ROYALE, 
-    ESTRATEGIA, 
-    SIMULACAO, 
-    OUTRO; // Categoria para jogos que não se encaixam nas anteriores
-}
