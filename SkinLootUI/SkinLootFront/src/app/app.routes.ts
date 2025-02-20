@@ -6,4 +6,5 @@ export const routes: Routes = [
   { path: 'menu', component: MenuComponent },
   { path: 'skins', component: SkinCardComponent },
 
+  { path: '', redirectTo: 'MenuComponent', pathMatch: 'full' },
 ];

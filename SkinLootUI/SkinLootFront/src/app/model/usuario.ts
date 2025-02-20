@@ -6,5 +6,13 @@ export interface Usuario {
   nome: String;
   email: String;
   senha: String;
-  skins: Skin;
+  skins: Skin[];
+}
+export interface LoginCredentials {
+  email: string;
+  senha: string;
+}
+export interface LoginResponse{
+  user: Usuario;
+  token: string;
 }
