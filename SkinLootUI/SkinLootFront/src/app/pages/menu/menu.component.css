@@ -6,7 +6,7 @@
 }
 
 .header {
-  background-color: #2619DE;
+  background-color: #5627B3;
   width: 100%;
   padding: 8px 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -23,11 +23,34 @@
   white-space: nowrap;
   transition: background-color 0.2s;
 }
+.menu-item span {
+  font-family: "Arial", sans-serif; /* Mude para a fonte desejada */
+  font-size: 16px; /* Ajuste o tamanho da fonte */
+  font-weight: bold; /* Exemplo: tornar o texto em negrito */
+  color: white; /* Cor do texto */
+}
 
 .menu-item:hover {
   background-color: #e9ecef;
 }
 
 .icon {
-  font-size: 1.2em;
+  font-size: 2em;
+}
+.hero {
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.banner-container {
+  width: 100%;
+  margin-top: 16px;
+  overflow: hidden;
+}
+
+.banner-image {
+  width: 100%;
+  height: auto;
+  display: block;
 }
