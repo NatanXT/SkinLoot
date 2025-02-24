@@ -1,3 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Fustat:wght@200..800&family=Press+Start+2P&display=swap" rel="stylesheet');
+
+.section {
+  margin-bottom: 48px;
+}
+
+.section-title{
+  font-family: "Press Start 2P", serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 24px;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding-left: 16px;
+  border-left: 4px solid #0d6efd;
+}
+
 .skin-grid {
   display: grid;
   flex-wrap: wrap;
@@ -6,7 +24,7 @@
 }
 
 .skin-card {
-  background-color: #FCFCFC;
+  background-color: #000000;
   border-radius: 12px;
   overflow: hidden;
   transition: transform 0.2s;
