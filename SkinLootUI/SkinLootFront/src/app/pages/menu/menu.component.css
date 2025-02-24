@@ -37,20 +37,4 @@
 .icon {
   font-size: 2em;
 }
-.hero {
-  height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.banner-container {
-  width: 100%;
-  margin-top: 16px;
-  overflow: hidden;
-}
 
-.banner-image {
-  width: 100%;
-  height: auto;
-  display: block;
-}
