@@ -23,6 +23,11 @@
   white-space: nowrap;
   transition: background-color 0.2s;
 }
+.left-menu, .right-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .menu-item span {
   font-family: "Arial", sans-serif; /* Mude para a fonte desejada */
   font-size: 16px; /* Ajuste o tamanho da fonte */
