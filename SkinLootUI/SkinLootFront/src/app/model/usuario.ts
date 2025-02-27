@@ -2,7 +2,7 @@ import {UUID} from "node:crypto";
 import {Skin} from "./skin";
 
 export interface Usuario {
-  id: UUID;
+  id: number;
   nome: String;
   email: String;
   senha: String;
