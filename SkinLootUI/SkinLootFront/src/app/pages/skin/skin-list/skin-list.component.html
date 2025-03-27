@@ -1,1 +1,25 @@
-<p>skin-list works!</p>
+<div class="skin-list-container">
+  <div class="listings-grid">
+    <div *ngFor="let anuncio of anuncioList" class="listing-card" [ngClass]="anuncio.skin.raridade">
+
+      <div class="listing-image-container">
+        <img [src]="anuncio.skin.imagem" [alt]="anuncio.skin.nome" class="listing-image">
+      </div>
+
+      <div class="listing-info">
+        <h3 class="listing-name">{{ anuncio.skin.nome }}</h3>
+        <p class="listing-jogo">Jogo: {{ anuncio.skin.jogo.nome }}</p>
+
+        <div class="listing-price-container">
+          <p class="listing-price">R$ {{ anuncio.preco | number:'1.2-2' }}</p>
+        </div>
+      </div>
+
+      <div class="listing-actions">
+        <button class="action-button contact-button">Contatar</button>
+        <button class="action-button offer-button">Fazer Oferta</button>
+      </div>
+
+    </div>
+  </div>
+</div>
