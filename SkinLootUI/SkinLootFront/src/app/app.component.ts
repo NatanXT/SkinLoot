@@ -7,7 +7,7 @@ import {SkinListComponent} from "./pages/skin/skin-list/skin-list.component";
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, MenuComponent, SkinCardComponent, SkinListComponent],
+  imports: [SkinListComponent,RouterOutlet, MenuComponent, SkinCardComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

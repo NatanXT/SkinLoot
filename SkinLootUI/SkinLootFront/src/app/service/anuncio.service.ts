@@ -9,7 +9,8 @@ import {Observable} from "rxjs";
 export class AnuncioService {
   private baseUrl = 'http://localhost:8080/api/anuncios';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {  console.log('HttpClient está aqui?', this.http);
+  }
 
   listarAnuncios(): Observable<Anuncio[]>{
     return this.http.get<Anuncio[]>(this.baseUrl);

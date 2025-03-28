@@ -6,7 +6,7 @@ export interface Anuncio{
   id: UUID;
   skin: Skin;
   vendedor: Usuario;
-  //preco: number;
+  preco: number;
   descricao: string;
   dataPublicacao: Date;
   status: 'DISPONIVEL' | 'VENDIDO';
