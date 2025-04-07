@@ -1,0 +1,13 @@
+<h2>Registro</h2>
+<form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
+  <label for="nome">Nome</label>
+  <input id="nome" formControlName="nome" type="text" />
+
+  <label for="email">Email</label>
+  <input id="email" formControlName="email" type="email" />
+
+  <label for="senha">Senha</label>
+  <input id="senha" formControlName="senha" type="password" />
+
+  <button type="submit">Registrar</button>
+</form>

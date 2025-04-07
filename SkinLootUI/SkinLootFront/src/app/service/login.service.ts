@@ -34,6 +34,15 @@ export class LoginService {
     localStorage.removeItem('userAtual');
     this.currentUserSubject.next(null);
   }
+  register(user: Usuario): Observable<Usuario> {
+    // Aqui você chamaria a API de cadastro.
+    // Por enquanto, vamos simular retornando o mesmo usuário:
+    this.currentUserSubject.next(usuario);
+    return new Observable<Usuario>(observer => {
+      observer.next(usuario);
+      observer.complete();
+    });
+  }
 
   getToken(): string | null {
     return localStorage.getItem('token');

@@ -1,12 +1,10 @@
 <header class="header">
 <nav class="menu">
   <div class="left-menu">
-  <a href="#" routerLink="/" class="menu-item">
-    <span class="icon">👤</span>
-    <span>Usuário</span></a>
-    <a href="#" routerLink="/login" class="menu-item">
-      <span class="icon">➲</span>
-      <span>Login</span>
+    <a href="#" routerLink="/" class="menu-item">
+      <span class="icon">👤</span>
+      <span *ngIf="!(currentUser$ | async)">Usuário</span>
+      <span *ngIf="currentUser$ | async as user">Olá, {{ user.nome }}</span>
     </a>
     <a href="#"  routerLink="/registro" class="menu-item">
       <span class="icon">⎆</span>
