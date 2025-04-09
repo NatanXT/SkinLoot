@@ -3,7 +3,7 @@ import {RouterLink} from "@angular/router";
 import {Observable} from "rxjs";
 import {Usuario} from "../../model/usuario";
 import {LoginService} from "../../service/login.service";
-import {AsyncPipe} from "@angular/common";
+import {AsyncPipe, NgIf} from "@angular/common";
 
 
 @Component({
@@ -11,7 +11,8 @@ import {AsyncPipe} from "@angular/common";
   standalone: true,
   imports: [
     RouterLink,
-    AsyncPipe
+    AsyncPipe,
+    NgIf
   ],
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.css'

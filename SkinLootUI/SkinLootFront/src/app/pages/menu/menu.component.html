@@ -16,6 +16,12 @@
   </div>
   </div>
   <div class="right-menu">
+    <ng-container *ngIf="!(currentUser$ | async)">
+      <a routerLink="/login" class="menu-item login-button">
+        <span class="icon">🔐</span>
+        <span>Login</span>
+      </a>
+    </ng-container>
     <a routerLink="/meus-anuncios" class="menu-item">
       <span class="icon">📢</span>
       <span>Meus anúncios</span>

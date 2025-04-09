@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {Router} from "express";
 import {LoginService} from "../../../service/login.service";
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-registro',
   standalone: true,
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
   templateUrl: './registro.component.html',
   styleUrl: './registro.component.css'
