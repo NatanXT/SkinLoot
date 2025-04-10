@@ -1,9 +1,8 @@
 package com.SkinLoot.SkinLoot.model;
 
+import com.SkinLoot.SkinLoot.model.enums.Raridade;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import java.math.BigDecimal;
-import java.util.UUID;
 
 @Entity // Define a classe como uma entidade JPA (tabela no banco de dados)
 public class Skin {
@@ -16,11 +15,11 @@ public class Skin {
     @NotNull(message = "O nome não pode ser nulo") // Garante que o nome não seja nulo
     @Size(min = 3, max = 100, message = "O nome deve ter entre 3 a 100 caracteres") // Restrição do tamanho do nome
     private String nome;
-
-    @Column(nullable = false) // Preço obrigatório
-    @NotNull(message = "O preço não pode ser nulo") // Garante que o preço não seja nulo
-    @DecimalMin(value = "0.01", message = "O preço deve ser maior que zero") // Define um valor mínimo válido
-    private BigDecimal preco;
+//
+//    @Column(nullable = false) // Preço obrigatório
+//    @NotNull(message = "O preço não pode ser nulo") // Garante que o preço não seja nulo
+//    @DecimalMin(value = "0.01", message = "O preço deve ser maior que zero") // Define um valor mínimo válido
+//    private BigDecimal preco;
 
     @Enumerated(EnumType.STRING) // Define a raridade como um Enum armazenado como String
     @Column(nullable = false) // Raridade obrigatória
@@ -58,14 +57,6 @@ public class Skin {
         this.nome = nome;
     }
 
-    public BigDecimal getPreco() {
-        return preco;
-    }
-
-    public void setPreco(BigDecimal preco) {
-        this.preco = preco;
-    }
-
     public Raridade getRaridade() {
         return raridade;
     }
@@ -99,12 +90,3 @@ public class Skin {
     }
 }
 
-// Enum para definir a raridade das skins
-enum Raridade{
-    COMUM,
-    INCOMUM,
-    RARO,
-    ÉPICO,
-    LENDÁRIO,
-    MÍTICO // As mais zika
-}

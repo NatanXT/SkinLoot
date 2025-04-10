@@ -4,6 +4,7 @@ import jakarta.persistence.*; // Importa as anotações JPA (@Entity, @Id, @Gene
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity // Define que esta classe representa uma tabela no banco de dados
@@ -15,8 +16,14 @@ public class CategoriaJogo{
 
     @Column(nullable = false, unique = true) // O nome da categoria deve ser único
     @NotNull(message = "O nome da CategoriaJogo não pode ser nulo") // Valida que o nome não seja nulo
-    @Size(min = 3, max = 50, message = "O nome da CategoriaJogo deve ter entre 3 e 50 caracteres")// Restringe o tamanho do nome
     private String nome;
+
+    @ManyToMany(mappedBy = "categorias")
+    private List<Jogo> jogos;
+
+    public CategoriaJogo(){
+
+    }
 
     // Getters e Setters
     public UUID getId(){

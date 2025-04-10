@@ -16,10 +16,14 @@ public class Jogo {
     @NotNull(message = "O nome do jogo não pode ser nulo") // Valida que o nome não seja nulo
     @Size(min = 3, max = 100, message = "O nome deve ter entre 3 a 100 caracteres") // Restringe o tamanho do nome
     private String nome;
-    
-    @Column(nullable = false) // A categoria do jogo é obrigatória
-    @NotNull(message = "A categoria do jogo não pode ser nula") // Valida que a categoria não seja nula
-    private CategoriaJogo categoria;
+
+    @ManyToMany
+    @JoinTable(
+            name = "jogo_categoria",
+            joinColumns = @JoinColumn(name = "jogo_id"),
+            inverseJoinColumns = @JoinColumn(name = "categoria_id")
+    )
+    private List<CategoriaJogo> categorias;
     
     @OneToMany(mappedBy = "jogo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     // Um jogo pode ter várias skins associadas a ele
@@ -45,12 +49,12 @@ public class Jogo {
         this.nome = nome;
     }
 
-    public CategoriaJogo getCategoria() {
-        return categoria;
+    public List<CategoriaJogo> getCategorias() {
+        return categorias;
     }
 
-    public void setCategoria(CategoriaJogo categoria) {
-        this.categoria = categoria;
+    public void setCategorias(List<CategoriaJogo> categorias) {
+        this.categorias = categorias;
     }
 
     public List<Skin> getSkins() {

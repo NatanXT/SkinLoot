@@ -37,9 +37,8 @@ export class SkinListComponent implements OnInit{
       //       imagem: 'https://imgs.search.brave.com/9QLGxAPbbEXbMLJfQWhPCESWbGdXkdDmnV5Tf91fPDw/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/Y3Nnb3NraW5zLmdn/L3B1YmxpYy91aWgv/cHJvZHVjdHMvYUhS/MGNITTZMeTlqYjIx/dGRXNXBkSGt1WTJ4/dmRXUm1iR0Z5WlM1/emRHVmhiWE4wWVhS/cFl5NWpiMjB2WldO/dmJtOXRlUzlwYldG/blpTOHRPV0U0TVdS/c1YweDNTakpWVlVk/alZuTmZibk5XZEhw/a1QwVmtkRmQzUzBk/YVdreFJTRlI0UkZv/M1NUVTJTMVV3V25k/M2J6Uk9WVmcwYjBa/S1drVklUR0pZU0RW/QmNHVlBORmx0Ykdo/NFdWRnJia05TZGtO/dk1EUkVSVlpzZUd0/TFozQnZkRFl5TVVa/QlVqRTNVRGRPWkZS/U1NDMTBNalp4TkZO/YWJIWkVOMUJaVkZG/bldIUjFOVTE0TW1k/Mk1sQnlaRk5wYWtG/WGQzRnJWblJPTWpj/eVNrbEhaRXAzTkRa/WlZuSlpjVlpQTTNo/TWVTMW5Ta001ZFRW/MlFubERRbWcyZVdk/cE4xZEhaSGRWUzFS/WlpGSkVPRUUtL2F1/dG8vYXV0by84NS9u/b3RyaW0vYmViYTkx/ZWU5NDhlNTk4YmNh/Mjg5YjlkMjM0ZWE2/MmMucG5n',
       //       raridade: 'legendario'
       //     },
-      //       preco:  9500,
-
-  //     descricao: 'um raro item',
+      //     preco:  9500,
+      //     descricao: 'um raro item',
       //     dataPublicacao: new Date('2025-03-15'),
       //     status: 'DISPONIVEL'
       //   },
