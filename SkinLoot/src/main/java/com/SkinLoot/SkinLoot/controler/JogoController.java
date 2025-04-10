@@ -1,4 +1,4 @@
-package com.SkinLoot.SkinLoot.controller;
+package com.SkinLoot.SkinLoot.controler;
 
 import com.SkinLoot.SkinLoot.model.Jogo;
 import com.SkinLoot.SkinLoot.repository.JogoRepository;

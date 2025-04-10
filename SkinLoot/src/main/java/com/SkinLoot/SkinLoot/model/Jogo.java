@@ -17,7 +17,6 @@ public class Jogo {
     @Size(min = 3, max = 100, message = "O nome deve ter entre 3 a 100 caracteres") // Restringe o tamanho do nome
     private String nome;
     
-    @Enumerated(EnumType.STRING) // Armazena a categoria como string no banco de dados
     @Column(nullable = false) // A categoria do jogo é obrigatória
     @NotNull(message = "A categoria do jogo não pode ser nula") // Valida que a categoria não seja nula
     private CategoriaJogo categoria;

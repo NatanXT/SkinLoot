@@ -1,7 +1,9 @@
 package com.SkinLoot.SkinLoot.model;
 
 import jakarta.persistence.*; // Importa as anotações JPA (@Entity, @Id, @GeneratedValue, @Column)
-import jakarta.validation.constraints.*; // Importa as validações (@NotNull, @Size)
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.util.UUID;
 
 @Entity // Define que esta classe representa uma tabela no banco de dados
