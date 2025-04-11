@@ -18,9 +18,6 @@ public class CategoriaJogo{
     @NotNull(message = "O nome da CategoriaJogo não pode ser nulo") // Valida que o nome não seja nulo
     private String nome;
 
-    @ManyToMany(mappedBy = "categorias")
-    private List<Jogo> jogos;
-
     public CategoriaJogo(){
 
     }

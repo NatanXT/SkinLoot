@@ -1,5 +1,6 @@
 package com.SkinLoot.SkinLoot.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.util.List;
@@ -30,6 +31,7 @@ public class Jogo {
     // CascadeType.ALL: Se o jogo for deletado, suas skins também são removidas
     // orphanRemoval = true: Remove skins órfãs automaticamente
     // FetchType.LAZY: As skins só são carregadas quando necessário, otimizando a performance
+    @JsonIgnore
     private List<Skin> skins;
 
     // Getters e Setters

@@ -32,11 +32,15 @@ public class UsuarioService {
     }
 
     @Transactional // Garante a integridade da transação ao criar um usuário
-    public Usuario criarUsuario(Usuario usuario) {
-        if (usuarioRepository.existsByEmail(usuario.getEmail())) {
-            throw new RuntimeException("E-mail já cadastrado");
+    public Usuario autenticarUsuario(String username, String senha) {
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        if (!passwordEncoder.matches(senha, usuario.getSenha())) {
+            throw new RuntimeException("Senha inválida");
         }
-        return usuarioRepository.save(usuario);
+
+        return usuario;
     }
 
     @Transactional // Garante a integridade da transação ao atualizar um usuário

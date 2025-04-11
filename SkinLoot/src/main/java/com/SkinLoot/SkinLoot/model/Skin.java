@@ -15,7 +15,7 @@ public class Skin {
     @NotNull(message = "O nome não pode ser nulo") // Garante que o nome não seja nulo
     @Size(min = 3, max = 100, message = "O nome deve ter entre 3 a 100 caracteres") // Restrição do tamanho do nome
     private String nome;
-//
+
 //    @Column(nullable = false) // Preço obrigatório
 //    @NotNull(message = "O preço não pode ser nulo") // Garante que o preço não seja nulo
 //    @DecimalMin(value = "0.01", message = "O preço deve ser maior que zero") // Define um valor mínimo válido
