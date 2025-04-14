@@ -16,6 +16,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {// JpaR
     // Método para verificar se um e-mail já está cadastrado
     boolean existsByEmail(String email);
 
-    Optional<Usuario> findByUsername(String username);
+    Optional<Usuario> findByNome(String username);
 
 }

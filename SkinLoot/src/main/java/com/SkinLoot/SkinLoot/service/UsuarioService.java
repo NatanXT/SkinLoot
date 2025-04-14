@@ -56,7 +56,7 @@ public class UsuarioService {
 
 
     public Usuario cadastrarUsuario(RegisterRequest request) {
-        if (usuarioRepository.findByUsername(request.getUsername()).isPresent()) {
+        if (usuarioRepository.findByNome(request.getUsername()).isPresent()) {
             throw new RuntimeException("Username já existe");
         }
 

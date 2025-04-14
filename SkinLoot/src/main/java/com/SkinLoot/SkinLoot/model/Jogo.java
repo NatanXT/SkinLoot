@@ -1,5 +1,6 @@
 package com.SkinLoot.SkinLoot.model;
 
+import com.SkinLoot.SkinLoot.model.enums.CategoriaJogo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -18,12 +19,11 @@ public class Jogo {
     @Size(min = 3, max = 100, message = "O nome deve ter entre 3 a 100 caracteres") // Restringe o tamanho do nome
     private String nome;
 
-    @ManyToMany
-    @JoinTable(
-            name = "jogo_categoria",
-            joinColumns = @JoinColumn(name = "jogo_id"),
-            inverseJoinColumns = @JoinColumn(name = "categoria_id")
-    )
+
+    @ElementCollection(targetClass = CategoriaJogo.class)
+    @CollectionTable(name = "jogo_categorias", joinColumns = @JoinColumn(name = "jogo_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "categoria")
     private List<CategoriaJogo> categorias;
     
     @OneToMany(mappedBy = "jogo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

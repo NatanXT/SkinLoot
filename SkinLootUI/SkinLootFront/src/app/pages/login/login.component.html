@@ -1,1 +1,26 @@
-<p>login works!</p>
+<div class="login-container">
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <h2>Login</h2>
+
+    <label for="email">Email</label>
+    <input id="email" type="email" formControlName="email" />
+    <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="error">
+      Email inválido
+    </div>
+
+    <label for="senha">Senha</label>
+    <input id="senha" type="password" formControlName="senha" />
+    <div *ngIf="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched" class="error">
+      A senha é obrigatória
+    </div>
+
+    <div *ngIf="loginError$ | async as error" class="error">
+      {{ error }}
+    </div>
+
+    <button type="submit" [disabled]="isLoading$ | async">
+      <ng-container *ngIf="isLoading$ | async; else loginText">Carregando...</ng-container>
+      <ng-template #loginText>Entrar</ng-template>
+    </button>
+  </form>
+</div>

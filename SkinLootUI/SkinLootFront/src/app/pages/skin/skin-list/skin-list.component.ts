@@ -21,12 +21,12 @@ export class SkinListComponent implements OnInit{
 
     }
     ngOnInit(): void{
-      this.anuncioService.listarAnuncios().subscribe(
-        data => {
-          this.anuncios = data;
-        },
-        error => console.log('fudeu',error)
-      )
+      // // this.anuncioService.listarAnuncios().subscribe(
+      // //   data => {
+      // //     this.anuncios = data;
+      //   },
+      //   error => console.log('fudeu',error)
+      // )
     }
       //essa logica de anuncio esta errada
       // anuncioList: Anuncio[] = [
