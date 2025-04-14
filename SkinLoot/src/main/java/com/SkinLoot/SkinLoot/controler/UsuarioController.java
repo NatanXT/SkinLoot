@@ -1,10 +1,16 @@
 package com.SkinLoot.SkinLoot.controler;
 
+import com.SkinLoot.SkinLoot.dto.LoginRequest;
+import com.SkinLoot.SkinLoot.dto.LoginResponse;
+import com.SkinLoot.SkinLoot.dto.RegisterRequest;
 import com.SkinLoot.SkinLoot.model.Usuario;
 import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
+import com.SkinLoot.SkinLoot.service.UsuarioService;
+import com.SkinLoot.SkinLoot.util.JwtTokenUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +24,14 @@ public class UsuarioController {
     @Autowired // Injeta automaticamente a dependência do repositório
     private UsuarioRepository usuarioRepository;
 
+    private final UsuarioService usuarioService;
+    private final JwtTokenUtil jwtTokenUtil;
+
+    public UsuarioController(UsuarioService usuarioService, JwtTokenUtil jwtTokenUtil) {
+        this.usuarioService = usuarioService;
+        this.jwtTokenUtil = jwtTokenUtil;
+    }
+
     @GetMapping // Lista todos os usuários
     public List<Usuario> listarUsuarios() {
         return usuarioRepository.findAll();
@@ -30,14 +44,21 @@ public class UsuarioController {
                       .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping // Cria um novo usuário
-    public ResponseEntity<Usuario> criarUsuario(@Valid @RequestBody Usuario usuario) {
-        if (usuarioRepository.existsByEmail(usuario.getEmail())) {
-            return ResponseEntity.badRequest().build(); // Retorna erro se o e-mail já estiver cadastrado
-        }
-        Usuario novoUsuario = usuarioRepository.save(usuario);
-        return ResponseEntity.ok(novoUsuario);
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+        UserDetails userDetails = usuarioService.autenticar(loginRequest.getUsername(), loginRequest.getSenha());
+
+        String token = jwtTokenUtil.generateToken(userDetails);
+
+        return ResponseEntity.ok(new LoginResponse(token, userDetails.getUsername()));
     }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest request) {
+        usuarioService.cadastrarUsuario(request);
+        return ResponseEntity.ok("Usuário cadastrado com sucesso!");
+    }
+
 
     @PutMapping("/{id}") // Atualiza um usuário existente
     public ResponseEntity<Usuario> atualizarUsuario(@PathVariable UUID id, @Valid @RequestBody Usuario usuarioAtualizado) {

@@ -1,5 +1,6 @@
 package com.SkinLoot.SkinLoot.model;
 
+import com.SkinLoot.SkinLoot.model.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -30,7 +31,12 @@ public class Usuario {
     @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres") // Define um tamanho mínimo para senha
     private String senha;
 
-    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
+
+
     @OneToMany(mappedBy = "usuario", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY) 
     // Um usuário pode possuir várias skins associadas a ele
     // CascadeType.PERSIST: Permite que novas skins sejam salvas automaticamente ao serem associadas a um usuário
@@ -79,5 +85,13 @@ public class Usuario {
 
     public void setSkins(List<Skin> skins) {
         this.skins = skins;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

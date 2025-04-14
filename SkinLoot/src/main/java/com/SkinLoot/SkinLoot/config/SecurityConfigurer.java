@@ -1,6 +1,6 @@
 package com.SkinLoot.SkinLoot.config;
 
-import com.j2ns.backend.config.Role;
+import com.SkinLoot.SkinLoot.model.enums.Role;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

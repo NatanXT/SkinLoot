@@ -1,8 +1,13 @@
 package com.SkinLoot.SkinLoot.service;
 
+import com.SkinLoot.SkinLoot.dto.RegisterRequest;
 import com.SkinLoot.SkinLoot.model.Usuario;
+import com.SkinLoot.SkinLoot.model.enums.Role;
 import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +20,14 @@ public class UsuarioService {
 
     @Autowired // Injeta automaticamente a dependência do repositório
     private UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserDetailsService userDetailsService;
+
+    public UsuarioService(UsuarioRepository usuarioRepository,PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.userDetailsService = userDetailsService;
+    }
 
     // Retorna uma lista de todos os usuários cadastrados
     public List<Usuario> listarUsuarios() {
@@ -31,26 +44,31 @@ public class UsuarioService {
         return usuarioRepository.findByEmail(email);
     }
 
-    @Transactional // Garante a integridade da transação ao criar um usuário
-    public Usuario autenticarUsuario(String username, String senha) {
-        Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+    public UserDetails autenticar(String username, String senha) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        if (!passwordEncoder.matches(senha, usuario.getSenha())) {
+        if (!passwordEncoder.matches(senha, userDetails.getPassword())) {
             throw new RuntimeException("Senha inválida");
         }
 
-        return usuario;
+        return userDetails;
     }
 
-    @Transactional // Garante a integridade da transação ao atualizar um usuário
-    public Usuario atualizarUsuario(UUID id, Usuario usuarioAtualizado) {
-        if (!usuarioRepository.existsById(id)) {
-            throw new RuntimeException("Usuário não encontrado");
+
+    public Usuario cadastrarUsuario(RegisterRequest request) {
+        if (usuarioRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new RuntimeException("Username já existe");
         }
-        usuarioAtualizado.setId(id);
-        return usuarioRepository.save(usuarioAtualizado);
+
+        Usuario novo = new Usuario();
+        novo.setNome(request.getUsername());
+        novo.setEmail(request.getEmail());
+        novo.setSenha(passwordEncoder.encode(request.getSenha()));
+        novo.setRole(Role.USER); // Padrão
+
+        return usuarioRepository.save(novo);
     }
+
 
     @Transactional // Garante a integridade da transação ao deletar um usuário
     public void deletarUsuario(UUID id) {
