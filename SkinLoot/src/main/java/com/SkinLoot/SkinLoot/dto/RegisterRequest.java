@@ -2,6 +2,7 @@ package com.SkinLoot.SkinLoot.dto;
 
 public class RegisterRequest {
         private String username;
+        private String genero;
         private String email;
         private String senha;
 
@@ -11,6 +12,14 @@ public class RegisterRequest {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getGenero() {
+        return genero;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
     }
 
     public String getEmail() {

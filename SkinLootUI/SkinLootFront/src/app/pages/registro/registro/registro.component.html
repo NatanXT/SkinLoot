@@ -1,13 +1,37 @@
-<h2>Registro</h2>
-<form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
-  <label for="nome">Nome</label>
-  <input id="nome" formControlName="nome" type="text" />
+<div class="register-container">
+  <h2>Cadastro de Usuário</h2>
 
-  <label for="email">Email</label>
-  <input id="email" formControlName="email" type="email" />
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
-  <label for="senha">Senha</label>
-  <input id="senha" formControlName="senha" type="password" />
+    <label for="username">Nome de usuário</label>
+    <input id="username" type="text" formControlName="username" />
+    <div *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched">
+      Nome de usuário é obrigatório.
+    </div>
 
-  <button type="submit">Registrar</button>
-</form>
+    <label for="email">Email</label>
+    <input id="email" type="email" formControlName="email" />
+    <div *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+      Email inválido ou ausente.
+    </div>
+
+    <label for="senha">Senha</label>
+    <input id="senha" type="password" formControlName="senha" />
+    <div *ngIf="registerForm.get('senha')?.invalid && registerForm.get('senha')?.touched">
+      Senha deve ter no mínimo 6 caracteres.
+    </div>
+
+    <label for="genero">Gênero preferido</label>
+    <select id="genero" formControlName="genero">
+      <option *ngFor="let g of generos" [value]="g">{{ g }}</option>
+    </select>
+
+    <button type="submit" [disabled]="registerForm.invalid || carregando">
+      {{ carregando ? 'Registrando...' : 'Cadastrar' }}
+    </button>
+
+    <div class="mensagem">
+      {{ mensagem }}
+    </div>
+  </form>
+</div>

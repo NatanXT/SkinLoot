@@ -4,6 +4,7 @@ import {Skin} from "./skin";
 export interface Usuario {
   id: number;
   nome: String;
+  genero: string;
   email: String;
   senha: String;
   skins: Skin[];

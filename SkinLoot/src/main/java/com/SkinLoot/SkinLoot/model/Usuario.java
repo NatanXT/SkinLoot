@@ -1,5 +1,6 @@
 package com.SkinLoot.SkinLoot.model;
 
+import com.SkinLoot.SkinLoot.model.enums.Genero;
 import com.SkinLoot.SkinLoot.model.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -20,6 +21,10 @@ public class Usuario {
     @NotNull(message = "O nome não pode ser nulo")// Garante que o nome não seja nulo
     @Size(min = 3, max = 65, message = "O nome deve ter entre 3 a 65 caracteres")// Restrição do tamanho do nome
     private String nome;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Genero genero;
 
     @Column(nullable = false, unique = true) // E-mail único e obrigatório
     @NotNull(message = "O e-mail não pode ser nulo") // Garante que o e-mail não seja nulo
