@@ -2,6 +2,7 @@ package com.SkinLoot.SkinLoot.service;
 
 import com.SkinLoot.SkinLoot.dto.RegisterRequest;
 import com.SkinLoot.SkinLoot.model.Usuario;
+import com.SkinLoot.SkinLoot.model.enums.Genero;
 import com.SkinLoot.SkinLoot.model.enums.Role;
 import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,7 @@ public class UsuarioService {
 
         Usuario novo = new Usuario();
         novo.setNome(request.getUsername());
+        novo.setGenero(Genero.valueOf(request.getGenero()));
         novo.setEmail(request.getEmail());
         novo.setSenha(passwordEncoder.encode(request.getSenha()));
         novo.setRole(Role.USER); // Padrão
