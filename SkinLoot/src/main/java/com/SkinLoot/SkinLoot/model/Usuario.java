@@ -68,6 +68,14 @@ public class Usuario {
         this.nome = nome;
     }
 
+    public Genero getGenero() {
+        return genero;
+    }
+
+    public void setGenero(Genero genero) {
+        this.genero = genero;
+    }
+
     public String getEmail() {
         return email;
     }
