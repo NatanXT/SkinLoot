@@ -54,10 +54,16 @@ public class UsuarioController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest request) {
-        usuarioService.cadastrarUsuario(request);
-        return ResponseEntity.ok("Usuário cadastrado com sucesso!");
+    public ResponseEntity<?> registrar(@RequestBody @Valid RegisterRequest request) {
+        Usuario novoUsuario = usuarioService.cadastrarUsuario(request); // ✅ já salva e valida
+
+        String accessToken = jwtTokenUtil.generateAccessToken(novoUsuario.getEmail());
+        String refreshToken = jwtTokenUtil.generateRefreshToken(novoUsuario.getId().toString());
+
+        return ResponseEntity.ok(new LoginResponse(accessToken, novoUsuario.getNome()));
+
     }
+
 
 
     @PutMapping("/{id}") // Atualiza um usuário existente
