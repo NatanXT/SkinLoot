@@ -46,7 +46,7 @@ public class UsuarioController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-        UserDetails userDetails = usuarioService.autenticar(loginRequest.getUsername(), loginRequest.getSenha());
+        UserDetails userDetails = usuarioService.autenticar(loginRequest.getNome(), loginRequest.getSenha());
 
         String token = jwtTokenUtil.generateToken(userDetails);
 
@@ -58,7 +58,7 @@ public class UsuarioController {
         Usuario novoUsuario = usuarioService.cadastrarUsuario(request); // ✅ já salva e valida
 
         String accessToken = jwtTokenUtil.generateAccessToken(novoUsuario.getEmail());
-        String refreshToken = jwtTokenUtil.generateRefreshToken(novoUsuario.getId().toString());
+//        String refreshToken = jwtTokenUtil.generateRefreshToken(novoUsuario.getId().toString());
 
         return ResponseEntity.ok(new LoginResponse(accessToken, novoUsuario.getNome()));
 

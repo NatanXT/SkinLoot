@@ -6,11 +6,11 @@ public class RegisterRequest {
         private String email;
         private String senha;
 
-    public String getUsername() {
+    public String getNome() {
         return nome;
     }
 
-    public void setUsername(String nome) {
+    public void setNome(String nome) {
         this.nome = nome;
     }
 

@@ -70,8 +70,8 @@ public class SecurityConfigurer {
                 .anonymous(AbstractHttpConfigurer::disable) // Desabilita a configuração de acesso anônimo.
                 .authorizeHttpRequests(authorize -> authorize // Configura as permissões de acesso às rotas.
                         .requestMatchers(
-                                "/api/authenticate", // Permite acesso sem autenticação a essas rotas.
-                                "/api/register"
+                                "/usuarios/login", // Permite acesso sem autenticação a essas rotas.
+                                "/usuarios/register"
                         ).permitAll()
                         .requestMatchers("/api/user/**").hasAuthority(Role.ADMIN.name()) // Apenas admins podem acessar rotas /api/user/**
                         .anyRequest().authenticated()) // Exige autenticação para todas as outras requisições.

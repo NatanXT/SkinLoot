@@ -2,11 +2,11 @@ package com.SkinLoot.SkinLoot.dto;
 
 public class LoginResponse{
     private String token;
-    private String username;
+    private String nome;
 
-    public LoginResponse(String token, String username) {
+    public LoginResponse(String token, String nome) {
             this.token = token;
-            this.username = username;
+            this.nome = nome;
     }
 
         // Getters e setters
@@ -19,11 +19,11 @@ public class LoginResponse{
         this.token = token;
     }
 
-    public String getUsername() {
-        return username;
+    public String getNome() {
+        return nome;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 }

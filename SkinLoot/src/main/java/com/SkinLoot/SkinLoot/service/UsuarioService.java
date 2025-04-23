@@ -57,12 +57,12 @@ public class UsuarioService {
 
 
     public Usuario cadastrarUsuario(RegisterRequest request) {
-        if (usuarioRepository.findByNome(request.getUsername()).isPresent()) {
+        if (usuarioRepository.findByNome(request.getNome()).isPresent()) {
             throw new RuntimeException("Username já existe");
         }
 
         Usuario novo = new Usuario();
-        novo.setNome(request.getUsername());
+        novo.setNome(request.getNome());
         novo.setGenero(Genero.valueOf(request.getGenero()));
         novo.setEmail(request.getEmail());
         novo.setSenha(passwordEncoder.encode(request.getSenha()));
