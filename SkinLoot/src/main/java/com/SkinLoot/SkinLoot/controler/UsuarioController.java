@@ -3,6 +3,7 @@ package com.SkinLoot.SkinLoot.controler;
 import com.SkinLoot.SkinLoot.dto.LoginRequest;
 import com.SkinLoot.SkinLoot.dto.LoginResponse;
 import com.SkinLoot.SkinLoot.dto.RegisterRequest;
+import com.SkinLoot.SkinLoot.dto.UsuarioDto;
 import com.SkinLoot.SkinLoot.model.Usuario;
 import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
 import com.SkinLoot.SkinLoot.service.UsuarioService;
@@ -10,7 +11,9 @@ import com.SkinLoot.SkinLoot.util.JwtTokenUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,6 +46,16 @@ public class UsuarioController {
         return usuario.map(ResponseEntity::ok)
                       .orElseGet(() -> ResponseEntity.notFound().build());
     }
+    @GetMapping("/user")
+    public ResponseEntity<UsuarioDto> getPerfil(Authentication authentication) {
+        String email = authentication.getName(); // extraído do token
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+
+        return ResponseEntity.ok(new UsuarioDto(usuario));
+    }
+
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
