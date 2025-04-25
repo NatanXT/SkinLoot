@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {BehaviorSubject, catchError, of} from "rxjs";
 import {LoginService} from "../../service/login.service";
-import {Router} from "@angular/router";
+import {Router, RouterModule} from "@angular/router";
 import {AsyncPipe, NgIf} from "@angular/common";
 
 @Component({
@@ -10,6 +10,7 @@ import {AsyncPipe, NgIf} from "@angular/common";
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    RouterModule,
     AsyncPipe,
     NgIf
   ],

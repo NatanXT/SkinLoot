@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {RouterLink} from "@angular/router";
+import {RouterLink, RouterModule} from "@angular/router";
 import {Observable} from "rxjs";
 import {Usuario} from "../../model/usuario";
 import {LoginService} from "../../service/login.service";
@@ -11,6 +11,7 @@ import {AsyncPipe, NgIf} from "@angular/common";
   standalone: true,
   imports: [
     RouterLink,
+    RouterModule,
     AsyncPipe,
     NgIf
   ],
