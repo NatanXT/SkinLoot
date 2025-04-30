@@ -6,10 +6,9 @@
       <span *ngIf="!(currentUser$ | async)">Usuário</span>
       <span *ngIf="currentUser$ | async as user">Olá, {{ user.nome }}</span>
     </a>
-    <a href="#"  routerLink="/registro" class="menu-item">
-      <span class="icon">⎆</span>
-      <span>Registro</span>
-    </a>
+    <button mat-button (click)="abrirRegistro()">
+      REGISTRAR
+    </button>
   <div class="search-container">
     <input type="text" placeholder="procurar skins" class="search-input">
     <button class="search-button"></button>

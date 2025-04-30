@@ -4,6 +4,8 @@ import {Observable} from "rxjs";
 import {Usuario} from "../../model/usuario";
 import {LoginService} from "../../service/login.service";
 import {AsyncPipe, NgIf} from "@angular/common";
+import {MatDialog, MatDialogModule} from "@angular/material/dialog";
+import {RegistroComponent} from "../registro/registro/registro.component";
 
 
 @Component({
@@ -13,7 +15,8 @@ import {AsyncPipe, NgIf} from "@angular/common";
     RouterLink,
     RouterModule,
     AsyncPipe,
-    NgIf
+    NgIf,
+    MatDialogModule
   ],
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.css'
@@ -21,8 +24,15 @@ import {AsyncPipe, NgIf} from "@angular/common";
 export class MenuComponent implements OnInit {
   currentUser$: Observable<Usuario | null>;
 
-  constructor(private loginService: LoginService) {
+  constructor(private loginService: LoginService, private dialog: MatDialog) {
     this.currentUser$ = this.loginService.currentUser$;
+  }
+//resolver o erro de unauthroized register
+  abrirRegistro() {
+    this.dialog.open(RegistroComponent, {
+      width: '450px',
+      disableClose: true
+    });
   }
 
   ngOnInit(): void {}

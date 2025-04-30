@@ -3,6 +3,12 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import {NgIf} from "@angular/common";
+import {StorageService} from "../../../service/storage.service";
+import {MatDialogModule, MatDialogRef} from "@angular/material/dialog";
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import {MatFormField} from "@angular/material/form-field";
+import {RegistroService} from "../../../service/registro.service";
 
 @Component({
   selector: 'app-registro',
@@ -10,7 +16,11 @@ import {NgIf} from "@angular/common";
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    NgIf
+    NgIf,
+    MatDialogModule,
+    MatFormField,
+    MatFormFieldModule,
+    MatInputModule
   ],
   styleUrls: ['./registro.component.css']
 })
@@ -22,7 +32,9 @@ export class RegistroComponent {
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
-    private router: Router
+    private dialogRef: MatDialogRef<RegistroComponent>,
+    private storageService: StorageService,
+    private registroService: RegistroService
   ) {
     this.registroForm = this.fb.group({
       nome: ['', Validators.required],
@@ -33,33 +45,23 @@ export class RegistroComponent {
   }
 
   onSubmit(): void {
-    if (this.registroForm.invalid) {
-      return;
-    }
+    if (this.registroForm.invalid) return;
 
     this.isLoading = true;
-    this.errorMessage = null;
-
     const payload = this.registroForm.value;
 
-    this.http.post<any>('http://localhost:8080/usuarios/register', payload)
-      .subscribe({
-        next: (response) => {
-          // Salvando o accessToken recebido
-          localStorage.setItem('accessToken', response.accessToken);
-          localStorage.setItem('userName', response.nome);
+    this.registroService.registrar(payload).subscribe({
+      next: res => {
+        console.log('Resposta do backend:', res);
 
-          // Redireciona para home (ou página que quiser)
-          this.router.navigate(['/']);
-        },
-        error: (error) => {
-          console.error(error);
-          this.errorMessage = error.error?.message || 'Erro ao registrar usuário.';
-          this.isLoading = false;
-        },
-        complete: () => {
-          this.isLoading = false;
-        }
-      });
+        this.storageService.set('accessToken', res.accessToken);
+        this.storageService.set('userName', String(res.user.nome));
+        this.dialogRef?.close();
+      },
+      error: err => {
+        this.errorMessage = err.ERROR?.message || 'erro ao regisrar.';
+        this.isLoading = false;
+      }
+    });
   }
 }

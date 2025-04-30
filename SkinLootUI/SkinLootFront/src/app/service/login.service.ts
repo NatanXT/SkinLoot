@@ -27,7 +27,7 @@ export class LoginService {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials)
       .pipe(
         tap(response => {
-          this.storage.set('token', response.token);
+          this.storage.set('token', response.accessToken);
           this.storage.set('userAtual', JSON.stringify(response.user));
           this.currentUserSubject.next(response.user);
         })

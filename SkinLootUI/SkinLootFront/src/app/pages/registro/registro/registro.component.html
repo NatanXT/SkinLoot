@@ -2,26 +2,31 @@
   <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
     <h2>Registro</h2>
 
-    <label for="nome">Nome</label>
-    <input id="nome" type="text" formControlName="nome" />
+    <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
 
-    <label for="genero">Gênero</label>
-    <select id="genero" formControlName="genero">
-      <option value="MASCULINO">Masculino</option>
-      <option value="FEMININO">Feminino</option>
-      <option value="OUTRO">Outro</option>
-    </select>
+      <label for="nome">Nome</label>
+      <input id="nome" type="text" formControlName="nome" />
 
-    <label for="email">Email</label>
-    <input id="email" type="email" formControlName="email" />
+      <label for="genero">Gênero</label>
+      <select id="genero" formControlName="genero">
+        <option value="M">Masculino</option>
+        <option value="F">Feminino</option>
+        <option value="NB">Outro</option>
+      </select>
 
-    <label for="senha">Senha</label>
-    <input id="senha" type="password" formControlName="senha" />
+      <label for="email">Email</label>
+      <input id="email" type="email" formControlName="email" />
 
-    <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" formControlName="senha" />
 
-    <button type="submit" [disabled]="isLoading">
-      {{ isLoading ? 'Registrando...' : 'Registrar' }}
-    </button>
+      <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+      <button type="submit" [disabled]="isLoading">
+        {{ isLoading ? 'Registrando...' : 'Registrar' }}
+      </button>
+
+    </form>
+
   </form>
 </div>
