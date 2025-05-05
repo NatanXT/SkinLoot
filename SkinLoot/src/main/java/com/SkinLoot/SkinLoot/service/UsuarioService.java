@@ -45,8 +45,8 @@ public class UsuarioService {
         return usuarioRepository.findByEmail(email);
     }
 
-    public UserDetails autenticar(String username, String senha) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    public UserDetails autenticar(String email, String senha) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
         if (!passwordEncoder.matches(senha, userDetails.getPassword())) {
             throw new RuntimeException("Senha inválida");

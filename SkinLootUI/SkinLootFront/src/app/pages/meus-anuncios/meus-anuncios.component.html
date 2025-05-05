@@ -1,0 +1,12 @@
+<div class="anuncio">
+<div class="criar-anuncio-container">
+  <app-criar-anuncio (anuncioCriado)="recarregarLista()"></app-criar-anuncio>
+</div>
+
+<div class="lista-anuncios">
+  <!-- Lista de anúncios será renderizada aqui -->
+  <ng-container *ngFor="let anuncio of anuncios">
+    <app-anuncio-card [anuncio]="anuncio"></app-anuncio-card>
+  </ng-container>
+</div>
+</div>

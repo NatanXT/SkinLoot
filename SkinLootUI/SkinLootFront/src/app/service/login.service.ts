@@ -10,7 +10,7 @@ import {StorageService} from "./storage.service";
   providedIn: 'root'
 })
 export class LoginService {
-  private apiUrl = "http://localhost:8080/login";
+  private apiUrl = "http://localhost:8080/usuarios";
   private currentUserSubject = new BehaviorSubject<Usuario| null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
 

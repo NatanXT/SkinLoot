@@ -59,11 +59,11 @@ public class UsuarioController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-        UserDetails userDetails = usuarioService.autenticar(loginRequest.getNome(), loginRequest.getSenha());
+        UserDetails userDetails = usuarioService.autenticar(loginRequest.getEmail(), loginRequest.getSenha());
 
         String token = jwtTokenUtil.generateToken(userDetails);
 
-        Usuario usuario = usuarioService.buscarPorNome(userDetails.getUsername())
+        Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         return ResponseEntity.ok(new LoginResponse(token, usuario));

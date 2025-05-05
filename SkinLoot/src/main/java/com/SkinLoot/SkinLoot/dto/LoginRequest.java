@@ -1,15 +1,15 @@
 package com.SkinLoot.SkinLoot.dto;
 
 public class LoginRequest {
-    private String nome;
+    private String email;
     private String senha;
 
-    public String getNome() {
-        return nome;
+    public String getEmail() {
+        return email;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getSenha() {

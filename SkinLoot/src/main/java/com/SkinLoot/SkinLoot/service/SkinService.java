@@ -9,52 +9,26 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service // Define esta classe como um serviço gerenciado pelo Spring
+@Service
 public class SkinService {
 
-//    @Autowired // Injeta automaticamente a dependência do repositório
-//    private SkinRepository skinRepository;
-//
-//    // Listar todas as skins
-//    public List<Skin> listarSkins() {
-//        return skinRepository.findAll();
-//    }
-//
-//    // Buscar uma skin pelo ID
-//    public Optional<Skin> buscarSkinPorId(Long id) {
-//        return skinRepository.findById(id);
-//    }
-//
-//    // Criar uma nova skin
-//    public Skin criarSkin(Skin skin) {
-//        return skinRepository.save(skin);
-//    }
-//
-//    // Atualizar uma skin existente
-//    public Optional<Skin> atualizarSkin(Long id, Skin skinAtualizada) {
-//        if (!skinRepository.existsById(id)) {
-//            return Optional.empty();
-//        }
-//        skinAtualizada.setId(id);
-//        return Optional.of(skinRepository.save(skinAtualizada));
-//    }
+    @Autowired
+    private SkinRepository skinRepository;
 
-//    // Deletar uma skin pelo ID
-//    public boolean deletarSkin(UUID id) {
-//        if (!skinRepository.existsById(id)) {
-//            return false;
-//        }
-//        skinRepository.deleteById(id);
-//        return true;
-//    }
+    public Skin salvar(Skin skin) {
+        return skinRepository.save(skin);
+    }
 
-//    // Buscar skins por jogo
-//    public List<Skin> buscarSkinsPorJogo(UUID jogoId) {
-//        return skinRepository.findByJogoId(jogoId);
-//    }
-//
-//    // Buscar skins por usuário (dono)
-//    public List<Skin> buscarSkinsPorUsuario(UUID usuarioId) {
-//        return skinRepository.findByUsuarioId(usuarioId);
-//    }
+    public List<Skin> listarPorUsuario(UUID usuarioId) {
+        return skinRepository.findByUsuarioId(usuarioId);
+    }
+
+    public List<Skin> listarPorJogo(UUID jogoId) {
+        return skinRepository.findByJogoId(jogoId);
+    }
+
+    public Optional<Skin> buscarPorId(UUID id) {
+        return skinRepository.findById(id);
+    }
 }
+

@@ -6,6 +6,7 @@ import {LoginService} from "../../service/login.service";
 import {AsyncPipe, NgIf} from "@angular/common";
 import {MatDialog, MatDialogModule} from "@angular/material/dialog";
 import {RegistroComponent} from "../registro/registro/registro.component";
+import {StorageService} from "../../service/storage.service";
 
 
 @Component({
@@ -24,16 +25,20 @@ import {RegistroComponent} from "../registro/registro/registro.component";
 export class MenuComponent implements OnInit {
   currentUser$: Observable<Usuario | null>;
 
-  constructor(private loginService: LoginService, private dialog: MatDialog) {
+  constructor(private loginService: LoginService, private dialog: MatDialog, private storage: StorageService) {
     this.currentUser$ = this.loginService.currentUser$;
   }
-//resolver o erro de unauthroized register
+
   abrirRegistro() {
     this.dialog.open(RegistroComponent, {
       width: '450px',
       disableClose: true
     });
   }
+  isLogado(): boolean {
+    return !!this.storage.get('token');
+  }
+
 
   ngOnInit(): void {}
 }
