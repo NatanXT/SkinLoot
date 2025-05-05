@@ -54,6 +54,10 @@ public class UsuarioService {
 
         return userDetails;
     }
+    public Optional<Usuario> buscarPorNome(String nome) {
+        return usuarioRepository.findByNome(nome);
+    }
+
 
 
     public Usuario cadastrarUsuario(RegisterRequest request) {

@@ -63,7 +63,10 @@ public class UsuarioController {
 
         String token = jwtTokenUtil.generateToken(userDetails);
 
-        return ResponseEntity.ok(new LoginResponse(token, userDetails.getUsername()));
+        Usuario usuario = usuarioService.buscarPorNome(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        return ResponseEntity.ok(new LoginResponse(token, usuario));
     }
 
     @PostMapping("/register")
@@ -73,7 +76,7 @@ public class UsuarioController {
         String accessToken = jwtTokenUtil.generateAccessToken(novoUsuario.getEmail());
 //        String refreshToken = jwtTokenUtil.generateRefreshToken(novoUsuario.getId().toString());
 
-        return ResponseEntity.ok(new LoginResponse(accessToken, novoUsuario.getNome()));
+        return ResponseEntity.ok(new LoginResponse(accessToken, novoUsuario));
 
     }
 

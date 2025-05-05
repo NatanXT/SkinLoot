@@ -1,15 +1,15 @@
 package com.SkinLoot.SkinLoot.dto;
 
-public class LoginResponse{
+import com.SkinLoot.SkinLoot.model.Usuario;
+
+public class LoginResponse {
     private String token;
-    private String nome;
+    private Usuario user;
 
-    public LoginResponse(String token, String nome) {
-            this.token = token;
-            this.nome = nome;
+    public LoginResponse(String token, Usuario user) {
+        this.token = token;
+        this.user = user;
     }
-
-        // Getters e setters
 
     public String getToken() {
         return token;
@@ -19,11 +19,11 @@ public class LoginResponse{
         this.token = token;
     }
 
-    public String getNome() {
-        return nome;
+    public Usuario getUser() {
+        return user;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setUser(Usuario user) {
+        this.user = user;
     }
 }
