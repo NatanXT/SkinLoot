@@ -1,5 +1,6 @@
 package com.SkinLoot.SkinLoot.model;
 
+import com.SkinLoot.SkinLoot.model.enums.Qualidade;
 import com.SkinLoot.SkinLoot.model.enums.Raridade;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -27,7 +28,7 @@ public class Skin {
     private Raridade raridade;
 
     @ManyToOne // Muitas skins podem pertencer a um jogo
-    @JoinColumn(name = "jogo_id", nullable = false) // Chave estrangeira para Jogo
+    @JoinColumn(name = "jogo_nome", nullable = false) // Chave estrangeira para Jogo
     @NotNull(message = "O jogo não pode ser nulo") // Garante que a skin esteja associada a um jogo
     private Jogo jogo;
 
@@ -39,6 +40,13 @@ public class Skin {
     @Column(nullable = false) // Ícone da skin (URL da imagem)
     @NotNull(message = "O ícone da skin não pode ser nulo") // Garante que o ícone não seja nulo
     private String icon;
+
+    private String assetId; // Opcional para CS:GO
+
+    private Double floatValue; // Opcional para CS:GO
+
+    @Enumerated(EnumType.STRING)
+    private Qualidade qualidade; // Opcional para CS:GO
 
     // Getters e Setters
     public Long getId() {

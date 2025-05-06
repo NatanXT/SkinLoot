@@ -19,6 +19,9 @@ public class Jogo {
     @Size(min = 3, max = 100, message = "O nome deve ter entre 3 a 100 caracteres") // Restringe o tamanho do nome
     private String nome;
 
+//    @Enumerated(EnumType.STRING)
+//    private Plataforma tipoPlataforma; // STEAM, EPIC, ROBLOX, etc
+
 
     @ElementCollection(targetClass = CategoriaJogo.class)
     @CollectionTable(name = "jogo_categorias", joinColumns = @JoinColumn(name = "jogo_id"))
