@@ -18,7 +18,7 @@ public class JogoController {
     @Autowired // Injeta automaticamente a dependência do repositório
     private JogoRepository jogoRepository;
 
-    @PostMapping // Endpoint para criar um novo jogo
+    @PostMapping("/save") // Endpoint para criar um novo jogo
     public ResponseEntity<Jogo> criarJogo(@Valid @RequestBody Jogo jogo) {
         Jogo novoJogo = jogoRepository.save(jogo);
         return ResponseEntity.ok(novoJogo);

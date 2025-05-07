@@ -26,7 +26,7 @@ public class SkinController {
     @Autowired
     private UsuarioService usuarioService;
 
-    @PostMapping
+    @PostMapping("/save")
     public ResponseEntity<Skin> criar(@RequestBody Skin skin, @AuthenticationPrincipal UserDetails userDetails) {
         Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));

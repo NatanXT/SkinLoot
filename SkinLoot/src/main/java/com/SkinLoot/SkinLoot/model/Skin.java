@@ -17,6 +17,9 @@ public class Skin {
     @Size(min = 3, max = 100, message = "O nome deve ter entre 3 a 100 caracteres") // Restrição do tamanho do nome
     private String nome;
 
+
+    private String descricao;
+
 //    @Column(nullable = false) // Preço obrigatório
 //    @NotNull(message = "O preço não pode ser nulo") // Garante que o preço não seja nulo
 //    @DecimalMin(value = "0.01", message = "O preço deve ser maior que zero") // Define um valor mínimo válido
@@ -43,7 +46,7 @@ public class Skin {
 
     private String assetId; // Opcional para CS:GO
 
-    private Double floatValue; // Opcional para CS:GO
+    private Double desgastefloat; // Opcional para CS:GO
 
     @Enumerated(EnumType.STRING)
     private Qualidade qualidade; // Opcional para CS:GO
@@ -63,6 +66,14 @@ public class Skin {
 
     public void setNome(String nome) {
         this.nome = nome;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
     }
 
     public Raridade getRaridade() {
@@ -95,6 +106,30 @@ public class Skin {
 
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+
+    public String getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(String assetId) {
+        this.assetId = assetId;
+    }
+
+    public Double getDesgastefloat() {
+        return desgastefloat;
+    }
+
+    public void setDesgastefloat(Double desgastefloat) {
+        this.desgastefloat = desgastefloat;
+    }
+
+    public Qualidade getQualidade() {
+        return qualidade;
+    }
+
+    public void setQualidade(Qualidade qualidade) {
+        this.qualidade = qualidade;
     }
 }
 

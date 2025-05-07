@@ -24,7 +24,10 @@ public class Jogo {
 
 
     @ElementCollection(targetClass = CategoriaJogo.class)
-    @CollectionTable(name = "jogo_categorias", joinColumns = @JoinColumn(name = "jogo_id"))
+    @CollectionTable(
+            name = "jogo_categorias",
+            joinColumns = @JoinColumn(name = "jogo_nome", referencedColumnName = "nome") // <- aqui está o ajuste
+    )
     @Enumerated(EnumType.STRING)
     @Column(name = "categoria")
     private List<CategoriaJogo> categorias;
