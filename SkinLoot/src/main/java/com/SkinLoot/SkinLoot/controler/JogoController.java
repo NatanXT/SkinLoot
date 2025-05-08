@@ -2,6 +2,7 @@ package com.SkinLoot.SkinLoot.controler;
 
 import com.SkinLoot.SkinLoot.model.Jogo;
 import com.SkinLoot.SkinLoot.repository.JogoRepository;
+import com.SkinLoot.SkinLoot.service.JogoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +19,15 @@ public class JogoController {
     @Autowired // Injeta automaticamente a dependência do repositório
     private JogoRepository jogoRepository;
 
+    private JogoService jogoService;
+
+    public JogoController(JogoService jogoService) {
+        this.jogoService = jogoService;
+    }
+
     @PostMapping("/save") // Endpoint para criar um novo jogo
     public ResponseEntity<Jogo> criarJogo(@Valid @RequestBody Jogo jogo) {
-        Jogo novoJogo = jogoRepository.save(jogo);
+        Jogo novoJogo = jogoService.criarJogo(jogo);
         return ResponseEntity.ok(novoJogo);
     }
 

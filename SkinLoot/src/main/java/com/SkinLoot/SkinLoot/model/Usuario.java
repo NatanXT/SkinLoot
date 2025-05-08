@@ -2,6 +2,7 @@ package com.SkinLoot.SkinLoot.model;
 
 import com.SkinLoot.SkinLoot.model.enums.Genero;
 import com.SkinLoot.SkinLoot.model.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -42,12 +43,13 @@ public class Usuario {
 
 
 
-    @OneToMany(mappedBy = "usuario", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY) 
+    @OneToMany(mappedBy = "usuario", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
     // Um usuário pode possuir várias skins associadas a ele
     // CascadeType.PERSIST: Permite que novas skins sejam salvas automaticamente ao serem associadas a um usuário
     // CascadeType.MERGE: Permite que skins existentes sejam atualizadas ao serem associadas a um usuário
     // orphanRemoval = true: Remove skins órfãs automaticamente ao serem desvinculadas do usuário
     // FetchType.LAZY: As skins só são carregadas quando necessário, otimizando a performance
+    @JsonIgnore
     private List<Skin> skins;
     
 
