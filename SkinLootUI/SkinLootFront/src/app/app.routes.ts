@@ -17,6 +17,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/menu/menu.component').then(m => m.MenuComponent),
     pathMatch: 'full'
   },
+  {
+    path: 'skins',
+    loadComponent: () => import('./pages/skin/skin-list/criar-skin/criar-skin.component').then(m => m.CriarSkinComponent)
+  },
 
 
   { path: '', redirectTo: 'MenuComponent', pathMatch: 'full' },

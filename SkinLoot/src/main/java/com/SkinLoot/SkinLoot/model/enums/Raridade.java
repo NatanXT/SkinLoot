@@ -6,6 +6,5 @@ public enum Raridade {
     INCOMUM,
     RARO,
     ÉPICO,
-    LENDÁRIO,
-    MÍTICO // As mais zika
+    LENDÁRIO
 }

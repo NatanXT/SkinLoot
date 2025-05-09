@@ -3,10 +3,29 @@ import {Usuario} from "./usuario";
 import {Jogo} from "./jogo";
 
 export interface Skin{
-  id: UUID;
+  // id: UUID;
+  // nome: string;
+  // imagem: string,
+  // raridade: string;
+  // jogo: Jogo;
+   nome: string;
+   descricao: string;
+   raridade: string;
+   jogoNome: string;
+   icon: string;
+   assetId: string;
+   desgasteFloat: number;
+   qualidade: number;
+   Jogo: Jogo
+   Usuario: Usuario;
+}
+export interface SkinRequest {
   nome: string;
-  imagem: string,
+  descricao: string;
   raridade: string;
-  jogo: Jogo;
-  //usuario: Usuario;
+  jogoNome: string;
+  icon: string;
+  assetId?: string;
+  desgasteFloat?: number;
+  qualidade?: string;
 }
