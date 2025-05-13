@@ -54,7 +54,7 @@ export class RegistroComponent {
       next: res => {
         console.log('Resposta do backend:', res);
 
-        this.storageService.set('accessToken', res.accessToken);
+        this.storageService.set('token', res.token);
         this.storageService.set('userName', String(res.user.nome));
         this.dialogRef?.close();
       },

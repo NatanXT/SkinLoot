@@ -17,17 +17,19 @@ export class LoginService {
 
   constructor(private http: HttpClient,
               private storage: StorageService){
-    const salvo = this.storage.get('usuario');
-      if (salvo) {
-        this.currentUserSubject.next(JSON.parse(salvo));
-      }
+    const userJson = this.storage.get('userAtual');
+    const user = userJson ? JSON.parse(userJson) : null;
+    this.currentUserSubject = new BehaviorSubject<Usuario | null>(user);
+    this.currentUser$ = this.currentUserSubject.asObservable();
   }
 
   login(credentials: LoginCredentials): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials)
       .pipe(
         tap(response => {
-          this.storage.set('token', response.accessToken);
+          console.log('Token recebido:', response.token); // Log do token
+
+          this.storage.set('token', response.token);
           this.storage.set('userAtual', JSON.stringify(response.user));
           this.currentUserSubject.next(response.user);
         })
