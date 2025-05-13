@@ -17,10 +17,10 @@ export class LoginService {
 
   constructor(private http: HttpClient,
               private storage: StorageService){
-    const userJson = this.storage.get('userAtual');
-    const user = userJson ? JSON.parse(userJson) : null;
-    this.currentUserSubject = new BehaviorSubject<Usuario | null>(user);
-    this.currentUser$ = this.currentUserSubject.asObservable();
+    const salvo = this.storage.get('usuario');
+    if (salvo) {
+      this.currentUserSubject.next(JSON.parse(salvo));
+    }
   }
 
   login(credentials: LoginCredentials): Observable<LoginResponse> {

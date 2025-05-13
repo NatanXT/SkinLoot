@@ -12,21 +12,19 @@ export class AuthInterceptorService implements HttpInterceptor{
   //private storage = inject(StorageService);
 
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept(
+    req: HttpRequest<any>,
+    next: HttpHandler
+  ): Observable<HttpEvent<any>> {
     const token = this.storage.get('token');
-
+    // só clona a requisição se tiver token válido (string não vazia)
     if (token) {
-      const cloned = req.clone({
-        headers: req.headers.set('Authorization', `Bearer ${token}`)
-
+      req = req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`
+        }
       });
-      console.log('🔐 Interceptor: token carregado:', token);
-      console.log('🔐 Interceptor: rota interceptada:', req.url);
-
-      return next.handle(cloned);
-
     }
-
     return next.handle(req);
   }
 }
