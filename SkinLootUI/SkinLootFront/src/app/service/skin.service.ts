@@ -15,4 +15,8 @@ export class SkinService {
   salvar(skin: SkinRequest): Observable<any>{
     return this.http.post(`${this.apiUrl}/save`, skin);
   }
+
+  listar(): Observable<Skin>{
+    return this.http.get<Skin>(`${this.apiUrl}/list`);
+  }
 }

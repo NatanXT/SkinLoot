@@ -47,8 +47,12 @@ public class UsuarioService {
 
     public UserDetails autenticar(String email, String senha) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+//        System.out.println("🔍 Buscando userDetails por email: " + email);
+
 
         if (!passwordEncoder.matches(senha, userDetails.getPassword())) {
+//            System.out.println("Comparando senha recebida com a salva...");
+
             throw new RuntimeException("Senha inválida");
         }
 

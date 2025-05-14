@@ -60,7 +60,9 @@ public class UsuarioController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         UserDetails userDetails = usuarioService.autenticar(loginRequest.getEmail(), loginRequest.getSenha());
-
+//        System.out.println("🔐 Requisição de login:");
+//        System.out.println("Email: " + loginRequest.getEmail());
+//        System.out.println("Senha: " + loginRequest.getSenha());
         String token = jwtTokenUtil.generateToken(userDetails);
 
         Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
