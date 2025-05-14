@@ -1,0 +1,32 @@
+<div class="registro-container">
+  <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
+    <h2>Registro</h2>
+
+    <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
+
+      <label for="nome">Nome</label>
+      <input id="nome" type="text" formControlName="nome" />
+
+      <label for="genero">Gênero</label>
+      <select id="genero" formControlName="genero">
+        <option value="M">Masculino</option>
+        <option value="F">Feminino</option>
+        <option value="NB">Outro</option>
+      </select>
+
+      <label for="email">Email</label>
+      <input id="email" type="email" formControlName="email" />
+
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" formControlName="senha" />
+
+      <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+      <button type="submit" [disabled]="isLoading">
+        {{ isLoading ? 'Registrando...' : 'Registrar' }}
+      </button>
+
+    </form>
+
+  </form>
+</div>

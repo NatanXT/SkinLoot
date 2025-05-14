@@ -6,7 +6,7 @@
 }
 
 .header {
-  background-color: #2619DE;
+  background-color: #5627B3;
   width: 100%;
   padding: 8px 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -23,11 +23,58 @@
   white-space: nowrap;
   transition: background-color 0.2s;
 }
+.left-menu, .right-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.menu-item span {
+  font-family: "Arial", sans-serif; /* Mude para a fonte desejada */
+  font-size: 16px; /* Ajuste o tamanho da fonte */
+  font-weight: bold; /* Exemplo: tornar o texto em negrito */
+  color: white; /* Cor do texto */
+}
 
 .menu-item:hover {
   background-color: #e9ecef;
 }
 
 .icon {
-  font-size: 1.2em;
+  font-size: 2em;
 }
+.search-container {
+  display: flex;
+  align-items: center;
+  margin-left: 16px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 4px;
+}
+
+.search-input {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 8px;
+  width: 200px;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.search-button {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.search-button:hover {
+  transform: scale(1.1);
+}
+
+

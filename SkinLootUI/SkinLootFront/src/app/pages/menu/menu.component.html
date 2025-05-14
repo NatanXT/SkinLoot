@@ -1,15 +1,40 @@
 <header class="header">
 <nav class="menu">
-  <a href="#" routerLink="/" class="menu-item">
-    <span class="icon">👤</span>
-    <span>Usuário</span></a>
-    <a href="#" routerLink="/login" class="menu-item">
-      <span class="icon">🔑</span>
-      <span>Login</span>
+  <div class="left-menu">
+    <a href="#" routerLink="/" class="menu-item">
+      <span class="icon">👤</span>
+      <span *ngIf="!(currentUser$ | async)">Usuário</span>
+      <span *ngIf="currentUser$ | async as user">Olá, {{ user.nome }}</span>
     </a>
-    <a href="#"  routerLink="/registro" class="menu-item">
-      <span class="icon">📝</span>
-      <span>Registro</span>
+    <button mat-button (click)="abrirRegistro()">
+      REGISTRAR
+    </button>
+  <div class="search-container">
+    <input type="text" placeholder="procurar skins" class="search-input">
+    <button class="search-button"></button>
+  </div>
+  </div>
+  <div class="right-menu">
+    <ng-container >
+      <a routerLink="login" class="menu-item ">
+        <span class="icon">🔐</span>
+        <span>Login</span>
+      </a>
+    </ng-container>
+    <a routerLink="meus-anuncios" class="menu-item">
+      <span class="icon">📢</span>
+      <span>Meus anúncios</span>
     </a>
+    <a routerLink="/chats" class="menu-item">
+      <span class="icon">💬</span>
+      <span>Chats</span>
+    </a>
+    <a routerLink="skins" class="menu-item ">
+      <span class="icon"></span>
+      <span>Minhas Skins</span>
+    </a>
+  </div>
 </nav>
 </header>
+
+

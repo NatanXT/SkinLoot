@@ -1,5 +1,7 @@
 package com.SkinLoot.SkinLoot.model;
 
+import com.SkinLoot.SkinLoot.model.enums.CategoriaJogo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.util.List;
@@ -16,17 +18,26 @@ public class Jogo {
     @NotNull(message = "O nome do jogo não pode ser nulo") // Valida que o nome não seja nulo
     @Size(min = 3, max = 100, message = "O nome deve ter entre 3 a 100 caracteres") // Restringe o tamanho do nome
     private String nome;
-    
-    @Enumerated(EnumType.STRING) // Armazena a categoria como string no banco de dados
-    @Column(nullable = false) // A categoria do jogo é obrigatória
-    @NotNull(message = "A categoria do jogo não pode ser nula") // Valida que a categoria não seja nula
-    private CategoriaJogo categoria;
+
+//    @Enumerated(EnumType.STRING)
+//    private Plataforma tipoPlataforma; // STEAM, EPIC, ROBLOX, etc
+
+
+    @ElementCollection(targetClass = CategoriaJogo.class)
+    @CollectionTable(
+            name = "jogo_categorias",
+            joinColumns = @JoinColumn(name = "jogo_nome", referencedColumnName = "nome") // <- aqui está o ajuste
+    )
+    @Enumerated(EnumType.STRING)
+    @Column(name = "categoria")
+    private List<CategoriaJogo> categorias;
     
     @OneToMany(mappedBy = "jogo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     // Um jogo pode ter várias skins associadas a ele
     // CascadeType.ALL: Se o jogo for deletado, suas skins também são removidas
     // orphanRemoval = true: Remove skins órfãs automaticamente
     // FetchType.LAZY: As skins só são carregadas quando necessário, otimizando a performance
+    @JsonIgnore
     private List<Skin> skins;
 
     // Getters e Setters
@@ -46,12 +57,12 @@ public class Jogo {
         this.nome = nome;
     }
 
-    public CategoriaJogo getCategoria() {
-        return categoria;
+    public List<CategoriaJogo> getCategorias() {
+        return categorias;
     }
 
-    public void setCategoria(CategoriaJogo categoria) {
-        this.categoria = categoria;
+    public void setCategorias(List<CategoriaJogo> categorias) {
+        this.categorias = categorias;
     }
 
     public List<Skin> getSkins() {
