@@ -60,7 +60,7 @@ public class SkinController {
         return ResponseEntity.ok(skinService.salvar(skin));
     }
 
-    @GetMapping("/meus")
+    @GetMapping("/list")
     public ResponseEntity<List<Skin>> minhasSkins(@AuthenticationPrincipal UserDetails userDetails) {
         Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));

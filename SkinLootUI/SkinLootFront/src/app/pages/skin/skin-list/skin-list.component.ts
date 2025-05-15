@@ -4,6 +4,7 @@ import {DecimalPipe, formatDate, NgClass, NgForOf, NgIf} from "@angular/common";
 import {AnuncioService} from "../../../service/anuncio.service";
 import {Skin} from "../../../model/skin";
 import {SkinService} from "../../../service/skin.service";
+import {RouterLink, RouterOutlet} from "@angular/router";
 
 @Component({
   selector: 'app-skin-list',
@@ -12,7 +13,9 @@ import {SkinService} from "../../../service/skin.service";
     NgClass,
     NgIf,
     NgForOf,
-    DecimalPipe
+    DecimalPipe,
+    RouterLink,
+    RouterOutlet
   ],
   templateUrl: './skin-list.component.html',
   styleUrl: './skin-list.component.css'
@@ -41,7 +44,7 @@ export class SkinListComponent implements OnInit{
 
   getQualidadeClasse(qualidade: string | undefined): string {
     if (!qualidade) return '';
-    const k = qualidade.toLowerCase();
+    const k = qualidade.toUpperCase();
     if (k.includes('nova')) return 'nova';
     if (k.includes('pouco')) return 'pouco-usada';
     if (k.includes('campo') || k.includes('testada')) return 'usada';

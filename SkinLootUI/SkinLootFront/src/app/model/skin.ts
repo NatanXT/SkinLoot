@@ -15,7 +15,7 @@ export interface Skin{
    icon: string;
    assetId: string;
    desgasteFloat: number;
-   qualidade: number;
+   qualidade: string;
    Jogo: Jogo
    Usuario: Usuario;
 }

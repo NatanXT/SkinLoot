@@ -16,7 +16,7 @@ export class SkinService {
     return this.http.post(`${this.apiUrl}/save`, skin);
   }
 
-  listar(): Observable<Skin>{
-    return this.http.get<Skin>(`${this.apiUrl}/list`);
+  listar(): Observable<Skin[]>{
+    return this.http.get<Skin[]>(`${this.apiUrl}/list`);
   }
 }
