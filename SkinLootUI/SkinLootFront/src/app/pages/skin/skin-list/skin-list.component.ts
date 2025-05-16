@@ -22,6 +22,9 @@ import {RouterLink, RouterOutlet} from "@angular/router";
 })
 export class SkinListComponent implements OnInit{
   skins: Skin[] = [];
+  qualidades = ['NOVA_DE_FABRICA', 'POUCO_USADA', 'TESTADA_EM_CAMPO', 'DESGASTADA', 'BEM_DESGASTADA'];
+  raridades = ['COMUM', 'INCOMUM', 'RARO', 'ÉPICO', 'LENDÁRIO'];
+
 
   constructor(private skinService: SkinService) {}
 
@@ -30,26 +33,6 @@ export class SkinListComponent implements OnInit{
       next: (res) => this.skins = res,
       error: (err) => console.error('Erro ao carregar skins:', err)
     });
-  }
-
-  getRaridadeClasse(raridade: string): string {
-    switch (raridade.toUpperCase()) {
-      case 'LENDÁRIO': return 'legendary';
-      case 'ÉPICO': return 'epic';
-      case 'RARO': return 'rare';
-      case 'COMUM': return 'common';
-      default: return '';
-    }
-  }
-
-  getQualidadeClasse(qualidade: string | undefined): string {
-    if (!qualidade) return '';
-    const k = qualidade.toUpperCase();
-    if (k.includes('nova')) return 'nova';
-    if (k.includes('pouco')) return 'pouco-usada';
-    if (k.includes('campo') || k.includes('testada')) return 'usada';
-    if (k.includes('bem') || k.includes('desgastada')) return 'muito-usada';
-    return '';
   }
 
   protected readonly formatDate = formatDate;

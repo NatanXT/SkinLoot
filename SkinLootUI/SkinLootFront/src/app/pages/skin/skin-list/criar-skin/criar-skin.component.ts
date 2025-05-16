@@ -32,8 +32,8 @@ export class CriarSkinComponent {
   skinForm: FormGroup;
   statusMessage: string | null = null;
 
-  raridades = ['COMUM', 'INCOMUM', 'RARO', 'ÉPICO', 'LENDÁRIO'];
-  qualidades = ['NOVA', 'POUCO_USADA', 'TESTADA_EM_CAMPO', 'DESGASTADA', 'BEM_DESGASTADA'];
+  raridade = ['COMUM', 'INCOMUM', 'RARO', 'ÉPICO', 'LENDÁRIO'];
+  qualidade = ['NOVA', 'POUCO_USADA', 'TESTADA', 'DESGASTADA', 'BEM_DESGASTADA'];
 
   constructor(
     private fb: FormBuilder,

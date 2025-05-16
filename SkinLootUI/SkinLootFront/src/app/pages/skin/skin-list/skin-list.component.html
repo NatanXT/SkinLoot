@@ -1,29 +1,25 @@
 <div class="skin-list-container">
   <h2 class="section-title">Minhas Skins</h2>
 
-  <div class="listings-grid">
-    <div class="listing-card"
-         *ngFor="let skin of skins"
-         [ngClass]="getRaridadeClasse(skin.raridade)">
+  <a [routerLink]="['criar']" class="btn-criar">Criar nova skin</a>
 
+
+  <div class="listings-grid">
+    <div *ngFor="let skin of skins" class="listing-card">
       <div class="listing-image-container">
         <img class="listing-image" [src]="skin.icon" [alt]="skin.nome">
-
-        <div class="condition-badge" [ngClass]="getQualidadeClasse(skin.qualidade)">
+        <div class="condition-badge">
           {{ skin.qualidade }}
         </div>
       </div>
 
-      <a [routerLink]="['criar']" class="btn-criar">Criar nova skin</a>
-
-
       <div class="listing-info">
         <h3 class="listing-name">{{ skin.nome }}</h3>
-        <p class="listing-price">Jogo: {{ skin.Jogo.nome }}</p>
+        <p class="listing-price">Jogo: {{ skin.Jogo?.nome }}</p>
         <p *ngIf="skin.desgasteFloat"><strong>Float:</strong> {{ skin.desgasteFloat }}</p>
         <p>{{ skin.descricao }}</p>
       </div>
-      <router-outlet></router-outlet>
     </div>
   </div>
+  <router-outlet></router-outlet>
 </div>
