@@ -3,7 +3,7 @@ import {Usuario} from "./usuario";
 import {Jogo} from "./jogo";
 
 export interface Skin{
-  // id: UUID;
+   id: bigint;
   // nome: string;
   // imagem: string,
   // raridade: string;
@@ -16,14 +16,13 @@ export interface Skin{
    assetId: string;
    desgasteFloat: number;
    qualidade: string;
-   Jogo: Jogo
    Usuario: Usuario;
 }
 export interface SkinRequest {
   nome: string;
   descricao: string;
   raridade: string;
-  jogoNome: string;
+  jogoId: UUID;
   icon: string;
   assetId?: string;
   desgasteFloat?: number;

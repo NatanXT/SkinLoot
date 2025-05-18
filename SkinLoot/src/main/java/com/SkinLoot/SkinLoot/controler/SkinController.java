@@ -43,7 +43,9 @@ public class SkinController {
         Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        Jogo jogo = jogoService.buscarPorNome(request.getJogoNome())
+
+        UUID jogoId = request.getJogoId();
+        Jogo jogo = jogoService.buscarPorId(jogoId)
                 .orElseThrow(() -> new RuntimeException("Jogo não encontrado"));
 
         Skin skin = new Skin();

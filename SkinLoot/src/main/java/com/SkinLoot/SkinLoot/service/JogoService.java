@@ -25,10 +25,9 @@ public class JogoService {
         return jogoRepository.save(jogo);
     }
 
-    public Optional<Jogo> buscarPorNome(String nome) {
-        return jogoRepository.findByNome(nome);
+    public Optional<Jogo> buscarPorId(UUID id) {
+        return jogoRepository.findById(id);
     }
-
     // Listar todos os jogos
     public List<Jogo> listarJogos() {
         return jogoRepository.findAll();
