@@ -14,21 +14,14 @@
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Raridade</mat-label>
     <mat-select formControlName="raridade" required>
-      <mat-option *ngFor="let r of raridade" [value]="r">{{ r }}</mat-option>
+      <mat-option *ngFor="let r of raridades" [value]="r">{{ r }}</mat-option>
     </mat-select>
   </mat-form-field>
 
-  <label for="jogo">Jogo</label>
-  <select id="jogo" formControlName="jogoId" required>
-    <option value="" disabled>Selecione um jogo</option>
-    <option *ngFor="let jogo of jogos" [value]="jogo.id">
-      {{ jogo.nome }}
-    </option>
-  </select>
-
-  <div *ngIf="skinForm.get('jogoNome')?.invalid && skinForm.get('jogoNome')?.touched" class="error">
-    Escolha um jogo válido
-  </div>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Jogo</mat-label>
+    <input matInput formControlName="jogoNome" required placeholder="Ex: CS:GO">
+  </mat-form-field>
 
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>URL do Ícone</mat-label>
@@ -42,13 +35,13 @@
 
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Float Value (opcional)</mat-label>
-    <input matInput type="number" formControlName="desgasteFloat" min="0" max="1" step="0.01">
+    <input matInput type="number" formControlName="floatValue" min="0" max="1" step="0.01">
   </mat-form-field>
 
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Qualidade (opcional)</mat-label>
     <mat-select formControlName="qualidade">
-      <mat-option *ngFor="let q of qualidade" [value]="q">{{ q }}</mat-option>
+      <mat-option *ngFor="let q of qualidades" [value]="q">{{ q }}</mat-option>
     </mat-select>
   </mat-form-field>
 

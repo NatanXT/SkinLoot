@@ -13,23 +13,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/registro/registro/registro.component').then(m => m.RegistroComponent)
   },
   {
-    path: 'skins',
-    loadComponent: () => import('./pages/skin/skin-list/skin-list.component')
-      .then(m => m.SkinListComponent),
-    children: [
-      {
-        path: 'criar',
-        loadComponent: () => import('./pages/skin/skin-list/criar-skin/criar-skin.component')
-          .then(m => m.CriarSkinComponent)
-      }
-    ]
-  },
-  {
     path: '',
     loadComponent: () => import('./pages/menu/menu.component').then(m => m.MenuComponent),
     pathMatch: 'full'
   },
-
+  {
+    path: 'skins',
+    loadComponent: () => import('./pages/skin/skin-list/criar-skin/criar-skin.component').then(m => m.CriarSkinComponent)
+  },
 
 
   { path: '', redirectTo: 'MenuComponent', pathMatch: 'full' },

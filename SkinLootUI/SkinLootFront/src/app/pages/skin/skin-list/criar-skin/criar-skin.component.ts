@@ -3,14 +3,12 @@ import {Anuncio} from "../../../../model/anuncio";
 import {AnuncioService} from "../../../../service/anuncio.service";
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {SkinService} from "../../../../service/skin.service";
-import {Skin, SkinRequest} from "../../../../model/skin";
+import {SkinRequest} from "../../../../model/skin";
 import {MatFormField, MatFormFieldModule} from '@angular/material/form-field';
 import {MatOption, MatSelect, MatSelectModule} from "@angular/material/select";
 import {CommonModule, NgForOf, NgIf} from "@angular/common";
 import {MatInputModule} from "@angular/material/input";
 import {MatButtonModule} from "@angular/material/button";
-import {Jogo} from "../../../../model/jogo";
-import {JogoService} from "../../../../service/jogo.service";
 
 @Component({
   selector: 'app-criar-skin',
@@ -33,36 +31,26 @@ export class CriarSkinComponent {
 
   skinForm: FormGroup;
   statusMessage: string | null = null;
-  jogos: Jogo[] = [];
 
-  raridade = ['COMUM', 'INCOMUM', 'RARO', 'ÉPICO', 'LENDÁRIO'];
-  qualidade = ['NOVA', 'POUCO_USADA', 'TESTADA', 'DESGASTADA', 'BEM_DESGASTADA'];
-
+  raridades = ['COMUM', 'INCOMUM', 'RARO', 'ÉPICO', 'LENDÁRIO'];
+  qualidades = ['NOVA', 'POUCO_USADA', 'TESTADA_EM_CAMPO', 'DESGASTADA', 'BEM_DESGASTADA'];
 
   constructor(
     private fb: FormBuilder,
-    private jogoService: JogoService,
     private skinService: SkinService
   ) {
     this.skinForm = this.fb.group({
       nome: ['', [Validators.required, Validators.minLength(3)]],
       descricao: [''],
       raridade: ['', Validators.required],
-      jogoId:    ['', Validators.required],   // ← renomeie de jogoNome para jogoId
+      jogoNome: ['', Validators.required],
       icon: ['', Validators.required],
       assetId: [''],
-      desgasteFloat: [null],
+      floatValue: [null],
       qualidade: ['']
     });
   }
 
-  ngOnInit(): void {
-    // carrega todos os jogos para popular o dropdown
-    this.jogoService.listarJogos().subscribe(
-      jogos => this.jogos = jogos,
-      err   => console.error('Erro ao buscar jogos', err)
-    );
-  }
   criarSkin(): void {
     if (this.skinForm.invalid) {
       this.statusMessage = 'Preencha todos os campos obrigatórios.';
