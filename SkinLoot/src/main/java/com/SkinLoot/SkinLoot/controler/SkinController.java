@@ -4,54 +4,50 @@ import com.SkinLoot.SkinLoot.dto.SkinRequest;
 import com.SkinLoot.SkinLoot.model.Jogo;
 import com.SkinLoot.SkinLoot.model.Skin;
 import com.SkinLoot.SkinLoot.model.Usuario;
+import com.SkinLoot.SkinLoot.repository.SkinRepository;
 import com.SkinLoot.SkinLoot.service.JogoService;
 import com.SkinLoot.SkinLoot.service.SkinService;
 import com.SkinLoot.SkinLoot.service.UsuarioService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-
-@RestController // Define a classe como um controlador REST
-@RequestMapping("/skins") // Define a rota base para os endpoints deste controller
-@RequiredArgsConstructor // Lombok: gera um construtor com todos os campos final (injeção via construtor)
+@RestController
+@RequestMapping("/skins")
 public class SkinController {
 
-    // Injeta os serviços necessários para a lógica do controller
-    private final SkinService skinService;
-    private final UsuarioService usuarioService;
-    private final JogoService jogoService;
+    @Autowired
+    private SkinService skinService;
 
-    /**
-     * Cria uma nova skin associada a um usuário autenticado e a um jogo existente.
-     * Rota: POST /skins
-     *
-     * @param request      Objeto com os dados da skin (recebido via body)
-     * @param userDetails  Detalhes do usuário autenticado (injetado automaticamente)
-     * @return A skin salva com status 200
-     */
-    @PostMapping
-    public ResponseEntity<Skin> criar(
-            @RequestBody @Valid SkinRequest request,
-            @AuthenticationPrincipal UserDetails userDetails) {
+    @Autowired
+    private UsuarioService usuarioService;
 
-        // Busca o usuário logado pelo e-mail
+    @Autowired
+    private JogoService jogoService;
+
+    public SkinController(SkinService skinService, JogoService jogoService, UsuarioService usuarioService) {
+        this.skinService = skinService;
+        this.usuarioService = usuarioService;
+        this.jogoService = jogoService;
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<Skin> criar(@RequestBody @Valid SkinRequest request, @AuthenticationPrincipal UserDetails userDetails) {
         Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Usuário não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        // Busca o jogo informado na requisição
-        Jogo jogo = jogoService.buscarPorNome(request.getJogoNome())
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Jogo não encontrado"));
 
-        // Cria o objeto Skin com os dados recebidos + relacionamento com o usuário e jogo
+        UUID jogoId = request.getJogoId();
+        Jogo jogo = jogoService.buscarPorId(jogoId)
+                .orElseThrow(() -> new RuntimeException("Jogo não encontrado"));
+
         Skin skin = new Skin();
         skin.setNome(request.getNome());
         skin.setDescricao(request.getDescricao());
@@ -63,36 +59,20 @@ public class SkinController {
         skin.setJogo(jogo);
         skin.setUsuario(usuario);
 
-        // Salva a skin e retorna no corpo da resposta
         return ResponseEntity.ok(skinService.salvar(skin));
     }
 
-    /**
-     * Lista todas as skins criadas pelo usuário autenticado.
-     * Rota: GET /skins/meus
-     *
-     * @param userDetails Detalhes do usuário logado
-     * @return Lista de skins do usuário
-     */
-    @GetMapping("/meus")
+    @GetMapping("/list")
     public ResponseEntity<List<Skin>> minhasSkins(@AuthenticationPrincipal UserDetails userDetails) {
-        // Busca o usuário atual pelo e-mail
         Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Usuário não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        // Retorna a lista de skins desse usuário
         return ResponseEntity.ok(skinService.listarPorUsuario(usuario.getId()));
     }
 
-    /**
-     * Lista todas as skins associadas a um jogo específico.
-     * Rota: GET /skins/jogo/{jogoId}
-     *
-     * @param jogoId ID do jogo
-     * @return Lista de skins pertencentes ao jogo
-     */
     @GetMapping("/jogo/{jogoId}")
     public ResponseEntity<List<Skin>> porJogo(@PathVariable UUID jogoId) {
         return ResponseEntity.ok(skinService.listarPorJogo(jogoId));
     }
 }
+

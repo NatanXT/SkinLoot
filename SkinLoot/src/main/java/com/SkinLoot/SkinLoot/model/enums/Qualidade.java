@@ -3,7 +3,7 @@ package com.SkinLoot.SkinLoot.model.enums;
 public enum Qualidade {
     NOVA,
     POUCO_USADA,
-    TESTADA_EM_CAMPO,
+    TESTADA,
     DESGASTADA,
     BEM_DESGASTADA
 }
