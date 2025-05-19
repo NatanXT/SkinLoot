@@ -1,8 +1,10 @@
 package com.SkinLoot.SkinLoot.util;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,8 @@ public class JwtTokenUtil {
     private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10 horas
     private static final long ACCESS_TOKEN_EXPIRATION = 10 * 60 * 1000; // 10 min
     private static final long REFRESH_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000; // 1 dia
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
 //    private final PrivateKey privateKey;
 //    private final PublicKey publicKey;
@@ -75,6 +79,14 @@ public class JwtTokenUtil {
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+    public String generateTokenFromEmail(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 10 * 60 * 1000)) // 10 min
+                .compact();
+    }
+
     public String generateAccessToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
@@ -90,6 +102,23 @@ public class JwtTokenUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+    // Valida se o token é legítimo e não expirou
+    public boolean isTokenValid(String token) {
+        try {
+            parseToken(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    // Extrai os dados do token
+    public Claims parseToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(jwtSecret)
+                .parseClaimsJws(token)
+                .getBody();
     }
 
 

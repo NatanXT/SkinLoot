@@ -8,17 +8,21 @@ import com.SkinLoot.SkinLoot.model.Usuario;
 import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
 import com.SkinLoot.SkinLoot.service.UsuarioService;
 import com.SkinLoot.SkinLoot.util.JwtTokenUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController // Define esta classe como um controlador REST
 @RequestMapping("/usuarios") // Define o endpoint base para esse controlador
@@ -58,17 +62,47 @@ public class UsuarioController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         UserDetails userDetails = usuarioService.autenticar(loginRequest.getEmail(), loginRequest.getSenha());
-//        System.out.println("🔐 Requisição de login:");
-//        System.out.println("Email: " + loginRequest.getEmail());
-//        System.out.println("Senha: " + loginRequest.getSenha());
+        String accessToken = jwtTokenUtil.generateToken(userDetails); // curto (10 min)
+        String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails.getUsername()); // longo (ex: 30h)
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(false) // true se for HTTPS
+                .path("/auth/refresh") // só é enviado quando acessar esta rota
+                .maxAge(30 * 60 * 60) // 30h
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
         String token = jwtTokenUtil.generateToken(userDetails);
 
         Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         return ResponseEntity.ok(new LoginResponse(token, usuario));
+    }
+
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<Map<String, String>> refreshToken(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        String refreshToken = Arrays.stream(cookies)
+                .filter(c -> "refreshToken".equals(c.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
+
+        if (refreshToken == null || !jwtTokenUtil.isTokenValid(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String email = jwtTokenUtil.parseToken(refreshToken).getSubject();
+        String newAccessToken = jwtTokenUtil.generateTokenFromEmail(email);
+
+        return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     }
 
     @PostMapping("/register")
