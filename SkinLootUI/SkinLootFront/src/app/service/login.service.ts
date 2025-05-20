@@ -23,18 +23,20 @@ export class LoginService {
     }
   }
 
+  // login.service.ts
   login(credentials: LoginCredentials): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials)
-      .pipe(
-        tap(response => {
-          console.log('Token recebido:', response.token); // Log do token
-
-          this.storage.set('token', response.token);
-          this.storage.set('userAtual', JSON.stringify(response.user));
-          this.currentUserSubject.next(response.user);
-        })
-      );
+    return this.http.post<LoginResponse>(
+      `${this.apiUrl}/login`,
+      credentials,
+      { withCredentials: true }      // ← diz ao browser para aceitar o Set-Cookie
+    ).pipe(
+      tap(response => {
+        // você pode continuar salvando no storage se quiser, mas
+        // não precisa mais para autenticação do backend
+      })
+    );
   }
+
   logout(): void {
     this.storage.remove('token');
     this.storage.remove('userAtual');

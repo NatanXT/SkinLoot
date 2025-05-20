@@ -3,6 +3,7 @@ package com.SkinLoot.SkinLoot.config;
 import com.SkinLoot.SkinLoot.util.JwtTokenUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,39 +30,46 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain chain
+    ) throws ServletException, IOException {
+        String jwt = null;
 
-        String path = request.getServletPath();
-             if ("/usuarios/login".equals(path) ||
-                "/usuarios/register".equals(path)) {
-                    filterChain.doFilter(request, response);
-            return;
-        }
-
-        final String authorizationHeader = request.getHeader("Authorization");
-
-
-
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            token = authorizationHeader.substring(7); // Remove "Bearer "
-            username = jwtTokenUtil.extractUsername(token);
-        }
-
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-
-            if (jwtTokenUtil.validateToken(token, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+        // 1) tenta extrair o cookie "JWT"
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if ("JWT".equals(c.getName())) {
+                    jwt = c.getValue();
+                    break;
+                }
             }
         }
 
-        filterChain.doFilter(request, response);
+        // 2) (opcional) fallback para header, caso queira manter compatibilidade
+        if (jwt == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                jwt = authHeader.substring(7);
+            }
+        }
+
+        // 3) valida token e popula o contexto de segurança
+        if (jwt != null && jwtTokenUtil.validateToken(jwt, userDetailsService.loadUserByUsername(username))) {
+            String username = jwtTokenUtil.extractUsername(jwt);
+            var userDetails = userDetailsService.loadUserByUsername(username);
+
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities()
+                    );
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+        }
+
+        // 4) segue o filtro
+        chain.doFilter(request, response);
     }
 }

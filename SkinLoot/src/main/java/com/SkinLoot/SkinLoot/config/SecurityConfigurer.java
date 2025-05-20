@@ -89,6 +89,8 @@ public class SecurityConfigurer {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(allowedOrigins); // Configura as origens permitidas para CORS.
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // Permite os métodos HTTP.
+        configuration.setAllowCredentials(true);                         // libera cookies
+
         configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token")); // Permite os cabeçalhos necessários para a API.
         configuration.setExposedHeaders(Collections.singletonList("x-auth-token")); // Expõe o cabeçalho x-auth-token para o cliente.
 

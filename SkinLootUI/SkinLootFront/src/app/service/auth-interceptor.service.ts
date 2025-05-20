@@ -16,15 +16,10 @@ export class AuthInterceptorService implements HttpInterceptor{
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    const token = this.storage.get('token');
-    // só clona a requisição se tiver token válido (string não vazia)
-    if (token) {
-      req = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    }
-    return next.handle(req);
+    // Clone qualquer requisição para incluir withCredentials
+    const authReq = req.clone({
+      withCredentials: true    // ← garante envio do cookie JWT em todas chamadas
+    });
+    return next.handle(authReq);
   }
 }
