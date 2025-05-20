@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.*;
 
 @RestController // Define esta classe como um controlador REST
@@ -70,11 +71,20 @@ public class UsuarioController {
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(false) // true se for HTTPS
-                .path("/auth/refresh") // só é enviado quando acessar esta rota
+                .path("/") // só é enviado quando acessar esta rota
                 .maxAge(30 * 60 * 60) // 30h
                 .sameSite("Strict")
                 .build();
 
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(false)      // marque true em produção
+                .path("/")          // enviado em TODAS as requisições
+                .maxAge(10 * 60)    // 10 min de validade
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
         String token = jwtTokenUtil.generateToken(userDetails);
 
@@ -85,9 +95,14 @@ public class UsuarioController {
     }
 
     @PostMapping("/auth/refresh")
-    public ResponseEntity<Map<String, String>> refreshToken(HttpServletRequest request) {
+    public ResponseEntity<Void> refreshToken(
+            HttpServletRequest request,
+            HttpServletResponse response  // ← injete o response aqui
+    ) {
         Cookie[] cookies = request.getCookies();
-        if (cookies == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (cookies == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         String refreshToken = Arrays.stream(cookies)
                 .filter(c -> "refreshToken".equals(c.getName()))
@@ -102,7 +117,18 @@ public class UsuarioController {
         String email = jwtTokenUtil.parseToken(refreshToken).getSubject();
         String newAccessToken = jwtTokenUtil.generateTokenFromEmail(email);
 
-        return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
+        // ── AQUI: criar o cookie de accessToken ──
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
+                .httpOnly(true)            // JavaScript não consegue ler
+                .secure(false)             // troque para true em produção HTTPS
+                .path("/")                 // enviado em todas as rotas
+                .maxAge(Duration.ofMinutes(15))
+                .sameSite("Strict")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+
+        // Você pode retornar vazio, já que o token está no cookie
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/register")
