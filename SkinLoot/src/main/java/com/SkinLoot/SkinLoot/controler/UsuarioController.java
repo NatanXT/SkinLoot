@@ -70,18 +70,18 @@ public class UsuarioController {
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(false) // true se for HTTPS
+                .secure(true) // true se for HTTPS
                 .path("/") // só é enviado quando acessar esta rota
                 .maxAge(30 * 60 * 60) // 30h
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                 .httpOnly(true)
-                .secure(false)      // marque true em produção
+                .secure(true)      // marque true em produção
                 .path("/")          // enviado em TODAS as requisições
                 .maxAge(10 * 60)    // 10 min de validade
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
