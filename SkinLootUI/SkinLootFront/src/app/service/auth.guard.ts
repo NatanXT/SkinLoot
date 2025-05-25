@@ -1,21 +1,25 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
-import { AuthService } from './auth.service';  // ajuste o caminho conforme o local do AuthService
+import {CanActivate, Router, UrlTree} from '@angular/router';
+import {map, Observable} from "rxjs";
+import {LoginService} from "./login.service";  // ajuste o caminho conforme o local do AuthService
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthGuard implements CanActivate {
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private loginService: LoginService, private router: Router) {}
 
-  canActivate(): boolean {
-    if (this.authService.isLoggedIn()) {
-      return true;
-    } else {
-      this.router.navigate(['/login']);
-      return false;
-    }
+  canActivate(): Observable<boolean | UrlTree> {
+    return this.loginService.isLoggedIn().pipe(
+      map(isLoggedIn => {
+        if (isLoggedIn) {
+          return true;
+        } else {
+          return this.router.parseUrl('/login');
+        }
+      })
+    );
   }
 }
 

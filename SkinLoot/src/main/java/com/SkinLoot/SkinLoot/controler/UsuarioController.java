@@ -17,7 +17,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
@@ -129,6 +131,30 @@ public class UsuarioController {
 
         // Você pode retornar vazio, já que o token está no cookie
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/auth/status")
+    public ResponseEntity<?> authStatus() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAuthenticated = auth != null && auth.isAuthenticated()
+                && !(auth instanceof AnonymousAuthenticationToken);
+        if (isAuthenticated) {
+            return ResponseEntity.ok(Collections.singletonMap("authenticated", true));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Collections.singletonMap("authenticated", false));
+        }
+    }
+
+    @GetMapping("/auth/me")
+    public ResponseEntity<Usuario> getCurrentUser() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+
+        Optional<Usuario> usuarioOpt = usuarioService.buscarUsuarioPorEmail(email);
+
+        return usuarioOpt.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @PostMapping("/register")

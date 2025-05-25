@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {RouterLink, RouterModule} from "@angular/router";
-import {Observable} from "rxjs";
+import {catchError, Observable, of} from "rxjs";
 import {Usuario} from "../../model/usuario";
 import {LoginService} from "../../service/login.service";
 import {AsyncPipe, NgIf} from "@angular/common";
@@ -25,8 +25,15 @@ import {StorageService} from "../../service/storage.service";
 export class MenuComponent implements OnInit {
   currentUser$: Observable<Usuario | null>;
 
-  constructor(private loginService: LoginService, private dialog: MatDialog, private storage: StorageService) {
+  constructor(private loginService: LoginService, private dialog: MatDialog) {
     this.currentUser$ = this.loginService.currentUser$;
+  }
+
+  ngOnInit(): void {
+    this.currentUser$ = this.loginService.getCurrentUser().pipe(
+      // Se der erro (não logado), retorna null.
+      catchError(() => of(null))
+    );
   }
 
   abrirRegistro() {
@@ -35,10 +42,5 @@ export class MenuComponent implements OnInit {
       disableClose: true
     });
   }
-  isLogado(): boolean {
-    return !!this.storage.get('token');
-  }
-
-
-  ngOnInit(): void {}
 }
+

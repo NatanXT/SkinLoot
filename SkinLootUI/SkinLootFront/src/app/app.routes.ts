@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import {MenuComponent} from "./pages/menu/menu.component";
 import {SkinCardComponent} from "./pages/skin/skin-card/skin-card.component";
 import {LoginComponent} from "./pages/login/login.component";
+import {AuthGuard} from "./service/auth.guard";
 
 export const routes: Routes = [
   {
@@ -15,7 +16,7 @@ export const routes: Routes = [
   {
     path: 'skins',
     loadComponent: () => import('./pages/skin/skin-list/skin-list.component')
-      .then(m => m.SkinListComponent),
+      .then(m => m.SkinListComponent),canActivate: [AuthGuard],
     children: [
       {
         path: 'criar',
@@ -29,6 +30,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/menu/menu.component').then(m => m.MenuComponent),
     pathMatch: 'full'
   },
+
 
 
 
