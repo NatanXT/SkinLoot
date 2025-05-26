@@ -157,6 +157,28 @@ public class UsuarioController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
+    @PostMapping("/auth/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        // Remover Access Token
+        Cookie tokenCookie = new Cookie("accessToken", null);
+        tokenCookie.setHttpOnly(true);
+        tokenCookie.setSecure(true);  // ou false se estiver local
+        tokenCookie.setPath("/");
+        tokenCookie.setMaxAge(0);
+        response.addCookie(tokenCookie);
+
+        // Remover Refresh Token
+        Cookie refreshCookie = new Cookie("refreshToken", null);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(true);  // ou false se estiver local
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(0);
+        response.addCookie(refreshCookie);
+
+        return ResponseEntity.ok().build();
+    }
+
+
     @PostMapping("/register")
     public ResponseEntity<?> registrar(@RequestBody @Valid RegisterRequest request) {
         Usuario novoUsuario = usuarioService.cadastrarUsuario(request); // ✅ já salva e valida

@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {RouterLink, RouterModule} from "@angular/router";
+import {Router, RouterLink, RouterModule} from "@angular/router";
 import {catchError, Observable, of} from "rxjs";
 import {Usuario} from "../../model/usuario";
 import {LoginService} from "../../service/login.service";
@@ -25,7 +25,7 @@ import {StorageService} from "../../service/storage.service";
 export class MenuComponent implements OnInit {
   currentUser$: Observable<Usuario | null>;
 
-  constructor(private loginService: LoginService, private dialog: MatDialog) {
+  constructor(private loginService: LoginService, private dialog: MatDialog, private router: Router) {
     this.currentUser$ = this.loginService.currentUser$;
   }
 
@@ -40,6 +40,17 @@ export class MenuComponent implements OnInit {
     this.dialog.open(RegistroComponent, {
       width: '450px',
       disableClose: true
+    });
+  }
+  logout(): void {
+    this.loginService.logout().subscribe({
+      next: () => {
+        // Redireciona para login
+        this.router.navigate(['/']);
+      },
+      error: err => {
+        console.error('Erro ao fazer logout:', err);
+      }
     });
   }
 }

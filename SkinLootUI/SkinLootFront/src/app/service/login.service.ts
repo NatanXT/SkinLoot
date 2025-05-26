@@ -38,10 +38,8 @@ export class LoginService {
     );
   }
 
-  logout(): void {
-    this.storage.remove('token');
-    this.storage.remove('userAtual');
-    this.currentUserSubject.next(null);
+  logout(): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/auth/logout`, {}, { withCredentials: true });
   }
 
   isLoggedIn(): Observable<boolean> {
