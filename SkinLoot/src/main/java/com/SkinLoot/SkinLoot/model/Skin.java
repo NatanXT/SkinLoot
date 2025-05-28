@@ -5,12 +5,14 @@ import com.SkinLoot.SkinLoot.model.enums.Raridade;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
+import java.util.UUID;
+
 @Entity // Define a classe como uma entidade JPA (tabela no banco de dados)
 public class Skin {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Gera automaticamente um ID único
-    private Long id;
+    private UUID id;
 
     @Column(nullable = false) // Nome obrigatório
     @NotNull(message = "O nome não pode ser nulo") // Garante que o nome não seja nulo
@@ -52,11 +54,13 @@ public class Skin {
     private Qualidade qualidade; // Opcional para CS:GO
 
     // Getters e Setters
-    public Long getId() {
+
+
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
