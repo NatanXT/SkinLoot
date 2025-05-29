@@ -4,14 +4,19 @@ import com.SkinLoot.SkinLoot.model.enums.Qualidade;
 import com.SkinLoot.SkinLoot.model.enums.Raridade;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.UUID;
 
 @Entity // Define a classe como uma entidade JPA (tabela no banco de dados)
+@Table(name = "skin")
+
 public class Skin {
-    
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Gera automaticamente um ID único
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
 
     @Column(nullable = false) // Nome obrigatório

@@ -5,6 +5,7 @@ import com.SkinLoot.SkinLoot.dto.AnuncioResponse;
 import com.SkinLoot.SkinLoot.model.Anuncio;
 import com.SkinLoot.SkinLoot.model.Skin;
 import com.SkinLoot.SkinLoot.model.Usuario;
+import com.SkinLoot.SkinLoot.model.enums.Status;
 import com.SkinLoot.SkinLoot.service.AnuncioService;
 import com.SkinLoot.SkinLoot.service.SkinService;
 import com.SkinLoot.SkinLoot.service.UsuarioService;
@@ -14,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,7 +23,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/anuncios")
-@CrossOrigin(origins = "*", allowCredentials = "true")
+//@CrossOrigin(origins = "*", allowCredentials = "true")
 public class AnuncioController {
 
     @Autowired
@@ -40,38 +42,47 @@ public class AnuncioController {
                 a.getDescricao(),
                 a.getPreco(),
                 a.getSkin().getId(),
-                a.getSkin().getNome()
+                a.getSkin().getNome(),
+                a.getStatus(),
+                a.getDataCriacao()
         );
     }
 
     // Criar Anúncio usando DTO
-    @PostMapping
-    public ResponseEntity<AnuncioResponse> criarAnuncio(
-            @RequestBody AnuncioRequest req,
-            Authentication authentication
-    ) {
-        UserDetails ud = (UserDetails) authentication.getPrincipal();
-        String email = ud.getUsername();
+    @PostMapping("/save")
+    public ResponseEntity<AnuncioResponse> criarAnuncio(@RequestBody AnuncioRequest anuncioRequest, Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String email = userDetails.getUsername();
 
-        Optional<Usuario> userOpt = usuarioService.buscarUsuarioPorEmail(email);
-        if (userOpt.isEmpty()) {
+        Optional<Usuario> usuarioOpt = usuarioService.buscarUsuarioPorEmail(email);
+        if (usuarioOpt.isEmpty()) {
             return ResponseEntity.status(401).build();
         }
 
-        Optional<Skin> skinOpt = skinService.buscarPorId(req.getSkinId());
+        Optional<Skin> skinOpt = skinService.buscarPorId(anuncioRequest.getSkinId());
         if (skinOpt.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
-        Anuncio a = new Anuncio();
-        a.setTitulo(req.getTitulo());
-        a.setDescricao(req.getDescricao());
-        a.setPreco(req.getPreco());
-        a.setSkin(skinOpt.get());
-        a.setUsuario(userOpt.get());
+        Anuncio anuncio = new Anuncio();
+        anuncio.setTitulo(anuncioRequest.getTitulo());
+        anuncio.setDescricao(anuncioRequest.getDescricao());
+        anuncio.setPreco(anuncioRequest.getPreco());
+        anuncio.setSkin(skinOpt.get());
+        anuncio.setUsuario(usuarioOpt.get());
 
-        Anuncio salvo = anuncioService.save(a);
-        return ResponseEntity.ok(toDto(salvo));
+        // ✅ Sempre seta a data de criação
+        anuncio.setDataCriacao(LocalDateTime.now());
+
+        // ✅ Se o status for enviado, usa; senão, coloca padrão ATIVO
+        if (anuncioRequest.getStatus() != null) {
+            anuncio.setStatus(anuncioRequest.getStatus());
+        } else {
+            anuncio.setStatus(Status.ATIVO);
+        }
+
+        Anuncio savedAnuncio = anuncioService.save(anuncio);
+        return ResponseEntity.ok(toDto(savedAnuncio));
     }
 
 
