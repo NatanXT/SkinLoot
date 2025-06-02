@@ -1,0 +1,9 @@
+.anuncio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.anuncio-card {
+  width: 100%;
+}

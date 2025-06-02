@@ -26,8 +26,12 @@ export const routes: Routes = [
     ]
   },
   {
-    path: 'anuncios/criar/:skinId',
+    path: 'meus-anuncios/criar/:skinId',
     loadComponent: () => import('./pages/meus-anuncios/criar-anuncio/criar-anuncio.component').then(m => m.CriarAnuncioComponent),
+  },
+  {
+    path: 'anuncios',
+    loadComponent: () => import('./pages/public/anuncio-list.component').then(m => m.AnuncioListComponent)
   },
   {
     path: '',

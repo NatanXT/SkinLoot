@@ -22,6 +22,7 @@ import {MatButton} from "@angular/material/button";
   templateUrl: './criar-anuncio.component.html',
   styleUrl: './criar-anuncio.component.css'
 })
+
 export class CriarAnuncioComponent implements OnInit {
   anuncioForm!: FormGroup;
   skinId!: string;
@@ -38,7 +39,7 @@ export class CriarAnuncioComponent implements OnInit {
 
     this.anuncioForm = this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(3)]],
-      descricao: ['', [Validators.required, Validators.minLength(10)]],
+      descricao: ['', [Validators.required]],
       preco: [null, [Validators.required, Validators.min(0.01)]],
       status: ['ATIVO']
     });

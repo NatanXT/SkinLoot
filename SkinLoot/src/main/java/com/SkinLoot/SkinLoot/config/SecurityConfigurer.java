@@ -71,7 +71,8 @@ public class SecurityConfigurer {
                 .authorizeHttpRequests(authorize -> authorize // Configura as permissões de acesso às rotas.
                         .requestMatchers(
                                 "/usuarios/login", // Permite acesso sem autenticação a essas rotas.
-                                "/usuarios/register"
+                                "/usuarios/register",
+                                "/anuncios/**"
                         ).permitAll()
                         .requestMatchers("/api/user/**").hasAuthority(Role.ADMIN.name()) // Apenas admins podem acessar rotas /api/user/**
                         .anyRequest().authenticated()) // Exige autenticação para todas as outras requisições.

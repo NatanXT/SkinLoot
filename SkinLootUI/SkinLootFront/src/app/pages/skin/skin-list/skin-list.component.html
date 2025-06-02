@@ -18,7 +18,7 @@
         <p class="listing-price">Jogo: {{ skin.jogoNome }}</p>
         <p *ngIf="skin.desgasteFloat"><strong>Float:</strong> {{ skin.desgasteFloat }}</p>
         <p>{{ skin.descricao }}</p>
-        <button [routerLink]="['/anuncios/criar', skin.id]" class="btn-criar-anuncio">
+        <button [routerLink]="['/meus-anuncios/criar', skin.id]" class="btn-criar-anuncio">
           Criar Anúncio
         </button>
       </div>

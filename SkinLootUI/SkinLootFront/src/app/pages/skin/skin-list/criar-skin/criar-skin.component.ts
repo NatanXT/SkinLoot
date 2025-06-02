@@ -11,6 +11,7 @@ import {MatInputModule} from "@angular/material/input";
 import {MatButtonModule} from "@angular/material/button";
 import {Jogo} from "../../../../model/jogo";
 import {JogoService} from "../../../../service/jogo.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-criar-skin',
@@ -42,7 +43,8 @@ export class CriarSkinComponent {
   constructor(
     private fb: FormBuilder,
     private jogoService: JogoService,
-    private skinService: SkinService
+    private skinService: SkinService,
+    private router: Router,
   ) {
     this.skinForm = this.fb.group({
       nome: ['', [Validators.required, Validators.minLength(3)]],
@@ -75,6 +77,7 @@ export class CriarSkinComponent {
       next: (res) => {
         this.statusMessage = '✅ Skin criada com sucesso!';
         this.skinForm.reset();
+        this.router.navigate(['/skins']);
       },
       error: (err) => {
         this.statusMessage = '❌ Erro ao criar skin.';

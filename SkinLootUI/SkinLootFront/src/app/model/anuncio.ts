@@ -18,3 +18,14 @@ export interface AnuncioRequest {
   skinId: string;
   status?: 'ATIVO' | 'INATIVO';
 }
+export interface AnuncioResponse {
+  id: string;
+  titulo: string;
+  descricao: string;
+  preco: number;
+  status: string;
+  dataCriacao: string;
+  skinId: string;
+  skinIcon: string;
+  skinNome: string;
+}

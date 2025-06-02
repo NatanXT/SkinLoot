@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {Anuncio, AnuncioRequest} from "../model/anuncio";
+import {Anuncio, AnuncioRequest, AnuncioResponse} from "../model/anuncio";
 import {Observable} from "rxjs";
 
 @Injectable({
@@ -16,7 +16,7 @@ export class AnuncioService {
     return this.http.post(`${this.baseUrl}/save`, anuncio);
   }
 
-  listarAnuncios(): Observable<Anuncio[]> {
-    return this.http.get<Anuncio[]>(this.baseUrl);
+  listarAnuncios(): Observable<AnuncioResponse[]> {
+    return this.http.get<AnuncioResponse[]>(this.baseUrl);
   }
 }

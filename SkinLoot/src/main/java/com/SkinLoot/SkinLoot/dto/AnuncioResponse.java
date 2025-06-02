@@ -13,17 +13,19 @@ public class AnuncioResponse {
     private BigDecimal preco;
     private UUID skinId;
     private String skinNome;
+    private String skinIcon;  // ✅ Adicione isso!
     private Status status;             // ✅ novo
     private LocalDateTime dataCriacao; // ✅ novo
 
     public AnuncioResponse() {}
 
-    public AnuncioResponse(UUID id, String titulo,String descricao, BigDecimal preco,  UUID skinId, String skinNome, Status status, LocalDateTime dataCriacao) {
+    public AnuncioResponse(UUID id, String titulo,String descricao, BigDecimal preco,UUID skinId,String skinIcon, String skinNome, Status status, LocalDateTime dataCriacao) {
         this.id = id;
         this.titulo = titulo;
         this.descricao = descricao;
         this.preco = preco;
         this.skinId = skinId;
+        this.skinIcon = skinIcon;
         this.skinNome = skinNome;
         this.status = status;
         this.dataCriacao = dataCriacao;
@@ -67,6 +69,14 @@ public class AnuncioResponse {
 
     public void setSkinId(UUID skinId) {
         this.skinId = skinId;
+    }
+
+    public String getSkinIcon() {
+        return skinIcon;
+    }
+
+    public void setSkinIcon(String skinIcon) {
+        this.skinIcon = skinIcon;
     }
 
     public String getSkinNome() {
