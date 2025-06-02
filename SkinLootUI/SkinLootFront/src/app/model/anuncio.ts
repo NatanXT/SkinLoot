@@ -11,3 +11,10 @@ export interface Anuncio{
   dataPublicacao: Date;
   status: 'DISPONIVEL' | 'VENDIDO';
 }
+export interface AnuncioRequest {
+  titulo: string;
+  descricao: string;
+  preco: number;
+  skinId: string;
+  status?: 'ATIVO' | 'INATIVO';
+}

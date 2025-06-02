@@ -22,7 +22,8 @@ import {StorageService} from "../../service/storage.service";
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.css'
 })
-export class MenuComponent implements OnInit {
+export class MenuComponent implements OnInit{
+
   currentUser$: Observable<Usuario | null>;
 
   constructor(private loginService: LoginService, private dialog: MatDialog, private router: Router) {

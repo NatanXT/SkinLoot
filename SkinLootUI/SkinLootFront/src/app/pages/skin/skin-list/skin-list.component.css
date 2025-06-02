@@ -221,3 +221,17 @@
 .common {
   border: 2px solid #808080;
 }
+.btn-criar-anuncio {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.btn-criar-anuncio:hover {
+  background-color: #45a049;
+}
+

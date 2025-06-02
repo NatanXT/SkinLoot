@@ -1,7 +1,8 @@
 <!-- app.component.html atualizado -->
 <div class="dark-theme">
   <router-outlet></router-outlet>
-  <div class="banner-container">
+
+  <div class="banner-container" *ngIf="mostrarBanner">
     <img src="assets/banner.png" alt="Skins Banner" class="banner-image">
   </div>
 </div>

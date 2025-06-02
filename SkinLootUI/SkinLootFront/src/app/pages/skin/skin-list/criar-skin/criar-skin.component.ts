@@ -58,7 +58,7 @@ export class CriarSkinComponent {
 
   ngOnInit(): void {
     // carrega todos os jogos para popular o dropdown
-    this.jogoService.listarJogos().subscribe(
+    this.jogoService.listarJogos().subscribe(//perguntar pro gpt pq isso ta ai
       jogos => this.jogos = jogos,
       err   => console.error('Erro ao buscar jogos', err)
     );

@@ -2,6 +2,7 @@ package com.SkinLoot.SkinLoot.model;
 
 import com.SkinLoot.SkinLoot.model.enums.Status;
 import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,7 +12,9 @@ import java.util.UUID;
 public class Anuncio {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
 
     private String descricao;
