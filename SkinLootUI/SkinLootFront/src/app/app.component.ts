@@ -9,19 +9,23 @@ import {NgIf} from "@angular/common";
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SkinListComponent, RouterOutlet, MenuComponent, SkinCardComponent, RouterModule, NgIf],
+  imports: [ MenuComponent, SkinListComponent, RouterOutlet, SkinCardComponent, RouterModule, NgIf],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent {
   mostrarBanner = false;
+  mostrarMenu = true;
 
   constructor(private router: Router) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
       // Define quais rotas devem exibir o banner
+      const url = event.urlAfterRedirects;
+
       this.mostrarBanner = event.urlAfterRedirects === '/';
+      this.mostrarMenu = !(url === '/login' || url === '/register');
     });
   }
 }

@@ -6,6 +6,11 @@ import {AuthGuard} from "./service/auth.guard";
 
 export const routes: Routes = [
   {
+    path: '',
+    loadComponent: () => import('./pages/public/anuncio-list.component').then(m => m.AnuncioListComponent),
+    pathMatch: 'full'
+  },
+  {
     path: 'login',
     loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent)
   },
@@ -29,18 +34,11 @@ export const routes: Routes = [
     path: 'meus-anuncios/criar/:skinId',
     loadComponent: () => import('./pages/meus-anuncios/criar-anuncio/criar-anuncio.component').then(m => m.CriarAnuncioComponent),
   },
-  {
-    path: 'anuncios',
-    loadComponent: () => import('./pages/public/anuncio-list.component').then(m => m.AnuncioListComponent)
-  },
-  {
-    path: '',
-    loadComponent: () => import('./pages/menu/menu.component').then(m => m.MenuComponent),
-    pathMatch: 'full'
-  },
 
 
 
 
-  { path: '', redirectTo: 'MenuComponent', pathMatch: 'full' },
+
+
+  // { path: '', redirectTo: '', pathMatch: 'full' },
 ];
