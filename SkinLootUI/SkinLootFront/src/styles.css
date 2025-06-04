@@ -2,3 +2,51 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.mat-form-field-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Customizando o input */
+.mat-input-element {
+  height: 10px; /* ou o tamanho que quiser */
+  line-height: 10px;
+  font-size: 16px;
+  color: white;
+}
+
+/* Customizando o ícone */
+.mat-form-field .mat-icon {
+  color: white;
+  font-size: 20px;
+}
+
+/* Customizando fundo do fill */
+.mat-form-field-appearance-fill .mat-form-field-flex {
+  background-color: #222;
+  border-radius: 4px;
+}
+
+/* Customizando foco */
+.mat-form-field-appearance-fill.mat-focused .mat-form-field-flex {
+  background-color: #333;
+}
+
+.search-field .mat-form-field-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+}
+
+.search-field .mat-input-element {
+  font-size: 16px;
+  color: white;
+}
+
+
+
+
+

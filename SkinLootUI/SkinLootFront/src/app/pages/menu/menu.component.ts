@@ -7,6 +7,11 @@ import {AsyncPipe, NgIf} from "@angular/common";
 import {MatDialog, MatDialogModule} from "@angular/material/dialog";
 import {RegistroComponent} from "../registro/registro/registro.component";
 import {StorageService} from "../../service/storage.service";
+import {MatAnchor, MatButton} from "@angular/material/button";
+import {MatToolbar} from "@angular/material/toolbar";
+import {MatIcon} from "@angular/material/icon";
+import {MatFormField, MatLabel} from "@angular/material/form-field";
+import {MatInput} from "@angular/material/input";
 
 
 @Component({
@@ -17,7 +22,14 @@ import {StorageService} from "../../service/storage.service";
     RouterModule,
     AsyncPipe,
     NgIf,
-    MatDialogModule
+    MatDialogModule,
+    MatButton,
+    MatToolbar,
+    MatIcon,
+    MatAnchor,
+    MatFormField,
+    MatInput,
+    MatLabel
   ],
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.css'

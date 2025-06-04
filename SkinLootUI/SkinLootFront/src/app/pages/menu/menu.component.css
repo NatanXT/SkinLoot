@@ -5,12 +5,36 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.header {
-  background-color: #BD1717;
-  width: 100%;
-  padding: 8px 16px;
+.toolbar-color {
+  background-color: #7F2727;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+::ng-deep .mat-form-field-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #888;
+}
+
+::ng-deep .mat-input-element {
+  font-size: 16px;
+  color: #fff;
+  background: transparent;
+}
+
+::ng-deep .mat-form-field-underline {
+  background-color: #836FFF; /* underline roxo */
+}
+
+::ng-deep .mat-form-field-outline {
+  border-color: #836FFF;
+}
+
+::ng-deep .mat-form-field {
+  width: 100%;
+}
+
+
 
 .menu-item {
   display: flex;
@@ -23,6 +47,7 @@
   white-space: nowrap;
   transition: background-color 0.2s;
 }
+
 .left-menu, .right-menu {
   display: flex;
   align-items: center;

@@ -1,42 +1,40 @@
-<header class="header">
-<nav class="menu">
+<mat-toolbar class="toolbar-color">
   <div class="left-menu">
-    <a href="#" routerLink="/" class="menu-item">
-      <span class="icon">👤</span>
+    <a mat-button routerLink="/">
+      <mat-icon>person</mat-icon>
       <span *ngIf="!(currentUser$ | async)">Usuário</span>
       <span *ngIf="currentUser$ | async as user">Olá, {{ user.nome }}</span>
     </a>
-    <button mat-button (click)="abrirRegistro()">
-      REGISTRAR
-    </button>
-  <div class="search-container">
-    <input type="text" placeholder="procurar skins" class="search-input">
-    <button class="search-button"></button>
+    <button mat-button (click)="abrirRegistro()">REGISTRAR</button>
+    <mat-form-field class="search-field">
+      <mat-icon>search</mat-icon>
+      <mat-label>pesquisar skins </mat-label>
+      <input matInput>
+    </mat-form-field>
   </div>
-  </div>
+
+  <span class="spacer"></span>
+
   <div class="right-menu">
-    <ng-container >
-      <a routerLink="login" class="menu-item ">
-        <span class="icon">🔐</span>
-        <span>Login</span>
-      </a>
-    </ng-container>
-    <a routerLink="meus-anuncios" class="menu-item">
-      <span class="icon">📢</span>
-      <span>Meus anúncios</span>
+    <a mat-button routerLink="login">
+      <mat-icon>lock</mat-icon>
+      Login
     </a>
-    <a routerLink="chats" class="menu-item">
-      <span class="icon">💬</span>
-      <span>Chats</span>
+    <a mat-button routerLink="meus-anuncios">
+      <mat-icon>campaign</mat-icon>
+      Meus anúncios
     </a>
-    <a routerLink="skins" class="menu-item ">
-      <span class="icon"></span>
-      <span>Minhas Skins</span>
+    <a mat-button routerLink="chats">
+      <mat-icon>chat</mat-icon>
+      Chats
     </a>
-    <button (click)="logout()">Logout</button>
-
+    <a mat-button routerLink="skins">
+      <mat-icon>collections</mat-icon>
+      Minhas Skins
+    </a>
+    <button mat-button (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Logout
+    </button>
   </div>
-</nav>
-</header>
-
-
+</mat-toolbar>
