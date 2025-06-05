@@ -23,7 +23,7 @@ public class AnuncioService {
         return anuncioRepository.findAll();
     }
 
-    public Optional<Anuncio> findById(UUID id) {
+    public Optional<Anuncio> findById(UUID id){
         return anuncioRepository.findById(id);
     }
 

@@ -16,10 +16,15 @@ public class AnuncioResponse {
     private String skinIcon;  // ✅ Adicione isso!
     private Status status;             // ✅ novo
     private LocalDateTime dataCriacao; // ✅ novo
+    private String usuarioNome;
+    private String skinRaridade;
+    private String skinQualidade;
+    private Double skinDesgasteFloat;
+
 
     public AnuncioResponse() {}
 
-    public AnuncioResponse(UUID id, String titulo,String descricao, BigDecimal preco,UUID skinId,String skinIcon, String skinNome, Status status, LocalDateTime dataCriacao) {
+    public AnuncioResponse(UUID id, String titulo,String descricao, BigDecimal preco,UUID skinId,String skinIcon, String skinNome, Status status, LocalDateTime dataCriacao, String usuarioNome, String skinRaridade, String skinQualidade, Double skinDesgasteFloat) {
         this.id = id;
         this.titulo = titulo;
         this.descricao = descricao;
@@ -29,6 +34,11 @@ public class AnuncioResponse {
         this.skinNome = skinNome;
         this.status = status;
         this.dataCriacao = dataCriacao;
+        this.usuarioNome = usuarioNome;
+        this.skinRaridade = skinRaridade;
+        this.skinQualidade = skinQualidade;
+        this.skinDesgasteFloat = skinDesgasteFloat;
+
     }
 
     public UUID getId() {
@@ -101,5 +111,37 @@ public class AnuncioResponse {
 
     public void setDataCriacao(LocalDateTime dataCriacao) {
         this.dataCriacao = dataCriacao;
+    }
+
+    public String getUsuarioNome() {
+        return usuarioNome;
+    }
+
+    public void setUsuarioNome(String usuarioNome) {
+        this.usuarioNome = usuarioNome;
+    }
+
+    public String getSkinRaridade() {
+        return skinRaridade;
+    }
+
+    public void setSkinRaridade(String skinRaridade) {
+        this.skinRaridade = skinRaridade;
+    }
+
+    public String getSkinQualidade() {
+        return skinQualidade;
+    }
+
+    public void setSkinQualidade(String skinQualidade) {
+        this.skinQualidade = skinQualidade;
+    }
+
+    public Double getSkinDesgasteFloat() {
+        return skinDesgasteFloat;
+    }
+
+    public void setSkinDesgasteFloat(Double skinDesgasteFloat) {
+        this.skinDesgasteFloat = skinDesgasteFloat;
     }
 }

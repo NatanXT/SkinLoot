@@ -45,7 +45,11 @@ public class AnuncioController {
                 a.getSkin().getIcon(),
                 a.getSkin().getNome(),
                 a.getStatus(),
-                a.getDataCriacao()
+                a.getDataCriacao(),
+                a.getUsuario().getNome(),
+                a.getSkin().getQualidade().name(),
+                a.getSkin().getRaridade().name(),
+                a.getSkin().getDesgastefloat()
         );
     }
 

@@ -23,9 +23,13 @@ export interface AnuncioResponse {
   titulo: string;
   descricao: string;
   preco: number;
-  status: string;
-  dataCriacao: string;
   skinId: string;
   skinIcon: string;
   skinNome: string;
+  status: string;
+  dataCriacao: string;
+  usuarioNome: string;
+  skinRaridade: string;
+  skinQualidade: string;
+  skinDesgasteFloat: number;
 }

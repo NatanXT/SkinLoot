@@ -19,4 +19,8 @@ export class AnuncioService {
   listarAnuncios(): Observable<AnuncioResponse[]> {
     return this.http.get<AnuncioResponse[]>(this.baseUrl);
   }
+  buscarPorId(id: string) {
+    return this.http.get<any>(`${this.baseUrl}/${id}`);
+  }
+
 }
