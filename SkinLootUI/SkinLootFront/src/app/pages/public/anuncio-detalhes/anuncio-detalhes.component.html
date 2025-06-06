@@ -1,3 +1,4 @@
+<div class="skin-grid" *ngIf="anuncio">
 <h2 class="section-title">Detalhes do Anúncio</h2>
 
 <mat-card class="skin-card">
@@ -10,9 +11,9 @@
     <p><strong>Status:</strong> {{ anuncio.status }}</p>
     <p><strong>Data:</strong> {{ anuncio.dataCriacao | date }}</p>
 
-    <h4>Usuário: {{ anuncio.usuarioNome }}</h4>
+    <h3 class="skin-name">Usuário: {{ anuncio.usuarioNome }}</h3>
 
-    <h4>Detalhes da Skin</h4>
+    <h3 class="skin-name">Detalhes da Skin</h3>
     <p><strong>Nome:</strong> {{ anuncio.skinNome }}</p>
     <p><strong>Descrição:</strong> {{ anuncio.skinDescricao }}</p>
     <p><strong>Raridade:</strong> {{ anuncio.skinRaridade }}</p>
@@ -20,3 +21,4 @@
     <p><strong>Desgaste (Float):</strong> {{ anuncio.skinDesgasteFloat }}</p>
   </div>
 </mat-card>
+</div>

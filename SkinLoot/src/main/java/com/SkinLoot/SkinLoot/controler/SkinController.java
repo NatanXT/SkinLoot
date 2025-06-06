@@ -1,6 +1,7 @@
 package com.SkinLoot.SkinLoot.controler;
 
 import com.SkinLoot.SkinLoot.dto.SkinRequest;
+import com.SkinLoot.SkinLoot.dto.SkinResponse;
 import com.SkinLoot.SkinLoot.model.Jogo;
 import com.SkinLoot.SkinLoot.model.Skin;
 import com.SkinLoot.SkinLoot.model.Usuario;
@@ -9,6 +10,7 @@ import com.SkinLoot.SkinLoot.service.JogoService;
 import com.SkinLoot.SkinLoot.service.SkinService;
 import com.SkinLoot.SkinLoot.service.UsuarioService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,15 +25,11 @@ import java.util.UUID;
 @RequestMapping("/skins")
 public class SkinController {
 
-    @Autowired
-    private SkinService skinService;
+    private final SkinService skinService;
+    private final UsuarioService usuarioService;
+    private final JogoService jogoService;
 
     @Autowired
-    private UsuarioService usuarioService;
-
-    @Autowired
-    private JogoService jogoService;
-
     public SkinController(SkinService skinService, JogoService jogoService, UsuarioService usuarioService) {
         this.skinService = skinService;
         this.usuarioService = usuarioService;
@@ -39,13 +37,12 @@ public class SkinController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<Skin> criar(@RequestBody @Valid SkinRequest request, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<SkinResponse> criar(@RequestBody @Valid SkinRequest request,
+                                              @AuthenticationPrincipal UserDetails userDetails) {
         Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-
-        UUID jogoId = request.getJogoId();
-        Jogo jogo = jogoService.buscarPorId(jogoId)
+        Jogo jogo = jogoService.buscarPorId(request.getJogoId())
                 .orElseThrow(() -> new RuntimeException("Jogo não encontrado"));
 
         Skin skin = new Skin();
@@ -59,11 +56,12 @@ public class SkinController {
         skin.setJogo(jogo);
         skin.setUsuario(usuario);
 
-        return ResponseEntity.ok(skinService.salvar(skin));
+        // ✅ método do service deve retornar já o DTO
+        return ResponseEntity.status(HttpStatus.CREATED).body(skinService.salvarERetornarDto(skin));
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<Skin>> minhasSkins(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<SkinResponse>> minhasSkins(@AuthenticationPrincipal UserDetails userDetails) {
         Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
@@ -71,8 +69,9 @@ public class SkinController {
     }
 
     @GetMapping("/jogo/{jogoId}")
-    public ResponseEntity<List<Skin>> porJogo(@PathVariable UUID jogoId) {
+    public ResponseEntity<List<SkinResponse>> porJogo(@PathVariable UUID jogoId) {
         return ResponseEntity.ok(skinService.listarPorJogo(jogoId));
     }
+
 }
 

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import {AnuncioService} from "../../../service/anuncio.service";
 import {ActivatedRoute} from "@angular/router";
 import {MatCard, MatCardImage} from "@angular/material/card";
-import {DatePipe} from "@angular/common";
+import {DatePipe, NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-anuncio-detalhes',
@@ -10,7 +10,8 @@ import {DatePipe} from "@angular/common";
   imports: [
     MatCard,
     DatePipe,
-    MatCardImage
+    MatCardImage,
+    NgIf
   ],
   templateUrl: './anuncio-detalhes.component.html',
   styleUrl: './anuncio-detalhes.component.css'
