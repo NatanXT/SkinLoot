@@ -30,10 +30,15 @@
     Escolha um jogo válido
   </div>
 
-  <mat-form-field appearance="fill" class="full-width">
-    <mat-label>URL do Ícone</mat-label>
-    <input matInput formControlName="icon" required>
-  </mat-form-field>
+  <div class="upload-container">
+    <label for="iconFile">Ícone da Skin</label>
+    <input type="file" id="iconFile" (change)="onIconSelected($event)" accept="image/*" required>
+
+    <div *ngIf="previewUrl" class="preview-box">
+      <p>Prévia da Imagem:</p>
+      <img [src]="previewUrl" alt="Prévia do ícone" class="preview-image">
+    </div>
+  </div>
 
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Asset ID (opcional)</mat-label>

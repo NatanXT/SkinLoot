@@ -35,6 +35,9 @@ export class CriarSkinComponent {
   skinForm: FormGroup;
   statusMessage: string | null = null;
   jogos: Jogo[] = [];
+  selectedIconFile: File | null = null;
+  previewUrl: string | null = null;
+
 
   raridade = ['COMUM', 'INCOMUM', 'RARO', 'ÉPICO', 'LENDÁRIO'];
   qualidade = ['NOVA', 'POUCO_USADA', 'TESTADA', 'DESGASTADA', 'BEM_DESGASTADA'];
@@ -65,11 +68,29 @@ export class CriarSkinComponent {
       err   => console.error('Erro ao buscar jogos', err)
     );
   }
+
+  onIconSelected(event: Event): void {
+    const fileInput = event.target as HTMLInputElement;
+    if (fileInput.files && fileInput.files[0]) {
+      this.selectedIconFile = fileInput.files[0];
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewUrl = reader.result as string;
+
+        // Se você quiser salvar o base64 no form:
+        this.skinForm.patchValue({ icon: this.previewUrl });
+      };
+      reader.readAsDataURL(this.selectedIconFile);
+    }
+  }
+
   criarSkin(): void {
     if (this.skinForm.invalid) {
       this.statusMessage = 'Preencha todos os campos obrigatórios.';
       return;
     }
+
 
     const request: SkinRequest = this.skinForm.value;
 
