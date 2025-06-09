@@ -1,0 +1,25 @@
+<!-- oferta-list.component.html -->
+<div class="oferta-filtros">
+  <input type="text" [(ngModel)]="filtroNome" (input)="aplicarFiltros()" placeholder="Buscar por nome" />
+  <input type="number" [(ngModel)]="filtroPrecoMax" (input)="aplicarFiltros()" placeholder="Preço máximo (R$)" />
+</div>
+
+<div class="ofertas-container">
+  <div class="oferta-card" *ngFor="let oferta of ofertasFiltradas">
+    <h3>{{ oferta.name }}</h3>
+    <p><strong>Preço mínimo:</strong> R$ {{ oferta.priceMin.toFixed(2) }}</p>
+    <p><strong>Preço médio:</strong> R$ {{ oferta.priceAvg.toFixed(2) }}</p>
+    <p><strong>Preço máximo:</strong> R$ {{ oferta.priceMax.toFixed(2) }}</p>
+    <p><strong>Quantidade disponível:</strong> {{ oferta.quantity }}</p>
+    <p><strong>ID:</strong> {{ oferta.skinId }}</p>
+    <a
+      class="btn-comprar"
+      [href]="'https://bitskins.com/market/?name=' + encodeURIComponent(oferta.name)"
+      target="_blank"
+    >
+      Comprar na BitSkins ↗
+    </a>
+
+
+  </div>
+</div>

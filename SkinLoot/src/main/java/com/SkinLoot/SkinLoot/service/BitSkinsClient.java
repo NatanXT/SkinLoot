@@ -1,12 +1,11 @@
 package com.SkinLoot.SkinLoot.service;
 
 import com.SkinLoot.SkinLoot.dto.OfertaSkinDto;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,25 +26,27 @@ public class BitSkinsClient {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("x-apikey", apiKey);
+        headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+        ResponseEntity<String> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 entity,
-                new ParameterizedTypeReference<>() {}
+                String.class
         );
 
         List<OfertaSkinDto> lista = new ArrayList<>();
 
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            Map<String, Object> body = response.getBody();
+        try {
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                ObjectMapper mapper = new ObjectMapper();
 
-            Object dataObj = body.get("data");
-            if (dataObj instanceof Map dataMap) {
-                Object itemsObj = dataMap.get("items");
+                // 🧠 Agora sabemos que o JSON tem o campo "list"
+                Map<String, Object> root = mapper.readValue(response.getBody(), new TypeReference<>() {});
+                Object listObj = root.get("list");
 
-                if (itemsObj instanceof List<?> items) {
+                if (listObj instanceof List<?> items) {
                     for (Object obj : items) {
                         if (obj instanceof Map<?, ?> item) {
                             OfertaSkinDto dto = new OfertaSkinDto(
@@ -60,15 +61,18 @@ public class BitSkinsClient {
                         }
                     }
                 } else {
-                    System.out.println("⚠️ Campo 'items' dentro de 'data' não é uma lista.");
+                    System.out.println("⚠️ Campo 'list' não é uma lista. Tipo: " + (listObj != null ? listObj.getClass() : "null"));
                 }
-            } else {
-                System.out.println("⚠️ Campo 'data' não é um objeto.");
             }
+        } catch (Exception e) {
+            System.out.println("❌ Erro ao processar JSON da BitSkins: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return lista;
     }
+
+
 
 
 }

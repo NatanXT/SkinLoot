@@ -38,6 +38,12 @@ export const routes: Routes = [
     path: 'anuncios/:id',
     loadComponent: () => import('./pages/public/anuncio-detalhes/anuncio-detalhes.component').then(m => m.AnuncioDetalhesComponent)
   },
+  {
+    path: 'ofertas',
+    loadComponent: () =>
+      import('./pages/public/oferta-list/oferta-list.component').then(m => m.OfertaListComponent),
+  }
+
 
 
 

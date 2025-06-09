@@ -28,3 +28,11 @@ export interface SkinRequest {
   desgasteFloat?: number;
   qualidade?: string;
 }
+export interface OfertaSkinCS2{
+  name: string;
+  priceMin: number;
+  priceMax: number;
+  priceAvg: number;
+  skinId: string;
+  quantity: number;
+}

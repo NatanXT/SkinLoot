@@ -1,0 +1,36 @@
+/* oferta-list.component.css */
+.oferta-filtros {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.oferta-filtros input {
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  flex: 1;
+  min-width: 200px;
+}
+
+.ofertas-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.oferta-card {
+  background: #1e1e1e;
+  color: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  font-family: 'Segoe UI', sans-serif;
+  transition: transform 0.2s;
+}
+
+.oferta-card:hover {
+  transform: scale(1.02);
+}
