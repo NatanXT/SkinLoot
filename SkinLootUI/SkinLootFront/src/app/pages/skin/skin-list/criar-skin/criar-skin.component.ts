@@ -98,6 +98,7 @@ export class CriarSkinComponent {
       next: (res) => {
         this.statusMessage = '✅ Skin criada com sucesso!';
         this.skinForm.reset();
+        this.skinService.notificarAtualizacao();
         this.router.navigate(['/skins']);
       },
       error: (err) => {

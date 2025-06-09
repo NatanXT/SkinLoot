@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {BehaviorSubject, Observable} from "rxjs";
 import {Skin, SkinRequest} from "../model/skin";
 
 @Injectable({
@@ -9,8 +9,15 @@ import {Skin, SkinRequest} from "../model/skin";
 export class SkinService {
 
   private apiUrl: string = 'http://localhost:8080/skins';
+  private atualizarListaSubject = new BehaviorSubject<void>(undefined);
+  public atualizarLista$ = this.atualizarListaSubject.asObservable();
+
+  public notificarAtualizacao(): void {
+    this.atualizarListaSubject.next();
+  }
 
   constructor(private http: HttpClient) { }
+
 
   salvar(skin: SkinRequest): Observable<any>{
     return this.http.post(`${this.apiUrl}/save`, skin);

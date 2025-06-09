@@ -29,10 +29,18 @@ export class SkinListComponent implements OnInit{
   constructor(private skinService: SkinService) {}
 
   ngOnInit(): void {
-    this.skinService.listar().subscribe({
+    this.carregarSkins();
+
+    this.skinService.atualizarLista$.subscribe(() => {
+      this.carregarSkins();
+    });
+  }
+
+  carregarSkins(): void {
+    this.skinService.listar().subscribe(({
       next: (res) => this.skins = res,
       error: (err) => console.error('Erro ao carregar skins:', err)
-    });
+    }));
   }
 
   protected readonly formatDate = formatDate;
