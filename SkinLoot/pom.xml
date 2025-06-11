@@ -62,6 +62,7 @@
 			<optional>true</optional>
 		</dependency>
 
+
 		<!-- Devtools para reload automático -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -104,6 +105,7 @@
 			<artifactId>aether-util</artifactId>
 			<version>1.7</version>
 		</dependency>
+
 	</dependencies>
 
 	<build>

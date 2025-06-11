@@ -73,7 +73,8 @@ public class SecurityConfigurer {
                                 "/usuarios/login", // Permite acesso sem autenticação a essas rotas.
                                 "/usuarios/register",
                                 "/anuncios/**",
-                                "/ofertas"
+                                "/ofertas",
+                                "/api/dmarket/**"
                         ).permitAll()
                         .requestMatchers("/api/user/**").hasAuthority(Role.ADMIN.name()) // Apenas admins podem acessar rotas /api/user/**
                         .anyRequest().authenticated()) // Exige autenticação para todas as outras requisições.
