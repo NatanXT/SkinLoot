@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/dmarket")
 public class DMarketController {
@@ -54,5 +55,25 @@ public class DMarketController {
         repository.save(keys);
 
         return ResponseEntity.ok(Map.of("message", "Chaves DMarket salvas com sucesso"));
+    }
+
+    @GetMapping("/items")
+    public ResponseEntity<?> getMarketItems(@RequestParam Map<String, String> allParams) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String principal = auth.getName();
+
+        Optional<Usuario> optionalUser = usuarioRepository.findByEmail(principal);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado com email: " + principal);
+        }
+
+        UUID userId = optionalUser.get().getId();
+        Optional<UserDMarketKeys> keysOpt = repository.findById(userId);
+        if (keysOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Chaves DMarket não cadastradas para o usuário");
+        }
+
+        UserDMarketKeys keys = keysOpt.get();
+        return service.getMarketItems(keys.getPublicKey(), keys.getSecretKey(), allParams);
     }
 }

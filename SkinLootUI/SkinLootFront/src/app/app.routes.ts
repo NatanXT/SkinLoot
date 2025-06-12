@@ -39,9 +39,9 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/public/anuncio-detalhes/anuncio-detalhes.component').then(m => m.AnuncioDetalhesComponent)
   },
   {
-    path: 'ofertas',
+    path: 'dmarket/connect',
     loadComponent: () =>
-      import('./pages/public/oferta-list/oferta-list.component').then(m => m.OfertaListComponent),
+      import('./pages/dmarket-connect/dmarket-connect.component').then(m => m.DmarketConnectComponent),
   }
 
 

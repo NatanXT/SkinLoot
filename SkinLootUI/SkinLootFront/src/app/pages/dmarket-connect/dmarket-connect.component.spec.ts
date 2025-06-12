@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { OfertaListComponent } from './oferta-list.component';
+import { DmarketConnectComponent } from './dmarket-connect.component';
 
-describe('OfertaListComponent', () => {
-  let component: OfertaListComponent;
-  let fixture: ComponentFixture<OfertaListComponent>;
+describe('DmarketConnectComponent', () => {
+  let component: DmarketConnectComponent;
+  let fixture: ComponentFixture<DmarketConnectComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [OfertaListComponent]
+      imports: [DmarketConnectComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(OfertaListComponent);
+    fixture = TestBed.createComponent(DmarketConnectComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
