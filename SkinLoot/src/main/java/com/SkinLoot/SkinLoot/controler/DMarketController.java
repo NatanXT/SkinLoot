@@ -23,16 +23,28 @@ public class DMarketController {
 
     private final UserDMarketKeysRepository repository;
     private final DMarketService service;
+    private final UsuarioRepository usuarioRepository;
 
-    public DMarketController(UserDMarketKeysRepository repository, DMarketService service) {
+    public DMarketController(UserDMarketKeysRepository repository, DMarketService service, UsuarioRepository usuarioRepository) {
         this.repository = repository;
         this.service = service;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @PostMapping("/connect")
-    public ResponseEntity<?> connect(@RequestBody DMarketKeyRequest req, @RequestParam UUID userId) {
+    public ResponseEntity<?> connect(@RequestBody DMarketKeyRequest req) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String principal = auth.getName();
+
+        Optional<Usuario> optionalUser = usuarioRepository.findByEmail(principal);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado com email: " + principal);
+        }
+
+        UUID userId = optionalUser.get().getId();
+
         boolean isValid = service.validateKeys(req.getPublicKey(), req.getSecretKey());
-        if (!isValid) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid DMarket keys");
+        if (!isValid) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Chaves DMarket inválidas");
 
         UserDMarketKeys keys = new UserDMarketKeys();
         keys.setUserId(userId);
@@ -41,6 +53,6 @@ public class DMarketController {
 
         repository.save(keys);
 
-        return ResponseEntity.ok(Map.of("message", "DMarket keys saved successfully"));
+        return ResponseEntity.ok(Map.of("message", "Chaves DMarket salvas com sucesso"));
     }
 }
