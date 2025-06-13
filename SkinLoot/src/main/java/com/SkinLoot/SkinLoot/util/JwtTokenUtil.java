@@ -29,7 +29,7 @@ public class JwtTokenUtil {
     private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10 horas
     private static final long ACCESS_TOKEN_EXPIRATION = 10 * 60 * 1000; // 10 min
     private static final long REFRESH_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000; // 1 dia
-    @Value("${jwt.secret}")
+//    @Value("${jwt.secret}")
     private String jwtSecret;
 
 //    private final PrivateKey privateKey;
@@ -46,6 +46,7 @@ public class JwtTokenUtil {
     }
 
     public String extractUsername(String token) {
+
         return extractClaim(token, Claims::getSubject);
     }
 

@@ -47,10 +47,10 @@ public class DMarketController {
         boolean isValid = service.validateKeys(req.getPublicKey(), req.getSecretKey());
         if (!isValid) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Chaves DMarket inválidas");
 
-        UserDMarketKeys keys = new UserDMarketKeys();
+        UserDMarketKeys keys = repository.findById(userId).orElse(new UserDMarketKeys());
         keys.setUserId(userId);
-        keys.setPublicKey(req.getPublicKey());
-        keys.setSecretKey(req.getSecretKey());
+        keys.setPublicKey(req.getPublicKey().trim());
+        keys.setSecretKey(req.getSecretKey().trim());
 
         repository.save(keys);
 

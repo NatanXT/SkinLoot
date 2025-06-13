@@ -75,7 +75,12 @@ public class DMarketService {
 
             // Cria a string para assinatura (METHOD + PATH + QUERY + TIMESTAMP)
             String unsignedString = method + uri.getPath() + uri.getQuery() + timestamp;
-            String signature = DMarketSignatureUtil.buildSignature(unsignedString, secretKey);
+            // --- ADICIONE ESTAS DUAS LINHAS PARA O TESTE ---
+            System.out.println("Chave Secreta Original (com possível \\n): '" + secretKey + "'");
+            String chaveLimpa = secretKey.trim();
+            System.out.println("Chave Secreta Após .trim(): '" + chaveLimpa + "'");
+            // ---------------------------------------------
+            String signature = DMarketSignatureUtil.buildSignature(unsignedString, secretKey.trim());
 
             // Monta os headers da requisição
             HttpHeaders headers = new HttpHeaders();
