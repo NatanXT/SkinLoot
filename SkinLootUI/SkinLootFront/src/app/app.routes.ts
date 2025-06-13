@@ -42,7 +42,12 @@ export const routes: Routes = [
     path: 'dmarket/connect',
     loadComponent: () =>
       import('./pages/dmarket-connect/dmarket-connect.component').then(m => m.DmarketConnectComponent),
-  }
+  },
+  {
+    path: 'dmarket/marketplace',
+    loadComponent: () => import('./pages/public/dmarket-items/dmarket-items.component').then(m => m.DmarketItemsComponent),
+  },
+
 
 
 

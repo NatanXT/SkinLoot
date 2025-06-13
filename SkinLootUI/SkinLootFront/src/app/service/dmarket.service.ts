@@ -7,13 +7,16 @@ import {Observable} from "rxjs";
   providedIn: 'root'
 })
 export class DmarketService {
+
+  private apiUrl: string = 'http://localhost:8080';
+
   constructor(private http: HttpClient) {}
 
   conectarChaves(dados: DMarketKeyRequest): Observable<any> {
-    return this.http.post('/api/dmarket/connect', dados);
+    return this.http.post(`${this.apiUrl}/api/dmarket/connect`, dados);
   }
 
   listarItensMarketplace(params: any): Observable<any> {
-    return this.http.get('/api/dmarket/market/items', { params });
+    return this.http.get(`${this.apiUrl}/api/dmarket/items`, { params });
   }
 }

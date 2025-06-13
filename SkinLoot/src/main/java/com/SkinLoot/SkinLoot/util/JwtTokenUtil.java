@@ -126,25 +126,6 @@ public class JwtTokenUtil {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
-    private PrivateKey loadPrivateKeyFromResource(String filename) throws Exception {
-        InputStream is = getClass().getClassLoader().getResourceAsStream(filename);
-        String key = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-        key = key.replace("-----BEGIN PRIVATE KEY-----", "")
-                .replace("-----END PRIVATE KEY-----", "")
-                .replaceAll("\\s", "");
-        byte[] keyBytes = Base64.getDecoder().decode(key);
-        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-        return KeyFactory.getInstance("RSA").generatePrivate(spec);
-    }
-    private PublicKey loadPublicKeyFromResource(String filename) throws Exception {
-        InputStream is = getClass().getClassLoader().getResourceAsStream(filename);
-        String key = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-        key = key.replace("-----BEGIN PUBLIC KEY-----", "")
-                .replace("-----END PUBLIC KEY-----", "")
-                .replaceAll("\\s", "");
-        byte[] keyBytes = Base64.getDecoder().decode(key);
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-        return KeyFactory.getInstance("RSA").generatePublic(spec);
-    }
+
 }
 

@@ -1,6 +1,7 @@
 package com.SkinLoot.SkinLoot.controler;
 
 import com.SkinLoot.SkinLoot.dto.DMarketKeyRequest;
+import com.SkinLoot.SkinLoot.dto.DMarketResponseDto;
 import com.SkinLoot.SkinLoot.model.UserDMarketKeys;
 import com.SkinLoot.SkinLoot.model.Usuario;
 import com.SkinLoot.SkinLoot.repository.UserDMarketKeysRepository;
@@ -17,7 +18,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/dmarket")
 public class DMarketController {
@@ -70,10 +70,16 @@ public class DMarketController {
         UUID userId = optionalUser.get().getId();
         Optional<UserDMarketKeys> keysOpt = repository.findById(userId);
         if (keysOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Chaves DMarket não cadastradas para o usuário");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Chaves DMarket não cadastradas para o usuário"));
         }
 
         UserDMarketKeys keys = keysOpt.get();
-        return service.getMarketItems(keys.getPublicKey(), keys.getSecretKey(), allParams);
+
+        // 1. O serviço é chamado e retorna o DTO fortemente tipado
+        DMarketResponseDto responseDto = service.getMarketItems(keys.getPublicKey(), keys.getSecretKey(), allParams);
+
+        // 2. Retorna o DTO completo na resposta. O Spring o converterá para JSON.
+        // O frontend receberá um objeto { "objects": [...] }
+        return ResponseEntity.ok(responseDto);
     }
 }

@@ -37,15 +37,18 @@ export class DmarketConnectComponent {
 
     this.loading = true;
     this.dmarketService.conectarChaves(this.form.value).subscribe({
-      next: () => {
+      next: (res) => {
         this.success = true;
+        console.log('Resposta:', res);
         this.router.navigate(['/']);
       },
       error: err => {
+        console.error('Erro:', err);
         this.error = err.error?.message || 'Erro ao conectar com DMarket';
         this.loading = false;
       }
     });
+
   }
 
 }
