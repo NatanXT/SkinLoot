@@ -11,20 +11,18 @@ public class AnuncioResponse {
     private String titulo;
     private String descricao;
     private BigDecimal preco;
-    private UUID skinId;
+    private Long skinId; // Agora é o ID da Steam (Long)
+    private String skinIcon;
     private String skinNome;
-    private String skinIcon;  // ✅ Adicione isso!
-    private Status status;             // ✅ novo
-    private LocalDateTime dataCriacao; // ✅ novo
+    private Status status;
+    private LocalDateTime dataCriacao;
     private String usuarioNome;
-    private String skinRaridade;
     private String skinQualidade;
-    private Double skinDesgasteFloat;
 
+    public AnuncioResponse() {
+    }
 
-    public AnuncioResponse() {}
-
-    public AnuncioResponse(UUID id, String titulo,String descricao, BigDecimal preco,UUID skinId,String skinIcon, String skinNome, Status status, LocalDateTime dataCriacao, String usuarioNome, String skinRaridade, String skinQualidade, Double skinDesgasteFloat) {
+    public AnuncioResponse(UUID id, String titulo, String descricao, BigDecimal preco, Long skinId, String skinIcon, String skinNome, Status status, String usuarioNome, LocalDateTime dataCriacao, String skinQualidade) {
         this.id = id;
         this.titulo = titulo;
         this.descricao = descricao;
@@ -33,12 +31,9 @@ public class AnuncioResponse {
         this.skinIcon = skinIcon;
         this.skinNome = skinNome;
         this.status = status;
-        this.dataCriacao = dataCriacao;
         this.usuarioNome = usuarioNome;
-        this.skinRaridade = skinRaridade;
+        this.dataCriacao = dataCriacao;
         this.skinQualidade = skinQualidade;
-        this.skinDesgasteFloat = skinDesgasteFloat;
-
     }
 
     public UUID getId() {
@@ -73,11 +68,11 @@ public class AnuncioResponse {
         this.preco = preco;
     }
 
-    public UUID getSkinId() {
+    public Long getSkinId() {
         return skinId;
     }
 
-    public void setSkinId(UUID skinId) {
+    public void setSkinId(Long skinId) {
         this.skinId = skinId;
     }
 
@@ -121,27 +116,11 @@ public class AnuncioResponse {
         this.usuarioNome = usuarioNome;
     }
 
-    public String getSkinRaridade() {
-        return skinRaridade;
-    }
-
-    public void setSkinRaridade(String skinRaridade) {
-        this.skinRaridade = skinRaridade;
-    }
-
     public String getSkinQualidade() {
         return skinQualidade;
     }
 
     public void setSkinQualidade(String skinQualidade) {
         this.skinQualidade = skinQualidade;
-    }
-
-    public Double getSkinDesgasteFloat() {
-        return skinDesgasteFloat;
-    }
-
-    public void setSkinDesgasteFloat(Double skinDesgasteFloat) {
-        this.skinDesgasteFloat = skinDesgasteFloat;
     }
 }

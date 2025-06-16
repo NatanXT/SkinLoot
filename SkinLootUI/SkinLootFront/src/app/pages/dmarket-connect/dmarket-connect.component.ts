@@ -40,7 +40,7 @@ export class DmarketConnectComponent {
       next: (res) => {
         this.success = true;
         console.log('Resposta:', res);
-        this.router.navigate(['/']);
+        this.router.navigate(['/dmarket/marketplace']);
       },
       error: err => {
         console.error('Erro:', err);

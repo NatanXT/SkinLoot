@@ -1,28 +1,35 @@
 <div class="skin-list-container">
-  <h2 class="section-title">Minhas Skins</h2>
+  <h2 class="section-title">Meu Inventário Steam</h2>
 
-  <a [routerLink]="['criar']" class="btn-criar">Criar nova skin</a>
-
+  <div *ngIf="isLoading" class="loading-message">Carregando inventário...</div>
 
   <div class="listings-grid">
-    <div *ngFor="let skin of skins" class="listing-card">
+    <div *ngFor="let item of inventoryItems" class="listing-card">
       <div class="listing-image-container">
-        <img class="listing-image" [src]="skin.icon" [alt]="skin.nome">
+
+        <div *ngIf="!item.tradable" class="untradable-badge">
+          Introcável
+        </div>
+
+        <img class="listing-image" [src]="item.imageUrl" [alt]="item.name">
+
         <div class="condition-badge">
-          {{ skin.qualidade }}
+          {{ item.qualityName || 'Comum' }}
         </div>
       </div>
 
       <div class="listing-info">
-        <h3 class="listing-name">{{ skin.nome }}</h3>
-        <p class="listing-price">Jogo: {{ skin.jogoNome }}</p>
-        <p *ngIf="skin.desgasteFloat"><strong>Float:</strong> {{ skin.desgasteFloat }}</p>
-        <p>{{ skin.descricao }}</p>
-        <button [routerLink]="['/meus-anuncios/criar', skin.id]" class="btn-criar-anuncio">
+        <h3 class="listing-name">{{ item.name }}</h3>
+
+        <button [routerLink]="['/meus-anuncios/criar', item.itemId]"
+                class="btn-criar-anuncio"
+                [disabled]="!item.tradable"
+                [class.btn-disabled]="!item.tradable">
           Criar Anúncio
         </button>
       </div>
     </div>
   </div>
+
   <router-outlet></router-outlet>
 </div>

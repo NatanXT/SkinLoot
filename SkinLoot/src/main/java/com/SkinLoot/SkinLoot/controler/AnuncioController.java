@@ -26,71 +26,54 @@ import java.util.stream.Collectors;
 //@CrossOrigin(origins = "*", allowCredentials = "true")
 public class AnuncioController {
 
-    @Autowired
-    private AnuncioService anuncioService;
+    private final AnuncioService anuncioService;
+    private final UsuarioService usuarioService;
 
-    @Autowired
-    private SkinService skinService;
+    // Injeção de dependências via construtor (melhor prática)
+    public AnuncioController(AnuncioService anuncioService, UsuarioService usuarioService) {
+        this.anuncioService = anuncioService;
+        this.usuarioService = usuarioService;
+    }
 
-    @Autowired
-    private UsuarioService usuarioService;
+    // O método de criar anúncio agora recebe o ID do item da Steam pela URL
+    @PostMapping("/criar/{itemId}")
+    public ResponseEntity<AnuncioResponse> criarAnuncio(
+            @PathVariable Long itemId,
+            @RequestBody AnuncioRequest anuncioRequest, // DTO com titulo, descricao, preco
+            Authentication authentication) {
 
+        String email = authentication.getName();
+        Usuario usuario = usuarioService.buscarUsuarioPorEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
+
+        // O AnuncioService agora conterá a lógica de validação e criação
+        Anuncio anuncioSalvo = anuncioService.criarAnuncioParaItemExterno(itemId, anuncioRequest, usuario);
+
+        // Converte o Anuncio salvo para o DTO de resposta
+        AnuncioResponse responseDto = toDto(anuncioSalvo);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    // Método para converter a entidade Anuncio para o DTO de resposta
     private AnuncioResponse toDto(Anuncio a) {
-        return new AnuncioResponse(
-                a.getId(),
-                a.getTitulo(),
-                a.getDescricao(),
-                a.getPreco(),
-                a.getSkin().getId(),
-                a.getSkin().getIcon(),
-                a.getSkin().getNome(),
-                a.getStatus(),
-                a.getDataCriacao(),
-                a.getUsuario().getNome(),
-                a.getSkin().getQualidade().name(),
-                a.getSkin().getRaridade().name(),
-                a.getSkin().getDesgastefloat()
-        );
+        AnuncioResponse dto = new AnuncioResponse();
+        dto.setId(a.getId());
+        dto.setTitulo(a.getTitulo());
+        dto.setDescricao(a.getDescricao());
+        dto.setPreco(a.getPreco());
+        dto.setSkinId(a.getSteamItemId()); // Usa o novo campo
+        dto.setSkinIcon(a.getSkinImageUrl()); // Usa o novo campo
+        dto.setSkinNome(a.getSkinName()); // Usa o novo campo
+        dto.setStatus(a.getStatus());
+        dto.setDataCriacao(a.getDataCriacao());
+        dto.setUsuarioNome(a.getUsuario().getNome());
+        dto.setSkinQualidade(a.getSkinQuality()); // Usa o novo campo
+        return dto;
     }
 
-    // Criar Anúncio usando DTO
-    @PostMapping("/save")
-    public ResponseEntity<AnuncioResponse> criarAnuncio(@RequestBody AnuncioRequest anuncioRequest, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
-
-        Optional<Usuario> usuarioOpt = usuarioService.buscarUsuarioPorEmail(email);
-        if (usuarioOpt.isEmpty()) {
-            return ResponseEntity.status(401).build();
-        }
-
-        Optional<Skin> skinOpt = skinService.buscarPorId(anuncioRequest.getSkinId());
-        if (skinOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Anuncio anuncio = new Anuncio();
-        anuncio.setTitulo(anuncioRequest.getTitulo());
-        anuncio.setDescricao(anuncioRequest.getDescricao());
-        anuncio.setPreco(anuncioRequest.getPreco());
-        anuncio.setSkin(skinOpt.get());
-        anuncio.setUsuario(usuarioOpt.get());
-
-        // ✅ Sempre seta a data de criação
-        anuncio.setDataCriacao(LocalDateTime.now());
-
-        // ✅ Se o status for enviado, usa; senão, coloca padrão ATIVO
-        if (anuncioRequest.getStatus() != null) {
-            anuncio.setStatus(anuncioRequest.getStatus());
-        } else {
-            anuncio.setStatus(Status.ATIVO);
-        }
-
-        Anuncio savedAnuncio = anuncioService.save(anuncio);
-        return ResponseEntity.ok(toDto(savedAnuncio));
-    }
-
-
+    // Seus outros métodos (listar, buscar por id, deletar) precisarão ser
+    // adaptados para usar o novo método toDto.
     @GetMapping
     public ResponseEntity<List<AnuncioResponse>> listarAnuncios() {
         List<AnuncioResponse> dtos = anuncioService.findAll()
@@ -98,21 +81,5 @@ public class AnuncioController {
                 .map(this::toDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<AnuncioResponse> buscarAnuncio(@PathVariable UUID id) {
-        return anuncioService.findById(id)
-                .map(a -> ResponseEntity.ok(toDto(a)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarAnuncio(@PathVariable UUID id) {
-        if (anuncioService.findById(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        anuncioService.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 }

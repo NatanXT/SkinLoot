@@ -21,14 +21,8 @@ export const routes: Routes = [
   {
     path: 'skins',
     loadComponent: () => import('./pages/skin/skin-list/skin-list.component')
-      .then(m => m.SkinListComponent),canActivate: [AuthGuard],
-    children: [
-      {
-        path: 'criar',
-        loadComponent: () => import('./pages/skin/skin-list/criar-skin/criar-skin.component')
-          .then(m => m.CriarSkinComponent)
-      }
-    ]
+      .then(m => m.SkinListComponent)
+
   },
   {
     path: 'meus-anuncios/criar/:skinId',

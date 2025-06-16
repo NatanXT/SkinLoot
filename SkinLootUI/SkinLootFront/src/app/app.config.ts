@@ -1,7 +1,7 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideClientHydration } from '@angular/platform-browser';
-import { provideHttpClient, HTTP_INTERCEPTORS, withInterceptorsFromDi } from "@angular/common/http";
+import {provideHttpClient, HTTP_INTERCEPTORS, withInterceptorsFromDi, withFetch} from "@angular/common/http";
 import { AuthInterceptorService } from "./service/auth-interceptor.service";
 import { provideAnimations } from "@angular/platform-browser/animations";
 import { ReactiveFormsModule } from '@angular/forms';
@@ -17,7 +17,7 @@ import { routes } from './app.routes';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withInterceptorsFromDi(), withFetch()),
     provideAnimations(),
     ReactiveFormsModule,
 

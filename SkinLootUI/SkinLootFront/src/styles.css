@@ -46,6 +46,31 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   color: white;
 }
 
+/* Estilos para o campo de busca com tema escuro */
+
+/* Regra mais forte para garantir a cor do texto que o usuário DIGITA */
+mat-form-field.dark-theme-search .mat-mdc-input-element {
+  color: white !important;
+}
+
+/* Regra mais forte para a cor do 'placeholder' */
+mat-form-field.dark-theme-search .mat-input-element::placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Regra mais forte para a cor da 'label' flutuante */
+mat-form-field.dark-theme-search .mdc-floating-label,
+mat-form-field.dark-theme-search .mat-mdc-form-field-label {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Regra mais forte para a cor da borda */
+mat-form-field.dark-theme-search .mat-mdc-form-field:not(.mat-form-field-disabled) .mdc-notched-outline__leading,
+mat-form-field.dark-theme-search .mat-mdc-form-field:not(.mat-form-field-disabled) .mdc-notched-outline__notch,
+mat-form-field.dark-theme-search .mat-mdc-form-field:not(.mat-form-field-disabled) .mdc-notched-outline__trailing {
+  border-color: rgba(255, 255, 255, 0.6) !important;
+}
+
 
 
 

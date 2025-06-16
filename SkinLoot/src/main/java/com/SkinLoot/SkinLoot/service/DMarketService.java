@@ -68,28 +68,43 @@ public class DMarketService {
         String timestamp = String.valueOf(Instant.now().getEpochSecond());
 
         try {
-            // Monta a URI com todos os query parameters
+            // 1. Monta a URI final para a requisição. Esta parte está correta.
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("https://api.dmarket.com" + path);
             queryParams.forEach(builder::queryParam);
             URI uri = builder.build(true).toUri();
 
-            // Cria a string para assinatura (METHOD + PATH + QUERY + TIMESTAMP)
-            String unsignedString = method + uri.getPath() + uri.getQuery() + timestamp;
-            // --- ADICIONE ESTAS DUAS LINHAS PARA O TESTE ---
-            System.out.println("Chave Secreta Original (com possível \\n): '" + secretKey + "'");
-            String chaveLimpa = secretKey.trim();
-            System.out.println("Chave Secreta Após .trim(): '" + chaveLimpa + "'");
-            // ---------------------------------------------
+            // ------------------- INÍCIO DA CORREÇÃO CRÍTICA -------------------
+
+            // 2. Monta a string para ser assinada, seguindo a fórmula da documentação:
+            // FORMULA: (HTTP Method) + (Route path + HTTP query params) + (body string) + (timestamp)
+
+            // Pega o path (ex: /exchange/v1/market/items)
+            String routePath = uri.getPath();
+
+            // Pega a query string (ex: gameId=...&currency=...). O '?' é importante.
+            String queryString = uri.getQuery() != null ? "?" + uri.getQuery() : "";
+
+            // Para requisições GET, o body é sempre uma string vazia, mas PRECISA ser incluído.
+            String body = "";
+
+            // Concatena tudo na ordem exata da documentação
+            String unsignedString = method + routePath + queryString + body + timestamp;
+
+            System.out.println("DEBUG - String Final para Assinatura: " + unsignedString);
+
+            // ------------------- FIM DA CORREÇÃO CRÍTICA -------------------
+
+            // 3. Gera a assinatura usando a chave limpa
             String signature = DMarketSignatureUtil.buildSignature(unsignedString, secretKey.trim());
 
-            // Monta os headers da requisição
+            // 4. Monta os headers da requisição para a DMarket
             HttpHeaders headers = new HttpHeaders();
             headers.set("X-Api-Key", publicKey);
             headers.set("X-Sign-Date", timestamp);
             headers.set("X-Request-Sign", signature);
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            // Faz a chamada, especificando que a resposta deve ser mapeada para DMarketResponseDto.class
+            // 5. Executa a chamada e mapeia a resposta para o nosso DTO
             ResponseEntity<DMarketResponseDto> dmarketResponse = restTemplate.exchange(
                     uri,
                     HttpMethod.GET,
@@ -97,13 +112,64 @@ public class DMarketService {
                     DMarketResponseDto.class
             );
 
-            // Retorna o corpo da resposta, que agora é um objeto Java fortemente tipado
+            // 6. Retorna o corpo da resposta, que é um objeto Java fortemente tipado
             return dmarketResponse.getBody();
 
         } catch (HttpClientErrorException e) {
-            // Lança uma exceção com o status e corpo do erro da DMarket para melhor depuração
+            // Se a DMarket retornar um erro (como 401), esta exceção será lançada.
+            // Isso ajuda a depurar, mostrando o erro exato que a DMarket enviou.
+            System.err.println("Erro da API DMarket: " + e.getResponseBodyAsString());
             throw new ResponseStatusException(e.getStatusCode(), e.getResponseBodyAsString());
         }
     }
+
+    public DMarketResponseDto getUserInventory(String publicKey, String secretKey, Map<String, String> queryParams) {
+        // 1. Define o path do endpoint correto, conforme a documentação
+        String path = "/marketplace-api/v1/user-inventory";
+        String method = "GET";
+        String timestamp = String.valueOf(Instant.now().getEpochSecond());
+
+        try {
+            // 2. Monta a URI final com os parâmetros de busca (GameID, BasicFilters.Title, etc.)
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("https://api.dmarket.com" + path);
+            queryParams.forEach(builder::queryParam);
+            URI uri = builder.build(true).toUri();
+
+            // 3. Cria a string para assinatura seguindo a fórmula exata da documentação
+            // Fórmula: (HTTP Method) + (Route path + HTTP query params) + (body string) + (timestamp)
+            String routePath = uri.getPath();
+            String queryString = uri.getQuery() != null ? "?" + uri.getQuery() : "";
+            String body = ""; // Body é sempre uma string vazia para requisições GET
+
+            String unsignedString = method + routePath + queryString + body + timestamp;
+
+            System.out.println("DEBUG - String para Assinar (Inventário): " + unsignedString);
+
+            // 4. Gera a assinatura usando a chave limpa
+            String signature = DMarketSignatureUtil.buildSignature(unsignedString, secretKey.trim());
+
+            // 5. Monta os headers para a requisição
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("X-Api-Key", publicKey);
+            headers.set("X-Sign-Date", timestamp);
+            headers.set("X-Request-Sign", signature);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            // 6. Executa a chamada e mapeia a resposta para o DTO
+            ResponseEntity<DMarketResponseDto> dmarketResponse = restTemplate.exchange(
+                    uri,
+                    HttpMethod.GET,
+                    entity,
+                    DMarketResponseDto.class
+            );
+
+            return dmarketResponse.getBody();
+
+        } catch (HttpClientErrorException e) {
+            System.err.println("Erro da API DMarket ao buscar inventário: " + e.getResponseBodyAsString());
+            throw new ResponseStatusException(e.getStatusCode(), e.getResponseBodyAsString());
+        }
+    }
+
 
 }

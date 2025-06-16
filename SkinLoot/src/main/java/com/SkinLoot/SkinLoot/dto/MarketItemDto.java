@@ -8,18 +8,37 @@ public class MarketItemDto {
     private priceDto price;
     private extraDto extra;
 
-    // Getters e Setters para todos os campos
-    public String getItemId() { return itemId; }
-    public void setItemId(String itemId) { this.itemId = itemId; }
+    public String getItemId() {
+        return itemId;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public void setItemId(String itemId) {
+        this.itemId = itemId;
+    }
 
-    public String getImage() { return image; }
-    public void setImage(String image) { this.image = image; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String getGameType() { return gameType; }
-    public void setGameType(String gameType) { this.gameType = gameType; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getGameType() {
+        return gameType;
+    }
+
+    public void setGameType(String gameType) {
+        this.gameType = gameType;
+    }
 
     public priceDto getPrice() {
         return price;
