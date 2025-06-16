@@ -4,7 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
 @Entity
-public class CachedSteamItem {
+public class CachedSteamItem{
 
     @Id
     private Long itemId; // O ID do item da Steam será nossa chave primária
