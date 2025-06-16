@@ -36,7 +36,7 @@ public class AnuncioController {
     }
 
     // O método de criar anúncio agora recebe o ID do item da Steam pela URL
-    @PostMapping("/criar/{itemId}")
+    @PostMapping("/save/{itemId}")
     public ResponseEntity<AnuncioResponse> criarAnuncio(
             @PathVariable Long itemId,
             @RequestBody AnuncioRequest anuncioRequest, // DTO com titulo, descricao, preco

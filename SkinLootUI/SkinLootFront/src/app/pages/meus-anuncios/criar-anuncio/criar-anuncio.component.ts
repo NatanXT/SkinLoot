@@ -25,7 +25,9 @@ import {MatButton} from "@angular/material/button";
 
 export class CriarAnuncioComponent implements OnInit {
   anuncioForm!: FormGroup;
-  skinId!: string;
+
+  // Vamos usar o nome correto para a variável, para manter a clareza.
+  itemId!: string;
 
   constructor(
     private fb: FormBuilder,
@@ -35,7 +37,18 @@ export class CriarAnuncioComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.skinId = this.route.snapshot.paramMap.get('skinId')!;
+    // --- CORREÇÃO AQUI ---
+    // Leia o parâmetro com o nome correto que está vindo da rota: 'itemId'
+    const idFromRoute = this.route.snapshot.paramMap.get('itemId');
+
+    if (idFromRoute) {
+      this.itemId = idFromRoute;
+    } else {
+      // Se nenhum ID for encontrado, é um erro.
+      console.error("Nenhum itemId encontrado na rota! Redirecionando...");
+      this.router.navigate(['/']); // Ex: volta para a home
+      return;
+    }
 
     this.anuncioForm = this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(3)]],
@@ -50,15 +63,13 @@ export class CriarAnuncioComponent implements OnInit {
       return;
     }
 
-    const anuncioData = {
-      ...this.anuncioForm.value,
-      skinId: this.skinId
-    };
+    const anuncioData = this.anuncioForm.value;
 
-    this.anuncioService.criarAnuncio(anuncioData).subscribe({
+    // Passa o 'this.itemId' (que agora tem o valor correto) para o serviço
+    this.anuncioService.criarAnuncio(this.itemId, anuncioData).subscribe({
       next: () => {
         alert('Anúncio criado com sucesso!');
-        this.router.navigate(['/skins']);
+        this.router.navigate(['/']);
       },
       error: err => {
         console.error('Erro ao criar anúncio:', err);

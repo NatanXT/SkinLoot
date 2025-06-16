@@ -24,7 +24,7 @@ public class AnuncioService {
 
     private final SteamInventoryService steamInventoryService;
 
-    @Value("{steam.id.user}")
+    @Value("${steam.id.user}")
     private String steamId;
 
     public AnuncioService(AnuncioRepository anuncioRepository, SteamInventoryService steamInventoryService) {

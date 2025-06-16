@@ -12,8 +12,8 @@ export class AnuncioService {
   constructor(private http: HttpClient) {
   }
 
-  criarAnuncio(anuncio: AnuncioRequest): Observable<any> {
-    return this.http.post(`${this.baseUrl}/save`, anuncio);
+  criarAnuncio(itemId: string,anuncio: AnuncioRequest): Observable<any> {
+    return this.http.post(`${this.baseUrl}/save/${itemId}`, anuncio);
   }
 
   listarAnuncios(): Observable<AnuncioResponse[]> {
