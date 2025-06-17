@@ -1,10 +1,10 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideClientHydration } from '@angular/platform-browser';
-import {provideHttpClient, HTTP_INTERCEPTORS, withInterceptorsFromDi, withFetch} from "@angular/common/http";
+import { provideHttpClient, HTTP_INTERCEPTORS, withInterceptorsFromDi, withFetch } from "@angular/common/http";
 import { AuthInterceptorService } from "./service/auth-interceptor.service";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -19,21 +19,24 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptorsFromDi(), withFetch()),
     provideAnimations(),
-    ReactiveFormsModule,
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideClientHydration(),
 
-    // Angular Material modules
+    // Angular Material
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
     MatCardModule,
 
+    // Forms
+    FormsModule,
+    ReactiveFormsModule,
+
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptorService,
       multi: true
-    },
-    provideZoneChangeDetection({ eventCoalescing: true }),
-    provideClientHydration()
+    }
   ]
 };

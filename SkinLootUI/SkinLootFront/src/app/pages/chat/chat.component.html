@@ -1,0 +1,18 @@
+<div class="chat-container" *ngIf="destinatarioId > 0">
+  <div class="mensagens">
+    <div *ngFor="let msg of mensagens" class="mensagem">
+      <strong>{{ msg.remetenteNome }}:</strong> {{ msg.conteudo }}
+      <br />
+      <small>{{ msg.timestamp | date:'shortTime' }}</small>
+    </div>
+  </div>
+
+  <div class="entrada">
+    <input [(ngModel)]="novaMensagem" placeholder="Digite uma mensagem..." />
+    <button (click)="enviar()">Enviar</button>
+  </div>
+</div>
+
+<div *ngIf="destinatarioId === 0">
+  <p>Escolha um usuário para iniciar uma conversa.</p>
+</div>

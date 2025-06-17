@@ -1,0 +1,24 @@
+.chat-container {
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+}
+
+.mensagens {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 8px;
+  margin-bottom: 10px;
+  background: #f9f9f9;
+}
+
+.mensagem {
+  padding: 6px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.entrada {
+  display: flex;
+  gap: 10px;
+}
