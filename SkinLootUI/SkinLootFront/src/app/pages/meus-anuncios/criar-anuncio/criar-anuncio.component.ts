@@ -6,6 +6,7 @@ import {MatOption, MatSelect} from "@angular/material/select";
 import {AnuncioService} from "../../../service/anuncio.service";
 import {MatInput} from "@angular/material/input";
 import {MatButton} from "@angular/material/button";
+import {AnuncioRequest} from "../../../model/anuncio";
 
 @Component({
   selector: 'app-criar-anuncio',
@@ -59,17 +60,25 @@ export class CriarAnuncioComponent implements OnInit {
   }
 
   criarAnuncio(): void {
+    // 1. Força o Angular a atualizar os valores e o status de validação do formulário
+    this.anuncioForm.updateValueAndValidity();
+
+    // 2. Checa a validade APÓS a atualização
     if (this.anuncioForm.invalid) {
+      console.error('Formulário inválido. Verifique os campos.');
+      // Esta linha ajuda a exibir as mensagens de erro nos campos, se você as tiver
+      this.anuncioForm.markAllAsTouched();
       return;
     }
 
-    const anuncioData = this.anuncioForm.value;
+    // 3. Pega os dados limpos e atualizados do formulário
+    const anuncioData: AnuncioRequest = this.anuncioForm.value;
 
-    // Passa o 'this.itemId' (que agora tem o valor correto) para o serviço
+    // 4. Chama o serviço com os parâmetros corretos
     this.anuncioService.criarAnuncio(this.itemId, anuncioData).subscribe({
       next: () => {
         alert('Anúncio criado com sucesso!');
-        this.router.navigate(['/']);
+        this.router.navigate(['/']); // Ou para a página de "meus anúncios"
       },
       error: err => {
         console.error('Erro ao criar anúncio:', err);

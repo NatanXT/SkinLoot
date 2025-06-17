@@ -15,7 +15,7 @@ export interface AnuncioRequest {
   titulo: string;
   descricao: string;
   preco: number;
-  skinId: string;
+  itemId: string;
   status?: 'ATIVO' | 'INATIVO';
 }
 export interface AnuncioResponse {

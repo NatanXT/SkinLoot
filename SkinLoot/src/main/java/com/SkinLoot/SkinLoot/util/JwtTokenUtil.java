@@ -27,7 +27,7 @@ public class JwtTokenUtil {
     private final String SECRET_KEY = "aG9nZXJzZWNyZXRvLXNraW5sb290LWF1dGgtdG9rZW4tc2VjcmV0"; // mínimo 256 bits para HS256
 
     private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10 horas
-    private static final long ACCESS_TOKEN_EXPIRATION = 10 * 60 * 1000; // 10 min
+    private static final long ACCESS_TOKEN_EXPIRATION = 30 * 60 * 1000; // 30 min
     private static final long REFRESH_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000; // 1 dia
 //    @Value("${jwt.secret}")
     private String jwtSecret;
