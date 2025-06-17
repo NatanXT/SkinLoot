@@ -29,7 +29,7 @@ public class SteamApiController{
     private String steamApiKey;
 
     @Value("${steam.id.user}")
-    private String steamId;
+    public String steamId;
 
     public SteamApiController(SteamApiService steamApiService, SteamInventoryService steamInventoryService,  CachedSteamItemRepository cachedSteamItemRepository, ObjectMapper objectMapper) {
         this.steamApiService = steamApiService;

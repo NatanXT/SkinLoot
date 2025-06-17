@@ -12,11 +12,11 @@ export class SteamService {
 
   constructor(private http: HttpClient) { }
 
-  // Método que chama o endpoint do seu backend para buscar o inventário enriquecido
+  //Método que chama o endpoint do seu backend para buscar o inventário enriquecido
   getInventory(steamId: string): Observable<any[]> {
-    return of(MOCKED_INVENTORY_ITEMS);
+    //return of(MOCKED_INVENTORY_ITEMS);
 
-    //return this.http.get<any[]>(`${this.apiUrl}/inventory/${steamId}`);
+    return this.http.get<any[]>(`${this.apiUrl}/inventory/${steamId}`);
   }
 }
 
