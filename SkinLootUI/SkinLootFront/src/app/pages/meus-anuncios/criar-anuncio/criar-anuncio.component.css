@@ -1,0 +1,413 @@
+/* Container Principal */
+.criar-anuncio-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #0f3460 50%, #533483 75%, #7209b7 100%);
+    position: relative;
+    overflow-x: hidden;
+    padding: 2rem 1rem;
+  }
+  
+  /* Background Decorativo */
+  .background-shapes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .shape {
+    position: absolute;
+    background: linear-gradient(45deg, #ff006e, #8338ec, #3a86ff);
+    opacity: 0.1;
+    border-radius: 20px;
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .shape-1 {
+    width: 300px;
+    height: 300px;
+    top: 10%;
+    right: -50px;
+    transform: rotate(45deg);
+    animation-delay: 0s;
+  }
+  
+  .shape-2 {
+    width: 200px;
+    height: 200px;
+    top: 60%;
+    left: -50px;
+    transform: rotate(-30deg);
+    animation-delay: 2s;
+  }
+  
+  .shape-3 {
+    width: 150px;
+    height: 150px;
+    top: 30%;
+    left: 20%;
+    transform: rotate(60deg);
+    animation-delay: 4s;
+  }
+  
+  .glow-effect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255, 0, 110, 0.1) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    animation: pulse 4s ease-in-out infinite;
+  }
+  
+  /* Header Section */
+  .header-section {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .header-content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .title-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .accent-line {
+    width: 4px;
+    height: 60px;
+    background: linear-gradient(to bottom, #ff006e, #8338ec);
+    border-radius: 2px;
+  }
+  
+  .main-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    text-shadow: 0 2px 10px rgba(255, 0, 110, 0.3);
+    line-height: 1.2;
+  }
+  
+  .subtitle-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    font-weight: 400;
+  }
+  
+  .accent-line-vertical {
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(to right, #8338ec, #3a86ff);
+    border-radius: 2px;
+  }
+  
+  /* Form Section */
+  .form-section {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .form-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+  
+  .form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .form-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 0.5rem 0;
+    text-shadow: 0 2px 10px rgba(131, 56, 236, 0.3);
+  }
+  
+  .form-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    font-size: 1rem;
+  }
+  
+  /* Item Info */
+  .item-info {
+    margin-bottom: 1.5rem;
+  }
+  
+  .info-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(45deg, #ff006e, #8338ec);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  /* Form Styles */
+  .anuncio-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .form-field {
+    width: 100%;
+  }
+  
+  .full-width {
+    grid-column: 1 / -1;
+  }
+  
+  /* Material Form Field Customization */
+  .form-field ::ng-deep .mat-mdc-form-field {
+    --mdc-filled-text-field-container-color: rgba(255, 255, 255, 0.05);
+    --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.3);
+    --mdc-outlined-text-field-hover-outline-color: #8338ec;
+    --mdc-outlined-text-field-focus-outline-color: #ff006e;
+    --mdc-outlined-text-field-label-text-color: rgba(255, 255, 255, 0.7);
+    --mdc-outlined-text-field-input-text-color: #ffffff;
+  }
+  
+  .form-field ::ng-deep .mat-mdc-form-field-focus-overlay {
+    background-color: rgba(131, 56, 236, 0.1);
+  }
+  
+  .form-field ::ng-deep .mdc-text-field--outlined .mdc-notched-outline__leading,
+  .form-field ::ng-deep .mdc-text-field--outlined .mdc-notched-outline__notch,
+  .form-field ::ng-deep .mdc-text-field--outlined .mdc-notched-outline__trailing {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .form-field ::ng-deep .mdc-text-field--focused .mdc-notched-outline__leading,
+  .form-field ::ng-deep .mdc-text-field--focused .mdc-notched-outline__notch,
+  .form-field ::ng-deep .mdc-text-field--focused .mdc-notched-outline__trailing {
+    border-color: #ff006e;
+    border-width: 2px;
+  }
+  
+  .form-field ::ng-deep .mat-mdc-form-field-icon-suffix {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .form-field ::ng-deep .mat-mdc-form-field-error {
+    color: #ff4757;
+    font-size: 0.85rem;
+  }
+  
+  /* Status Options */
+  .status-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  
+  .status-dot.active {
+    background-color: #2ed573;
+    box-shadow: 0 0 6px rgba(46, 213, 115, 0.5);
+  }
+  
+  .status-dot.inactive {
+    background-color: #ff4757;
+    box-shadow: 0 0 6px rgba(255, 71, 87, 0.5);
+  }
+  
+  /* Form Actions */
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+  }
+  
+  .cancel-btn {
+    color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+  
+  .cancel-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: #ffffff;
+  }
+  
+  .submit-btn {
+    background: linear-gradient(45deg, #ff006e, #8338ec);
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 0, 110, 0.3);
+  }
+  
+  .submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 0, 110, 0.4);
+  }
+  
+  .submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .loading-icon {
+    animation: spin 1s linear infinite;
+  }
+  
+  /* Validation Summary */
+  .validation-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ff4757;
+    font-size: 0.9rem;
+    padding: 0.75rem;
+    background-color: rgba(255, 71, 87, 0.1);
+    border: 1px solid rgba(255, 71, 87, 0.3);
+    border-radius: 8px;
+  }
+  
+  /* Animations */
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px) rotate(45deg);
+    }
+    50% {
+      transform: translateY(-20px) rotate(45deg);
+    }
+  }
+  
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 0.1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+      opacity: 0.2;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .criar-anuncio-container {
+      padding: 1rem 0.5rem;
+    }
+  
+    .main-title {
+      font-size: 2rem;
+    }
+  
+    .form-container {
+      padding: 1.5rem;
+      margin: 0 0.5rem;
+    }
+  
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  
+    .form-actions {
+      flex-direction: column;
+    }
+  
+    .accent-line {
+      height: 40px;
+    }
+  
+    .shape-1,
+    .shape-2,
+    .shape-3 {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .title-section {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  
+    .subtitle-section {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  
+    .accent-line {
+      width: 60px;
+      height: 4px;
+    }
+  
+    .accent-line-vertical {
+      width: 4px;
+      height: 40px;
+    }
+  }
+  

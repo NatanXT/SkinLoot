@@ -2,7 +2,7 @@ import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideClientHydration } from '@angular/platform-browser';
 import {provideHttpClient, HTTP_INTERCEPTORS, withInterceptorsFromDi, withFetch} from "@angular/common/http";
-import { AuthInterceptorService } from "./service/auth-interceptor.service";
+import { AuthInterceptor } from './service/auth-interceptor.service';
 import { provideAnimations } from "@angular/platform-browser/animations";
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -30,7 +30,7 @@ export const appConfig: ApplicationConfig = {
 
     {
       provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptorService,
+      useClass: AuthInterceptor,
       multi: true
     },
     provideZoneChangeDetection({ eventCoalescing: true }),
