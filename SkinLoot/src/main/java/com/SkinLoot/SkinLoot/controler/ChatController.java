@@ -1,12 +1,12 @@
 package com.SkinLoot.SkinLoot.controler;
 
-import com.seuprojeto.dto.ChatMessageRequest;
-import com.seuprojeto.dto.ChatMessageResponse;
-import com.seuprojeto.model.ChatMessage;
-import com.seuprojeto.model.Usuario;
-import com.seuprojeto.repository.ChatMessageRepository;
-import com.seuprojeto.repository.UsuarioRepository;
-import com.seuprojeto.security.JwtTokenUtil; // ajuste se estiver em outro pacote
+import com.SkinLoot.SkinLoot.dto.ChatMessageRequest;
+import com.SkinLoot.SkinLoot.dto.ChatMessageResponse;
+import com.SkinLoot.SkinLoot.model.ChatMessage;
+import com.SkinLoot.SkinLoot.model.Usuario;
+import com.SkinLoot.SkinLoot.repository.ChatMessageRepository;
+import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
+import com.SkinLoot.SkinLoot.util.JwtTokenUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID; // Importe UUID
 import java.util.stream.Collectors;
 
 @RestController
@@ -30,9 +31,12 @@ public class ChatController {
     public ResponseEntity<?> enviar(@RequestBody ChatMessageRequest request, HttpServletRequest servletRequest) {
         String token = jwtTokenUtil.resolveToken(servletRequest);
         String username = jwtTokenUtil.getUsernameFromToken(token);
-        Usuario remetente = usuarioRepository.findByEmail(username).orElseThrow();
+        Usuario remetente = usuarioRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("Usuário remetente não encontrado."));
 
-        Usuario destinatario = usuarioRepository.findById(request.getDestinatarioId()).orElseThrow();
+        // A busca agora usa o ID do tipo UUID vindo do request
+        Usuario destinatario = usuarioRepository.findById(request.getDestinatarioId()) // ✅ CORRIGIDO
+                .orElseThrow(() -> new RuntimeException("Usuário destinatário não encontrado."));
 
         ChatMessage msg = new ChatMessage();
         msg.setRemetente(remetente);
@@ -45,24 +49,28 @@ public class ChatController {
     }
 
     @GetMapping("/conversa/{destinatarioId}")
-    public List<ChatMessageResponse> buscarMensagens(@PathVariable Long destinatarioId, HttpServletRequest servletRequest) {
+    public List<ChatMessageResponse> buscarMensagens(@PathVariable UUID destinatarioId, HttpServletRequest servletRequest) { // ✅ CORRIGIDO
         String token = jwtTokenUtil.resolveToken(servletRequest);
         String username = jwtTokenUtil.getUsernameFromToken(token);
-        Usuario remetente = usuarioRepository.findByEmail(username).orElseThrow();
-        Usuario destinatario = usuarioRepository.findById(destinatarioId).orElseThrow();
+        Usuario remetente = usuarioRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("Usuário remetente não encontrado."));
+        
+        // A busca agora usa o ID do tipo UUID vindo da URL
+        Usuario destinatario = usuarioRepository.findById(destinatarioId) // ✅ CORRIGIDO
+                .orElseThrow(() -> new RuntimeException("Usuário destinatário não encontrado."));
 
         return chatRepository
-            .findByRemetenteAndDestinatarioOrDestinatarioAndRemetenteOrderByTimestampAsc(
-                remetente, destinatario, destinatario, remetente
-            ).stream()
-            .map(m -> {
-                ChatMessageResponse res = new ChatMessageResponse();
-                res.setId(m.getId());
-                res.setConteudo(m.getConteudo());
-                res.setTimestamp(m.getTimestamp());
-                res.setRemetenteNome(m.getRemetente().getNome());
-                res.setDestinatarioNome(m.getDestinatario().getNome());
-                return res;
-            }).collect(Collectors.toList());
+                .findByRemetenteAndDestinatarioOrDestinatarioAndRemetenteOrderByTimestampAsc(
+                        remetente, destinatario, remetente, destinatario
+                ).stream()
+                .map(m -> {
+                    ChatMessageResponse res = new ChatMessageResponse();
+                    res.setId(m.getId());
+                    res.setConteudo(m.getConteudo());
+                    res.setTimestamp(m.getTimestamp());
+                    res.setRemetenteNome(m.getRemetente().getNome());
+                    res.setDestinatarioNome(m.getDestinatario().getNome());
+                    return res;
+                }).collect(Collectors.toList());
     }
 }

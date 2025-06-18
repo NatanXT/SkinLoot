@@ -20,6 +20,8 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.function.Function;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Component
 public class JwtTokenUtil {
 
@@ -31,6 +33,7 @@ public class JwtTokenUtil {
     private static final long REFRESH_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000; // 1 dia
 //    @Value("${jwt.secret}")
     private String jwtSecret;
+    
 
 //    private final PrivateKey privateKey;
 //    private final PublicKey publicKey;
@@ -40,6 +43,17 @@ public class JwtTokenUtil {
 //        this.publicKey = loadPublicKeyFromResource("public_key.pem");
     }
 
+     public String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7); // Remove o prefixo "Bearer "
+        }
+        return null;
+    }
+
+    public String getUsernameFromToken(String token) {
+        return extractUsername(token);
+    }
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
@@ -80,6 +94,7 @@ public class JwtTokenUtil {
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+    
     public String generateTokenFromEmail(String email) {
         return Jwts.builder()
                 .setSubject(email)

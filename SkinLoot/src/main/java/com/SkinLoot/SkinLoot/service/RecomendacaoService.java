@@ -1,6 +1,7 @@
 package com.SkinLoot.SkinLoot.service;
 
 import com.SkinLoot.SkinLoot.model.*;
+import com.SkinLoot.SkinLoot.model.enums.*;
 import com.SkinLoot.SkinLoot.dto.SkinResponse;
 import com.SkinLoot.SkinLoot.repository.InteracaoUsuarioSkinRepository;
 import com.SkinLoot.SkinLoot.repository.SkinRepository;
@@ -48,4 +49,6 @@ public class RecomendacaoService {
 
         return recomendadas.stream().map(SkinResponse::new).collect(Collectors.toList());
     }
+
+    
 }

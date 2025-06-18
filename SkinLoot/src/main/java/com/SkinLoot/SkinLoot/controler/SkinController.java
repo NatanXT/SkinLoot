@@ -52,7 +52,7 @@ public class SkinController {
         skin.setRaridade(request.getRaridade());
         skin.setQualidade(request.getQualidade());
         skin.setAssetId(request.getAssetId());
-        skin.setDesgastefloat(request.getDesgastefloat());
+        skin.setDesgasteFloat(request.getDesgastefloat());
         skin.setJogo(jogo);
         skin.setUsuario(usuario);
 
