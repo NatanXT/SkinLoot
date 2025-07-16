@@ -1,0 +1,76 @@
+.header {
+  background-color: var(--gray-dark);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+.logo {
+  font-size: 1.8rem;
+  color: var(--green);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-links a {
+  color: var(--white);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:visited {
+  color: var(--white);
+}
+
+.nav-links a:hover {
+  color: var(--green);
+}
+
+.search-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+}
+
+.search-header input {
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  border: none;
+  background-color: var(--gray-mid);
+  color: var(--white);
+  width: 100%;
+  max-width: 300px;
+}
+
+.search-header input::placeholder {
+  color: #aaa;
+}
+
+.search-header button {
+  background-color: var(--green);
+  border: none;
+  color: var(--black);
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.sidebar-toggle {
+  background-color: transparent;
+  color: var(--white);
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  margin-right: 1rem;
+}

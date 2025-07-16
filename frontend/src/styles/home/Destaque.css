@@ -1,0 +1,40 @@
+.destaque-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+  background: linear-gradient(90deg, #0b0b0b, #111, #0b0b0b);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 0 12px rgba(16, 198, 111, 0.2);
+  flex-direction: column;
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.destaque-box h2 {
+  font-size: 2.4rem;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  position: relative;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.destaque-box h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 100%;
+  height: 3px;
+  background-color: var(--green);
+  border-radius: 10px;
+}
+
+.destaque-box img {
+  width: 200px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
