@@ -6,14 +6,14 @@ import "../home/Home";
 import MockSkins from "../../components/mock/MockSkins";
 
 // Componentes da página
-import Header from "../../components/shared/header/Header";
+import Header from "../../components/shared/Header";
 import Hero from "../../components/home/Hero";
 import Categorias from "../../components/home/Categorias";
 import Destaque from "../../components/home/Destaque";
 import Avaliacoes from "../../components/home/Avaliacoes";
 import CarrosselSkins from "../../components/home/CarrosselSkins";
-import Footer from "../../components/home/Footer";
-import Sidebar from "../../components/shared/sidebar/Sidebar";
+import Footer from "../../components/layout/Footer";
+import Sidebar from "../../components/shared/Sidebar";
 
 /**
  * Componente principal da Home, renderiza toda a página inicial.
@@ -34,8 +34,8 @@ export default function Home() {
 
   return (
     <div className="home-container">
-      <Sidebar />
       <Header />
+      <Sidebar />
       <Hero />
       <Categorias />
       <Destaque />

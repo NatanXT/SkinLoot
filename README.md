@@ -60,7 +60,7 @@ mvn spring-boot:run
 ```sh
 cd frontend
 npm install
-ng serve
+npm run dev
 ```
 
 ---

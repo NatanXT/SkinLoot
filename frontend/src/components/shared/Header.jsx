@@ -1,6 +1,6 @@
 // Header.jsx
 import React from "react";
-import "../../styles/home/Header.css";
+import "./Header.css";
 import { FaBars, FaTimes } from "react-icons/fa";
 
 /**
