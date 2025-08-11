@@ -1,6 +1,6 @@
 // Footer.jsx
 import React from "react";
-import "../../styles/home/Footer.css";
+import "../home/Footer.css";
 
 /**
  * Rodapé do site com redes sociais e copyright.

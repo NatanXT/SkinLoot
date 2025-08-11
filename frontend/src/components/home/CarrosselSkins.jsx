@@ -1,6 +1,6 @@
 // CarrosselSkins.jsx
 import React, { useRef } from "react";
-import "../../styles/home/CarrosselSkins.css";
+import "../home/CarrosselSkins.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 // Estilos do Swiper

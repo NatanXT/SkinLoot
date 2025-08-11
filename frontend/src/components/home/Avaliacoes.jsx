@@ -1,6 +1,6 @@
 // Avaliacoes.jsx
 import React from "react";
-import "../../styles/home/Avaliacoes.css";
+import "../home/Avaliacoes.css";
 
 /**
  * Componente que exibe depoimentos de usuários em formato de blocos de citação.

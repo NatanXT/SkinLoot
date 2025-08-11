@@ -1,19 +1,19 @@
 // Home.jsx
 import React, { useEffect, useState } from "react";
-import "../../styles/home/Home.css";
+import "../home/Home";
 
 // Importação de dados mock
 import MockSkins from "../../components/mock/MockSkins";
 
 // Componentes da página
-import Header from "../../components/home/Header";
+import Header from "../../components/shared/header/Header";
 import Hero from "../../components/home/Hero";
 import Categorias from "../../components/home/Categorias";
 import Destaque from "../../components/home/Destaque";
 import Avaliacoes from "../../components/home/Avaliacoes";
 import CarrosselSkins from "../../components/home/CarrosselSkins";
 import Footer from "../../components/home/Footer";
-import Sidebar from "../../components/home/SideBar";
+import Sidebar from "../../components/shared/sidebar/Sidebar";
 
 /**
  * Componente principal da Home, renderiza toda a página inicial.

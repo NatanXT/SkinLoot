@@ -1,6 +1,6 @@
 // Sidebar.jsx
 import React from "react";
-import "../../styles/home/SideBar.css";
+import "./Sidebar.css";
 
 /**
  * Menu lateral fixo que pode ser expandido ou recolhido.
