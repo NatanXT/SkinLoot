@@ -1,11 +1,24 @@
-/* Reaproveita a mesma paleta da Dashboard */
+/* ======================================================
+   Auth.css (compartilhado por Login/Cadastro)
+   - Reaproveita a paleta e o look da Dashboard
+   - Estrutura: Tokens • Base • Card • Campos • Botões
+                 OAuth/Links • Password • Strength • Responsivo
+====================================================== */
+
+/* ---------- Tokens / Variáveis ---------- */
 :root{
-  --bg:#0B0D10; --panel:#11151A; --muted:#7B8694; --text:#E8F1F2;
-  --primary:#39FF14; --secondary:#00C896; --ring: rgba(57,255,20,.6);
+  --bg:#0B0D10;            /* preto carvão */
+  --panel:#11151A;         /* cinza profundo */
+  --muted:#7B8694;
+  --text:#E8F1F2;          /* quase branco */
+  --primary:#39FF14;       /* verde neon */
+  --secondary:#00C896;     /* verde aqua */
+  --ring: rgba(57,255,20,.6);
   --shadow:0 10px 30px rgba(0,0,0,.45);
   --radius:18px;
 }
 
+/* ---------- Base ---------- */
 *{ box-sizing:border-box }
 body{ background:var(--bg); color:var(--text) }
 
@@ -18,32 +31,36 @@ body{ background:var(--bg); color:var(--text) }
     radial-gradient(900px 500px at 100% 10%, rgba(0,200,150,.08), transparent 60%);
 }
 
+/* ---------- Card ---------- */
 .auth-card{
-  width:100%; max-width: 520px;
-  background: linear-gradient(180deg,#12171E,#0F1319);
-  border:1px solid #1A2129; border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 22px 20px;
-  position: relative;
+  width:100%; max-width:520px;
+  background:linear-gradient(180deg,#12171E,#0F1319);
+  border:1px solid #1A2129;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:22px 20px;
+  position:relative;
 }
 .auth-card::before{
   /* filete neon superior */
-  content:""; position:absolute; left:0; right:0; top:0; height:3px;
-  background: linear-gradient(90deg, var(--secondary), var(--primary));
+  content:""; position:absolute; inset:0 auto auto 0;
+  right:0; height:3px;
+  background:linear-gradient(90deg, var(--secondary), var(--primary));
 }
 
 .auth-brand{
-  display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.4px;
+  display:flex; align-items:center; gap:10px;
+  font-weight:800; letter-spacing:.4px;
   color:var(--text); margin-bottom:6px;
 }
 .auth-brand svg{ color:var(--primary) }
 
-.auth-title{ margin:6px 0 4px; font-size:28px; }
+.auth-title{ margin:6px 0 4px; font-size:28px }
 .auth-subtitle{ margin:0 0 18px; color:var(--muted) }
 
 .auth-form{ display:flex; flex-direction:column; gap:12px }
 
-/* Campos (iguais aos filtros da dashboard) */
+/* ---------- Campos (coerentes com os filtros da Dashboard) ---------- */
 .field{
   display:flex; flex-direction:column; gap:6px;
   background:var(--panel);
@@ -51,65 +68,71 @@ body{ background:var(--bg); color:var(--text) }
 }
 .field label{ font-size:12px; color:var(--muted) }
 .field input, .field select{
-  width:100%; background:#0E1217; color:var(--text);
+  width:100%;
+  background:#0E1217; color:var(--text);
   border:1px solid #1C2430; border-radius:10px; padding:12px;
 }
 .field input:focus, .field select:focus{
-  outline:none; border-color: var(--secondary);
-  box-shadow: 0 0 0 2px rgba(57,255,20,.12);
+  outline:none; border-color:var(--secondary);
+  box-shadow:0 0 0 2px rgba(57,255,20,.12);
 }
-.field__error{
-  color:#ff8b8b; font-size:12px; margin-top:4px;
-}
+.field__error{ color:#ff8b8b; font-size:12px; margin-top:4px }
 
-/* Senha com botão de mostrar/ocultar */
+/* ---------- Senha com toggle ---------- */
 .input-pass{ position:relative }
 .input-pass input{ padding-right:42px }
 .input-pass .toggle{
   position:absolute; right:8px; top:50%; transform:translateY(-50%);
   width:34px; height:34px; display:grid; place-items:center;
   border:1px solid #2A323C; border-radius:10px;
-  background: rgba(255,255,255,.05); color:#C9D3DC;
+  background:rgba(255,255,255,.05); color:#C9D3DC;
   cursor:pointer;
 }
 .input-pass .toggle:hover{ border-color:#3A4451 }
 
-/* Linha com lembrar/esqueci */
+/* ---------- Linha auxiliar (lembrar/esqueci) ---------- */
 .form-row{
   display:flex; align-items:center; justify-content:space-between;
   gap:12px; margin-top:2px;
 }
-.check{
-  display:inline-flex; align-items:center; gap:8px; color:#D6E3DB; font-size:14px;
-}
+.check{ display:inline-flex; align-items:center; gap:8px; color:#D6E3DB; font-size:14px }
 .check input{ width:16px; height:16px }
 
-.link{ color: var(--secondary); text-decoration: none }
-.link:hover{ text-decoration: underline }
+/* ---------- Links & Botões ---------- */
+.link{ color:var(--secondary); text-decoration:none }
+.link:hover{ text-decoration:underline }
+.link:focus-visible{ outline:2px solid var(--secondary); outline-offset:2px }
 
-/* Botões */
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
   border:1px solid #1C2430; background:transparent; color:var(--text);
   text-decoration:none; cursor:pointer; border-radius:12px; padding:12px 16px;
 }
+.btn:focus-visible{ outline:2px solid var(--secondary); outline-offset:2px }
 .btn--full{ width:100% }
 .btn--primary{ background:linear-gradient(180deg, var(--primary), var(--secondary)); color:#0B0D10; font-weight:800 }
 .btn--primary:hover{ filter:brightness(.95) }
 .btn--ghost{ border-color:#2A323C; color:#D3D8DF }
 .btn--ghost:hover{ border-color:#3A4451 }
 
-/* OAuth/alternativas */
+/* ---------- OAuth/alternativas + switch ---------- */
 .oauth{ margin-top:8px; display:flex; flex-direction:column; gap:10px }
-
-/* Switch entre telas */
 .switch{ text-align:center; color:var(--muted); margin-top:10px }
 
-/* Medidor de força da senha */
+/* ---------- Medidor de força (reaproveitado no Cadastro) ---------- */
 .pass-strength{
-  display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-top:8px;
+  display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:8px;
 }
 .pass-strength .bar{
   height:6px; border-radius:6px; background:#24303B; border:1px solid #2A3745;
 }
-.pass-strength .bar.on{ background: linear-gradient(90deg, var(--secondary), var(--primary)); border-color:transparent }
+.pass-strength .bar.on{
+  background:linear-gradient(90deg, var(--secondary), var(--primary));
+  border-color:transparent;
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width:480px){
+  .auth-card{ padding:18px 16px }
+  .auth-title{ font-size:24px }
+}
