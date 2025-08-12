@@ -1,36 +1,53 @@
-/* ======= DashboardVitrine.css =======
+/* ======================================================
+   DashboardVitrine.css
    Caminho: frontend/src/pages/DashboardVitrine.css
-======================================= */
+   - Tokens (cores, espaçamentos, tamanhos)
+   - Base e layout
+   - Topbar / Hero
+   - Filtros (+ Preço com máscara visual)
+   - Grid e Cards
+   - Botões, Planos e Footer
+   - Responsivo
+====================================================== */
 
 /* ---------- Tokens / Variáveis ---------- */
 :root{
   /* Paleta */
-  --bg:#0B0D10; --panel:#11151A; --muted:#7B8694; --text:#E8F1F2;
-  --primary:#39FF14; --secondary:#00C896; --ring: rgba(57,255,20,.6);
+  --bg:#0B0D10;              /* preto carvão */
+  --panel:#11151A;           /* cinza profundo */
+  --muted:#7B8694;
+  --text:#E8F1F2;            /* quase branco */
+  --primary:#39FF14;         /* verde neon */
+  --secondary:#00C896;       /* verde aqua */
+  --ring: rgba(57,255,20,.6);
+
+  /* Sombra padrão */
   --shadow:0 10px 30px rgba(0,0,0,.45);
 
-  /* Mídia das skins */
-  --media-ratio: 4/3;
-  --media-min-h: 360px;
-  --media-pad: 20px;       /* laterais e base */
-  --media-pad-top: 36px;   /* <— espaço extra no topo da imagem */
+  /* Mídia (imagens das skins) */
+  --media-ratio: 4/3;        /* proporção do palco */
+  --media-min-h: 360px;      /* altura mínima */
+  --media-pad: 20px;         /* laterais e base */
+  --media-pad-top: 48px;     /* topo (respiro da imagem) */
 
   /* Grid / Cards */
-  --card-min-col: 370px;   /* largura mínima de cada card */
+  --card-min-col: 370px;     /* largura mínima de cada card */
   --card-gap: 22px;
 
-  /* UI */
+  /* UI genérica */
   --btn-h: 48px;
   --radius: 18px;
 
-  /* Largura do container */
+  /* Largura máxima do container */
   --container-max: 1550px;
 }
 
 /* ---------- Base ---------- */
 *{ box-sizing:border-box }
 body{
-  margin:0; background:var(--bg); color:var(--text);
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
   font:16px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;
 }
 .dash-root{ position:relative; min-height:100vh }
@@ -71,9 +88,14 @@ nav a:hover{ color:var(--text) }
 .filters{ padding:14px clamp(16px, 4vw, 32px) }
 .filters__row{
   display:grid;
-  grid-template-columns:1.2fr .7fr .7fr .8fr .9fr;
-  gap:12px; max-width:var(--container-max); margin:0 auto;
+  /* mais espaço para o bloco de Preço (última coluna) */
+  grid-template-columns: 1.2fr .7fr .7fr .8fr 1fr;
+  gap:12px;
+  max-width:var(--container-max);
+  margin:0 auto;
 }
+
+/* Campo padrão (search/select) */
 .field{
   display:flex; flex-direction:column; gap:6px;
   background:var(--panel);
@@ -87,13 +109,59 @@ nav a:hover{ color:var(--text) }
 .field--search{ flex-direction:row; align-items:center; gap:8px }
 .field--search input{ border:none; background:transparent }
 .field--search svg{ color:var(--muted) }
+
+/* Campo de Preço (R$ [min] — R$ [max]) */
 .range{
   display:flex; flex-direction:column; gap:8px;
-  background:var(--panel); border:1px solid #1A2129; border-radius:14px; padding:12px;
+  background:var(--panel);
+  border:1px solid #1A2129; border-radius:14px; padding:12px;
 }
-.range__inputs{ display:flex; align-items:center; gap:8px }
+.range__inputs{
+  display:flex; align-items:center; gap:10px;
+  background:#0E1217;
+  border:1px solid #1C2430;
+  border-radius:12px;
+  padding:8px;
+}
+.range__inputs span{
+  color:var(--muted);
+  opacity:.6;
+  user-select:none;
+  min-width:16px;
+  text-align:center;
+}
 
-/* ---------- Grid & Cards ---------- */
+/* Money input com prefixo "R$" */
+.money{ position:relative; flex:1; }
+.money__prefix{
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  color:var(--muted); font-weight:700; opacity:.8; pointer-events:none;
+}
+.money__field{
+  width:100%; height:42px;
+  padding:0 12px 0 36px;                /* espaço pro "R$" */
+  background:#0B0F14; color:var(--text);
+  border:1px solid #1C2430; border-radius:10px;
+  font-variant-numeric: tabular-nums;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.money__field:focus{
+  outline:none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 2px rgba(57,255,20,.12);
+}
+/* remove up/down dos number inputs visuais (sobrou se o browser insistir) */
+.money__field::-webkit-outer-spin-button,
+.money__field::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+.money__field[type="number"]{ -moz-appearance:textfield; appearance:textfield; }
+
+/* Ações dos filtros (limpar, etc.) */
+.filters__actions{
+  grid-column: 1 / -1;
+  display:flex; justify-content:flex-end; gap:8px;
+}
+
+/* ---------- Grid (cards) ---------- */
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fill, minmax(var(--card-min-col), 1fr));
@@ -107,11 +175,15 @@ nav a:hover{ color:var(--text) }
   .grid{ grid-template-columns:repeat(3, minmax(var(--card-min-col), 1fr)); }
 }
 
+/* ---------- Card ---------- */
 .card{
   display:flex; flex-direction:column;
   background:linear-gradient(180deg,#12171E, #0F1319);
-  border:1px solid #1A2129; border-radius:var(--radius); overflow:hidden;
-  box-shadow:var(--shadow); position:relative;
+  border:1px solid #1A2129;
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  position:relative;
   transition:transform .25s ease, box-shadow .25s ease;
 }
 .card:hover{ transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,.5) }
@@ -121,7 +193,6 @@ nav a:hover{ color:var(--text) }
   position:relative; background:#0E1217;
   display:flex; align-items:center; justify-content:center;
   height:auto; aspect-ratio:var(--media-ratio); min-height:var(--media-min-h);
-  /* topo separado para dar respiro acima da imagem */
   padding:var(--media-pad-top) var(--media-pad) var(--media-pad);
   border-bottom:1px solid #1A2129;
 }
@@ -131,13 +202,14 @@ nav a:hover{ color:var(--text) }
   image-rendering:-webkit-optimize-contrast;
   filter:saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.55));
 }
+/* glow sutil atrás da mídia */
 .card__media::after{
   content:""; position:absolute; inset:0; pointer-events:none; z-index:1;
   background:
     radial-gradient(420px 180px at 85% 30%, rgba(0,200,150,.10), transparent 60%),
     radial-gradient(400px 160px at 20% 15%, rgba(57,255,20,.08), transparent 55%);
 }
-/* Badge e like acima do glow */
+/* badge do plano + botão like acima do glow */
 .badge{
   position:absolute; left:16px; top:14px; z-index:3;
   padding:6px 12px; border-radius:999px; white-space:nowrap;
@@ -151,16 +223,13 @@ nav a:hover{ color:var(--text) }
 }
 .like.is-liked{ color:var(--primary); box-shadow:0 0 0 2px rgba(57,255,20,.15) inset }
 
-/* Corpo do card */
-.card__body{
-  display:flex; flex-direction:column; gap:10px;
-  padding:14px;
-}
+/* Conteúdo do card */
+.card__body{ display:flex; flex-direction:column; gap:10px; padding:14px }
 .card h3{ margin:0; font-size:18px }
 .meta{ display:flex; justify-content:space-between; align-items:center; color:var(--muted) }
 .price{ color:#E9FFF1; font-weight:800; letter-spacing:.3px }
 
-/* Rodapé do card (vende/ações) colado embaixo */
+/* Rodapé do card (vendedor + ações) colado embaixo */
 .seller{
   margin-top:auto;
   display:flex; justify-content:space-between; align-items:end; gap:12px;
@@ -207,7 +276,11 @@ nav a:hover{ color:var(--text) }
 .plan--plus{ box-shadow:0 0 0 2px rgba(57,255,20,.35) inset, 0 0 80px rgba(57,255,20,.06) }
 
 /* ---------- Footer ---------- */
-.foot{ padding:32px clamp(16px, 4vw, 32px); border-top:1px solid #121921; color:#8C98A6; text-align:center }
+.foot{
+  padding:32px clamp(16px, 4vw, 32px);
+  border-top:1px solid #121921;
+  color:#8C98A6; text-align:center
+}
 
 /* ---------- Responsivo ---------- */
 @media (max-width: 960px){
