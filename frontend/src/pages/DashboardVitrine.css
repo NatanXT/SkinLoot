@@ -1,0 +1,293 @@
+/* ======================================================
+   DashboardVitrine.css
+   Caminho: frontend/src/pages/DashboardVitrine.css
+   - Tokens (cores, espaçamentos, tamanhos)
+   - Base e layout
+   - Topbar / Hero
+   - Filtros (+ Preço com máscara visual)
+   - Grid e Cards
+   - Botões, Planos e Footer
+   - Responsivo
+====================================================== */
+
+/* ---------- Tokens / Variáveis ---------- */
+:root{
+  /* Paleta */
+  --bg:#0B0D10;              /* preto carvão */
+  --panel:#11151A;           /* cinza profundo */
+  --muted:#7B8694;
+  --text:#E8F1F2;            /* quase branco */
+  --primary:#39FF14;         /* verde neon */
+  --secondary:#00C896;       /* verde aqua */
+  --ring: rgba(57,255,20,.6);
+
+  /* Sombra padrão */
+  --shadow:0 10px 30px rgba(0,0,0,.45);
+
+  /* Mídia (imagens das skins) */
+  --media-ratio: 4/3;        /* proporção do palco */
+  --media-min-h: 360px;      /* altura mínima */
+  --media-pad: 20px;         /* laterais e base */
+  --media-pad-top: 48px;     /* topo (respiro da imagem) */
+
+  /* Grid / Cards */
+  --card-min-col: 370px;     /* largura mínima de cada card */
+  --card-gap: 22px;
+
+  /* UI genérica */
+  --btn-h: 48px;
+  --radius: 18px;
+
+  /* Largura máxima do container */
+  --container-max: 1550px;
+}
+
+/* ---------- Base ---------- */
+*{ box-sizing:border-box }
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:16px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;
+}
+.dash-root{ position:relative; min-height:100vh }
+.backdrop{
+  position:fixed; inset:0; pointer-events:none;
+  background:
+    radial-gradient(800px 400px at 10% 0%, rgba(57,255,20,.06), transparent 60%),
+    radial-gradient(900px 500px at 100% 10%, rgba(0,200,150,.08), transparent 60%);
+}
+
+/* ---------- Topbar ---------- */
+.topbar{
+  position:sticky; top:0; z-index:20;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:14px 24px;
+  background:rgba(11,13,16,.65);
+  backdrop-filter:saturate(140%) blur(8px);
+  border-bottom:1px solid #131920;
+}
+.brand{ display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.5px }
+.brand svg{ color:var(--primary) }
+nav a{ margin:0 10px; color:var(--muted); text-decoration:none }
+nav a:hover{ color:var(--text) }
+.actions{ display:flex; gap:8px }
+
+/* ---------- Hero ---------- */
+.hero{
+  display:grid; place-items:center;
+  padding:64px 24px 32px;
+  background:linear-gradient(180deg, rgba(57,255,20,.06), transparent);
+}
+.hero__copy{ max-width:980px; text-align:center }
+.hero h1{ font-size:48px; margin:0 0 10px; letter-spacing:.3px }
+.hero p{ color:var(--muted); margin:0 0 20px }
+.hero__cta{ display:flex; gap:12px; justify-content:center }
+
+/* ---------- Filtros ---------- */
+.filters{ padding:14px clamp(16px, 4vw, 32px) }
+.filters__row{
+  display:grid;
+  /* mais espaço para o bloco de Preço (última coluna) */
+  grid-template-columns: 1.2fr .7fr .7fr .8fr 1fr;
+  gap:12px;
+  max-width:var(--container-max);
+  margin:0 auto;
+}
+
+/* Campo padrão (search/select) */
+.field{
+  display:flex; flex-direction:column; gap:6px;
+  background:var(--panel);
+  border:1px solid #1A2129; border-radius:14px; padding:12px;
+}
+.field label{ font-size:12px; color:var(--muted) }
+.field select,.field input{
+  width:100%; background:#0E1217; color:var(--text);
+  border:1px solid #1C2430; border-radius:10px; padding:10px;
+}
+.field--search{ flex-direction:row; align-items:center; gap:8px }
+.field--search input{ border:none; background:transparent }
+.field--search svg{ color:var(--muted) }
+
+/* Campo de Preço (R$ [min] — R$ [max]) */
+.range{
+  display:flex; flex-direction:column; gap:8px;
+  background:var(--panel);
+  border:1px solid #1A2129; border-radius:14px; padding:12px;
+}
+.range__inputs{
+  display:flex; align-items:center; gap:10px;
+  background:#0E1217;
+  border:1px solid #1C2430;
+  border-radius:12px;
+  padding:8px;
+}
+.range__inputs span{
+  color:var(--muted);
+  opacity:.6;
+  user-select:none;
+  min-width:16px;
+  text-align:center;
+}
+
+/* Money input com prefixo "R$" */
+.money{ position:relative; flex:1; }
+.money__prefix{
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  color:var(--muted); font-weight:700; opacity:.8; pointer-events:none;
+}
+.money__field{
+  width:100%; height:42px;
+  padding:0 12px 0 36px;                /* espaço pro "R$" */
+  background:#0B0F14; color:var(--text);
+  border:1px solid #1C2430; border-radius:10px;
+  font-variant-numeric: tabular-nums;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.money__field:focus{
+  outline:none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 2px rgba(57,255,20,.12);
+}
+/* remove up/down dos number inputs visuais (sobrou se o browser insistir) */
+.money__field::-webkit-outer-spin-button,
+.money__field::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+.money__field[type="number"]{ -moz-appearance:textfield; appearance:textfield; }
+
+/* Ações dos filtros (limpar, etc.) */
+.filters__actions{
+  grid-column: 1 / -1;
+  display:flex; justify-content:flex-end; gap:8px;
+}
+
+/* ---------- Grid (cards) ---------- */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(var(--card-min-col), 1fr));
+  gap:var(--card-gap);
+  max-width:var(--container-max);
+  margin:16px auto 64px;
+  padding:0 clamp(16px, 4vw, 32px);
+}
+@media (min-width: 1200px){
+  /* força 3 colunas quando houver espaço */
+  .grid{ grid-template-columns:repeat(3, minmax(var(--card-min-col), 1fr)); }
+}
+
+/* ---------- Card ---------- */
+.card{
+  display:flex; flex-direction:column;
+  background:linear-gradient(180deg,#12171E, #0F1319);
+  border:1px solid #1A2129;
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  position:relative;
+  transition:transform .25s ease, box-shadow .25s ease;
+}
+.card:hover{ transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,.5) }
+
+/* Palco da imagem */
+.card__media{
+  position:relative; background:#0E1217;
+  display:flex; align-items:center; justify-content:center;
+  height:auto; aspect-ratio:var(--media-ratio); min-height:var(--media-min-h);
+  padding:var(--media-pad-top) var(--media-pad) var(--media-pad);
+  border-bottom:1px solid #1A2129;
+}
+.card__media img{
+  width:auto; height:auto; max-width:100%; max-height:100%;
+  object-fit:contain; display:block;
+  image-rendering:-webkit-optimize-contrast;
+  filter:saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.55));
+}
+/* glow sutil atrás da mídia */
+.card__media::after{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:1;
+  background:
+    radial-gradient(420px 180px at 85% 30%, rgba(0,200,150,.10), transparent 60%),
+    radial-gradient(400px 160px at 20% 15%, rgba(57,255,20,.08), transparent 55%);
+}
+/* badge do plano + botão like acima do glow */
+.badge{
+  position:absolute; left:16px; top:14px; z-index:3;
+  padding:6px 12px; border-radius:999px; white-space:nowrap;
+  color:#0B0D10; font-weight:800; font-size:12px; line-height:1;
+  box-shadow:0 0 24px var(--ring);
+}
+.like{
+  position:absolute; right:12px; top:12px; z-index:3;
+  background:rgba(255,255,255,.06); border:1px solid #2A323C; border-radius:999px;
+  padding:8px; display:grid; place-items:center; color:#D3D8DF; cursor:pointer;
+}
+.like.is-liked{ color:var(--primary); box-shadow:0 0 0 2px rgba(57,255,20,.15) inset }
+
+/* Conteúdo do card */
+.card__body{ display:flex; flex-direction:column; gap:10px; padding:14px }
+.card h3{ margin:0; font-size:18px }
+.meta{ display:flex; justify-content:space-between; align-items:center; color:var(--muted) }
+.price{ color:#E9FFF1; font-weight:800; letter-spacing:.3px }
+
+/* Rodapé do card (vendedor + ações) colado embaixo */
+.seller{
+  margin-top:auto;
+  display:flex; justify-content:space-between; align-items:end; gap:12px;
+}
+.seller > span{ color:#CFE5D6; font-size:14px }
+.seller .cta{ display:flex; gap:10px }
+.seller .cta .btn{ height:var(--btn-h); padding:0 16px; }
+.seller .cta .btn.btn--primary{ min-width:130px }
+.seller .cta .btn.btn--ghost{ min-width:110px }
+
+/* Destaques por plano */
+.card--intermediario{ box-shadow:0 0 0 1px rgba(0,200,150,.25) inset }
+.card--plus{
+  outline:1px solid rgba(57,255,20,.18);
+  box-shadow:0 0 0 2px rgba(57,255,20,.08) inset, 0 0 60px 0 rgba(57,255,20,.06);
+}
+
+/* ---------- Botões ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  border:1px solid #1C2430; background:transparent; color:var(--text);
+  text-decoration:none; cursor:pointer; border-radius:12px; padding:12px 16px;
+}
+.btn.sm{ padding:8px 12px; border-radius:10px }
+.btn--primary{ background:linear-gradient(180deg, var(--primary), var(--secondary)); color:#0B0D10; font-weight:800 }
+.btn--primary:hover{ filter:brightness(.95) }
+.btn--ghost{ border-color:#2A323C; color:#D3D8DF }
+.btn--ghost:hover{ border-color:#3A4451 }
+
+/* ---------- Planos ---------- */
+.plans{
+  max-width:var(--container-max);
+  margin:0 auto 80px;
+  padding:0 clamp(16px, 4vw, 32px);
+}
+.plans h2{ text-align:center; margin:24px 0 }
+.plans__grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px }
+.plan{ background:var(--panel); border:1px solid #1A2129; border-radius:var(--radius); padding:18px 16px }
+.plan h3{ display:inline-flex; align-items:center; gap:8px; margin:0 0 10px }
+.plan ul{ margin:0 0 16px 18px; color:var(--muted) }
+.plan button{ width:100% }
+.plan--gratuito{ box-shadow:0 0 0 1px rgba(124,132,144,.25) inset }
+.plan--intermediario{ box-shadow:0 0 0 1px rgba(0,200,150,.3) inset }
+.plan--plus{ box-shadow:0 0 0 2px rgba(57,255,20,.35) inset, 0 0 80px rgba(57,255,20,.06) }
+
+/* ---------- Footer ---------- */
+.foot{
+  padding:32px clamp(16px, 4vw, 32px);
+  border-top:1px solid #121921;
+  color:#8C98A6; text-align:center
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 960px){
+  .filters__row{ grid-template-columns:1fr 1fr 1fr; }
+  .hero h1{ font-size:36px }
+}
+@media (max-width: 640px){
+  .filters__row{ grid-template-columns:1fr; }
+  :root{ --card-min-col: 310px; --media-min-h: 300px; --btn-h: 44px; }
+}

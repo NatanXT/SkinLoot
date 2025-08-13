@@ -1,0 +1,9 @@
+.footer {
+    text-align: center;
+    padding: 15px 0;
+    background-color: #10c66f; /* verde médio */
+    color: white;
+    font-size: 14px;
+    width: 100%;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+  }

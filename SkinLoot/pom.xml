@@ -24,6 +24,12 @@
         <maven.compiler.target>24</maven.compiler.target>
     </properties>
 
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt</artifactId>
+    <version>0.9.1</version>
+</dependency>
+
 	<dependencies>
 		<!-- Spring Boot Web -->
 		<dependency>
