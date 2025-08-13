@@ -66,60 +66,71 @@ public class UsuarioController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
-        // PASSO 1: Autentica o usuário usando o serviço (que usa o AuthenticationManager do Spring Security)
         UserDetails userDetails = usuarioService.autenticar(loginRequest.getEmail(), loginRequest.getSenha());
+        String accessToken = jwtTokenUtil.generateToken(userDetails); // curto (10 min)
+        String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails.getUsername()); // longo (ex: 30h)
 
-        // PASSO 2: Gera os dois tokens necessários
-        String accessToken = jwtTokenUtil.generateToken(userDetails); // Token de acesso de curta duração
-        String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails.getUsername()); // Token de atualização de longa duração
-
-        // PASSO 3: Configura o REFRESH token no cookie HttpOnly (padrão seguro, como no seu projeto Tavola)
-        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(false) // Mantenha false para desenvolvimento local (HTTP)
-                .path("/")     // Disponível em todo o site
-                .maxAge(30 * 24 * 60 * 60) // 30 dias de validade
-                .sameSite("Lax")
+                .secure(true) // true se for HTTPS
+                .path("/") // só é enviado quando acessar esta rota
+                .maxAge(30 * 60 * 60) // 30h
+                .sameSite("None")
                 .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
-        // PASSO 4: Prepara a resposta JSON com o ACCESS token e os dados do usuário
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(true)      // marque true em produção
+                .path("/")          // enviado em TODAS as requisições
+                .maxAge(10 * 60)    // 10 min de validade
+                .sameSite("None")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+        String token = jwtTokenUtil.generateToken(userDetails);
+
         Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado após autenticação bem-sucedida."));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        // Retorna o access token no corpo da resposta para o frontend usar
-        return ResponseEntity.ok(new LoginResponse(accessToken, usuario));
+        return ResponseEntity.ok(new LoginResponse(token, usuario));
     }
 
     @PostMapping("/auth/refresh")
-    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
-        // PASSO 1: Extrai o refreshToken do cookie HttpOnly
-        String refreshTokenValue = null;
-        if (request.getCookies() != null) {
-            refreshTokenValue = Arrays.stream(request.getCookies())
-                    .filter(c -> "refreshToken".equals(c.getName()))
-                    .map(Cookie::getValue)
-                    .findFirst()
-                    .orElse(null);
+    public ResponseEntity<Void> refreshToken(
+            HttpServletRequest request,
+            HttpServletResponse response  // ← injete o response aqui
+    ) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // PASSO 2: Valida o refreshToken
-        if (refreshTokenValue == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token não encontrado.");
-        }
-        if (!jwtTokenUtil.isTokenValid(refreshTokenValue)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token inválido ou expirado.");
+        String refreshToken = Arrays.stream(cookies)
+                .filter(c -> "refreshToken".equals(c.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
+
+        if (refreshToken == null || !jwtTokenUtil.isTokenValid(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // PASSO 3: Gera um NOVO accessToken a partir do refreshToken
-        String email = jwtTokenUtil.parseToken(refreshTokenValue).getSubject();
+        String email = jwtTokenUtil.parseToken(refreshToken).getSubject();
         String newAccessToken = jwtTokenUtil.generateTokenFromEmail(email);
 
-        // PASSO 4: Retorna o novo accessToken no corpo da resposta, como o frontend espera
-        Map<String, String> responseBody = new HashMap<>();
-        responseBody.put("token", newAccessToken);
+        // ── AQUI: criar o cookie de accessToken ──
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
+                .httpOnly(true)            // JavaScript não consegue ler
+                .secure(false)             // troque para true em produção HTTPS
+                .path("/")                 // enviado em todas as rotas
+                .maxAge(Duration.ofMinutes(15))
+                .sameSite("Strict")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 
-        return ResponseEntity.ok(responseBody);
+        // Você pode retornar vazio, já que o token está no cookie
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/auth/status")
