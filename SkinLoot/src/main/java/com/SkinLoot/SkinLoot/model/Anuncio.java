@@ -43,6 +43,20 @@ public class Anuncio {
 
     public Anuncio() {}
 
+    public Anuncio(UUID id, String titulo, String descricao, BigDecimal preco, Status status, String skinName, String skinImageUrl, String skinQuality, Usuario usuario, LocalDateTime dataCriacao, Long steamItemId) {
+        this.id = id;
+        this.titulo = titulo;
+        this.descricao = descricao;
+        this.preco = preco;
+        this.status = status;
+        this.skinName = skinName;
+        this.skinImageUrl = skinImageUrl;
+        this.skinQuality = skinQuality;
+        this.usuario = usuario;
+        this.dataCriacao = dataCriacao;
+        this.steamItemId = steamItemId;
+    }
+
     // GETTERS E SETTERS
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }

@@ -40,6 +40,13 @@ public class Jogo {
     @JsonIgnore
     private List<Skin> skins;
 
+    public Jogo(UUID id, String nome, List<CategoriaJogo> categorias, List<Skin> skins) {
+        this.id = id;
+        this.nome = nome;
+        this.categorias = categorias;
+        this.skins = skins;
+    }
+
     // Getters e Setters
     public UUID getId() {
         return id;

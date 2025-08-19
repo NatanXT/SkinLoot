@@ -14,7 +14,6 @@ import java.util.UUID;
 @Table(name = "skin")
 @Getter
 @Setter
-@NoArgsConstructor
 public class Skin {
 
     @Id
@@ -58,12 +57,94 @@ public class Skin {
     @Enumerated(EnumType.STRING)
     private Qualidade qualidade;
 
-    // Construtores que já fizemos antes...
-    public Skin(String nome, Raridade raridade, Jogo jogo, Usuario usuario, String icon) {
+//    // Construtores que já fizemos antes...
+//    public Skin(String nome, Raridade raridade, Jogo jogo, Usuario usuario, String icon) {
+//        this.nome = nome;
+//        this.raridade = raridade;
+//        this.jogo = jogo;
+//        this.usuario = usuario;
+//        this.icon = icon;
+//    }
+    public Skin() {
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public @NotNull @Size(min = 3, max = 100) String getNome() {
+        return nome;
+    }
+
+    public void setNome(@NotNull @Size(min = 3, max = 100) String nome) {
         this.nome = nome;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public @NotNull Raridade getRaridade() {
+        return raridade;
+    }
+
+    public void setRaridade(@NotNull Raridade raridade) {
         this.raridade = raridade;
+    }
+
+    public @NotNull Jogo getJogo() {
+        return jogo;
+    }
+
+    public void setJogo(@NotNull Jogo jogo) {
         this.jogo = jogo;
+    }
+
+    public @NotNull Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(@NotNull Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public @NotBlank String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(@NotBlank String icon) {
         this.icon = icon;
+    }
+
+    public String getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(String assetId) {
+        this.assetId = assetId;
+    }
+
+    public Double getDesgasteFloat() {
+        return desgasteFloat;
+    }
+
+    public void setDesgasteFloat(Double desgasteFloat) {
+        this.desgasteFloat = desgasteFloat;
+    }
+
+    public Qualidade getQualidade() {
+        return qualidade;
+    }
+
+    public void setQualidade(Qualidade qualidade) {
+        this.qualidade = qualidade;
     }
 }
