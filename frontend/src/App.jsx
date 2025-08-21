@@ -1,6 +1,8 @@
 import React from "react";
 // Importa componentes para roteamento do React Router
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {Routes, Route} from "react-router-dom";
+import ProtectedRoute from "./components/protectedRoutes"; // Certifique-se de que este import está correto
+
 
 // Importa as páginas principais da aplicação
 import Home from "./pages/home/Home";
@@ -20,27 +22,37 @@ import Layout from "./components/layout/Layout";
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/vitrine" element={<DashboardVitrine />} />
+       <Routes>
+      {/* =============================================== */}
+      {/* GRUPO 1: Rotas Públicas (acessíveis a todos) */}
+      {/* =============================================== */}
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/cadastro" element={<Cadastro />} />
+      <Route path="/marketplace" element={<Marketplace />} />
+      {/* Adicione outras rotas 100% públicas aqui */}
+      
 
-        {/* rotas “planas” */}
-        <Route path="/cadastro" element={<Cadastro />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/marketplace" element={<Marketplace />} />
+      {/* =================================================================== */}
+      {/* GRUPO 2: Rotas Protegidas (exigem login e usam o Layout) */}
+      {/* =================================================================== */}
+      <Route 
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/historico" element={<Historico />} />
         <Route path="/suporte" element={<Suporte />} />
+        <Route path="/vitrine" element={<DashboardVitrine />} />
+        {/* Adicione outras rotas que precisam de login e do Layout aqui */}
+      </Route>
 
-        {/* rotas com layout persistente */}
-        <Route element={<Layout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          {/* se quiser, adicione outras rotas protegidas aqui */}
-        </Route>
-
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Router>
+      {/* Rota para páginas não encontradas */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }

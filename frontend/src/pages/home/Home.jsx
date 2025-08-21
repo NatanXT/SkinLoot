@@ -24,11 +24,11 @@ export default function Home() {
 
   useEffect(() => {
     // Para usar com backend futuramente:
-    /*
+    
     axios.get("http://localhost:8080/api/skins")
       .then((res) => setSkins(res.data))
       .catch((err) => console.error("Erro ao carregar skins:", err));
-    */
+    
     setSkins(MockSkins);
   }, []);
 

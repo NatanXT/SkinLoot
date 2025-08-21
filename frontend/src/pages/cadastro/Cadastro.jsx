@@ -10,6 +10,9 @@
 // ======================================================
 
 import { useMemo, useState } from "react";
+import { useAuth } from "../../services/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 // Ajuste este import conforme sua estrutura.
 // Ex.: se Cadastro.jsx estiver em /pages/cadastro, use "../login/Auth.css"
 import "../../pages/login/Auth.css";
@@ -38,6 +41,7 @@ const INITIAL_FORM = {
   senha: "",
   confirmarSenha: "",
   aceitar: false,
+  genero: "MASCULINO", // Valor padrão
 };
 
 export default function Cadastro() {
@@ -45,6 +49,8 @@ export default function Cadastro() {
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [showPass, setShowPass] = useState({ s1: false, s2: false });
   const [errors, setErrors] = useState({});
+  const [isLoading,setIsLoading] = useState(false);
+  const [apiError,setApiError] = useState("");
 
   /* ---------- Derivados ---------- */
   const strength = useMemo(() => getPasswordStrength(formData.senha), [formData.senha]);
