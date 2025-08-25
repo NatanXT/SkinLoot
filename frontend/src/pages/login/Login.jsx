@@ -78,7 +78,7 @@ export default function Login() {
 
     try {
       await login(formData.email, formData.senha);
-      navigate("/minha-conta"); // Redireciona para uma página protegida
+      navigate("/vitrine"); // Redireciona para uma página protegida
     } catch (error) {
       const message = error.response?.data?.message || "E-mail ou senha incorretos.";
       setApiError(message);

@@ -1,19 +1,16 @@
 import React from "react";
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './services/AuthContext.jsx';
-
-
+import router from './router'; 
 import './index.css'
-import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
- <StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </BrowserRouter>
+<StrictMode>
+    <AuthProvider>
+      {/* 3. Use RouterProvider e passe o router como prop */}
+      <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode>
 )

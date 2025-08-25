@@ -51,6 +51,8 @@ export default function Cadastro() {
   const [errors, setErrors] = useState({});
   const [isLoading,setIsLoading] = useState(false);
   const [apiError,setApiError] = useState("");
+  const {register} = useAuth();
+  const navigate = useNavigate();
 
   /* ---------- Derivados ---------- */
   const strength = useMemo(() => getPasswordStrength(formData.senha), [formData.senha]);
@@ -85,15 +87,33 @@ export default function Cadastro() {
   };
 
   /** Envio (substitua pelo POST ao seu backend) */
-  const onSubmit = (ev) => {
+  const onSubmit = async (ev) => {
     ev.preventDefault();
     if (!validate()) return;
-    // TODO: integrar com sua API (ex.: fetch/axios para Spring Boot)
-    console.log("Cadastro enviado:", formData);
-    alert("Cadastro realizado com sucesso!");
-    // Opcional: resetar formulário
-    // setFormData(INITIAL_FORM);
-  };
+    
+    setIsLoading(true);
+    setApiError("");
+
+      try{
+        await register(
+          formData.nome,
+          formData.email,
+          formData.senha,
+          formData.genero
+        )
+          console.log("Resposta do servidor:", res.data);
+
+        navigate("/dashboard");
+      }catch(error){
+    const message = error.response?.data?.message || "Erro ao realizar o cadastro. Tente novamente.";
+      setApiError(message);
+    console.error("Falha no cadastro:", error);
+    } finally {
+    setIsLoading(false);
+      }
+      }
+
+  
 
   /* ---------- Render ---------- */
   return (
@@ -116,6 +136,8 @@ export default function Cadastro() {
         </p>
 
         <form className="auth-form" onSubmit={onSubmit} noValidate>
+
+          {apiError && <div className="api-error-message">{apiError}</div>}
           {/* Nome */}
           <div className="field">
             <label htmlFor="nome">Nome</label>
@@ -146,6 +168,20 @@ export default function Cadastro() {
             {errors.email && <span className="field__error">{errors.email}</span>}
           </div>
 
+          <div className="field">
+            <label htmlFor="genero">Gênero</label>
+              <select 
+              id="genero" 
+              name="genero" 
+              value={formData.genero} 
+              onChange={onChange}
+              >
+              <option value="MASCULINO">Masculino</option>
+              <option value="FEMININO">Feminino</option>
+              <option value="OUTRO">Outro</option>
+            </select>
+          </div>
+
           {/* Senha (com toggle + força) */}
           <div className="field">
             <label htmlFor="senha">Senha</label>
@@ -174,6 +210,7 @@ export default function Cadastro() {
                 </svg>
               </button>
             </div>
+            
             {errors.senha && <span className="field__error">{errors.senha}</span>}
 
             {/* Medidor de força (apenas visual) */}
@@ -236,8 +273,10 @@ export default function Cadastro() {
           {errors.aceitar && <span className="field__error">{errors.aceitar}</span>}
 
           {/* CTA principal */}
-          <button type="submit" className="btn btn--primary btn--full">
-            Criar conta
+          <button type="submit" className="btn btn--primary btn--full"
+          disabled={isLoading}
+  >
+            {isLoading ? "Criando conta..." : "Criar conta"}
           </button>
 
           {/* Alternância para login */}
@@ -251,4 +290,4 @@ export default function Cadastro() {
       </div>
     </div>
   );
-}
+};

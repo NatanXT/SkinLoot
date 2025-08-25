@@ -1,15 +1,11 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../services/AuthContext';
 
 const ProtectedRoute = () => {
-  const { user, loading } = useAuth();
+  const { user } = useAuth(); // Não precisamos mais do 'loading'
 
-  if (loading) {
-    // Pode mostrar um spinner/tela de carregamento enquanto verifica a autenticação
-    return <div>Carregando...</div>;
-  }
-
+  // A lógica agora é direta: tem usuário? Mostra o conteúdo. Não tem? Redireciona.
   return user ? <Outlet /> : <Navigate to="/login" />;
 };
 
