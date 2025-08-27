@@ -1,153 +1,132 @@
-// ======================================================
 // Cadastro.jsx
-// Caminho sugerido: frontend/src/pages/cadastro/Cadastro.jsx
-//
-// - UI consistente com a dashboard (usa Auth.css compartilhado)
-// - Validação client-side simples (nome, e-mail, senha, termos)
-// - Medidor de força de senha (0..4)
-// - Mostrar/ocultar senha (dois campos)
-// - Form sem submit nativo do HTML5 (noValidate) para exibir erros próprios
-// ======================================================
-
 import { useMemo, useState } from "react";
 import { useAuth } from "../../services/AuthContext";
-import { useNavigate } from "react-router-dom";
-
-// Ajuste este import conforme sua estrutura.
-// Ex.: se Cadastro.jsx estiver em /pages/cadastro, use "../login/Auth.css"
+import { Link, useNavigate } from "react-router-dom";
 import "../../pages/login/Auth.css";
 
-/* ---------- Constantes & utilitários ---------- */
+/* -------------------- Regex & Constantes -------------------- */
 
-// Regex simples e suficiente para validar e-mail no client.
-// (No backend faça validação mais robusta)
-const EMAIL_RE = /^\S+@\S+\.\S+$/;
+// Nome: apenas letras (com acento), espaços e hífen
+const NAME_RE = /^[A-Za-zÀ-ÖØ-öø-ÿ\s-]+$/;
+const NAME_BLOCK_RE = /[^A-Za-zÀ-ÖØ-öø-ÿ\s-]/g;
 
-/** Retorna um score de força de senha entre 0 e 4 */
+// E-mail
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+// Senha (Unicode-aware)
+const PWD_LEN_MIN = 8;
+const PWD_LEN_MAX = 16;
+const RE_UPPER   = /\p{Lu}/u;         // pelo menos 1 maiúscula (qualquer idioma)
+const RE_LOWER   = /\p{Ll}/u;         // pelo menos 1 minúscula
+const RE_DIGIT   = /\p{Nd}/u;         // pelo menos 1 número
+const RE_SPECIAL = /[^\p{L}\p{Nd}\s]/u; // pelo menos 1 especial (ignora espaço)
+
+// Força visual
 function getPasswordStrength(pwd = "") {
   let score = 0;
-  if (pwd.length >= 8) score++;
-  if (/[A-Z]/.test(pwd)) score++;
-  if (/[a-z]/.test(pwd)) score++;
-  if (/\d/.test(pwd)) score++;
-  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+  if (RE_UPPER.test(pwd)) score++;
+  if (RE_LOWER.test(pwd)) score++;
+  if (RE_DIGIT.test(pwd)) score++;
+  if (RE_SPECIAL.test(pwd)) score++;
   return Math.min(score, 4);
 }
 
-/** Estado inicial do formulário */
 const INITIAL_FORM = {
   nome: "",
   email: "",
   senha: "",
   confirmarSenha: "",
   aceitar: false,
-  genero: "MASCULINO", // Valor padrão
+  genero: "MASCULINO",
 };
 
 export default function Cadastro() {
-  /* ---------- State ---------- */
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [showPass, setShowPass] = useState({ s1: false, s2: false });
   const [errors, setErrors] = useState({});
-  const [isLoading,setIsLoading] = useState(false);
-  const [apiError,setApiError] = useState("");
-  const {register} = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+  const { register } = useAuth();
   const navigate = useNavigate();
 
-  /* ---------- Derivados ---------- */
   const strength = useMemo(() => getPasswordStrength(formData.senha), [formData.senha]);
 
-  /* ---------- Handlers ---------- */
-
-  /** Atualiza campos de texto/checkbox de forma genérica */
   const onChange = (e) => {
-    const { name, type, value, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    const { name, type } = e.target;
+    let { value, checked } = e.target;
+
+    if (type === "checkbox") {
+      setFormData((prev) => ({ ...prev, [name]: checked }));
+      return;
+    }
+    if (name === "nome") value = value.replace(NAME_BLOCK_RE, "");
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  /** Alterna visibilidade dos campos de senha */
-  const toggleShow = (key) => {
-    setShowPass((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
+  const toggleShow = (key) => setShowPass((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  /** Validação simples de campos obrigatórios */
   const validate = () => {
     const e = {};
-    if (!formData.nome.trim()) e.nome = "Informe seu nome.";
-    if (!EMAIL_RE.test(formData.email)) e.email = "Informe um e-mail válido.";
-    if ((formData.senha || "").length < 8) e.senha = "Use ao menos 8 caracteres.";
-    if (formData.senha !== formData.confirmarSenha)
-      e.confirmarSenha = "As senhas não coincidem.";
+    const nome = (formData.nome || "").trim();
+    const email = (formData.email || "").trim();
+    const pwd = formData.senha || "";
+
+    if (nome.length < 2) e.nome = "Informe seu nome (mín. 2 letras).";
+    else if (!NAME_RE.test(nome)) e.nome = "Use apenas letras, espaços ou hífen (sem números e símbolos).";
+
+    if (!EMAIL_RE.test(email)) e.email = "Informe um e-mail válido.";
+
+    const pwdErrors = [];
+    if (pwd.length < PWD_LEN_MIN || pwd.length > PWD_LEN_MAX)
+      pwdErrors.push(`Use entre ${PWD_LEN_MIN} e ${PWD_LEN_MAX} caracteres.`);
+    if (!RE_UPPER.test(pwd))   pwdErrors.push("Inclua ao menos 1 letra maiúscula.");
+    if (!RE_LOWER.test(pwd))   pwdErrors.push("Inclua ao menos 1 letra minúscula.");
+    if (!RE_DIGIT.test(pwd))   pwdErrors.push("Inclua ao menos 1 número.");
+    if (!RE_SPECIAL.test(pwd)) pwdErrors.push("Inclua ao menos 1 caractere especial.");
+
+    if (pwdErrors.length) e.senha = pwdErrors.join(" ");
+    if (formData.senha !== formData.confirmarSenha) e.confirmarSenha = "As senhas não coincidem.";
     if (!formData.aceitar) e.aceitar = "Você precisa aceitar os termos.";
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  /** Envio (substitua pelo POST ao seu backend) */
   const onSubmit = async (ev) => {
     ev.preventDefault();
-    if (!validate()) return;
-    
-    setIsLoading(true);
     setApiError("");
+    if (!validate()) return;
 
-      try{
-        await register(
-          formData.nome,
-          formData.email,
-          formData.senha,
-          formData.genero
-        )
-          console.log("Resposta do servidor:", res.data);
-
-        navigate("/dashboard");
-      }catch (error) {
-      // ✅ Lógica de erro robusta
-      if (error.response) {
-        // O backend respondeu com um erro (4xx, 5xx)
-        setApiError(error.response.data.message || "E-mail ou senha incorretos.");
-      } else if (error.request) {
-        // A requisição foi feita, mas não houve resposta (backend offline)
-        setApiError("Não foi possível conectar ao servidor. Tente novamente mais tarde.");
-      } else {
-        // Um erro ocorreu ao configurar a requisição
-        setApiError("Ocorreu um erro inesperado. Tente novamente.");
-      }
+    setIsLoading(true);
+    try {
+      await register(formData.nome.trim(), formData.email.trim(), formData.senha, formData.genero);
+      navigate("/vitrine", { replace: true });
+    } catch (error) {
+      if (error.response) setApiError(error.response.data?.message || "Não foi possível criar a conta.");
+      else if (error.request) setApiError("Não foi possível conectar ao servidor. Tente novamente mais tarde.");
+      else setApiError("Ocorreu um erro inesperado. Tente novamente.");
       console.error("Falha no cadastro:", error);
-    }finally {
-    setIsLoading(false);
-      }
-      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  
-
-  /* ---------- Render ---------- */
   return (
     <div className="auth-root">
       <div className="auth-card">
-        {/* Marca / Logo */}
-        <div className="auth-brand">
+        <Link to="/" className="auth-brand" aria-label="Ir para a página inicial">
           <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
-            <path
-              fill="currentColor"
-              d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v13l10 5 10-5V4l-10 5Z"
-            />
+            <path fill="currentColor" d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v13l10 5 10-5V4l-10 5Z"/>
           </svg>
           <span>SkinLoot</span>
-        </div>
+        </Link>
 
         <h1 className="auth-title">Criar conta</h1>
-        <p className="auth-subtitle">
-          Cadastre-se para anunciar, favoritar e falar com vendedores.
-        </p>
+        <p className="auth-subtitle">Cadastre-se para anunciar, favoritar e falar com vendedores.</p>
 
         <form className="auth-form" onSubmit={onSubmit} noValidate>
-
           {apiError && <div className="api-error-message">{apiError}</div>}
-          {/* Nome */}
+
           <div className="field">
             <label htmlFor="nome">Nome</label>
             <input
@@ -158,11 +137,15 @@ export default function Cadastro() {
               value={formData.nome}
               onChange={onChange}
               required
+              aria-invalid={!!errors.nome}
+              onPaste={(e) => {
+                const txt = (e.clipboardData || window.clipboardData).getData("text");
+                if (!NAME_RE.test(txt)) e.preventDefault();
+              }}
             />
             {errors.nome && <span className="field__error">{errors.nome}</span>}
           </div>
 
-          {/* E-mail */}
           <div className="field">
             <label htmlFor="email">E-mail</label>
             <input
@@ -173,25 +156,20 @@ export default function Cadastro() {
               value={formData.email}
               onChange={onChange}
               required
+              aria-invalid={!!errors.email}
             />
             {errors.email && <span className="field__error">{errors.email}</span>}
           </div>
 
           <div className="field">
             <label htmlFor="genero">Gênero</label>
-              <select 
-              id="genero" 
-              name="genero" 
-              value={formData.genero} 
-              onChange={onChange}
-              >
+            <select id="genero" name="genero" value={formData.genero} onChange={onChange}>
               <option value="MASCULINO">Masculino</option>
               <option value="FEMININO">Feminino</option>
               <option value="OUTRO">Outro</option>
             </select>
           </div>
 
-          {/* Senha (com toggle + força) */}
           <div className="field">
             <label htmlFor="senha">Senha</label>
             <div className="input-pass">
@@ -199,11 +177,18 @@ export default function Cadastro() {
                 id="senha"
                 name="senha"
                 type={showPass.s1 ? "text" : "password"}
-                placeholder="Mínimo 8 caracteres"
+                placeholder="8–16 (maiús, minús, número, especial)"
                 value={formData.senha}
                 onChange={onChange}
                 required
                 aria-invalid={!!errors.senha}
+                minLength={PWD_LEN_MIN}
+                maxLength={PWD_LEN_MAX}
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
+                inputMode="text"
+                autoComplete="new-password"
               />
               <button
                 type="button"
@@ -212,17 +197,12 @@ export default function Cadastro() {
                 aria-label={showPass.s1 ? "Ocultar senha" : "Mostrar senha"}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
-                  <path
-                    fill="currentColor"
-                    d="M12 7c-5 0-9 5-9 5s4 5 9 5 9-5 9-5-4-5-9-5Zm0 8a3 3 0 1 1 .001-6.001A3 3 0 0 1 12 15Z"
-                  />
+                  <path fill="currentColor" d="M12 7c-5 0-9 5-9 5s4 5 9 5 9-5 9-5-4-5-9-5Zm0 8a3 3 0 1 1 .001-6.001A3 3 0 0 1 12 15Z"/>
                 </svg>
               </button>
             </div>
-            
             {errors.senha && <span className="field__error">{errors.senha}</span>}
 
-            {/* Medidor de força (apenas visual) */}
             <div className="pass-strength" aria-hidden>
               <div className={`bar ${strength >= 1 ? "on" : ""}`} />
               <div className={`bar ${strength >= 2 ? "on" : ""}`} />
@@ -231,7 +211,6 @@ export default function Cadastro() {
             </div>
           </div>
 
-          {/* Confirmar senha (com toggle) */}
           <div className="field">
             <label htmlFor="confirmarSenha">Confirmar senha</label>
             <div className="input-pass">
@@ -244,6 +223,13 @@ export default function Cadastro() {
                 onChange={onChange}
                 required
                 aria-invalid={!!errors.confirmarSenha}
+                minLength={PWD_LEN_MIN}
+                maxLength={PWD_LEN_MAX}
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
+                inputMode="text"
+                autoComplete="new-password"
               />
               <button
                 type="button"
@@ -252,51 +238,28 @@ export default function Cadastro() {
                 aria-label={showPass.s2 ? "Ocultar senha" : "Mostrar senha"}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
-                  <path
-                    fill="currentColor"
-                    d="M12 7c-5 0-9 5-9 5s4 5 9 5 9-5 9-5-4-5-9-5Zm0 8a3 3 0 1 1 .001-6.001A3 3 0 0 1 12 15Z"
-                  />
+                  <path fill="currentColor" d="M12 7c-5 0-9 5-9 5s4 5 9 5 9-5 9-5-4-5-9-5Zm0 8a3 3 0 1 1 .001-6.001A3 3 0 0 1 12 15Z"/>
                 </svg>
               </button>
             </div>
-            {errors.confirmarSenha && (
-              <span className="field__error">{errors.confirmarSenha}</span>
-            )}
+            {errors.confirmarSenha && <span className="field__error">{errors.confirmarSenha}</span>}
           </div>
 
-          {/* Aceite de termos */}
           <label className="check" style={{ marginTop: 6 }}>
-            <input
-              type="checkbox"
-              name="aceitar"
-              checked={formData.aceitar}
-              onChange={onChange}
-            />
-            <span>
-              Li e aceito os{" "}
-              <a className="link" href="#">
-                termos de uso
-              </a>
-            </span>
+            <input type="checkbox" name="aceitar" checked={formData.aceitar} onChange={onChange} />
+            <span>Li e aceito os <a className="link" href="#">termos de uso</a></span>
           </label>
           {errors.aceitar && <span className="field__error">{errors.aceitar}</span>}
 
-          {/* CTA principal */}
-          <button type="submit" className="btn btn--primary btn--full"
-          disabled={isLoading}
-  >
+          <button type="submit" className="btn btn--primary btn--full" disabled={isLoading}>
             {isLoading ? "Criando conta..." : "Criar conta"}
           </button>
 
-          {/* Alternância para login */}
           <p className="switch">
-            Já tem conta?{" "}
-            <a className="link" href="/login">
-              Entrar
-            </a>
+            Já tem conta? <a className="link" href="/login">Entrar</a>
           </p>
         </form>
       </div>
     </div>
   );
-};
+}

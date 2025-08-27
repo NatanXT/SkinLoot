@@ -78,6 +78,22 @@ body{ background:var(--bg); color:var(--text) }
 }
 .field__error{ color:#ff8b8b; font-size:12px; margin-top:4px }
 
+.api-error-message{
+  background:#30121a;            /* fundo erro */
+  border:1px solid #5c1b2a;      /* borda erro */
+  color:#ffb4c8;                  /* texto erro */
+  padding:10px; border-radius:12px;
+}
+
+/* Deixa a marca clicável visualmente como link, sem sublinhado */
+.auth-brand { 
+  cursor: pointer; 
+  text-decoration: none; 
+  color: var(--text);
+}
+.auth-brand:hover { filter: brightness(1.05); }
+
+
 /* ---------- Senha com toggle ---------- */
 .input-pass{ position:relative }
 .input-pass input{ padding-right:42px }
