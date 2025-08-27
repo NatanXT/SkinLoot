@@ -51,7 +51,9 @@ public class Usuario {
     // FetchType.LAZY: As skins só são carregadas quando necessário, otimizando a performance
     @JsonIgnore
     private List<Skin> skins;
-    
+
+
+
 
     // Getters e Setters
     public UUID getId() {

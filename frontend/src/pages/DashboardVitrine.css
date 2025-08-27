@@ -67,6 +67,11 @@ body{
   backdrop-filter:saturate(140%) blur(8px);
   border-bottom:1px solid #131920;
 }
+.topbar .actions .welcome-user {
+  color: #fff;
+  margin-right: 1rem;
+  font-size: 0.9rem;
+}
 .brand{ display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.5px }
 .brand svg{ color:var(--primary) }
 nav a{ margin:0 10px; color:var(--muted); text-decoration:none }
@@ -186,6 +191,7 @@ nav a:hover{ color:var(--text) }
   position:relative;
   transition:transform .25s ease, box-shadow .25s ease;
 }
+
 .card:hover{ transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,.5) }
 
 /* Palco da imagem */

@@ -10,6 +10,9 @@
 // ======================================================
 
 import { useMemo, useState } from "react";
+import { useAuth } from "../../services/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 // Ajuste este import conforme sua estrutura.
 // Ex.: se Cadastro.jsx estiver em /pages/cadastro, use "../login/Auth.css"
 import "../../pages/login/Auth.css";
@@ -38,6 +41,7 @@ const INITIAL_FORM = {
   senha: "",
   confirmarSenha: "",
   aceitar: false,
+  genero: "MASCULINO", // Valor padrão
 };
 
 export default function Cadastro() {
@@ -45,6 +49,10 @@ export default function Cadastro() {
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [showPass, setShowPass] = useState({ s1: false, s2: false });
   const [errors, setErrors] = useState({});
+  const [isLoading,setIsLoading] = useState(false);
+  const [apiError,setApiError] = useState("");
+  const {register} = useAuth();
+  const navigate = useNavigate();
 
   /* ---------- Derivados ---------- */
   const strength = useMemo(() => getPasswordStrength(formData.senha), [formData.senha]);
@@ -79,15 +87,42 @@ export default function Cadastro() {
   };
 
   /** Envio (substitua pelo POST ao seu backend) */
-  const onSubmit = (ev) => {
+  const onSubmit = async (ev) => {
     ev.preventDefault();
     if (!validate()) return;
-    // TODO: integrar com sua API (ex.: fetch/axios para Spring Boot)
-    console.log("Cadastro enviado:", formData);
-    alert("Cadastro realizado com sucesso!");
-    // Opcional: resetar formulário
-    // setFormData(INITIAL_FORM);
-  };
+    
+    setIsLoading(true);
+    setApiError("");
+
+      try{
+        await register(
+          formData.nome,
+          formData.email,
+          formData.senha,
+          formData.genero
+        )
+          console.log("Resposta do servidor:", res.data);
+
+        navigate("/dashboard");
+      }catch (error) {
+      // ✅ Lógica de erro robusta
+      if (error.response) {
+        // O backend respondeu com um erro (4xx, 5xx)
+        setApiError(error.response.data.message || "E-mail ou senha incorretos.");
+      } else if (error.request) {
+        // A requisição foi feita, mas não houve resposta (backend offline)
+        setApiError("Não foi possível conectar ao servidor. Tente novamente mais tarde.");
+      } else {
+        // Um erro ocorreu ao configurar a requisição
+        setApiError("Ocorreu um erro inesperado. Tente novamente.");
+      }
+      console.error("Falha no cadastro:", error);
+    }finally {
+    setIsLoading(false);
+      }
+      }
+
+  
 
   /* ---------- Render ---------- */
   return (
@@ -110,6 +145,8 @@ export default function Cadastro() {
         </p>
 
         <form className="auth-form" onSubmit={onSubmit} noValidate>
+
+          {apiError && <div className="api-error-message">{apiError}</div>}
           {/* Nome */}
           <div className="field">
             <label htmlFor="nome">Nome</label>
@@ -140,6 +177,20 @@ export default function Cadastro() {
             {errors.email && <span className="field__error">{errors.email}</span>}
           </div>
 
+          <div className="field">
+            <label htmlFor="genero">Gênero</label>
+              <select 
+              id="genero" 
+              name="genero" 
+              value={formData.genero} 
+              onChange={onChange}
+              >
+              <option value="MASCULINO">Masculino</option>
+              <option value="FEMININO">Feminino</option>
+              <option value="OUTRO">Outro</option>
+            </select>
+          </div>
+
           {/* Senha (com toggle + força) */}
           <div className="field">
             <label htmlFor="senha">Senha</label>
@@ -168,6 +219,7 @@ export default function Cadastro() {
                 </svg>
               </button>
             </div>
+            
             {errors.senha && <span className="field__error">{errors.senha}</span>}
 
             {/* Medidor de força (apenas visual) */}
@@ -230,8 +282,10 @@ export default function Cadastro() {
           {errors.aceitar && <span className="field__error">{errors.aceitar}</span>}
 
           {/* CTA principal */}
-          <button type="submit" className="btn btn--primary btn--full">
-            Criar conta
+          <button type="submit" className="btn btn--primary btn--full"
+          disabled={isLoading}
+  >
+            {isLoading ? "Criando conta..." : "Criar conta"}
           </button>
 
           {/* Alternância para login */}
@@ -245,4 +299,4 @@ export default function Cadastro() {
       </div>
     </div>
   );
-}
+};

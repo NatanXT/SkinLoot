@@ -10,6 +10,9 @@
 // ======================================================
 
 import React, { useState } from "react"; // garante React no runtime clássico
+import { useAuth } from "../../services/AuthContext"; // Importe o hook
+import { useNavigate } from "react-router-dom"; // Para redirecionar após o login
+
 import "./Auth.css";
 
 /* ---------- Utilidades & Constantes ---------- */
@@ -44,6 +47,11 @@ export default function Login() {
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [showPass, setShowPass] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+
+  const { login } = useAuth(); // Pegue a função de login do contexto
+  const navigate = useNavigate();
 
   /* ----- Handlers ----- */
 
@@ -63,12 +71,30 @@ export default function Login() {
     return Object.keys(e).length === 0;
   };
 
-  // Envio (substitua pelo POST ao seu backend)
-  const onSubmit = (ev) => {
+  const onSubmit = async (ev) => {
     ev.preventDefault();
-    if (!validate()) return;
-    console.log("Tentativa de login:", formData);
-    alert(`Login realizado para: ${formData.email}`);
+    setIsLoading(true);
+    setApiError("");
+
+    try {
+      await login(formData.email, formData.senha);
+      navigate("/vitrine");
+    } catch (error) {
+      // ✅ Lógica de erro robusta
+      if (error.response) {
+        // O backend respondeu com um erro (4xx, 5xx)
+        setApiError(error.response.data.message || "E-mail ou senha incorretos.");
+      } else if (error.request) {
+        // A requisição foi feita, mas não houve resposta (backend offline)
+        setApiError("Não foi possível conectar ao servidor. Tente novamente mais tarde.");
+      } else {
+        // Um erro ocorreu ao configurar a requisição
+        setApiError("Ocorreu um erro inesperado. Tente novamente.");
+      }
+      console.error("Falha no login:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   /* ----- Render ----- */

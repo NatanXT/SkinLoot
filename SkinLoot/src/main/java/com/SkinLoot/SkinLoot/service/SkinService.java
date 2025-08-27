@@ -12,10 +12,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor // Forma moderna de injeção de dependência com Lombok
+//@RequiredArgsConstructor // Forma moderna de injeção de dependência com Lombok
 public class SkinService {
 
     private final SkinRepository skinRepository;
+
+    public SkinService(SkinRepository skinRepository) {
+        this.skinRepository = skinRepository;
+    }
 
     // ✅ O método privado "toDto" foi REMOVIDO! Ele não é mais necessário.
 
