@@ -104,11 +104,20 @@ export default function Cadastro() {
           console.log("Resposta do servidor:", res.data);
 
         navigate("/dashboard");
-      }catch(error){
-    const message = error.response?.data?.message || "Erro ao realizar o cadastro. Tente novamente.";
-      setApiError(message);
-    console.error("Falha no cadastro:", error);
-    } finally {
+      }catch (error) {
+      // ✅ Lógica de erro robusta
+      if (error.response) {
+        // O backend respondeu com um erro (4xx, 5xx)
+        setApiError(error.response.data.message || "E-mail ou senha incorretos.");
+      } else if (error.request) {
+        // A requisição foi feita, mas não houve resposta (backend offline)
+        setApiError("Não foi possível conectar ao servidor. Tente novamente mais tarde.");
+      } else {
+        // Um erro ocorreu ao configurar a requisição
+        setApiError("Ocorreu um erro inesperado. Tente novamente.");
+      }
+      console.error("Falha no cadastro:", error);
+    }finally {
     setIsLoading(false);
       }
       }

@@ -14,8 +14,8 @@ import NotFound from "./pages/notfound/NotFound";
 import DashboardVitrine from "./pages/DashboardVitrine.jsx";
 import Layout from "./components/layout/Layout";
 import ProtectedRoute from "./components/protectedRoutes";
-import PublicRoute from "./components/publicRoute.jsx"; // <-- Importe o novo componente
-import RootLayout from "./components/rootLayout.jsx"; // <-- Importe o novo layout raiz
+import PublicRoute from "./components/publicRoute"; // <-- Importe o novo componente
+import RootLayout from "./components/rootLayout"; // <-- Importe o novo layout raiz
 
 
 

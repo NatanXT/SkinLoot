@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, useMemo } from 'react';
 import authService from './authservice';
 
 const AuthContext = createContext(null);
@@ -8,13 +8,16 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true); // Para saber se a autenticação inicial já foi verificada
 
   useEffect(() => {
-    // Tenta buscar o usuário ao carregar a aplicação para manter a sessão ativa
     authService.getCurrentUser()
       .then(response => {
         setUser(response.data);
       })
       .catch(error => {
-        console.log("Nenhum usuário logado na sessão.");
+        if (error.response) {
+            console.log(`Sessão não encontrada (Status: ${error.response.status})`);
+        } else {
+            console.warn("Erro de rede ao verificar sessão. O backend está online?");
+        }
         setUser(null);
       })
       .finally(() => {
@@ -22,30 +25,31 @@ export const AuthProvider = ({ children }) => {
       });
   }, []);
 
-  const login = async (email, senha) => {
+  const login = useCallback(async (email, senha) => {
     const response = await authService.login(email, senha);
-    setUser(response.data.user); // O backend retorna o usuário no corpo da resposta
+    setUser(response.data.user);
     return response;
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await authService.logout();
     setUser(null);
-  };
+  }, []);
   
-  const register = async (nome, email, senha, genero) => {
+  const register = useCallback(async (nome, email, senha, genero) => {
     const response = await authService.register(nome, email, senha, genero);
     setUser(response.data.user);
     return response;
-  };
+  }, []);
 
-  const value = {
+  // useMemo garante que o objeto de valor só seja recriado se user ou loading mudarem.
+  const value = useMemo(() => ({
     user,
     loading,
     login,
     logout,
     register,
-  };
+  }), [user, loading, login, logout, register]);
 
   return (
     <AuthContext.Provider value={value}>
@@ -54,7 +58,6 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Hook customizado para facilitar o uso do contexto
 export const useAuth = () => {
   return useContext(AuthContext);
 };

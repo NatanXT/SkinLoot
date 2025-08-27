@@ -78,10 +78,20 @@ export default function Login() {
 
     try {
       await login(formData.email, formData.senha);
-      navigate("/vitrine"); // Redireciona para uma página protegida
+      navigate("/vitrine");
     } catch (error) {
-      const message = error.response?.data?.message || "E-mail ou senha incorretos.";
-      setApiError(message);
+      // ✅ Lógica de erro robusta
+      if (error.response) {
+        // O backend respondeu com um erro (4xx, 5xx)
+        setApiError(error.response.data.message || "E-mail ou senha incorretos.");
+      } else if (error.request) {
+        // A requisição foi feita, mas não houve resposta (backend offline)
+        setApiError("Não foi possível conectar ao servidor. Tente novamente mais tarde.");
+      } else {
+        // Um erro ocorreu ao configurar a requisição
+        setApiError("Ocorreu um erro inesperado. Tente novamente.");
+      }
+      console.error("Falha no login:", error);
     } finally {
       setIsLoading(false);
     }

@@ -12,9 +12,14 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Se o erro for 401 e a requisição ainda não foi re-tentada
-    if (error.response.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true; // Marca como re-tentada
+    const publicAuthEndpoints = [
+        '/usuarios/login',
+        '/usuarios/auth/refresh',
+        '/usuarios/auth/me'
+    ];
+
+     if (error.response.status === 401 && !originalRequest._retry && !publicAuthEndpoints.includes(originalRequest.url)) {
+      originalRequest._retry = true;
 
       try {
         // Tenta chamar o endpoint de refresh token
@@ -22,17 +27,18 @@ api.interceptors.response.use(
           withCredentials: true,
         });
         
-        // Se o refresh funcionou, o novo accessToken está no cookie.
-        // Re-tenta a requisição original, que agora deve funcionar.
         return api(originalRequest);
       } catch (refreshError) {
-        // Se o refresh falhar (ex: refreshToken expirado), desloga o usuário
-        // (Aqui você pode chamar a função de logout do seu AuthContext ou redirecionar para o login)
+        // Se o refresh falhar, o ideal é limpar o estado local e redirecionar
+        // com o roteador do React, mas window.location é um fallback.
+        // Neste ponto, o usuário será deslogado de qualquer forma.
         console.error("Sessão expirada. Faça o login novamente.");
-        window.location.href = '/login'; // Redirecionamento simples
+        // O ideal é ter uma função de logout no AuthContext para limpar o estado
+        // window.location.href = '/login'; 
         return Promise.reject(refreshError);
       }
     }
+
 
     return Promise.reject(error);
   }

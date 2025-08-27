@@ -8,9 +8,13 @@
 // ======================================================
 
 import { useEffect, useMemo, useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { useAuth } from "../services/AuthContext"; // Importe o useAuth
+
+import { Link, useNavigate } from "react-router-dom"; // Adicione useNavigate
 import "./DashboardVitrine.css";
 import MockSkins from "../components/mock/MockSkins.js";
+
+
 
 /* ---------- Metadados dos planos ---------- */
 const plansMeta = {
@@ -119,6 +123,8 @@ function useRankedSkins(list, sortBy, filters) {
 /* ====================================================== */
 
 export default function DashboardVitrine() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   // estado inicial vindo do URL (ou defaults)
   const initial = readStateFromURL();
 
@@ -174,6 +180,8 @@ export default function DashboardVitrine() {
     e.preventDefault();
   }
 
+
+  
   // Cola: mantém somente dígitos
   function handlePasteDigits(e, which) {
     const text = (e.clipboardData || window.clipboardData).getData("text");
@@ -209,6 +217,17 @@ export default function DashboardVitrine() {
     setPriceUI((p) => ({ ...p, max: brlPlain(filters.max) }));
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Opcional: redireciona para a home ou login após o logout
+      navigate('/');
+    } catch (error) {
+      console.error("Falha ao fazer logout:", error);
+      // Opcional: mostrar uma notificação de erro
+    }
+  };
+  
   // Limpa filtros para defaults
   const handleClearFilters = () => {
     setFilters(DEFAULT_FILTERS);
@@ -235,8 +254,19 @@ export default function DashboardVitrine() {
           <a href="#">Anunciar</a>
         </nav>
         <div className="actions">
-          <Link to="/login" className="btn btn--ghost sm">Entrar</Link>
-          <Link to="/cadastro" className="btn btn--primary sm">Criar conta</Link>
+          {user ? (
+            // Se o usuário ESTIVER logado
+            <>
+              <span className="welcome-user">Olá, {user.nome}!</span>
+              <button onClick={handleLogout} className="btn btn--ghost sm">Sair</button>
+            </>
+          ) : (
+            // Se o usuário NÃO estiver logado
+            <>
+              <Link to="/login" className="btn btn--ghost sm">Entrar</Link>
+              <Link to="/cadastro" className="btn btn--primary sm">Criar conta</Link>
+            </>
+          )}
         </div>
       </div>
 
