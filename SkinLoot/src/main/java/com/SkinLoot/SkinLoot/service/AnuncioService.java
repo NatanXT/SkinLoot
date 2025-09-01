@@ -3,9 +3,12 @@ package com.SkinLoot.SkinLoot.service;
 import com.SkinLoot.SkinLoot.dto.AnuncioRequest;
 import com.SkinLoot.SkinLoot.dto.MochilaPlayerDto;
 import com.SkinLoot.SkinLoot.model.Anuncio;
+import com.SkinLoot.SkinLoot.model.AnuncioLike;
 import com.SkinLoot.SkinLoot.model.Usuario;
 import com.SkinLoot.SkinLoot.model.enums.Status;
+import com.SkinLoot.SkinLoot.repository.AnuncioLikeRepository;
 import com.SkinLoot.SkinLoot.repository.AnuncioRepository;
+import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +26,10 @@ public class AnuncioService {
     private final AnuncioRepository anuncioRepository;
 
     private final SteamInventoryService steamInventoryService;
+
+    private UsuarioRepository usuarioRepository;
+
+    private AnuncioLikeRepository anuncioLikeRepository;
 
     @Value("${steam.id.user}")
     private String steamId;
@@ -66,6 +73,25 @@ public class AnuncioService {
         } catch (Exception e) {
             // Lança uma exceção mais específica para o controller tratar
             throw new RuntimeException("Falha ao criar anúncio: " + e.getMessage(), e);
+        }
+    }
+    @Transactional
+    public void toggleLike(UUID anuncioId, String userEmail) {
+        Usuario usuario = usuarioRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        Anuncio anuncio = anuncioRepository.findById(anuncioId)
+                .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
+
+        Optional<AnuncioLike> existingLike = anuncioLikeRepository.findByAnuncioAndUsuario(anuncio, usuario);
+
+        if (existingLike.isPresent()) {
+            // Se já curtiu, descurte
+            anuncioLikeRepository.delete(existingLike.get());
+        } else {
+            // Se não curtiu, curta
+            AnuncioLike newLike = new AnuncioLike(usuario, anuncio);
+            anuncioLikeRepository.save(newLike);
         }
     }
 

@@ -13,6 +13,8 @@ import { useAuth } from "../services/AuthContext"; // Importe o useAuth
 import { Link, useNavigate } from "react-router-dom"; // Adicione useNavigate
 import "./DashboardVitrine.css";
 import MockSkins from "../components/mock/MockSkins.js";
+import anuncioService from "../services/anuncioService"; // ✅ Importe o novo serviço
+
 
 
 
@@ -129,6 +131,8 @@ export default function DashboardVitrine() {
   const initial = readStateFromURL();
 
   const [skins] = useState(() => enrichFromMock(MockSkins));
+    const [anuncios, setAnuncios] = useState([]);
+
   const [likes, setLikes] = useState(() => new Set());
   const [sortBy, setSortBy] = useState(initial.sort);
   const [filters, setFilters] = useState(initial.filters);
@@ -153,6 +157,20 @@ export default function DashboardVitrine() {
       max: document.activeElement === maxRef?.current ? p.max : brlPlain(filters.max),
     }));
   }, [filters, sortBy]);
+
+   useEffect(() => {
+    anuncioService.getAnuncios()
+      .then(response => {
+        setAnuncios(response.data); // Salva os anúncios no estado
+      })
+      .catch(err => {
+        console.error("Falha ao buscar anúncios:", err);
+        setError("Não foi possível carregar os anúncios. Tente novamente mais tarde.");
+      })
+      .finally(() => {
+        setLoading(false); // Finaliza o carregamento, com sucesso ou erro
+      });
+  }, []);
 
   const ranked = useRankedSkins(skins, sortBy, filters);
 
@@ -385,14 +403,15 @@ export default function DashboardVitrine() {
         </div>
       </section>
 
-      {/* Grid de Cards */}
+       {/* Grid de Cards */}
       <section className="grid">
-        {ranked.map((s) => (
+        {ranked.map((anuncio) => (
+          // Agora passamos o objeto 'anuncio' para o SkinCard
           <SkinCard
-            key={s.id}
-            data={s}
-            liked={likes.has(s.id)}
-            onLike={() => toggleLike(s.id)}
+            key={anuncio.id} // Use o ID do anúncio
+            data={anuncio}
+            liked={likes.has(anuncio.id)}
+            onLike={() => toggleLike(anuncio.id)}
           />
         ))}
       </section>

@@ -82,4 +82,12 @@ public class AnuncioController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
+
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Void> toggleLike(@PathVariable UUID id, Authentication authentication) {
+        String userEmail = authentication.getName(); // Pega o email do usuário logado
+        anuncioService.toggleLike(id, userEmail);
+        return ResponseEntity.ok().build();
+    }
 }

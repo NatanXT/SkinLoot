@@ -1,6 +1,7 @@
 // Home.jsx
 import React, { useEffect, useState } from "react";
 import "../home/Home";
+import axios from "axios";
 
 // Importação de dados mock
 import MockSkins from "../../components/mock/MockSkins";

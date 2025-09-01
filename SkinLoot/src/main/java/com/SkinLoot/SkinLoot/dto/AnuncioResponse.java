@@ -14,6 +14,7 @@ public class AnuncioResponse {
     private Long skinId; // Agora é o ID da Steam (Long)
     private String skinIcon;
     private String skinNome;
+    private String planoNome; // ✅ Novo campo
     private Status status;
     private LocalDateTime dataCriacao;
     private String usuarioNome;
