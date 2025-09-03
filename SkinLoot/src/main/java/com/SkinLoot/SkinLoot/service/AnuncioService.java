@@ -75,24 +75,30 @@ public class AnuncioService {
             throw new RuntimeException("Falha ao criar anúncio: " + e.getMessage(), e);
         }
     }
-    @Transactional
-    public void toggleLike(UUID anuncioId, String userEmail) {
+    // É idempotente: se o like já existir, o banco de dados (com a constraint correta) não fará nada.
+    public void likeAnuncio(UUID anuncioId, String userEmail) {
         Usuario usuario = usuarioRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        Anuncio anuncio = anuncioRepository.findById(anuncioId)
-                .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
-
-        Optional<AnuncioLike> existingLike = anuncioLikeRepository.findByAnuncioAndUsuario(anuncio, usuario);
-
-        if (existingLike.isPresent()) {
-            // Se já curtiu, descurte
-            anuncioLikeRepository.delete(existingLike.get());
-        } else {
-            // Se não curtiu, curta
-            AnuncioLike newLike = new AnuncioLike(usuario, anuncio);
-            anuncioLikeRepository.save(newLike);
+        // Verificamos a existência do anúncio para segurança
+        if (!anuncioRepository.existsById(anuncioId)) {
+            throw new RuntimeException("Anúncio não encontrado");
         }
+
+        // Apenas tenta salvar. Nenhuma leitura prévia é feita.
+        AnuncioLike newLike = new AnuncioLike(usuario, new Anuncio(anuncioId)); // Usamos referência
+        anuncioLikeRepository.save(newLike);
+    }
+
+    // ✅ NOVO MÉTODO: Apenas remove o like.
+// É idempotente: se o like não existir, não faz nada.
+    @Transactional
+    public void unlikeAnuncio(UUID anuncioId, String userEmail) {
+        Usuario usuario = usuarioRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        // Apenas tenta deletar. Nenhuma leitura prévia é feita.
+        anuncioLikeRepository.deleteByAnuncioIdAndUsuarioId(anuncioId, usuario.getId());
     }
 
     public Anuncio save(Anuncio anuncio) {

@@ -69,6 +69,9 @@ public class Anuncio {
         this.likesCount = likesCount;
     }
 
+    public Anuncio(UUID anuncioId) {
+    }
+
     // GETTERS E SETTERS
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }

@@ -1,5 +1,6 @@
 package com.SkinLoot.SkinLoot.dto;
 
+import com.SkinLoot.SkinLoot.model.Anuncio;
 import com.SkinLoot.SkinLoot.model.enums.Status;
 
 import java.math.BigDecimal;
@@ -23,18 +24,30 @@ public class AnuncioResponse {
     public AnuncioResponse() {
     }
 
-    public AnuncioResponse(UUID id, String titulo, String descricao, BigDecimal preco, Long skinId, String skinIcon, String skinNome, Status status, String usuarioNome, LocalDateTime dataCriacao, String skinQualidade) {
-        this.id = id;
-        this.titulo = titulo;
-        this.descricao = descricao;
-        this.preco = preco;
-        this.skinId = skinId;
-        this.skinIcon = skinIcon;
-        this.skinNome = skinNome;
-        this.status = status;
-        this.usuarioNome = usuarioNome;
-        this.dataCriacao = dataCriacao;
-        this.skinQualidade = skinQualidade;
+    public AnuncioResponse(Anuncio anuncio) {
+        this.id = anuncio.getId();
+        this.titulo = anuncio.getTitulo();
+        this.descricao = anuncio.getDescricao();
+        this.preco = anuncio.getPreco();
+        this.status = anuncio.getStatus();
+        this.dataCriacao = anuncio.getDataCriacao();
+
+        // Mapeando os campos da skin que já existem no Anuncio
+        this.skinId = anuncio.getSteamItemId();
+        this.skinNome = anuncio.getSkinName();
+        this.skinIcon = anuncio.getSkinImageUrl();
+        this.skinQualidade = anuncio.getSkinQuality();
+
+        // Verifica se o usuário associado ao anúncio não é nulo
+        if (anuncio.getUsuario() != null) {
+            this.usuarioNome = anuncio.getUsuario().getNome();
+
+            // --- LÓGICA PARA OBTER O NOME DO PLANO ---
+            // Verifica se o plano do usuário também não é nulo antes de tentar acessá-lo
+            if (anuncio.getUsuario().getPlanoAssinatura() != null) {
+                this.planoNome = anuncio.getUsuario().getPlanoAssinatura().getNome();
+            }
+        }
     }
 
     public UUID getId() {

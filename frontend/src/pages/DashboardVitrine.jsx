@@ -174,12 +174,30 @@ export default function DashboardVitrine() {
 
   const ranked = useRankedSkins(skins, sortBy, filters);
 
-  const toggleLike = (id) =>
-    setLikes((prev) => {
-      const n = new Set(prev);
-      n.has(id) ? n.delete(id) : n.add(id);
-      return n;
-    });
+  const handleLikeToggle = (anuncioId) => {
+        const isCurrentlyLiked = likes.has(anuncioId);
+        
+        // 1. Atualização Otimista: Mude o estado da UI imediatamente.
+        const newLikes = new Set(likes);
+        if (isCurrentlyLiked) {
+            newLikes.delete(anuncioId);
+        } else {
+            newLikes.add(anuncioId);
+        }
+        setLikes(newLikes);
+
+        // 2. Chamada à API em segundo plano
+        const apiCall = isCurrentlyLiked 
+            ? anuncioService.unlikeAnuncio(anuncioId) 
+            : anuncioService.likeAnuncio(anuncioId);
+        
+        apiCall.catch(error => {
+            console.error("Falha ao atualizar o like:", error);
+            // 3. Reversão em caso de erro: volte ao estado original.
+            setLikes(likes); 
+            // Opcional: mostrar uma notificação de erro para o usuário
+        });
+    };
 
   /* ---------- Price inputs: refs + handlers ---------- */
   const minRef = useRef(null);
@@ -253,6 +271,8 @@ export default function DashboardVitrine() {
     setPriceUI({ min: brlPlain(DEFAULT_FILTERS.min), max: brlPlain(DEFAULT_FILTERS.max) });
     writeStateToURL(DEFAULT_FILTERS, DEFAULT_SORT, false);
   };
+
+  
 
   return (
     <div className="dash-root">
@@ -406,15 +426,14 @@ export default function DashboardVitrine() {
        {/* Grid de Cards */}
       <section className="grid">
         {ranked.map((anuncio) => (
-          // Agora passamos o objeto 'anuncio' para o SkinCard
-          <SkinCard
-            key={anuncio.id} // Use o ID do anúncio
-            data={anuncio}
-            liked={likes.has(anuncio.id)}
-            onLike={() => toggleLike(anuncio.id)}
-          />
+            <SkinCard
+                key={anuncio.id}
+                data={anuncio}
+                liked={likes.has(anuncio.id)}
+                onLike={() => handleLikeToggle(anuncio.id)} // Use a nova função
+            />
         ))}
-      </section>
+    </section>
 
       {/* Planos */}
       <section id="planos" className="plans">

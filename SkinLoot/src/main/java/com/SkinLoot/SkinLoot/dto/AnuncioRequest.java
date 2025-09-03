@@ -16,6 +16,8 @@ public class AnuncioRequest {
     private String skinImageUrl;
     private String skinQuality;
 
+
+
     // Getters e Setters para todos os campos
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }

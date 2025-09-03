@@ -10,6 +10,7 @@ import com.SkinLoot.SkinLoot.service.AnuncioService;
 import com.SkinLoot.SkinLoot.service.SkinService;
 import com.SkinLoot.SkinLoot.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -85,9 +86,17 @@ public class AnuncioController {
 
 
     @PostMapping("/{id}/like")
-    public ResponseEntity<Void> toggleLike(@PathVariable UUID id, Authentication authentication) {
-        String userEmail = authentication.getName(); // Pega o email do usuário logado
-        anuncioService.toggleLike(id, userEmail);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> likeAnuncio(@PathVariable UUID id, Authentication authentication) {
+        String userEmail = authentication.getName();
+        anuncioService.likeAnuncio(id, userEmail); // Chama o novo serviço
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    // ✅ NOVO ENDPOINT: Apenas para remover o like
+    @DeleteMapping("/{id}/unlike")
+    public ResponseEntity<Void> unlikeAnuncio(@PathVariable UUID id, Authentication authentication) {
+        String userEmail = authentication.getName();
+        anuncioService.unlikeAnuncio(id, userEmail); // Chama o novo serviço
+        return ResponseEntity.noContent().build();
     }
 }
