@@ -12,9 +12,7 @@ public class AnuncioRequest {
     private BigDecimal preco;
     private Status status;
     private Long steamItemId;    // O ID do item que vem da API da Steam
-    private String skinName;
-    private String skinImageUrl;
-    private String skinQuality;
+    private UUID skinId;
 
 
 
@@ -36,28 +34,12 @@ public class AnuncioRequest {
         this.steamItemId = steamItemId;
     }
 
-    public String getSkinName() {
-        return skinName;
+    public UUID getSkinId() {
+        return skinId;
     }
 
-    public void setSkinName(String skinName) {
-        this.skinName = skinName;
-    }
-
-    public String getSkinImageUrl() {
-        return skinImageUrl;
-    }
-
-    public void setSkinImageUrl(String skinImageUrl) {
-        this.skinImageUrl = skinImageUrl;
-    }
-
-    public String getSkinQuality() {
-        return skinQuality;
-    }
-
-    public void setSkinQuality(String skinQuality) {
-        this.skinQuality = skinQuality;
+    public void setSkinId(UUID skinId) {
+        this.skinId = skinId;
     }
 }
 

@@ -467,11 +467,14 @@ export default function DashboardVitrine() {
 function SkinCard({ data, liked, onLike }) {
   const { plan } = data;
   return (
-    <article className={`card card--${plan}`} style={{ "--glow": plansMeta[plan].color }}>
+    <article className="card"> {/* Removido a classe dinâmica de plano */}
       <div className="card__media">
-        {/* Imagens do Mock devem estar em /public/img (caminho absoluto /img/...) */}
-        <img src={data.image} alt={data.title} loading="lazy" />
-        <span className="badge" style={{ background: plansMeta[plan].color }}>{plansMeta[plan].label}</span>
+        {/* ✅ Use os campos corretos do AnuncioResponse */}
+        <img src={data.skinIcon} alt={data.skinNome} loading="lazy" />
+        
+        {/* O 'badge' de plano não existe mais, pode ser removido ou adaptado */}
+        {/* <span className="badge">Destaque</span> */}
+
         <button className={`like ${liked ? "is-liked" : ""}`} onClick={onLike} aria-label="Favoritar">
           <svg width="20" height="20" viewBox="0 0 24 24">
             <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.22 2.53C11.09 5.01 12.76 4 14.5 4 17 4 19 6 19 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -480,19 +483,22 @@ function SkinCard({ data, liked, onLike }) {
       </div>
 
       <div className="card__body">
-        <h3>{data.title}</h3>
+        {/* ✅ Use os campos corretos */}
+        <h3>{data.skinNome}</h3>
         <div className="meta">
           <span className="price">
-            {data.currency === "BRL" ? "R$" : data.currency}{" "}
-            {data.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+            R$ {data.preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
           </span>
-          <span className="likes">{data.likes} likes</span>
+          {/* O campo 'likes' não vem da API. Você pode remover ou adaptar. */}
+          {/* <span className="likes">{data.likes} likes</span> */}
         </div>
         <div className="seller">
-          <span>Vendedor: {data.seller.name}</span>
+          {/* ✅ Use o campo correto */}
+          <span>Vendedor: {data.usuarioNome}</span>
           <div className="cta">
-            <a className="btn btn--ghost" href={data.seller.contactUrl} target="_blank" rel="noreferrer">Contato</a>
-            <a className="btn btn--primary" href={data.seller.contactUrl} target="_blank" rel="noreferrer">Comprar fora</a>
+            {/* Estes links podem ser adaptados no futuro */}
+            <a className="btn btn--ghost" href="#" target="_blank" rel="noreferrer">Contato</a>
+            <a className="btn btn--primary" href="#" target="_blank" rel="noreferrer">Comprar fora</a>
           </div>
         </div>
       </div>

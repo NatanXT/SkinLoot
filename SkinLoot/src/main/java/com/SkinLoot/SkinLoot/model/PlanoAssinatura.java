@@ -1,8 +1,7 @@
 package com.SkinLoot.SkinLoot.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.SkinLoot.SkinLoot.model.enums.TipoPlano;
+import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
@@ -15,7 +14,11 @@ public class PlanoAssinatura {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
-    private String nome;
+
+    @Enumerated(EnumType.STRING)
+    @Column(unique = true, nullable = false)
+    private TipoPlano nome;
+
     private BigDecimal precoMensal;
     private int limiteAnuncios;
     private boolean destaqueAnuncio;
@@ -31,11 +34,11 @@ public class PlanoAssinatura {
         this.id = id;
     }
 
-    public String getNome() {
+    public TipoPlano getNome() {
         return nome;
     }
 
-    public void setNome(String nome) {
+    public void setNome(TipoPlano nome) {
         this.nome = nome;
     }
 

@@ -45,7 +45,7 @@ public class AnuncioResponse {
             // --- LÓGICA PARA OBTER O NOME DO PLANO ---
             // Verifica se o plano do usuário também não é nulo antes de tentar acessá-lo
             if (anuncio.getUsuario().getPlanoAssinatura() != null) {
-                this.planoNome = anuncio.getUsuario().getPlanoAssinatura().getNome();
+                this.planoNome = String.valueOf(anuncio.getUsuario().getPlanoAssinatura().getNome());
             }
         }
     }

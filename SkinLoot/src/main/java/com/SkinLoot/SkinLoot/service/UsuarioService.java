@@ -27,10 +27,11 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
 
-    public UsuarioService(UsuarioRepository usuarioRepository,PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
+    public UsuarioService(UsuarioRepository usuarioRepository,PasswordEncoder passwordEncoder, UserDetailsService userDetailsService, PlanoAssinaturaRepository planoAssinaturaRepository) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.userDetailsService = userDetailsService;
+        this.planoAssinaturaRepository = planoAssinaturaRepository;
     }
 
     // Retorna uma lista de todos os usuários cadastrados
