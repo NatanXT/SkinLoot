@@ -5,6 +5,7 @@ import com.SkinLoot.SkinLoot.model.PlanoAssinatura;
 import com.SkinLoot.SkinLoot.model.Usuario;
 import com.SkinLoot.SkinLoot.model.enums.Genero;
 import com.SkinLoot.SkinLoot.model.enums.Role;
+import com.SkinLoot.SkinLoot.model.enums.TipoPlano;
 import com.SkinLoot.SkinLoot.repository.PlanoAssinaturaRepository;
 import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +77,8 @@ public class UsuarioService {
 
         // 1. Busque o plano padrão no banco de dados.
         //    Isso garante que o plano "Gratuito" deve existir na sua tabela.
-        PlanoAssinatura planoPadrao = planoAssinaturaRepository.findByNome("Gratuito")
+        TipoPlano tipoPlano = TipoPlano.valueOf("GRATUITO");
+        PlanoAssinatura planoPadrao = planoAssinaturaRepository.findByNome(tipoPlano.GRATUITO)
                 .orElseThrow(() -> new RuntimeException("Plano de assinatura padrão 'Gratuito' não encontrado no banco de dados."));
 
         // 2. Crie o novo usuário
