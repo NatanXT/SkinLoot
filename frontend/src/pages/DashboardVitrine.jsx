@@ -5,16 +5,15 @@
 // - Grid com cards grandes
 // - Filtros c/ máscara BRL nos preços, Limpar filtros,
 //   e sincronização de estado no URL (share/refresh).
+// - Scroll suave (manual) com compensação da topbar
 // ======================================================
 
 import { useEffect, useMemo, useState, useRef } from "react";
-import { useAuth } from "../services/AuthContext"; // Importe o useAuth
-
-import { Link, useNavigate } from "react-router-dom"; // Adicione useNavigate
+import { useAuth } from "../services/AuthContext";
+import { Link, useNavigate } from "react-router-dom";
 import "./DashboardVitrine.css";
 import MockSkins from "../components/mock/MockSkins.js";
 import AuthBrand from "../components/logo/AuthBrand";
-
 
 /* ---------- Metadados dos planos ---------- */
 const plansMeta = {
@@ -43,31 +42,24 @@ const brlPlain = (n) =>
 /** Lê filtros/sort do URL (se houver), senão usa defaults */
 function readStateFromURL() {
   const p = new URLSearchParams(window.location.search);
-
   const search = p.get("q") ?? DEFAULT_FILTERS.search;
   const game = p.get("game") ?? DEFAULT_FILTERS.game;
   const plan = p.get("plan") ?? DEFAULT_FILTERS.plan;
   const min = Math.max(0, parseInt(p.get("min") ?? DEFAULT_FILTERS.min, 10) || 0);
   const max = Math.max(min, parseInt(p.get("max") ?? DEFAULT_FILTERS.max, 10) || DEFAULT_FILTERS.max);
   const sort = ALLOWED_SORT.has(p.get("sort")) ? p.get("sort") : DEFAULT_SORT;
-
-  return {
-    filters: { search, game, plan, min, max },
-    sort,
-  };
+  return { filters: { search, game, plan, min, max }, sort };
 }
 
 /** Escreve filtros/sort no URL (remove params que estão iguais aos defaults) */
 function writeStateToURL(filters, sort, replace = true) {
   const p = new URLSearchParams();
-
   if (filters.search) p.set("q", filters.search);
   if (filters.game !== DEFAULT_FILTERS.game) p.set("game", filters.game);
   if (filters.plan !== DEFAULT_FILTERS.plan) p.set("plan", filters.plan);
   if (filters.min !== DEFAULT_FILTERS.min) p.set("min", String(filters.min));
   if (filters.max !== DEFAULT_FILTERS.max) p.set("max", String(filters.max));
   if (sort !== DEFAULT_SORT) p.set("sort", sort);
-
   const qs = p.toString();
   const newUrl = qs ? `?${qs}` : window.location.pathname;
   const method = replace ? "replaceState" : "pushState";
@@ -118,6 +110,23 @@ function useRankedSkins(list, sortBy, filters) {
   }, [list, sortBy, filters]);
 }
 
+/* ========= smooth scroll util (independe de CSS/OS prefs) ========= */
+function smoothScrollToY(toY, duration = 500) {
+  const startY = window.scrollY || window.pageYOffset || 0;
+  const distance = toY - startY;
+  const startTime = performance.now();
+  const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+  function step(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / duration);
+    const eased = easeInOutCubic(t);
+    window.scrollTo(0, startY + distance * eased);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
 /* ====================================================== */
 /*                      COMPONENTE                        */
 /* ====================================================== */
@@ -125,6 +134,7 @@ function useRankedSkins(list, sortBy, filters) {
 export default function DashboardVitrine() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
   // estado inicial vindo do URL (ou defaults)
   const initial = readStateFromURL();
 
@@ -141,18 +151,46 @@ export default function DashboardVitrine() {
 
   // sincroniza URL quando filtros/ordenar mudam
   useEffect(() => {
-    // garante min <= max
     if (filters.min > filters.max) {
       setFilters((f) => ({ ...f, max: f.min }));
       return;
     }
     writeStateToURL(filters, sortBy, true);
-    // atualiza a UI dos prices quando filtros mudarem fora do input
     setPriceUI((p) => ({
       min: document.activeElement === minRef?.current ? p.min : brlPlain(filters.min),
       max: document.activeElement === maxRef?.current ? p.max : brlPlain(filters.max),
     }));
   }, [filters, sortBy]);
+
+  // Delegação global: qualquer <a href="#..."> vai fazer scroll suave manual
+  useEffect(() => {
+    const onClick = (e) => {
+      const a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+
+      const hash = a.getAttribute("href");
+      if (!hash || hash === "#") return;
+
+      const el = document.querySelector(hash);
+      if (!el) return;
+
+      e.preventDefault();
+
+      const header = document.querySelector(".topbar");
+      const offset = (header?.offsetHeight ?? 0) + 8;
+
+      const y = el.getBoundingClientRect().top + window.scrollY - offset;
+
+      // atualiza a URL sem provocar o pulo instantâneo
+      history.pushState(null, "", hash);
+
+      // anima manualmente
+      smoothScrollToY(y, 600);
+    };
+
+    document.addEventListener("click", onClick, { passive: false });
+    return () => document.removeEventListener("click", onClick);
+  }, []);
 
   const ranked = useRankedSkins(skins, sortBy, filters);
 
@@ -167,22 +205,18 @@ export default function DashboardVitrine() {
   const minRef = useRef(null);
   const maxRef = useRef(null);
 
-  // Restringe teclado a dígitos e teclas de navegação/edição
   function allowOnlyDigitsKeyDown(e) {
     const allowed = [
       "Backspace", "Delete", "ArrowLeft", "ArrowRight", "Home", "End", "Tab", "Enter",
     ];
     const isCmd = e.ctrlKey || e.metaKey;
-    const isShortcut = isCmd && ["a","c","v","x"].includes(e.key.toLowerCase());
+    const isShortcut = isCmd && ["a", "c", "v", "x"].includes(e.key.toLowerCase());
     const isDigit = e.key >= "0" && e.key <= "9";
     const isNumpadDigit = e.code && /^Numpad[0-9]$/.test(e.code);
     if (allowed.includes(e.key) || isShortcut || isDigit || isNumpadDigit) return;
     e.preventDefault();
   }
 
-
-  
-  // Cola: mantém somente dígitos
   function handlePasteDigits(e, which) {
     const text = (e.clipboardData || window.clipboardData).getData("text");
     const cleaned = onlyDigits(text);
@@ -220,15 +254,12 @@ export default function DashboardVitrine() {
   const handleLogout = async () => {
     try {
       await logout();
-      // Opcional: redireciona para a home ou login após o logout
-      navigate('/');
+      navigate("/");
     } catch (error) {
       console.error("Falha ao fazer logout:", error);
-      // Opcional: mostrar uma notificação de erro
     }
   };
-  
-  // Limpa filtros para defaults
+
   const handleClearFilters = () => {
     setFilters(DEFAULT_FILTERS);
     setSortBy(DEFAULT_SORT);
@@ -242,21 +273,19 @@ export default function DashboardVitrine() {
 
       {/* Topbar */}
       <div className="topbar">
-        <AuthBrand/>
+        <AuthBrand />
         <nav>
           <a href="#grid">Explorar</a>
           <a href="#planos">Planos</a>
-          <a href="#">Anunciar</a>
+          <a href="#planos">Anunciar</a>
         </nav>
         <div className="actions">
           {user ? (
-            // Se o usuário ESTIVER logado
             <>
               <span className="welcome-user">Olá, {user.nome}!</span>
               <button onClick={handleLogout} className="btn btn--ghost sm">Sair</button>
             </>
           ) : (
-            // Se o usuário NÃO estiver logado
             <>
               <Link to="/login" className="btn btn--ghost sm">Entrar</Link>
               <Link to="/cadastro" className="btn btn--primary sm">Criar conta</Link>
@@ -426,7 +455,6 @@ function SkinCard({ data, liked, onLike }) {
   return (
     <article className={`card card--${plan}`} style={{ "--glow": plansMeta[plan].color }}>
       <div className="card__media">
-        {/* Imagens do Mock devem estar em /public/img (caminho absoluto /img/...) */}
         <img src={data.image} alt={data.title} loading="lazy" />
         <span className="badge" style={{ background: plansMeta[plan].color }}>{plansMeta[plan].label}</span>
         <button className={`like ${liked ? "is-liked" : ""}`} onClick={onLike} aria-label="Favoritar">

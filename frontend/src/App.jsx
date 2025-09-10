@@ -9,7 +9,7 @@ import Login from "./pages/login/Login";
 import ForgotPassword from "./pages/login/ForgotPassword";
 import ResetPassword from "./pages/login/ResetPassword";
 import Dashboard from "./pages/dashboard/Dashboard";
-import Marketplace from "./pages/marketplace/marketplace";
+import Marketplace from "./pages/marketplace/Marketplace.jsx"
 import Carrinho from "./pages/carrinho/Carrinho";
 import Historico from "./pages/historico/Historico";
 import Suporte from "./pages/suporte/Suporte";

@@ -1,0 +1,20 @@
+services:
+  web:
+    container_name: skinloot-web
+
+    # Variáveis só para o "entrypoint.sh" imprimir o link bonitinho no log
+    environment:
+      - APP_HOST=localhost
+      - APP_PORT=5173
+
+    build:
+      context: .               # usa a pasta atual (onde está o Dockerfile)
+      dockerfile: Dockerfile   # garante que usa esse Dockerfile
+      args:                    # ARGs usados na etapa de build (Vite)
+        VITE_AUTH_MODE: ${VITE_AUTH_MODE:-mock}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080}
+
+    ports:
+      - "5173:80"              # http://localhost:5173 → container:80 (Nginx)
+
+    restart: unless-stopped    # reinicia automaticamente se cair (exceto se você der "down")

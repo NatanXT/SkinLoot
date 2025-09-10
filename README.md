@@ -19,7 +19,7 @@ A **SkinLoot** é uma plataforma inovadora que conecta jogadores interessados em
 
 ## 🛠 **Tecnologias Utilizadas**  
 - **Back-end:** Java (Spring Boot)  
-- **Front-end:** Angular  
+- **Front-end:** React + Vite
 - **Banco de Dados:** PostgreSQL  
 - **Autenticação:** JWT (JSON Web Token)  
 - **Integração com APIs de Jogos**  
@@ -63,6 +63,34 @@ npm install
 npm run dev
 ```
 
+### **Docker**
+```sh
+# Primeira vez (ou quando mudar .env, dependências ou Dockerfile)
+docker compose up -d --build
+
+# Iniciar normalmente (em segundo plano)
+docker compose up -d
+# ou, iniciar em primeiro plano (mostra logs)
+docker compose up
+
+# Ver status dos containers do projeto
+docker compose ps
+
+# Logs em tempo real (de todos ou de um serviço específico, ex.: web)
+docker compose logs -f
+docker compose logs -f web
+
+# Parar e remover containers/rede do projeto
+docker compose down
+
+# Reiniciar rápido após pequenas mudanças de config
+docker compose restart
+
+# Construir a imagem sem subir (apenas build)
+docker compose build
+# ou, para ignorar cache:
+docker compose build --no-cache
+```
 ---
 
 ## 📄 **Licença**  
