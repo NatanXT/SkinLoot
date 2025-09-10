@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useAuth } from "../../services/AuthContext";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import "./Auth.css";
+import AuthBrand from "../../components/logo/AuthBrand";
 
 // E-mail simples
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -69,13 +70,7 @@ export default function Login() {
     <div className="auth-root">
       <div className="auth-card">
         {/* 🔗 Logo → "/" */}
-        <Link to="/" className="auth-brand" aria-label="Ir para a página inicial">
-          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
-            <path fill="currentColor" d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v13l10 5 10-5V4l-10 5Z"/>
-          </svg>
-          <span>SkinLoot</span>
-        </Link>
-
+        <AuthBrand/>
         <h1 className="auth-title">Entrar</h1>
         <p className="auth-subtitle">Bem-vindo de volta! Acesse sua conta para anunciar e favoritar skins.</p>
 
@@ -132,7 +127,7 @@ export default function Login() {
               <input type="checkbox" name="lembrar" checked={formData.lembrar} onChange={onChange} />
               <span>Lembrar-me</span>
             </label>
-            <a className="link" href="#">Esqueci minha senha</a>
+            <Link className="link" to={"/forgot-password"}>Esqueci minha senha</Link>
           </div>
 
           {/* CTA */}

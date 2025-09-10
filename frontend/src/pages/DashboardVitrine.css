@@ -72,8 +72,6 @@ body{
   margin-right: 1rem;
   font-size: 0.9rem;
 }
-.brand{ display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.5px }
-.brand svg{ color:var(--primary) }
 nav a{ margin:0 10px; color:var(--muted); text-decoration:none }
 nav a:hover{ color:var(--text) }
 .actions{ display:flex; gap:8px }

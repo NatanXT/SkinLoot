@@ -13,7 +13,7 @@ import { useAuth } from "../services/AuthContext"; // Importe o useAuth
 import { Link, useNavigate } from "react-router-dom"; // Adicione useNavigate
 import "./DashboardVitrine.css";
 import MockSkins from "../components/mock/MockSkins.js";
-
+import AuthBrand from "../components/logo/AuthBrand";
 
 
 /* ---------- Metadados dos planos ---------- */
@@ -242,12 +242,7 @@ export default function DashboardVitrine() {
 
       {/* Topbar */}
       <div className="topbar">
-        <div className="brand">
-          <svg width="20" height="20" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M12 2L2 7l10 5 10-5-10-5Zm0 7L2 4v13l10 5 10-5V4l-10 5Z"/>
-          </svg>
-          <span>SkinLoot</span>
-        </div>
+        <AuthBrand/>
         <nav>
           <a href="#grid">Explorar</a>
           <a href="#planos">Planos</a>

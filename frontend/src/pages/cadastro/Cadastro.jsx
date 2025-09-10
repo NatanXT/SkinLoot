@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useAuth } from "../../services/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import "../../pages/login/Auth.css";
+import AuthBrand from "../../components/logo/AuthBrand";
 
 /* -------------------- Regex & Constantes -------------------- */
 
@@ -114,13 +115,8 @@ export default function Cadastro() {
   return (
     <div className="auth-root">
       <div className="auth-card">
-        <Link to="/" className="auth-brand" aria-label="Ir para a página inicial">
-          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
-            <path fill="currentColor" d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v13l10 5 10-5V4l-10 5Z"/>
-          </svg>
-          <span>SkinLoot</span>
-        </Link>
-
+        {/* 🔗 Logo → "/" */}
+        <AuthBrand/>
         <h1 className="auth-title">Criar conta</h1>
         <p className="auth-subtitle">Cadastre-se para anunciar, favoritar e falar com vendedores.</p>
 

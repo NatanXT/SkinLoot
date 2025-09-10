@@ -6,6 +6,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 // Páginas
 import Cadastro from "./pages/cadastro/Cadastro";
 import Login from "./pages/login/Login";
+import ForgotPassword from "./pages/login/ForgotPassword";
+import ResetPassword from "./pages/login/ResetPassword";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Marketplace from "./pages/marketplace/marketplace";
 import Carrinho from "./pages/carrinho/Carrinho";
@@ -31,6 +33,8 @@ export default function App() {
         {/* Rotas públicas “planas” */}
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/historico" element={<Historico />} />
