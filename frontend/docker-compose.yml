@@ -1,3 +1,6 @@
+# docker-compose.yml
+version: "3.9"
+
 services:
   web:
     container_name: skinloot-web
