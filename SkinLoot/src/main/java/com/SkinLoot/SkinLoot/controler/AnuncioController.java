@@ -48,7 +48,7 @@ public class AnuncioController {
                 .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
 
         // O AnuncioService agora conterá a lógica de validação e criação
-        Anuncio anuncioSalvo = anuncioService.criarAnuncioParaItemExterno(itemId, anuncioRequest, usuario);
+        Anuncio anuncioSalvo = anuncioService.criarAnuncio(anuncioRequest, usuario);
 
         // Converte o Anuncio salvo para o DTO de resposta
         AnuncioResponse responseDto = toDto(anuncioSalvo);
@@ -63,13 +63,15 @@ public class AnuncioController {
         dto.setTitulo(a.getTitulo());
         dto.setDescricao(a.getDescricao());
         dto.setPreco(a.getPreco());
-        dto.setSkinId(a.getSteamItemId()); // Usa o novo campo
-        dto.setSkinIcon(a.getSkinImageUrl()); // Usa o novo campo
-        dto.setSkinNome(a.getSkinName()); // Usa o novo campo
         dto.setStatus(a.getStatus());
         dto.setDataCriacao(a.getDataCriacao());
+        dto.setSkinId(a.getSteamItemId()); // Usa o novo campo
+        dto.setSkinIcon(a.getSkinImageUrl()); // Usa o novo campo
+        dto.setSkinNome(a.getSkinName());
         dto.setUsuarioNome(a.getUsuario().getNome());
-        dto.setSkinQualidade(a.getSkinQuality()); // Usa o novo campo
+        dto.setQualidade(a.getQualidade());
+        dto.setDesgasteFloat(a.getDesgasteFloat());
+        dto.setLikesCount(a.getLikesCount());
         return dto;
     }
 

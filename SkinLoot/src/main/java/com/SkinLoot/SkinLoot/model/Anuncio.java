@@ -1,5 +1,6 @@
 package com.SkinLoot.SkinLoot.model;
 
+import com.SkinLoot.SkinLoot.model.enums.Qualidade;
 import com.SkinLoot.SkinLoot.model.enums.Status;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Formula;
@@ -19,9 +20,10 @@ public class Anuncio {
     @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
 
-    // --- Campos do seu formulário ---
     private String titulo;
+
     private String descricao;
+
     private BigDecimal preco;
 
     @Enumerated(EnumType.STRING)
@@ -29,10 +31,10 @@ public class Anuncio {
 
     // --- Campos que substituem a relação com a entidade Skin ---
     private Long steamItemId; // O ID do item que vem da API da Steam
+
     private String skinName;
+
     private String skinImageUrl;
-    private String skinQuality;
-    // -----------------------------------------------------------
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
@@ -47,13 +49,18 @@ public class Anuncio {
     @Formula("(select count(*) from anuncio_like al where al.anuncio_id = id)")
     private int likesCount;
 
+    private String qualidade;
+
+    @Column(name = "desgaste_float")
+    private Double desgasteFloat;
+
     // Construtores, Getters e Setters para TODOS os campos acima...
     // (É importante ter todos os getters e setters para que o Spring funcione corretamente)
 
     public Anuncio() {}
 
-    public Anuncio(UUID id, String titulo, String descricao, BigDecimal preco, Status status, String skinName, String skinImageUrl, String skinQuality, Usuario usuario, LocalDateTime dataCriacao, Long steamItemId,
-                   Set<AnuncioLike> likes, int likesCount) {
+    public Anuncio(UUID id, String titulo, String descricao, BigDecimal preco, Status status, String skinName, String skinImageUrl, Usuario usuario, LocalDateTime dataCriacao, Long steamItemId,
+                   Set<AnuncioLike> likes, int likesCount, String qualidade, Double desgasteFloat) {
         this.id = id;
         this.titulo = titulo;
         this.descricao = descricao;
@@ -61,12 +68,13 @@ public class Anuncio {
         this.status = status;
         this.skinName = skinName;
         this.skinImageUrl = skinImageUrl;
-        this.skinQuality = skinQuality;
         this.usuario = usuario;
         this.dataCriacao = dataCriacao;
         this.steamItemId = steamItemId;
         this.likes = likes;
         this.likesCount = likesCount;
+        this.qualidade = qualidade;
+        this.desgasteFloat = desgasteFloat;
     }
 
     public Anuncio(UUID anuncioId) {
@@ -89,8 +97,6 @@ public class Anuncio {
     public void setSkinName(String skinName) { this.skinName = skinName; }
     public String getSkinImageUrl() { return skinImageUrl; }
     public void setSkinImageUrl(String skinImageUrl) { this.skinImageUrl = skinImageUrl; }
-    public String getSkinQuality() { return skinQuality; }
-    public void setSkinQuality(String skinQuality) { this.skinQuality = skinQuality; }
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
     public LocalDateTime getDataCriacao() { return dataCriacao; }
@@ -99,4 +105,22 @@ public class Anuncio {
     public void setLikes(Set<AnuncioLike> likes) { this.likes = likes; }
     public int getLikesCount() { return likesCount; }
     public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
+
+    public String getQualidade() {
+        return qualidade;
+    }
+
+    public void setQualidade(String qualidade) {
+        this.qualidade = qualidade;
+    }
+
+    public Double getDesgasteFloat() {
+        return desgasteFloat;
+    }
+
+    public void setDesgasteFloat(Double desgasteFloat) {
+        this.desgasteFloat = desgasteFloat;
+    }
+
+
 }

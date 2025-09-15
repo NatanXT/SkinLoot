@@ -9,7 +9,11 @@ import java.util.UUID;
 
 @Entity // Define que esta classe representa uma tabela no banco de dados
 public class Jogo {
-    
+
+    //Um jogo pode ter várias categorias.
+    //
+    //Uma categoria pode ser aplicada a vários jogos.
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO) // Gera automaticamente um UUID como ID único
     private UUID id;

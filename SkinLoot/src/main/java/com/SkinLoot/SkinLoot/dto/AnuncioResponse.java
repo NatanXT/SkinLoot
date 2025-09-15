@@ -1,6 +1,7 @@
 package com.SkinLoot.SkinLoot.dto;
 
 import com.SkinLoot.SkinLoot.model.Anuncio;
+import com.SkinLoot.SkinLoot.model.enums.Qualidade;
 import com.SkinLoot.SkinLoot.model.enums.Status;
 
 import java.math.BigDecimal;
@@ -19,7 +20,10 @@ public class AnuncioResponse {
     private Status status;
     private LocalDateTime dataCriacao;
     private String usuarioNome;
-    private String skinQualidade;
+    private Double desgasteFloat;
+    private String qualidade;
+    private int likesCount;
+
 
     public AnuncioResponse() {
     }
@@ -36,7 +40,9 @@ public class AnuncioResponse {
         this.skinId = anuncio.getSteamItemId();
         this.skinNome = anuncio.getSkinName();
         this.skinIcon = anuncio.getSkinImageUrl();
-        this.skinQualidade = anuncio.getSkinQuality();
+        this.qualidade = anuncio.getQualidade();
+        this.desgasteFloat = anuncio.getDesgasteFloat();
+        this.likesCount = anuncio.getLikesCount();
 
         // Verifica se o usuário associado ao anúncio não é nulo
         if (anuncio.getUsuario() != null) {
@@ -130,11 +136,35 @@ public class AnuncioResponse {
         this.usuarioNome = usuarioNome;
     }
 
-    public String getSkinQualidade() {
-        return skinQualidade;
+    public String getPlanoNome() {
+        return planoNome;
     }
 
-    public void setSkinQualidade(String skinQualidade) {
-        this.skinQualidade = skinQualidade;
+    public void setPlanoNome(String planoNome) {
+        this.planoNome = planoNome;
+    }
+
+    public Double getDesgasteFloat() {
+        return desgasteFloat;
+    }
+
+    public void setDesgasteFloat(Double desgasteFloat) {
+        this.desgasteFloat = desgasteFloat;
+    }
+
+    public String getQualidade() {
+        return qualidade;
+    }
+
+    public void setQualidade(String qualidade) {
+        this.qualidade = qualidade;
+    }
+
+    public int getLikesCount() {
+        return likesCount;
+    }
+
+    public void setLikesCount(int likesCount) {
+        this.likesCount = likesCount;
     }
 }

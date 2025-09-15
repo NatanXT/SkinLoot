@@ -17,8 +17,6 @@ public class SkinResponse {
     private String descricao;
     private String icon;
     private String raridade;
-    private String qualidade;
-    private Double desgasteFloat;
     private String assetId;
     private UUID jogoId;
     private String jogoNome;
@@ -32,14 +30,9 @@ public class SkinResponse {
         this.nome = skin.getNome();
         this.descricao = skin.getDescricao();
         this.icon = skin.getIcon();
-        this.desgasteFloat = skin.getDesgasteFloat(); // Usa o getter com nome correto
         this.assetId = skin.getAssetId();
-
         if (skin.getRaridade() != null) {
             this.raridade = skin.getRaridade().name();
-        }
-        if (skin.getQualidade() != null) {
-            this.qualidade = skin.getQualidade().name();
         }
         if (skin.getJogo() != null) {
             this.jogoId = skin.getJogo().getId();
