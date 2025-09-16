@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -20,6 +21,8 @@ public class SkinResponse {
     private String assetId;
     private UUID jogoId;
     private String jogoNome;
+    private String statusModeracao;
+    private LocalDateTime dataSubmissao;
 
     /**
      * ✅ ESTE É O ÚNICO CONSTRUTOR DE CONVERSÃO QUE PRECISAMOS.
@@ -31,6 +34,12 @@ public class SkinResponse {
         this.descricao = skin.getDescricao();
         this.icon = skin.getIcon();
         this.assetId = skin.getAssetId();
+        this.dataSubmissao = skin.getDataSubmissao();
+        if (skin.getStatusModeracao() != null) {
+            this.statusModeracao = skin.getStatusModeracao().name(); // Converte o enum para String
+        }
+        // ------------------------------------
+
         if (skin.getRaridade() != null) {
             this.raridade = skin.getRaridade().name();
         }

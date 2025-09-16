@@ -44,6 +44,9 @@ public class Jogo {
     @JsonIgnore
     private List<Skin> skins;
 
+    public Jogo() {
+    }
+
     public Jogo(UUID id, String nome, List<CategoriaJogo> categorias, List<Skin> skins) {
         this.id = id;
         this.nome = nome;

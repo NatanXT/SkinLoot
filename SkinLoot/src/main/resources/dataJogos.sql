@@ -2,9 +2,25 @@
 ALTER TABLE jogo
     ADD CONSTRAINT uk_jogo_nome UNIQUE (nome);
 
+ALTER TABLE jogo_categorias DROP CONSTRAINT IF EXISTS jogo_categorias_categoria_check;
+
 -- Garante que a combinação jogo-categoria é única para evitar duplicatas
-ALTER TABLE jogo_categorias
-    ADD PRIMARY KEY (jogo_nome, categoria); -- Usando as colunas como chave primária composta
+ALTER TABLE jogo_categorias ADD CONSTRAINT jogo_categorias_categoria_check
+    CHECK (categoria IN (
+        -- Categorias antigas
+                         'FPS',
+                         'RPG',
+                         'MOBA',
+                         'ESTRATEGIA',
+                         'SANDBOX',
+                         'P2W',
+        -- Categorias novas
+                         'TATICO',
+                         'COMPETITIVO',
+                         'HERO_SHOOTER',
+                         'SOBREVIVENCIA',
+                         'MUNDO_ABERTO'
+        ));
 
 -- Insere as categorias passo2
 -- Insere os jogos na tabela principal

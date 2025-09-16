@@ -70,6 +70,8 @@ public class Skin {
 //        this.icon = icon;
 //    }
     public Skin() {
+        this.dataSubmissao = LocalDateTime.now();
+        this.statusModeracao = StatusModeracao.PENDENTE; // Define o status padrão
     }
 
     public UUID getId() {
@@ -136,5 +138,19 @@ public class Skin {
         this.assetId = assetId;
     }
 
+    public StatusModeracao getStatusModeracao() {
+        return statusModeracao;
+    }
 
+    public void setStatusModeracao(StatusModeracao statusModeracao) {
+        this.statusModeracao = statusModeracao;
+    }
+
+    public LocalDateTime getDataSubmissao() {
+        return dataSubmissao;
+    }
+
+    public void setDataSubmissao(LocalDateTime dataSubmissao) {
+        this.dataSubmissao = dataSubmissao;
+    }
 }
