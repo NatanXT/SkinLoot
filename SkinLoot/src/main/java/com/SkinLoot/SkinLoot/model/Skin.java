@@ -2,12 +2,14 @@ package com.SkinLoot.SkinLoot.model;
 
 import com.SkinLoot.SkinLoot.model.enums.Qualidade;
 import com.SkinLoot.SkinLoot.model.enums.Raridade;
+import com.SkinLoot.SkinLoot.model.enums.StatusModeracao;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -51,13 +53,15 @@ public class Skin {
     @Column(name = "asset_id")
     private String assetId;
 
-    @Column(name = "desgaste_float")
-    private Double desgasteFloat; // ✅ Nome corrigido (camelCase)
-
     @Enumerated(EnumType.STRING)
-    private Qualidade qualidade;
+    @Column(nullable = false)
+    private StatusModeracao statusModeracao;
 
-//    // Construtores que já fizemos antes...
+    private LocalDateTime dataSubmissao;
+
+
+
+    //    // Construtores que já fizemos antes...
 //    public Skin(String nome, Raridade raridade, Jogo jogo, Usuario usuario, String icon) {
 //        this.nome = nome;
 //        this.raridade = raridade;
@@ -66,6 +70,8 @@ public class Skin {
 //        this.icon = icon;
 //    }
     public Skin() {
+        this.dataSubmissao = LocalDateTime.now();
+        this.statusModeracao = StatusModeracao.PENDENTE; // Define o status padrão
     }
 
     public UUID getId() {
@@ -132,19 +138,19 @@ public class Skin {
         this.assetId = assetId;
     }
 
-    public Double getDesgasteFloat() {
-        return desgasteFloat;
+    public StatusModeracao getStatusModeracao() {
+        return statusModeracao;
     }
 
-    public void setDesgasteFloat(Double desgasteFloat) {
-        this.desgasteFloat = desgasteFloat;
+    public void setStatusModeracao(StatusModeracao statusModeracao) {
+        this.statusModeracao = statusModeracao;
     }
 
-    public Qualidade getQualidade() {
-        return qualidade;
+    public LocalDateTime getDataSubmissao() {
+        return dataSubmissao;
     }
 
-    public void setQualidade(Qualidade qualidade) {
-        this.qualidade = qualidade;
+    public void setDataSubmissao(LocalDateTime dataSubmissao) {
+        this.dataSubmissao = dataSubmissao;
     }
 }

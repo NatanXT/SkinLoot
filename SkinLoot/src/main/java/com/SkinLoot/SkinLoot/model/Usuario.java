@@ -37,6 +37,10 @@ public class Usuario {
     @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres") // Define um tamanho mínimo para senha
     private String senha;
 
+    @ManyToOne // Muitos usuários podem ter um mesmo plano
+    @JoinColumn(name = "plano_assinatura_id") // Nome da coluna da chave estrangeira
+    private PlanoAssinatura planoAssinatura;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -102,6 +106,14 @@ public class Usuario {
 
     public void setSkins(List<Skin> skins) {
         this.skins = skins;
+    }
+
+    public PlanoAssinatura getPlanoAssinatura() {
+        return planoAssinatura;
+    }
+
+    public void setPlanoAssinatura(PlanoAssinatura planoAssinatura) {
+        this.planoAssinatura = planoAssinatura;
     }
 
     public Role getRole() {

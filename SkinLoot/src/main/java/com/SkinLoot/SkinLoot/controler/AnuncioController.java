@@ -10,6 +10,7 @@ import com.SkinLoot.SkinLoot.service.AnuncioService;
 import com.SkinLoot.SkinLoot.service.SkinService;
 import com.SkinLoot.SkinLoot.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -47,7 +48,7 @@ public class AnuncioController {
                 .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
 
         // O AnuncioService agora conterá a lógica de validação e criação
-        Anuncio anuncioSalvo = anuncioService.criarAnuncioParaItemExterno(itemId, anuncioRequest, usuario);
+        Anuncio anuncioSalvo = anuncioService.criarAnuncio(anuncioRequest, usuario);
 
         // Converte o Anuncio salvo para o DTO de resposta
         AnuncioResponse responseDto = toDto(anuncioSalvo);
@@ -62,13 +63,15 @@ public class AnuncioController {
         dto.setTitulo(a.getTitulo());
         dto.setDescricao(a.getDescricao());
         dto.setPreco(a.getPreco());
-        dto.setSkinId(a.getSteamItemId()); // Usa o novo campo
-        dto.setSkinIcon(a.getSkinImageUrl()); // Usa o novo campo
-        dto.setSkinNome(a.getSkinName()); // Usa o novo campo
         dto.setStatus(a.getStatus());
         dto.setDataCriacao(a.getDataCriacao());
+        dto.setSkinId(a.getSteamItemId()); // Usa o novo campo
+        dto.setSkinIcon(a.getSkinImageUrl()); // Usa o novo campo
+        dto.setSkinNome(a.getSkinName());
         dto.setUsuarioNome(a.getUsuario().getNome());
-        dto.setSkinQualidade(a.getSkinQuality()); // Usa o novo campo
+        dto.setQualidade(a.getQualidade());
+        dto.setDesgasteFloat(a.getDesgasteFloat());
+        dto.setLikesCount(a.getLikesCount());
         return dto;
     }
 
@@ -81,5 +84,21 @@ public class AnuncioController {
                 .map(this::toDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
+    }
+
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Void> likeAnuncio(@PathVariable UUID id, Authentication authentication) {
+        String userEmail = authentication.getName();
+        anuncioService.likeAnuncio(id, userEmail); // Chama o novo serviço
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    // ✅ NOVO ENDPOINT: Apenas para remover o like
+    @DeleteMapping("/{id}/unlike")
+    public ResponseEntity<Void> unlikeAnuncio(@PathVariable UUID id, Authentication authentication) {
+        String userEmail = authentication.getName();
+        anuncioService.unlikeAnuncio(id, userEmail); // Chama o novo serviço
+        return ResponseEntity.noContent().build();
     }
 }

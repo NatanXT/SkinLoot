@@ -7,5 +7,9 @@ public enum CategoriaJogo{
     ESTRATEGIA,
     SANDBOX,
     P2W,
-
+    TATICO,
+    COMPETITIVO,
+    HERO_SHOOTER,
+    SOBREVIVENCIA,
+    MUNDO_ABERTO
 }

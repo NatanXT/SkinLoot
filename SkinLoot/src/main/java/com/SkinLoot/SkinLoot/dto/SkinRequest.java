@@ -14,8 +14,6 @@ public class SkinRequest{
     private UUID jogoId;
     private String icon;
     private String assetId;
-    private Double desgastefloat;
-    private Qualidade qualidade;
 
     public String getNome() {
         return nome;
@@ -65,21 +63,6 @@ public class SkinRequest{
         this.assetId = assetId;
     }
 
-    public Double getDesgastefloat() {
-        return desgastefloat;
-    }
-
-    public void setDesgastefloat(Double desgastefloat) {
-        this.desgastefloat = desgastefloat;
-    }
-
-    public Qualidade getQualidade() {
-        return qualidade;
-    }
-
-    public void setQualidade(Qualidade qualidade) {
-        this.qualidade = qualidade;
-    }
 }
 
 

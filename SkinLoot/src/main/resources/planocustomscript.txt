@@ -1,0 +1,5 @@
+-- comando para rodar o arquivo sql sem apontar o problema do uuid no pgadmin --
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- gerar o uuid automaticamente quando o id não é fornecido pelo insert --
+ALTER TABLE plano_assinatura
+ALTER COLUMN id SET DEFAULT gen_random_uuid();

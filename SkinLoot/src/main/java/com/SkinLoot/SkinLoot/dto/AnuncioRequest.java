@@ -11,6 +11,11 @@ public class AnuncioRequest {
     private String descricao;
     private BigDecimal preco;
     private Status status;
+    private Long steamItemId;    // O ID do item que vem da API da Steam
+    private UUID skinId;
+    private Double desgasteFloat;
+    private String qualidade;
+
 
     // Getters e Setters para todos os campos
     public String getTitulo() { return titulo; }
@@ -21,5 +26,34 @@ public class AnuncioRequest {
     public void setPreco(BigDecimal preco) { this.preco = preco; }
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
+
+    public Long getSteamItemId() {
+        return steamItemId;
+    }
+
+    public void setSteamItemId(Long steamItemId) {
+        this.steamItemId = steamItemId;
+    }
+
+    public UUID getSkinId() {
+        return skinId;
+    }
+
+    public void setSkinId(UUID skinId) {
+        this.skinId = skinId;
+    }
+    public Double getDesgasteFloat() { return desgasteFloat; }
+
+    public void setDesgasteFloat(Double desgasteFloat) {
+        this.desgasteFloat = desgasteFloat;
+    }
+
+    public String getQualidade() {
+        return qualidade;
+    }
+
+    public void setQualidade(String qualidade) {
+        this.qualidade = qualidade;
+    }
 }
 

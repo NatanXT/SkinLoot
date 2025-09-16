@@ -2,7 +2,6 @@
 // import React, { useEffect, useState } from "react";
 // // CSS da Home (ajuste o caminho/nome se necessário)
 // import "./Home.css";
-
 // // Dados mock para rodar sem backend (fallback)
 // import MockSkins from "../../components/mock/MockSkins";
 

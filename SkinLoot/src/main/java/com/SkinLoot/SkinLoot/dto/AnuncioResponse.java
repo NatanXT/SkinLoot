@@ -1,5 +1,7 @@
 package com.SkinLoot.SkinLoot.dto;
 
+import com.SkinLoot.SkinLoot.model.Anuncio;
+import com.SkinLoot.SkinLoot.model.enums.Qualidade;
 import com.SkinLoot.SkinLoot.model.enums.Status;
 
 import java.math.BigDecimal;
@@ -14,26 +16,44 @@ public class AnuncioResponse {
     private Long skinId; // Agora é o ID da Steam (Long)
     private String skinIcon;
     private String skinNome;
+    private String planoNome; // ✅ Novo campo
     private Status status;
     private LocalDateTime dataCriacao;
     private String usuarioNome;
-    private String skinQualidade;
+    private Double desgasteFloat;
+    private String qualidade;
+    private int likesCount;
+
 
     public AnuncioResponse() {
     }
 
-    public AnuncioResponse(UUID id, String titulo, String descricao, BigDecimal preco, Long skinId, String skinIcon, String skinNome, Status status, String usuarioNome, LocalDateTime dataCriacao, String skinQualidade) {
-        this.id = id;
-        this.titulo = titulo;
-        this.descricao = descricao;
-        this.preco = preco;
-        this.skinId = skinId;
-        this.skinIcon = skinIcon;
-        this.skinNome = skinNome;
-        this.status = status;
-        this.usuarioNome = usuarioNome;
-        this.dataCriacao = dataCriacao;
-        this.skinQualidade = skinQualidade;
+    public AnuncioResponse(Anuncio anuncio) {
+        this.id = anuncio.getId();
+        this.titulo = anuncio.getTitulo();
+        this.descricao = anuncio.getDescricao();
+        this.preco = anuncio.getPreco();
+        this.status = anuncio.getStatus();
+        this.dataCriacao = anuncio.getDataCriacao();
+
+        // Mapeando os campos da skin que já existem no Anuncio
+        this.skinId = anuncio.getSteamItemId();
+        this.skinNome = anuncio.getSkinName();
+        this.skinIcon = anuncio.getSkinImageUrl();
+        this.qualidade = anuncio.getQualidade();
+        this.desgasteFloat = anuncio.getDesgasteFloat();
+        this.likesCount = anuncio.getLikesCount();
+
+        // Verifica se o usuário associado ao anúncio não é nulo
+        if (anuncio.getUsuario() != null) {
+            this.usuarioNome = anuncio.getUsuario().getNome();
+
+            // --- LÓGICA PARA OBTER O NOME DO PLANO ---
+            // Verifica se o plano do usuário também não é nulo antes de tentar acessá-lo
+            if (anuncio.getUsuario().getPlanoAssinatura() != null) {
+                this.planoNome = String.valueOf(anuncio.getUsuario().getPlanoAssinatura().getNome());
+            }
+        }
     }
 
     public UUID getId() {
@@ -116,11 +136,35 @@ public class AnuncioResponse {
         this.usuarioNome = usuarioNome;
     }
 
-    public String getSkinQualidade() {
-        return skinQualidade;
+    public String getPlanoNome() {
+        return planoNome;
     }
 
-    public void setSkinQualidade(String skinQualidade) {
-        this.skinQualidade = skinQualidade;
+    public void setPlanoNome(String planoNome) {
+        this.planoNome = planoNome;
+    }
+
+    public Double getDesgasteFloat() {
+        return desgasteFloat;
+    }
+
+    public void setDesgasteFloat(Double desgasteFloat) {
+        this.desgasteFloat = desgasteFloat;
+    }
+
+    public String getQualidade() {
+        return qualidade;
+    }
+
+    public void setQualidade(String qualidade) {
+        this.qualidade = qualidade;
+    }
+
+    public int getLikesCount() {
+        return likesCount;
+    }
+
+    public void setLikesCount(int likesCount) {
+        this.likesCount = likesCount;
     }
 }

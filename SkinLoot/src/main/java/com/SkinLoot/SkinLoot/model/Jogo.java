@@ -9,7 +9,11 @@ import java.util.UUID;
 
 @Entity // Define que esta classe representa uma tabela no banco de dados
 public class Jogo {
-    
+
+    //Um jogo pode ter várias categorias.
+    //
+    //Uma categoria pode ser aplicada a vários jogos.
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO) // Gera automaticamente um UUID como ID único
     private UUID id;
@@ -39,6 +43,9 @@ public class Jogo {
     // FetchType.LAZY: As skins só são carregadas quando necessário, otimizando a performance
     @JsonIgnore
     private List<Skin> skins;
+
+    public Jogo() {
+    }
 
     public Jogo(UUID id, String nome, List<CategoriaJogo> categorias, List<Skin> skins) {
         this.id = id;
