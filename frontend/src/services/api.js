@@ -80,4 +80,5 @@ api.interceptors.response.use(
   }
 );
 
-export { api, storage };
+export { storage };
+export default api;
