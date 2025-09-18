@@ -17,8 +17,6 @@
 // import PublicRoute from "./components/publicRoute"; // <-- Importe o novo componente
 // import RootLayout from "./components/rootLayout"; // <-- Importe o novo layout raiz
 
-
-
 // const router = createBrowserRouter([
 //   {
 //     // A ROTA RAIZ AGORA É O NOSSO CONTÊINER DE CARREGAMENTO
@@ -69,7 +67,7 @@
 //           }
 //         ],
 //       },
-      
+
 //       // Rota para URLs não encontradas
 //       {
 //         path: "*",

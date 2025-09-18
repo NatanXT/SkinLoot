@@ -1,5 +1,5 @@
-import React from "react";
-import "./Carrinho.css";
+import React from 'react';
+import './Carrinho.css';
 
 export default function Carrinho() {
   return (

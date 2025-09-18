@@ -6,16 +6,16 @@
 //   o perfil atualizado, simulando sucesso de backend.
 // ============================================================================
 
-import api, { DEV_API_ENABLED, isDevAuth } from "./api";
+import api, { DEV_API_ENABLED, isDevAuth } from './api';
 
 // ⚠️ AJUSTE ESTES ENDPOINTS CONFORME O BACKEND
-const ENDPOINT_RENOVAR = "/planos/renovar";     // POST { planoAtual }
-const ENDPOINT_UPGRADE = "/planos/upgrade";     // POST { planoNovo }
+const ENDPOINT_RENOVAR = '/planos/renovar'; // POST { planoAtual }
+const ENDPOINT_UPGRADE = '/planos/upgrade'; // POST { planoNovo }
 
 /** Lê o "auth_user" salvo no localStorage (DEV login o grava lá). */
 function readAuthUser() {
   try {
-    const raw = localStorage.getItem("auth_user");
+    const raw = localStorage.getItem('auth_user');
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -26,9 +26,9 @@ function readAuthUser() {
 function writeAuthUser(user) {
   try {
     if (!user) {
-      localStorage.removeItem("auth_user");
+      localStorage.removeItem('auth_user');
     } else {
-      localStorage.setItem("auth_user", JSON.stringify(user));
+      localStorage.setItem('auth_user', JSON.stringify(user));
     }
   } catch {
     /* noop */
@@ -49,7 +49,7 @@ export async function renovarPlano(planoAtual) {
     const now = Date.now();
     const renovado = {
       ...user,
-      plano: planoAtual || user.plano || "gratuito",
+      plano: planoAtual || user.plano || 'gratuito',
       planoRenovadoEm: now,
       planoExpiraEm: now + 30 * 24 * 60 * 60 * 1000, // +30 dias
     };
@@ -75,7 +75,7 @@ export async function upgradePlano(planoNovo) {
     const now = Date.now();
     const atualizado = {
       ...user,
-      plano: planoNovo || "intermediario",
+      plano: planoNovo || 'intermediario',
       planoAtualizadoEm: now,
       planoExpiraEm: now + 30 * 24 * 60 * 60 * 1000, // +30 dias
     };

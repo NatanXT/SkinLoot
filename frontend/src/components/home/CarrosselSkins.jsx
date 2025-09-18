@@ -1,21 +1,21 @@
 // CarrosselSkins.jsx
-import React, { useRef } from "react";
-import "../home/CarrosselSkins.css";
-import { Swiper, SwiperSlide } from "swiper/react";
+import React, { useRef } from 'react';
+import '../home/CarrosselSkins.css';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
 // Estilos do Swiper
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/autoplay";
-import "swiper/css/effect-fade";
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/autoplay';
+import 'swiper/css/effect-fade';
 
 // Módulos do Swiper
-import { Autoplay, Pagination, EffectFade } from "swiper/modules";
+import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
 
 /**
  * Componente que renderiza um carrossel automático de skins em grupos de 4.
  * Pausa o autoplay ao passar o mouse e reinicia ao sair.
- * 
+ *
  * @param {Array} skins - Lista de objetos de skin com `nome` e `imagemUrl`.
  */
 export default function CarrosselSkins({ skins }) {
@@ -42,10 +42,12 @@ export default function CarrosselSkins({ skins }) {
         slidesPerView={1}
         effect="fade"
         fadeEffect={{ crossFade: true }}
-        pagination={{ clickable: true, el: ".swiper-pagination-container" }}
+        pagination={{ clickable: true, el: '.swiper-pagination-container' }}
         autoplay={{ delay: 3000, disableOnInteraction: false }}
         loop={true}
-        onSwiper={(swiper) => { swiperRef.current = swiper }}
+        onSwiper={(swiper) => {
+          swiperRef.current = swiper;
+        }}
       >
         {groupedSkins.map((group, index) => (
           <SwiperSlide
@@ -57,7 +59,7 @@ export default function CarrosselSkins({ skins }) {
               {group.map((skin, i) => (
                 <div className="card" key={i}>
                   <img
-                    src={skin.imagemUrl || "/img/placeholder.png"}
+                    src={skin.imagemUrl || '/img/placeholder.png'}
                     alt={skin.nome}
                   />
                   <div className="card-info">

@@ -1,6 +1,6 @@
 // Destaque.jsx
-import React from "react";
-import "../home/Destaque.css";
+import React from 'react';
+import '../home/Destaque.css';
 
 /**
  * Componente de destaque para uma skin especial com botão de chamada para ação.

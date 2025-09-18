@@ -1,6 +1,6 @@
 // Categorias.jsx
-import React from "react";
-import "../home/Categorias.css";
+import React from 'react';
+import '../home/Categorias.css';
 
 /**
  * Componente que exibe categorias populares de skins como botões clicáveis.

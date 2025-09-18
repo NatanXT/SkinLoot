@@ -1,6 +1,6 @@
 // Hero.jsx
-import React from "react";
-import "../home/Hero.css";
+import React from 'react';
+import '../home/Hero.css';
 
 /**
  * Seção de destaque inicial com título, subtítulo e botão.

@@ -7,11 +7,11 @@
 // - Suporte a MODO MOCK via VITE_AUTH_MODE=mock ou VITE_ENABLE_DEV_API=true
 // ============================================================================
 
-import axios from "axios";
+import axios from 'axios';
 
 // ---------- API base ----------
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080",
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
   timeout: 20000,
 });
 
@@ -20,33 +20,37 @@ const api = axios.create({
 const storage = {
   // Flag de “lembrar sessão” no localStorage (sempre aqui)
   get remember() {
-    return localStorage.getItem("remember") === "true";
+    return localStorage.getItem('remember') === 'true';
   },
   set remember(v) {
-    localStorage.setItem("remember", v ? "true" : "false");
+    localStorage.setItem('remember', v ? 'true' : 'false');
   },
 
   // Access token salvo no “box” conforme remember
   get access() {
-    return (this.remember ? localStorage : sessionStorage).getItem("accessToken");
+    return (this.remember ? localStorage : sessionStorage).getItem(
+      'accessToken',
+    );
   },
   set access(v) {
     const box = this.remember ? localStorage : sessionStorage;
-    v ? box.setItem("accessToken", v) : box.removeItem("accessToken");
+    v ? box.setItem('accessToken', v) : box.removeItem('accessToken');
   },
 
   // Refresh token salvo no “box” conforme remember
   get refresh() {
-    return (this.remember ? localStorage : sessionStorage).getItem("refreshToken");
+    return (this.remember ? localStorage : sessionStorage).getItem(
+      'refreshToken',
+    );
   },
   set refresh(v) {
     const box = this.remember ? localStorage : sessionStorage;
-    v ? box.setItem("refreshToken", v) : box.removeItem("refreshToken");
+    v ? box.setItem('refreshToken', v) : box.removeItem('refreshToken');
   },
 
   // Limpa access/refresh dos dois storages
   clear() {
-    ["accessToken", "refreshToken"].forEach((k) => {
+    ['accessToken', 'refreshToken'].forEach((k) => {
       localStorage.removeItem(k);
       sessionStorage.removeItem(k);
     });
@@ -58,16 +62,16 @@ const storage = {
 // - VITE_AUTH_MODE=mock, OU
 // - VITE_ENABLE_DEV_API=true (chave auxiliar de desenvolvimento)
 const DEV_API_ENABLED =
-  import.meta.env.VITE_AUTH_MODE === "mock" ||
-  import.meta.env.VITE_ENABLE_DEV_API === "true";
+  import.meta.env.VITE_AUTH_MODE === 'mock' ||
+  import.meta.env.VITE_ENABLE_DEV_API === 'true';
 
 /**
  * Retorna true se estivermos “logados” com token de desenvolvimento.
  * Convenção: o DEV Login grava "dev-access-token" como accessToken.
  */
 function isDevAuth() {
-  const t = storage.access || "";
-  return t.startsWith("dev-");
+  const t = storage.access || '';
+  return t.startsWith('dev-');
 }
 
 // ---------- Interceptors JWT ----------
@@ -91,7 +95,7 @@ api.interceptors.response.use(
       try {
         if (!refreshing) {
           refreshing = api
-            .post("/auth/refresh", { refreshToken: storage.refresh })
+            .post('/auth/refresh', { refreshToken: storage.refresh })
             .then((r) => {
               const novoAccess = r?.data?.accessToken;
               if (novoAccess) storage.access = novoAccess;
@@ -103,7 +107,7 @@ api.interceptors.response.use(
         }
 
         const newAccess = await refreshing;
-        if (!newAccess) throw new Error("Refresh inválido");
+        if (!newAccess) throw new Error('Refresh inválido');
 
         // Reexecuta a requisição original com o novo access
         config.__isRetry = true;
@@ -116,7 +120,7 @@ api.interceptors.response.use(
     }
 
     throw err;
-  }
+  },
 );
 
 export { storage, isDevAuth, DEV_API_ENABLED };

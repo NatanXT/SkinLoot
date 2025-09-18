@@ -10,79 +10,95 @@
 //   fecha ao clicar fora ou pressionar ESC.
 // ======================================================
 
-import { useEffect, useMemo, useState, useRef } from "react";
-import { useAuth } from "../../services/AuthContext.jsx";
-import { Link, useNavigate } from "react-router-dom";
-import "./DashboardVitrine.css";
-import MockSkins from "../../components/mock/MockSkins.js";
-import AuthBrand from "../../components/logo/AuthBrand.jsx";
+import { useEffect, useMemo, useState, useRef } from 'react';
+import { useAuth } from '../../services/AuthContext.jsx';
+import { Link, useNavigate } from 'react-router-dom';
+import './DashboardVitrine.css';
+import MockSkins from '../../components/mock/MockSkins.js';
+import AuthBrand from '../../components/logo/AuthBrand.jsx';
 
 //import anuncioService from "../services/anuncioService"; // ✅ futuro
 
 /* ---------- Metadados dos planos ---------- */
 const plansMeta = {
-  gratuito:      { label: "Gratuito",      weight: 1.0, color: "#454B54" },
-  intermediario: { label: "Intermediário", weight: 1.6, color: "#00C896" },
-  plus:          { label: "+ Plus",        weight: 2.2, color: "#39FF14" },
+  gratuito: { label: 'Gratuito', weight: 1.0, color: '#454B54' },
+  intermediario: { label: 'Intermediário', weight: 1.6, color: '#00C896' },
+  plus: { label: '+ Plus', weight: 2.2, color: '#39FF14' },
 };
 
 /* ---------- Defaults / URL helpers ---------- */
 const DEFAULT_FILTERS = Object.freeze({
-  search: "",
-  game: "todos",
-  plan: "todos",
+  search: '',
+  game: 'todos',
+  plan: 'todos',
   min: 0,
   max: 10000,
 });
-const DEFAULT_SORT = "relevancia";
-const ALLOWED_SORT = new Set(["relevancia", "recentes", "preco_asc", "preco_desc"]);
+const DEFAULT_SORT = 'relevancia';
+const ALLOWED_SORT = new Set([
+  'relevancia',
+  'recentes',
+  'preco_asc',
+  'preco_desc',
+]);
 
-const onlyDigits = (s) => (s || "").replace(/\D/g, "");
+const onlyDigits = (s) => (s || '').replace(/\D/g, '');
 const brlPlain = (n) =>
   Number.isFinite(n)
-    ? n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-    : "0,00";
+    ? n.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    : '0,00';
 
 /** Lê filtros/sort do URL (se houver), senão usa defaults */
 function readStateFromURL() {
   const p = new URLSearchParams(window.location.search);
-  const search = p.get("q") ?? DEFAULT_FILTERS.search;
-  const game = p.get("game") ?? DEFAULT_FILTERS.game;
-  const plan = p.get("plan") ?? DEFAULT_FILTERS.plan;
-  const min = Math.max(0, parseInt(p.get("min") ?? DEFAULT_FILTERS.min, 10) || 0);
-  const max = Math.max(min, parseInt(p.get("max") ?? DEFAULT_FILTERS.max, 10) || DEFAULT_FILTERS.max);
-  const sort = ALLOWED_SORT.has(p.get("sort")) ? p.get("sort") : DEFAULT_SORT;
+  const search = p.get('q') ?? DEFAULT_FILTERS.search;
+  const game = p.get('game') ?? DEFAULT_FILTERS.game;
+  const plan = p.get('plan') ?? DEFAULT_FILTERS.plan;
+  const min = Math.max(
+    0,
+    parseInt(p.get('min') ?? DEFAULT_FILTERS.min, 10) || 0,
+  );
+  const max = Math.max(
+    min,
+    parseInt(p.get('max') ?? DEFAULT_FILTERS.max, 10) || DEFAULT_FILTERS.max,
+  );
+  const sort = ALLOWED_SORT.has(p.get('sort')) ? p.get('sort') : DEFAULT_SORT;
   return { filters: { search, game, plan, min, max }, sort };
 }
 
 /** Escreve filtros/sort no URL (remove params que estão iguais aos defaults) */
 function writeStateToURL(filters, sort, replace = true) {
   const p = new URLSearchParams();
-  if (filters.search) p.set("q", filters.search);
-  if (filters.game !== DEFAULT_FILTERS.game) p.set("game", filters.game);
-  if (filters.plan !== DEFAULT_FILTERS.plan) p.set("plan", filters.plan);
-  if (filters.min !== DEFAULT_FILTERS.min) p.set("min", String(filters.min));
-  if (filters.max !== DEFAULT_FILTERS.max) p.set("max", String(filters.max));
-  if (sort !== DEFAULT_SORT) p.set("sort", sort);
+  if (filters.search) p.set('q', filters.search);
+  if (filters.game !== DEFAULT_FILTERS.game) p.set('game', filters.game);
+  if (filters.plan !== DEFAULT_FILTERS.plan) p.set('plan', filters.plan);
+  if (filters.min !== DEFAULT_FILTERS.min) p.set('min', String(filters.min));
+  if (filters.max !== DEFAULT_FILTERS.max) p.set('max', String(filters.max));
+  if (sort !== DEFAULT_SORT) p.set('sort', sort);
   const qs = p.toString();
   const newUrl = qs ? `?${qs}` : window.location.pathname;
-  const method = replace ? "replaceState" : "pushState";
-  window.history[method]({}, "", newUrl);
+  const method = replace ? 'replaceState' : 'pushState';
+  window.history[method]({}, '', newUrl);
 }
 
 /* ---------- Mock enrichment ---------- */
 function enrichFromMock(list) {
-  const plans = ["gratuito", "intermediario", "plus"];
+  const plans = ['gratuito', 'intermediario', 'plus'];
   return list.map((s, i) => ({
     id: String(i + 1),
     title: s.nome,
     image: s.imagemUrl,
-    game: "CS2",
-    price: Math.round((200 + (i * 137) % 5400 + (i % 3 === 2 ? 800 : 0)) * 10) / 10,
-    currency: "BRL",
-    seller: { name: `@seller_${i + 1}`, contactUrl: "#" },
+    game: 'CS2',
+    price:
+      Math.round((200 + ((i * 137) % 5400) + (i % 3 === 2 ? 800 : 0)) * 10) /
+      10,
+    currency: 'BRL',
+    seller: { name: `@seller_${i + 1}`, contactUrl: '#' },
     plan: plans[i % plans.length],
-    likes: 20 + (i * 73) % 900,
+    likes: 20 + ((i * 73) % 900),
     listedAt: Date.now() - (i + 1) * 1000 * 60 * 60 * (3 + (i % 6)),
   }));
 }
@@ -93,23 +109,28 @@ function useRankedSkins(list, sortBy, filters) {
     const now = Date.now();
     const rec = (t) => Math.max(0.6, 1.4 - (now - t) / (1000 * 60 * 60 * 72));
 
-    let filtered = list.filter((s) =>
-      (filters.plan === "todos" || s.plan === filters.plan) &&
-      (filters.game === "todos" || s.game === filters.game) &&
-      s.price >= filters.min &&
-      s.price <= filters.max &&
-      s.title.toLowerCase().includes(filters.search.toLowerCase())
+    let filtered = list.filter(
+      (s) =>
+        (filters.plan === 'todos' || s.plan === filters.plan) &&
+        (filters.game === 'todos' || s.game === filters.game) &&
+        s.price >= filters.min &&
+        s.price <= filters.max &&
+        s.title.toLowerCase().includes(filters.search.toLowerCase()),
     );
 
     const scored = filtered.map((s) => ({
       ...s,
-      score: plansMeta[s.plan].weight * Math.pow(s.likes + 1, 0.5) * rec(s.listedAt),
+      score:
+        plansMeta[s.plan].weight * Math.pow(s.likes + 1, 0.5) * rec(s.listedAt),
     }));
 
-    if (sortBy === "relevancia") return scored.sort((a, b) => b.score - a.score);
-    if (sortBy === "preco_asc") return scored.sort((a, b) => a.price - b.price);
-    if (sortBy === "preco_desc") return scored.sort((a, b) => b.price - a.price);
-    if (sortBy === "recentes") return scored.sort((a, b) => b.listedAt - a.listedAt);
+    if (sortBy === 'relevancia')
+      return scored.sort((a, b) => b.score - a.score);
+    if (sortBy === 'preco_asc') return scored.sort((a, b) => a.price - b.price);
+    if (sortBy === 'preco_desc')
+      return scored.sort((a, b) => b.price - a.price);
+    if (sortBy === 'recentes')
+      return scored.sort((a, b) => b.listedAt - a.listedAt);
     return scored;
   }, [list, sortBy, filters]);
 }
@@ -119,7 +140,8 @@ function smoothScrollToY(toY, duration = 500) {
   const startY = window.scrollY || window.pageYOffset || 0;
   const distance = toY - startY;
   const startTime = performance.now();
-  const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const easeInOutCubic = (t) =>
+    t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
   function step(now) {
     const elapsed = now - startTime;
@@ -161,8 +183,14 @@ export default function DashboardVitrine() {
     }
     writeStateToURL(filters, sortBy, true);
     setPriceUI((p) => ({
-      min: document.activeElement === minRef?.current ? p.min : brlPlain(filters.min),
-      max: document.activeElement === maxRef?.current ? p.max : brlPlain(filters.max),
+      min:
+        document.activeElement === minRef?.current
+          ? p.min
+          : brlPlain(filters.min),
+      max:
+        document.activeElement === maxRef?.current
+          ? p.max
+          : brlPlain(filters.max),
     }));
   }, [filters, sortBy]);
 
@@ -172,25 +200,25 @@ export default function DashboardVitrine() {
       const a = e.target.closest('a[href^="#"]');
       if (!a) return;
 
-      const hash = a.getAttribute("href");
-      if (!hash || hash === "#") return;
+      const hash = a.getAttribute('href');
+      if (!hash || hash === '#') return;
 
       const el = document.querySelector(hash);
       if (!el) return;
 
       e.preventDefault();
 
-      const header = document.querySelector(".topbar");
+      const header = document.querySelector('.topbar');
       const offset = (header?.offsetHeight ?? 0) + 8;
 
       const y = el.getBoundingClientRect().top + window.scrollY - offset;
 
-      history.pushState(null, "", hash);
+      history.pushState(null, '', hash);
       smoothScrollToY(y, 600);
     };
 
-    document.addEventListener("click", onClick, { passive: false });
-    return () => document.removeEventListener("click", onClick);
+    document.addEventListener('click', onClick, { passive: false });
+    return () => document.removeEventListener('click', onClick);
   }, []);
 
   const ranked = useRankedSkins(skins, sortBy, filters);
@@ -213,18 +241,27 @@ export default function DashboardVitrine() {
 
   function allowOnlyDigitsKeyDown(e) {
     const allowed = [
-      "Backspace", "Delete", "ArrowLeft", "ArrowRight", "Home", "End", "Tab", "Enter",
+      'Backspace',
+      'Delete',
+      'ArrowLeft',
+      'ArrowRight',
+      'Home',
+      'End',
+      'Tab',
+      'Enter',
     ];
     const isCmd = e.ctrlKey || e.metaKey;
-    const isShortcut = isCmd && ["a", "c", "v", "x"].includes(e.key.toLowerCase());
-    const isDigit = e.key >= "0" && e.key <= "9";
+    const isShortcut =
+      isCmd && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase());
+    const isDigit = e.key >= '0' && e.key <= '9';
     const isNumpadDigit = e.code && /^Numpad[0-9]$/.test(e.code);
-    if (allowed.includes(e.key) || isShortcut || isDigit || isNumpadDigit) return;
+    if (allowed.includes(e.key) || isShortcut || isDigit || isNumpadDigit)
+      return;
     e.preventDefault();
   }
 
   function handlePasteDigits(e, which) {
-    const text = (e.clipboardData || window.clipboardData).getData("text");
+    const text = (e.clipboardData || window.clipboardData).getData('text');
     const cleaned = onlyDigits(text);
     e.preventDefault();
     setPriceUI((p) => ({ ...p, [which]: cleaned }));
@@ -238,7 +275,10 @@ export default function DashboardVitrine() {
     setFilters((f) => ({ ...f, min: cleaned ? parseInt(cleaned, 10) : 0 }));
   };
   const handleMinFocus = () => {
-    setPriceUI((p) => ({ ...p, min: filters.min ? String(Math.round(filters.min)) : "" }));
+    setPriceUI((p) => ({
+      ...p,
+      min: filters.min ? String(Math.round(filters.min)) : '',
+    }));
   };
   const handleMinBlur = () => {
     setPriceUI((p) => ({ ...p, min: brlPlain(filters.min) }));
@@ -251,7 +291,10 @@ export default function DashboardVitrine() {
     setFilters((f) => ({ ...f, max: cleaned ? parseInt(cleaned, 10) : 0 }));
   };
   const handleMaxFocus = () => {
-    setPriceUI((p) => ({ ...p, max: filters.max ? String(Math.round(filters.max)) : "" }));
+    setPriceUI((p) => ({
+      ...p,
+      max: filters.max ? String(Math.round(filters.max)) : '',
+    }));
   };
   const handleMaxBlur = () => {
     setPriceUI((p) => ({ ...p, max: brlPlain(filters.max) }));
@@ -260,16 +303,19 @@ export default function DashboardVitrine() {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate("/");
+      navigate('/');
     } catch (error) {
-      console.error("Falha ao fazer logout:", error);
+      console.error('Falha ao fazer logout:', error);
     }
   };
 
   const handleClearFilters = () => {
     setFilters(DEFAULT_FILTERS);
     setSortBy(DEFAULT_SORT);
-    setPriceUI({ min: brlPlain(DEFAULT_FILTERS.min), max: brlPlain(DEFAULT_FILTERS.max) });
+    setPriceUI({
+      min: brlPlain(DEFAULT_FILTERS.min),
+      max: brlPlain(DEFAULT_FILTERS.max),
+    });
     writeStateToURL(DEFAULT_FILTERS, DEFAULT_SORT, false);
   };
 
@@ -305,20 +351,20 @@ export default function DashboardVitrine() {
         setMenuOpen(false);
       }
     };
-    document.addEventListener("click", onDocClick);
-    return () => document.removeEventListener("click", onDocClick);
+    document.addEventListener('click', onDocClick);
+    return () => document.removeEventListener('click', onDocClick);
   }, []);
 
   // Fecha com ESC
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         setMenuPinned(false);
         setMenuOpen(false);
       }
     };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
   }, []);
 
   // Limpa o timer ao desmontar
@@ -329,11 +375,11 @@ export default function DashboardVitrine() {
   }, []);
 
   /* ---------- Avatar (apenas quando logado) ---------- */
-  const initials = (user?.nome || user?.email || "?")
-    .split(" ")
+  const initials = (user?.nome || user?.email || '?')
+    .split(' ')
     .map((p) => p[0])
     .slice(0, 2)
-    .join("")
+    .join('')
     .toUpperCase();
 
   return (
@@ -352,7 +398,7 @@ export default function DashboardVitrine() {
         <div className="actions">
           {user ? (
             <div
-              className={`profile-menu ${menuOpen ? "is-open" : ""}`}
+              className={`profile-menu ${menuOpen ? 'is-open' : ''}`}
               ref={menuRef}
               onMouseEnter={openMenu}
               onMouseLeave={scheduleClose}
@@ -369,15 +415,23 @@ export default function DashboardVitrine() {
 
               {menuOpen && (
                 <div className="menu" role="menu">
-                  <button onClick={() => navigate("/perfil")} role="menuitem">Meu perfil</button>
-                  <button onClick={handleLogout} role="menuitem">Sair</button>
+                  <button onClick={() => navigate('/perfil')} role="menuitem">
+                    Meu perfil
+                  </button>
+                  <button onClick={handleLogout} role="menuitem">
+                    Sair
+                  </button>
                 </div>
               )}
             </div>
           ) : (
             <>
-              <Link to="/login" className="btn btn--ghost sm">Entrar</Link>
-              <Link to="/cadastro" className="btn btn--primary sm">Criar conta</Link>
+              <Link to="/login" className="btn btn--ghost sm">
+                Entrar
+              </Link>
+              <Link to="/cadastro" className="btn btn--primary sm">
+                Criar conta
+              </Link>
             </>
           )}
         </div>
@@ -387,10 +441,17 @@ export default function DashboardVitrine() {
       <header className="hero">
         <div className="hero__copy">
           <h1>Vitrine das Skins</h1>
-          <p>Somos apenas a vitrine. Anuncie, favorite e, ao comprar, redirecionamos para o site do vendedor.</p>
+          <p>
+            Somos apenas a vitrine. Anuncie, favorite e, ao comprar,
+            redirecionamos para o site do vendedor.
+          </p>
           <div className="hero__cta">
-            <a className="btn btn--primary" href="#grid">Explorar Skins</a>
-            <a className="btn btn--ghost" href="#planos">Planos de Destaque</a>
+            <a className="btn btn--primary" href="#grid">
+              Explorar Skins
+            </a>
+            <a className="btn btn--ghost" href="#planos">
+              Planos de Destaque
+            </a>
           </div>
         </div>
       </header>
@@ -400,12 +461,17 @@ export default function DashboardVitrine() {
         <div className="filters__row">
           <div className="field field--search">
             <svg width="18" height="18" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16a6.471 6.471 0 0 0 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"/>
+              <path
+                fill="currentColor"
+                d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16a6.471 6.471 0 0 0 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"
+              />
             </svg>
             <input
               placeholder="Buscar skins..."
               value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+              onChange={(e) =>
+                setFilters({ ...filters, search: e.target.value })
+              }
             />
           </div>
 
@@ -436,7 +502,9 @@ export default function DashboardVitrine() {
           <div className="field">
             <label>Ordenar</label>
             <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-              <option value="relevancia">Relevância (plano + likes + recência)</option>
+              <option value="relevancia">
+                Relevância (plano + likes + recência)
+              </option>
               <option value="recentes">Mais recentes</option>
               <option value="preco_asc">Preço: menor → maior</option>
               <option value="preco_desc">Preço: maior → menor</option>
@@ -461,7 +529,7 @@ export default function DashboardVitrine() {
                   onFocus={handleMinFocus}
                   onBlur={handleMinBlur}
                   onKeyDown={allowOnlyDigitsKeyDown}
-                  onPaste={(e) => handlePasteDigits(e, "min")}
+                  onPaste={(e) => handlePasteDigits(e, 'min')}
                   placeholder={brlPlain(DEFAULT_FILTERS.min)}
                 />
               </div>
@@ -482,7 +550,7 @@ export default function DashboardVitrine() {
                   onFocus={handleMaxFocus}
                   onBlur={handleMaxBlur}
                   onKeyDown={allowOnlyDigitsKeyDown}
-                  onPaste={(e) => handlePasteDigits(e, "max")}
+                  onPaste={(e) => handlePasteDigits(e, 'max')}
                   placeholder={brlPlain(DEFAULT_FILTERS.max)}
                 />
               </div>
@@ -515,14 +583,20 @@ export default function DashboardVitrine() {
         <h2>Planos de Destaque</h2>
         <div className="plans__grid">
           {Object.entries(plansMeta).map(([key, p]) => (
-            <div key={key} className={`plan plan--${key}`} style={{ "--plan": p.color }}>
+            <div
+              key={key}
+              className={`plan plan--${key}`}
+              style={{ '--plan': p.color }}
+            >
               <h3>{p.label}</h3>
               <ul>
-                <li>Prioridade de exibição: <strong>{p.weight}x</strong></li>
+                <li>
+                  Prioridade de exibição: <strong>{p.weight}x</strong>
+                </li>
                 <li>Badge de destaque</li>
                 <li>Suporte via e-mail</li>
-                {key !== "gratuito" && <li>Relatórios de visualização</li>}
-                {key === "plus" && <li>Spotlight na página inicial</li>}
+                {key !== 'gratuito' && <li>Relatórios de visualização</li>}
+                {key === 'plus' && <li>Spotlight na página inicial</li>}
               </ul>
               <button className="btn btn--primary">Assinar</button>
             </div>
@@ -532,7 +606,10 @@ export default function DashboardVitrine() {
 
       {/* Footer */}
       <footer className="foot">
-        <p>© {new Date().getFullYear()} SkinLoot — Nós apenas conectamos vendedor e comprador.</p>
+        <p>
+          © {new Date().getFullYear()} SkinLoot — Nós apenas conectamos vendedor
+          e comprador.
+        </p>
       </footer>
     </div>
   );
@@ -541,17 +618,21 @@ export default function DashboardVitrine() {
 /* ---------- Card (componente) ---------- */
 function SkinCard({ data, liked, onLike }) {
   // ✅ Suporta formatos do MOCK (price/title/seller) e do BACKEND (preco/skinNome/usuarioNome)
-  const title   = data?.skinNome ?? data?.title ?? data?.nome ?? "Skin";
-  const image   = data?.image ?? data?.imagemUrl ?? data?.imagem ?? "";
-  const vendedor = data?.usuarioNome ?? data?.seller?.name ?? data?.vendedorNome ?? "—";
+  const title = data?.skinNome ?? data?.title ?? data?.nome ?? 'Skin';
+  const image = data?.image ?? data?.imagemUrl ?? data?.imagem ?? '';
+  const vendedor =
+    data?.usuarioNome ?? data?.seller?.name ?? data?.vendedorNome ?? '—';
 
   const precoNumber = Number(data?.preco ?? data?.price ?? NaN);
   const precoFmt = Number.isFinite(precoNumber)
-    ? precoNumber.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-    : "—";
+    ? precoNumber.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    : '—';
 
-  const planKey = (data?.plan ?? data?.plano ?? "gratuito");
-  const planMeta = plansMeta[planKey] || { label: "—", color: "#999" };
+  const planKey = data?.plan ?? data?.plano ?? 'gratuito';
+  const planMeta = plansMeta[planKey] || { label: '—', color: '#999' };
 
   return (
     <article className="card">
@@ -561,9 +642,16 @@ function SkinCard({ data, liked, onLike }) {
           {planMeta.label}
         </span>
 
-        <button className={`like ${liked ? "is-liked" : ""}`} onClick={onLike} aria-label="Favoritar">
+        <button
+          className={`like ${liked ? 'is-liked' : ''}`}
+          onClick={onLike}
+          aria-label="Favoritar"
+        >
           <svg width="20" height="20" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.22 2.53C11.09 5.01 12.76 4 14.5 4 17 4 19 6 19 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            <path
+              fill="currentColor"
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.22 2.53C11.09 5.01 12.76 4 14.5 4 17 4 19 6 19 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+            />
           </svg>
         </button>
       </div>
@@ -576,8 +664,22 @@ function SkinCard({ data, liked, onLike }) {
         <div className="seller">
           <span>Vendedor: {vendedor}</span>
           <div className="cta">
-            <a className="btn btn--ghost" href="#" target="_blank" rel="noreferrer">Contato</a>
-            <a className="btn btn--primary" href="#" target="_blank" rel="noreferrer">Comprar fora</a>
+            <a
+              className="btn btn--ghost"
+              href="#"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Contato
+            </a>
+            <a
+              className="btn btn--primary"
+              href="#"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Comprar fora
+            </a>
           </div>
         </div>
       </div>

@@ -5,22 +5,24 @@
 // - Em MODO MOCK, retorna um usuário local (de auth_user ou fallback padrão)
 // ============================================================================
 
-import api, { isDevAuth, DEV_API_ENABLED } from "./api";
+import api, { isDevAuth, DEV_API_ENABLED } from './api';
 
 // ---------- Mock de perfil ----------
 function mockPerfil() {
   // Tenta reaproveitar o user salvo pelo DEV Login
-  const raw = localStorage.getItem("auth_user");
+  const raw = localStorage.getItem('auth_user');
   if (raw) {
-    try { return JSON.parse(raw); } catch {}
+    try {
+      return JSON.parse(raw);
+    } catch {}
   }
   // Fallback (caso não exista no storage)
   return {
     id: 0,
-    nome: "Usuário DEV",
-    email: "dev@skinloot.com",
-    plano: "plus",
-    criadoEm: "2024-01-10T12:00:00Z",
+    nome: 'Usuário DEV',
+    email: 'dev@skinloot.com',
+    plano: 'plus',
+    criadoEm: '2024-01-10T12:00:00Z',
   };
 }
 
@@ -36,7 +38,7 @@ export async function getMyProfile() {
 
   // ---------- CHAMADA REAL AO BACKEND (AJUSTE O ENDPOINT) ----------
   // Ex.: GET /users/me
-  const { data } = await api.get("/users/me");
+  const { data } = await api.get('/users/me');
   return data;
 }
 
@@ -48,12 +50,12 @@ export async function updateMyProfile(payload) {
     // Simula atualização local no auth_user
     const atual = mockPerfil();
     const novo = { ...atual, ...payload };
-    localStorage.setItem("auth_user", JSON.stringify(novo));
+    localStorage.setItem('auth_user', JSON.stringify(novo));
     await new Promise((r) => setTimeout(r, 200));
     return novo;
   }
 
-  const { data } = await api.put("/users/me", payload);
+  const { data } = await api.put('/users/me', payload);
   return data;
 }
 
@@ -67,6 +69,6 @@ export async function changeMyPassword(payload) {
     return { ok: true };
   }
 
-  const { data } = await api.put("/users/me/password", payload);
+  const { data } = await api.put('/users/me/password', payload);
   return data;
 }

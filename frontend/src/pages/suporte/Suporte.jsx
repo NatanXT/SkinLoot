@@ -1,5 +1,5 @@
-import React from "react";
-import "./Suporte.css";
+import React from 'react';
+import './Suporte.css';
 
 export default function Suporte() {
   return (

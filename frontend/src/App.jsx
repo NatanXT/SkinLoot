@@ -1,28 +1,33 @@
 // src/App.jsx
-import React from "react";
+import React from 'react';
 // OBS: como usamos Router dentro do App, o main.jsx NÃO deve criar Router de novo
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 
 // Páginas
-import Cadastro from "./pages/cadastro/Cadastro";
-import Login from "./pages/login/Login";
-import ForgotPassword from "./pages/login/ForgotPassword";
-import ResetPassword from "./pages/login/ResetPassword";
+import Cadastro from './pages/cadastro/Cadastro';
+import Login from './pages/login/Login';
+import ForgotPassword from './pages/login/ForgotPassword';
+import ResetPassword from './pages/login/ResetPassword';
 
-import Marketplace from "./pages/marketplace/Marketplace.jsx";
-import Carrinho from "./pages/carrinho/Carrinho";
-import Historico from "./pages/historico/Historico";
-import Suporte from "./pages/suporte/Suporte";
-import NotFound from "./pages/notfound/NotFound";
-import DashboardVitrine from "./pages/dashboard/DashboardVitrine.jsx";
+import Marketplace from './pages/marketplace/Marketplace.jsx';
+import Carrinho from './pages/carrinho/Carrinho';
+import Historico from './pages/historico/Historico';
+import Suporte from './pages/suporte/Suporte';
+import NotFound from './pages/notfound/NotFound';
+import DashboardVitrine from './pages/dashboard/DashboardVitrine.jsx';
 
-import PerfilUsuario from "./pages/usuario/PerfilUsuario";
+import PerfilUsuario from './pages/usuario/PerfilUsuario';
 
 // Context/Auth
-import { useAuth } from "./services/AuthContext";
+import { useAuth } from './services/AuthContext';
 
 // Layout persistente (Sidebar/Header/Footer) para rotas específicas
-import Layout from "./components/layout/Layout"; // (import mantido caso vá usar em outras rotas)
+import Layout from './components/layout/Layout'; // (import mantido caso vá usar em outras rotas)
 
 // ------ Guard de rota (protege rotas que exigem login) ------
 function RequireAuth({ children }) {

@@ -1,5 +1,5 @@
-import React from "react";
-import "./Historico.css";
+import React from 'react';
+import './Historico.css';
 
 export default function Historico() {
   return (
