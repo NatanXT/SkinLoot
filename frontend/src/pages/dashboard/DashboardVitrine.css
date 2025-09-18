@@ -9,6 +9,7 @@
    - Botões, Planos e Footer
    - Responsivo
    - Scroll suave (âncoras) com compensação da topbar
+   - Avatar com menu (neon e dropdown)
 ====================================================== */
 
 /* ---------- Tokens / Variáveis ---------- */
@@ -159,7 +160,7 @@ nav a:hover{ color:var(--text) }
 .money__field::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
 .money__field[type="number"]{ -moz-appearance:textfield; appearance:textfield; }
 
-/* Ações dos filtros (limpar, etc.) */
+/* Ações dos filtros */
 .filters__actions{
   grid-column: 1 / -1;
   display:flex; justify-content:flex-end; gap:8px;
@@ -287,4 +288,74 @@ nav a:hover{ color:var(--text) }
 @media (max-width: 640px){
   .filters__row{ grid-template-columns:1fr; }
   :root{ --card-min-col: 310px; --media-min-h: 300px; --btn-h: 44px; }
+}
+
+/* ===== Profile menu (avatar com dropdown) ===== */
+.profile-menu{
+  position: relative;
+}
+.profile-menu .avatar{
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid #2A323C;
+  background: #0E1217;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  letter-spacing: .5px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Neon nas letras (segue a paleta do projeto) */
+.avatar.neon{
+  color: var(--primary);
+  text-shadow:
+    0 0 4px rgba(57,255,20,.6),
+    0 0 10px rgba(57,255,20,.45),
+    0 0 18px rgba(0,200,150,.35);
+  box-shadow:
+    0 0 0 2px rgba(57,255,20,.08) inset,
+    0 4px 18px rgba(0,0,0,.35);
+}
+.avatar.neon:hover{
+  filter: brightness(1.05);
+  box-shadow:
+    0 0 0 2px rgba(57,255,20,.12) inset,
+    0 6px 22px rgba(0,0,0,.45);
+}
+
+/* Dropdown (controlado por React; nada de display:none aqui) */
+.profile-menu .menu{
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 180px;
+  background: var(--panel);
+  border: 1px solid #1A2129;
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 20px 40px rgba(0,0,0,.45);
+  animation: pmenu-in .14s ease-out;
+  z-index: 30;
+}
+.profile-menu .menu button{
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.profile-menu .menu button:hover{
+  background: #0F1319;
+  border: 1px solid #263140;
+}
+
+@keyframes pmenu-in{
+  from{ transform: translateY(-6px); opacity: 0 }
+  to  { transform: translateY(0);    opacity: 1 }
 }

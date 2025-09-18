@@ -2,6 +2,7 @@
 // Contexto de autenticação consumindo src/services/AuthService.(jsx|js)
 // - Import robusto: funciona se o service exportar default OU nomeado
 // - Bootstrap tolerante ao formato de resposta (res.data.user || res.data)
+// - [NOVO] Hidratação via localStorage ("auth_user") e setUser exposto no contexto
 
 import React, {
   createContext,
@@ -25,12 +26,41 @@ const authService = authServiceModule.default ?? authServiceModule;
 
 const AuthContext = createContext(null);
 
+// Chave simples para persistir o usuário localmente (DEV e bootstrap rápido)
+const STORAGE_USER_KEY = "auth_user";
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);     // usuário atual (ou null)
-  const [loading, setLoading] = useState(true); // carregando sessão inicial?
+  const [user, setUser] = useState(null);        // usuário atual (ou null)
+  const [loading, setLoading] = useState(true);  // carregando sessão inicial?
+
+  // Helper: normaliza payload vindo do backend/mock
+  const pickPayload = (res) => res?.data?.user ?? res?.data ?? null;
+
+  // Helper: salva user no estado + localStorage
+  const saveUser = (payload) => {
+    setUser(payload);
+    try {
+      if (payload) localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(payload));
+      else localStorage.removeItem(STORAGE_USER_KEY);
+    } catch {
+      // ignore quota/SSR
+    }
+  };
 
   useEffect(() => {
-    // Se o serviço estiver mal importado, evita quebrar a app
+    // 1) Hidrata rapidamente a UI com o usuário salvo (DEV ou cache do /me)
+    //    Isso evita "piscar" entre logado ↔ não logado nos primeiros ms.
+    try {
+      const saved = localStorage.getItem(STORAGE_USER_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === "object") setUser(parsed);
+      }
+    } catch {
+      // ignore JSON parse errors
+    }
+
+    // 2) Valida a sessão no backend (se o serviço expõe getCurrentUser)
     if (!authService || typeof authService.getCurrentUser !== "function") {
       console.error(
         "[AuthContext] AuthService inválido: getCurrentUser não encontrado. " +
@@ -38,20 +68,17 @@ export const AuthProvider = ({ children }) => {
           "e o CASE do import no AuthContext."
       );
       setLoading(false);
-      setUser(null);
       return;
     }
 
     authService
       .getCurrentUser()
       .then((res) => {
-        // Mock costuma devolver { data: user }
-        // Backend costuma devolver { data: { user } }
-        const payload = res?.data?.user ?? res?.data ?? null;
-        setUser(payload);
+        const payload = pickPayload(res);
+        saveUser(payload);
       })
       .catch((error) => {
-        // Mantém o comportamento: sessão não encontrada → user = null
+        // Sessão não encontrada ou erro de rede → mantém/limpa conforme necessário
         if (error?.response) {
           console.log(
             `Sessão não encontrada (Status: ${error.response.status})`
@@ -61,7 +88,8 @@ export const AuthProvider = ({ children }) => {
             "Erro de rede ao verificar sessão. O backend está online?"
           );
         }
-        setUser(null);
+        // Se não havia user hidratado (DEV), garante null:
+        if (!localStorage.getItem(STORAGE_USER_KEY)) saveUser(null);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -74,23 +102,25 @@ export const AuthProvider = ({ children }) => {
       );
     }
     const res = await authService.login(email, senha);
-    const payload = res?.data?.user ?? res?.data ?? null;
-    setUser(payload);
+    const payload = pickPayload(res);
+    saveUser(payload);
     return res;
   }, []);
 
   // LOGOUT
   const logout = useCallback(async () => {
-    if (!authService || typeof authService.logout !== "function") {
-      // Se não houver endpoint de logout, faça o mínimo: limpar user
-      console.warn(
-        "[AuthContext] authService.logout não disponível — limpando sessão local."
-      );
-      setUser(null);
-      return;
+    // Se o serviço tiver logout, use; se não, apenas limpe localmente
+    try {
+      if (authService && typeof authService.logout === "function") {
+        await authService.logout();
+      } else {
+        console.warn(
+          "[AuthContext] authService.logout não disponível — limpando sessão local."
+        );
+      }
+    } finally {
+      saveUser(null);
     }
-    await authService.logout();
-    setUser(null);
   }, []);
 
   // REGISTER
@@ -101,14 +131,14 @@ export const AuthProvider = ({ children }) => {
       );
     }
     const res = await authService.register(nome, email, senha, genero);
-    const payload = res?.data?.user ?? res?.data ?? null;
-    setUser(payload);
+    const payload = pickPayload(res);
+    saveUser(payload);
     return res;
   }, []);
 
-  // Memoiza o value para evitar rerenders desnecessários
+  // [NOVO] Expor setUser no contexto (útil para DEV LOGIN do front)
   const value = useMemo(
-    () => ({ user, loading, login, logout, register }),
+    () => ({ user, loading, login, logout, register, setUser: saveUser }),
     [user, loading, login, logout, register]
   );
 

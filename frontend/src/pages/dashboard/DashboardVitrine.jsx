@@ -1,20 +1,23 @@
 // ======================================================
 // DashboardVitrine.jsx
-// Caminho: frontend/src/pages/DashboardVitrine.jsx
+// Caminho: frontend/src/pages/dashboard/DashboardVitrine.jsx
 // - Ranking (plano + likes + recência)
 // - Grid com cards grandes
 // - Filtros c/ máscara BRL nos preços, Limpar filtros,
 //   e sincronização de estado no URL (share/refresh).
 // - Scroll suave (manual) com compensação da topbar
+// - [Logado] Avatar com menu: atraso de 2s no mouseout, “pin” ao clicar,
+//   fecha ao clicar fora ou pressionar ESC.
 // ======================================================
 
 import { useEffect, useMemo, useState, useRef } from "react";
-import { useAuth } from "../services/AuthContext";
+import { useAuth } from "../../services/AuthContext.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import "./DashboardVitrine.css";
-import MockSkins from "../components/mock/MockSkins.js";
-import AuthBrand from "../components/logo/AuthBrand";
-import anuncioService from "../services/anuncioService"; // ✅ Importe o novo serviço
+import MockSkins from "../../components/mock/MockSkins.js";
+import AuthBrand from "../../components/logo/AuthBrand.jsx";
+
+//import anuncioService from "../services/anuncioService"; // ✅ futuro
 
 /* ---------- Metadados dos planos ---------- */
 const plansMeta = {
@@ -140,8 +143,6 @@ export default function DashboardVitrine() {
   const initial = readStateFromURL();
 
   const [skins] = useState(() => enrichFromMock(MockSkins));
-    const [anuncios, setAnuncios] = useState([]);
-
   const [likes, setLikes] = useState(() => new Set());
   const [sortBy, setSortBy] = useState(initial.sort);
   const [filters, setFilters] = useState(initial.filters);
@@ -165,7 +166,7 @@ export default function DashboardVitrine() {
     }));
   }, [filters, sortBy]);
 
-  // Delegação global: qualquer <a href="#..."> vai fazer scroll suave manual
+  // Delegação global: qualquer <a href="#..."> faz scroll suave manual
   useEffect(() => {
     const onClick = (e) => {
       const a = e.target.closest('a[href^="#"]');
@@ -184,10 +185,7 @@ export default function DashboardVitrine() {
 
       const y = el.getBoundingClientRect().top + window.scrollY - offset;
 
-      // atualiza a URL sem provocar o pulo instantâneo
       history.pushState(null, "", hash);
-
-      // anima manualmente
       smoothScrollToY(y, 600);
     };
 
@@ -198,29 +196,16 @@ export default function DashboardVitrine() {
   const ranked = useRankedSkins(skins, sortBy, filters);
 
   const handleLikeToggle = (anuncioId) => {
-        const isCurrentlyLiked = likes.has(anuncioId);
-        
-        // 1. Atualização Otimista: Mude o estado da UI imediatamente.
-        const newLikes = new Set(likes);
-        if (isCurrentlyLiked) {
-            newLikes.delete(anuncioId);
-        } else {
-            newLikes.add(anuncioId);
-        }
-        setLikes(newLikes);
+    const isCurrentlyLiked = likes.has(anuncioId);
+    const newLikes = new Set(likes);
+    if (isCurrentlyLiked) newLikes.delete(anuncioId);
+    else newLikes.add(anuncioId);
+    setLikes(newLikes);
 
-        // 2. Chamada à API em segundo plano
-        const apiCall = isCurrentlyLiked 
-            ? anuncioService.unlikeAnuncio(anuncioId) 
-            : anuncioService.likeAnuncio(anuncioId);
-        
-        apiCall.catch(error => {
-            console.error("Falha ao atualizar o like:", error);
-            // 3. Reversão em caso de erro: volte ao estado original.
-            setLikes(likes); 
-            // Opcional: mostrar uma notificação de erro para o usuário
-        });
-    };
+    // chamada à API em segundo plano (opcional)
+    // (isCurrentlyLiked ? anuncioService.unlikeAnuncio(anuncioId) : anuncioService.likeAnuncio(anuncioId))
+    //   .catch(() => setLikes(likes));
+  };
 
   /* ---------- Price inputs: refs + handlers ---------- */
   const minRef = useRef(null);
@@ -288,7 +273,68 @@ export default function DashboardVitrine() {
     writeStateToURL(DEFAULT_FILTERS, DEFAULT_SORT, false);
   };
 
-  
+  /* ---------- Menu do perfil: atraso de 2s no mouseout + pin por clique ---------- */
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPinned, setMenuPinned] = useState(false);
+  const menuRef = useRef(null);
+  const hideTimerRef = useRef(null);
+
+  const openMenu = () => {
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    setMenuOpen(true);
+  };
+
+  const scheduleClose = () => {
+    if (menuPinned) return;
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => setMenuOpen(false), 500); // 2s
+  };
+
+  const togglePinned = () => {
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    setMenuPinned((v) => !v);
+    setMenuOpen(true);
+  };
+
+  // Fecha ao clicar fora
+  useEffect(() => {
+    const onDocClick = (e) => {
+      if (!menuRef.current) return;
+      if (!menuRef.current.contains(e.target)) {
+        setMenuPinned(false);
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, []);
+
+  // Fecha com ESC
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        setMenuPinned(false);
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Limpa o timer ao desmontar
+  useEffect(() => {
+    return () => {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, []);
+
+  /* ---------- Avatar (apenas quando logado) ---------- */
+  const initials = (user?.nome || user?.email || "?")
+    .split(" ")
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <div className="dash-root">
@@ -302,12 +348,32 @@ export default function DashboardVitrine() {
           <a href="#planos">Planos</a>
           <a href="#planos">Anunciar</a>
         </nav>
+
         <div className="actions">
           {user ? (
-            <>
-              <span className="welcome-user">Olá, {user.nome}!</span>
-              <button onClick={handleLogout} className="btn btn--ghost sm">Sair</button>
-            </>
+            <div
+              className={`profile-menu ${menuOpen ? "is-open" : ""}`}
+              ref={menuRef}
+              onMouseEnter={openMenu}
+              onMouseLeave={scheduleClose}
+            >
+              <button
+                className="avatar neon"
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                onClick={togglePinned}
+                type="button"
+              >
+                {initials}
+              </button>
+
+              {menuOpen && (
+                <div className="menu" role="menu">
+                  <button onClick={() => navigate("/perfil")} role="menuitem">Meu perfil</button>
+                  <button onClick={handleLogout} role="menuitem">Sair</button>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               <Link to="/login" className="btn btn--ghost sm">Entrar</Link>
@@ -432,17 +498,17 @@ export default function DashboardVitrine() {
         </div>
       </section>
 
-       {/* Grid de Cards */}
+      {/* Grid de Cards */}
       <section className="grid">
         {ranked.map((anuncio) => (
-            <SkinCard
-                key={anuncio.id}
-                data={anuncio}
-                liked={likes.has(anuncio.id)}
-                onLike={() => handleLikeToggle(anuncio.id)} // Use a nova função
-            />
+          <SkinCard
+            key={anuncio.id}
+            data={anuncio}
+            liked={likes.has(anuncio.id)}
+            onLike={() => handleLikeToggle(anuncio.id)}
+          />
         ))}
-    </section>
+      </section>
 
       {/* Planos */}
       <section id="planos" className="plans">
@@ -474,14 +540,26 @@ export default function DashboardVitrine() {
 
 /* ---------- Card (componente) ---------- */
 function SkinCard({ data, liked, onLike }) {
-  const { plan } = data;
+  // ✅ Suporta formatos do MOCK (price/title/seller) e do BACKEND (preco/skinNome/usuarioNome)
+  const title   = data?.skinNome ?? data?.title ?? data?.nome ?? "Skin";
+  const image   = data?.image ?? data?.imagemUrl ?? data?.imagem ?? "";
+  const vendedor = data?.usuarioNome ?? data?.seller?.name ?? data?.vendedorNome ?? "—";
+
+  const precoNumber = Number(data?.preco ?? data?.price ?? NaN);
+  const precoFmt = Number.isFinite(precoNumber)
+    ? precoNumber.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : "—";
+
+  const planKey = (data?.plan ?? data?.plano ?? "gratuito");
+  const planMeta = plansMeta[planKey] || { label: "—", color: "#999" };
+
   return (
-    <article className="card"> {/* Removido a classe dinâmica de plano */}
+    <article className="card">
       <div className="card__media">
-        <img src={data.image} alt={data.title} loading="lazy" />
-        <span className="badge" style={{ background: plansMeta[plan].color }}>{plansMeta[plan].label}</span>
-        {/* O 'badge' de plano não existe mais, pode ser removido ou adaptado */}
-        {/* <span className="badge">Destaque</span> */}
+        <img src={image} alt={title} loading="lazy" />
+        <span className="badge" style={{ background: planMeta.color }}>
+          {planMeta.label}
+        </span>
 
         <button className={`like ${liked ? "is-liked" : ""}`} onClick={onLike} aria-label="Favoritar">
           <svg width="20" height="20" viewBox="0 0 24 24">
@@ -491,20 +569,13 @@ function SkinCard({ data, liked, onLike }) {
       </div>
 
       <div className="card__body">
-        {/* ✅ Use os campos corretos */}
-        <h3>{data.skinNome}</h3>
+        <h3>{title}</h3>
         <div className="meta">
-          <span className="price">
-            R$ {data.preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-          </span>
-          {/* O campo 'likes' não vem da API. Você pode remover ou adaptar. */}
-          {/* <span className="likes">{data.likes} likes</span> */}
+          <span className="price">R$ {precoFmt}</span>
         </div>
         <div className="seller">
-          {/* ✅ Use o campo correto */}
-          <span>Vendedor: {data.usuarioNome}</span>
+          <span>Vendedor: {vendedor}</span>
           <div className="cta">
-            {/* Estes links podem ser adaptados no futuro */}
             <a className="btn btn--ghost" href="#" target="_blank" rel="noreferrer">Contato</a>
             <a className="btn btn--primary" href="#" target="_blank" rel="noreferrer">Comprar fora</a>
           </div>

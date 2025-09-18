@@ -8,17 +8,30 @@ import Cadastro from "./pages/cadastro/Cadastro";
 import Login from "./pages/login/Login";
 import ForgotPassword from "./pages/login/ForgotPassword";
 import ResetPassword from "./pages/login/ResetPassword";
-import Dashboard from "./pages/dashboard/Dashboard";
-import Marketplace from "./pages/marketplace/Marketplace.jsx"
+
+import Marketplace from "./pages/marketplace/Marketplace.jsx";
 import Carrinho from "./pages/carrinho/Carrinho";
 import Historico from "./pages/historico/Historico";
 import Suporte from "./pages/suporte/Suporte";
 import NotFound from "./pages/notfound/NotFound";
-import Perfil from "./pages/contas/Perfil.jsx";
-import DashboardVitrine from "./pages/DashboardVitrine.jsx";
+import DashboardVitrine from "./pages/dashboard/DashboardVitrine.jsx";
+
+import PerfilUsuario from "./pages/usuario/PerfilUsuario";
+
+// Context/Auth
+import { useAuth } from "./services/AuthContext";
 
 // Layout persistente (Sidebar/Header/Footer) para rotas específicas
-import Layout from "./components/layout/Layout";
+import Layout from "./components/layout/Layout"; // (import mantido caso vá usar em outras rotas)
+
+// ------ Guard de rota (protege rotas que exigem login) ------
+function RequireAuth({ children }) {
+  const { user } = useAuth(); // espera que seu AuthContext exponha 'user'
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+}
 
 export default function App() {
   return (
@@ -39,14 +52,16 @@ export default function App() {
         <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/historico" element={<Historico />} />
         <Route path="/suporte" element={<Suporte />} />
-        <Route path="/perfil" element={<Perfil />} />
 
-        {/* Rotas com layout persistente */}
-        {/* IMPORTANTE: o componente Layout PRECISA ter <Outlet/> para os filhos renderizarem */}
-        <Route element={<Layout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          {/* adicione outras páginas que usam o mesmo Layout aqui */}
-        </Route>
+        {/* Usuario/Perfil (PROTEGIDA) */}
+        <Route
+          path="/perfil"
+          element={
+            <RequireAuth>
+              <PerfilUsuario />
+            </RequireAuth>
+          }
+        />
 
         {/* 404 */}
         <Route path="*" element={<NotFound />} />

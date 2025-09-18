@@ -5,10 +5,19 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import "./Auth.css";
 import AuthBrand from "../../components/logo/AuthBrand";
 
+// storage: para salvar tokens mock no dev-login
+import { storage } from "../../services/api";
+
 // E-mail simples
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const INITIAL_FORM = { email: "", senha: "", lembrar: false };
+
+// Flags/credenciais do DEV LOGIN (controle por .env)
+// Em desenvolvimento, crie/edite .env.local e defina: VITE_ENABLE_DEV_LOGIN=true
+const DEV_ENABLED = import.meta.env.VITE_ENABLE_DEV_LOGIN === "true";
+const DEV_EMAIL = "natan@email.com";
+const DEV_PASSWORD = "123";
 
 const Eye = (
   <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
@@ -28,7 +37,8 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState("");
 
-  const { login } = useAuth();
+  // 🔹 seu AuthContext (mantido)
+  const { login, setUser } = useAuth(); // [NOVO] se seu contexto não tiver setUser, ele será undefined e ignoramos
   const navigate = useNavigate();
   const [qs] = useSearchParams();
 
@@ -40,6 +50,7 @@ export default function Login() {
 
   const validate = () => {
     const e = {};
+    // 🔹 Validação padrão (mantida). O DEV LOGIN pula essa etapa no onSubmit.
     if (!EMAIL_RE.test(formData.email)) e.email = "Informe um e-mail válido.";
     if (!formData.senha || formData.senha.length < 8) e.senha = "Senha precisa ter ao menos 8 caracteres.";
     setErrors(e);
@@ -49,12 +60,54 @@ export default function Login() {
   const onSubmit = async (ev) => {
     ev.preventDefault();
     setApiError("");
+
+    // 🔹 [NOVO] Caminho curto: DEV LOGIN (não passa pela validação de 8+ caracteres)
+    if (
+      DEV_ENABLED &&
+      formData.email.trim() === DEV_EMAIL &&
+      formData.senha === DEV_PASSWORD
+    ) {
+      try {
+        setIsLoading(true);
+
+        // salva preferência "lembrar" para decidir storage (localStorage ou sessionStorage)
+        storage.remember = !!formData.lembrar;
+
+        // tokens mockados só para navegação no front
+        storage.access = "dev-access-token";
+        storage.refresh = "dev-refresh-token";
+
+        // opcional: setar um usuário mock no contexto (se existir setUser no AuthContext)
+        if (typeof setUser === "function") {
+          const devUser = {
+            id: 0,
+            nome: "Natan (DEV)",
+            email: DEV_EMAIL,
+            plano: "plus", // você pode trocar para "intermediario" ou "gratuito"
+          };
+          setUser(devUser);
+          localStorage.setItem("auth_user", JSON.stringify(devUser));
+        }
+
+        // mantém seu redirecionamento original
+        const backTo = qs.get("from") || "/";
+        navigate(backTo, { replace: true });
+        return;
+      } catch (err) {
+        console.error("Falha no DEV LOGIN:", err);
+        setApiError("Falha ao efetuar login de desenvolvimento.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    // 🔹 Fluxo NORMAL (mantido)
     if (!validate()) return;
 
     setIsLoading(true);
     try {
       await login(formData.email.trim(), formData.senha);
-      const backTo = qs.get("from") || "/vitrine";
+      const backTo = qs.get("from") || "/";
       navigate(backTo, { replace: true });
     } catch (error) {
       if (error.response) setApiError(error.response.data?.message || "E-mail ou senha incorretos.");
@@ -73,6 +126,23 @@ export default function Login() {
         <AuthBrand/>
         <h1 className="auth-title">Entrar</h1>
         <p className="auth-subtitle">Bem-vindo de volta! Acesse sua conta para anunciar e favoritar skins.</p>
+
+        {/* aviso visual quando o DEV LOGIN estiver ativo */}
+        {DEV_ENABLED && (
+          <div
+            style={{
+              marginBottom: 12,
+              padding: "8px 10px",
+              borderRadius: 8,
+              background: "#102a12",
+              color: "#8eff9b",
+              fontSize: 14,
+              border: "1px solid #1d5e24",
+            }}
+          >
+            DEV LOGIN ativo — use <strong>{DEV_EMAIL}</strong> / <strong>{DEV_PASSWORD}</strong>
+          </div>
+        )}
 
         <form className="auth-form" onSubmit={onSubmit} noValidate>
           {apiError && <div className="api-error-message">{apiError}</div>}
