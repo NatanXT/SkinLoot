@@ -87,6 +87,10 @@ docker compose up
 # Ver status dos containers do projeto
 docker compose ps
 
+#Limpar portas 
+docker stop $(docker ps -aq)
+docker rm $(docker ps -aq) -f
+
 # Logs em tempo real (de todos ou de um serviço específico, ex.: web)
 docker compose logs -f
 docker compose logs -f web
