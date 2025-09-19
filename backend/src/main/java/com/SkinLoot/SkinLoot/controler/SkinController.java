@@ -5,7 +5,6 @@ import com.SkinLoot.SkinLoot.dto.SkinResponse;
 import com.SkinLoot.SkinLoot.model.Jogo;
 import com.SkinLoot.SkinLoot.model.Skin;
 import com.SkinLoot.SkinLoot.model.Usuario;
-import com.SkinLoot.SkinLoot.repository.SkinRepository;
 import com.SkinLoot.SkinLoot.service.JogoService;
 import com.SkinLoot.SkinLoot.service.SkinService;
 import com.SkinLoot.SkinLoot.service.UsuarioService;
@@ -69,6 +68,26 @@ public class SkinController {
     @GetMapping("/jogo/{jogoId}")
     public ResponseEntity<List<SkinResponse>> porJogo(@PathVariable UUID jogoId) {
         return ResponseEntity.ok(skinService.listarPorJogo(jogoId));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<SkinResponse>> listarJogos(){
+        return ResponseEntity.ok(skinService.listarTodas());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<SkinResponse> buscarPorId(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        // 1. Pega o usuário logado
+        Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        // 2. Busca a skin pelo seu ID e pelo ID do usuário logado
+        return skinService.buscarPorIdEUsuarioId(id, usuario.getId())
+                .map(skin -> ResponseEntity.ok(new SkinResponse(skin))) // 3a. Se encontrar, converte para DTO e retorna 200 OK
+                .orElseGet(() -> ResponseEntity.notFound().build());      // 3b. Se não encontrar, retorna 404 Not Found
     }
 
 }

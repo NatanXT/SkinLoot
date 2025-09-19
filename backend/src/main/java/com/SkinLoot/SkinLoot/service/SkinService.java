@@ -5,6 +5,7 @@ import com.SkinLoot.SkinLoot.model.Skin;
 import com.SkinLoot.SkinLoot.repository.SkinRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +46,7 @@ public class SkinService {
                 .collect(Collectors.toList());
     }
 
+    //@Transactional(readOnly = true) // Mantém a sessão do banco aberta durante a conversão
     public List<SkinResponse> listarTodas() {
         return skinRepository.findAll().stream()
                 .map(SkinResponse::new) // ✅ Forma correta e moderna de mapear
@@ -54,4 +56,10 @@ public class SkinService {
     public Optional<Skin> buscarPorId(UUID id) {
         return skinRepository.findById(id);
     }
+    // ✅ NOVO MÉTODO:
+    public Optional<Skin> buscarPorIdEUsuarioId(UUID id, UUID usuarioId) {
+        return skinRepository.findByIdAndUsuarioId(id, usuarioId);
+    }
 }
+
+

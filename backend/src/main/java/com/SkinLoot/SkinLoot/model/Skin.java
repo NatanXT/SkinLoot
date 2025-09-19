@@ -14,8 +14,13 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "skin")
-@Getter
-@Setter
+@NamedEntityGraph(
+        name = "Skin.withJogoAndUsuario",
+        attributeNodes = {
+                @NamedAttributeNode("jogo"),
+                @NamedAttributeNode("usuario")
+        }
+)
 public class Skin {
 
     @Id
