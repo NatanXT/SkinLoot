@@ -1,0 +1,64 @@
+package com.SkinLoot.SkinLoot.controler;
+
+import com.SkinLoot.SkinLoot.model.Jogo;
+import com.SkinLoot.SkinLoot.repository.JogoRepository;
+import com.SkinLoot.SkinLoot.service.JogoService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@RestController // Define esta classe como um controlador REST
+@RequestMapping("/jogos") // Define o endpoint base para esse controlador
+public class JogoController {
+
+    @Autowired // Injeta automaticamente a dependência do repositório
+    private JogoRepository jogoRepository;
+
+    private JogoService jogoService;
+
+    public JogoController(JogoService jogoService) {
+        this.jogoService = jogoService;
+    }
+
+    @PostMapping("/save") // Endpoint para criar um novo jogo
+    public ResponseEntity<Jogo> criarJogo(@Valid @RequestBody Jogo jogo) {
+        Jogo novoJogo = jogoService.criarJogo(jogo);
+        return ResponseEntity.ok(novoJogo);
+    }
+
+    @GetMapping // Endpoint para listar todos os jogos
+    public ResponseEntity<List<Jogo>> listarJogos() {
+        List<Jogo> jogos = jogoRepository.findAll();
+        return ResponseEntity.ok(jogos);
+    }
+
+    @GetMapping("/{id}") // Endpoint para buscar um jogo pelo ID
+    public ResponseEntity<Jogo> buscarJogoPorId(@PathVariable UUID id) {
+        Optional<Jogo> jogo = jogoRepository.findById(id);
+        return jogo.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}") // Endpoint para atualizar um jogo
+    public ResponseEntity<Jogo> atualizarJogo(@PathVariable UUID id, @Valid @RequestBody Jogo jogoAtualizado) {
+        if (!jogoRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        jogoAtualizado.setId(id);
+        Jogo jogoSalvo = jogoRepository.save(jogoAtualizado);
+        return ResponseEntity.ok(jogoSalvo);
+    }
+
+    @DeleteMapping("/{id}") // Endpoint para deletar um jogo pelo ID
+    public ResponseEntity<Void> deletarJogo(@PathVariable UUID id) {
+        if (!jogoRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        jogoRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}

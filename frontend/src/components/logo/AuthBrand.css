@@ -1,0 +1,50 @@
+/* ---------- Tokens / Variáveis ---------- */
+:root {
+  --bg: #0B0D10;            /* preto carvão */
+  --panel: #11151A;         /* cinza profundo */
+  --muted: #7B8694;
+  --text: #E8F1F2;          /* quase branco */
+  --primary: #39FF14;       /* verde neon */
+  --secondary: #00C896;     /* verde aqua */
+  --ring: rgba(57,255,20,.6);
+  --shadow: 0 10px 30px rgba(0,0,0,.45);
+  --radius: 18px;
+}
+
+/* ---------- Marca / Logo ---------- */
+.brand, .auth-brand {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* logo à esquerda */
+  gap: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  color: var(--text);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.brand svg, .auth-brand svg {
+  color: var(--primary);
+}
+
+/* Hover suave */
+.brand:hover, .auth-brand:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px); /* sobe levemente */
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 480px) {
+  .brand, .auth-brand {
+    gap: 6px;
+    font-size: 1rem;
+    justify-content: flex-start; /* mantém à esquerda no mobile */
+  }
+
+  .brand svg, .auth-brand svg {
+    width: 28px;
+    height: 28px;
+  }
+}

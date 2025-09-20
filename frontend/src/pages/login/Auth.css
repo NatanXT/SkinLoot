@@ -1,0 +1,170 @@
+/* ======================================================
+   Auth.css (compartilhado por Login/Cadastro)
+   - Reaproveita a paleta e o look da Dashboard
+   - Estrutura: Tokens • Base • Card • Campos • Botões
+                 OAuth/Links • Password • Strength • Responsivo
+====================================================== */
+
+/* ---------- Tokens / Variáveis ---------- */
+:root{
+  --bg:#0B0D10;
+  --panel:#11151A;
+  --muted:#7B8694;
+  --text:#E8F1F2;
+  --primary:#39FF14;
+  --secondary:#00C896;
+  --ring: rgba(57,255,20,.6);
+  --shadow:0 10px 30px rgba(0,0,0,.45);
+  --radius:18px;
+}
+
+/* ---------- Base ---------- */
+*{ box-sizing:border-box }
+body{ background:var(--bg); color:var(--text) }
+
+.auth-root{
+  min-height:100dvh;
+  display:grid; place-items:center;
+  padding:32px 16px;
+  background:
+    radial-gradient(1000px 500px at 10% 0%, rgba(57,255,20,.06), transparent 60%),
+    radial-gradient(900px 500px at 100% 10%, rgba(0,200,150,.08), transparent 60%);
+}
+
+/* ---------- Card ---------- */
+.auth-card{
+  width:100%; max-width:520px;
+  background:linear-gradient(180deg,#12171E,#0F1319);
+  border:1px solid #1A2129;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:22px 20px;
+  position:relative;
+}
+.auth-card::before{
+  content:""; position:absolute; inset:0 auto auto 0;
+  right:0; height:3px;
+  background:linear-gradient(90deg, var(--secondary), var(--primary));
+}
+
+/* ---------- Títulos ---------- */
+.auth-title{ margin:6px 0 4px; font-size:28px }
+.auth-subtitle{ margin:0 0 18px; color:var(--muted) }
+
+.auth-form{ display:flex; flex-direction:column; gap:12px }
+
+/* ---------- Campos ---------- */
+.field{
+  display:flex; flex-direction:column; gap:6px;
+  background:var(--panel);
+  border:1px solid #1A2129; border-radius:14px; padding:12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.field label{ font-size:12px; color:var(--muted) }
+.field input, .field select{
+  width:100%;
+  background:#0E1217; color:var(--text);
+  border:1px solid #1C2430; border-radius:10px; padding:12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.field input:focus, .field select:focus,
+.field input:hover, .field select:hover {
+  border-color: var(--secondary);
+  box-shadow:0 0 0 2px rgba(57,255,20,.12);
+}
+.field__error{ color:#ff8b8b; font-size:12px; margin-top:4px }
+
+.api-error-message{
+  background:#30121a;
+  border:1px solid #5c1b2a;
+  color:#ffb4c8;
+  padding:10px; border-radius:12px;
+}
+
+/* ---------- Senha com toggle ---------- */
+.input-pass{ position:relative }
+.input-pass input{ padding-right:42px }
+.input-pass .toggle{
+  position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  width:34px; height:34px; display:grid; place-items:center;
+  border:1px solid #2A323C; border-radius:10px;
+  background:rgba(255,255,255,.05); color:#C9D3DC;
+  cursor:pointer;
+}
+.input-pass .toggle:hover{ border-color:#3A4451 }
+
+/* ---------- Linha auxiliar (lembrar/esqueci) ---------- */
+.form-row{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; margin-top:2px;
+}
+.check{ display:inline-flex; align-items:center; gap:8px; color:#D6E3DB; font-size:14px }
+.check input{ width:16px; height:16px }
+
+/* ---------- Links ---------- */
+.link{ color:var(--secondary); text-decoration:none }
+.link:hover{ text-decoration:underline }
+.link:focus-visible{ outline:2px solid var(--secondary); outline-offset:2px }
+
+/* ---------- Botões ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  border:1px solid #1C2430; background:transparent; color:var(--text);
+  text-decoration:none; cursor:pointer; border-radius:12px; padding:12px 16px;
+  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+.btn:focus-visible{ outline:2px solid var(--secondary); outline-offset:2px }
+.btn--full{ width:100% }
+
+/* Botão principal */
+.btn--primary{
+  background:linear-gradient(180deg, var(--primary), var(--secondary));
+  color:#0B0D10; font-weight:800;
+}
+.btn--primary:hover{
+  filter:brightness(1.1);
+  transform:scale(1.05);
+  box-shadow:0 4px 12px rgba(57,255,20,0.4);
+}
+
+/* Botão ghost / secundário */
+.btn--ghost{ border-color:#2A323C; color:#D3D8DF }
+.btn--ghost:hover{ border-color:#3A4451; transform:scale(1.03) }
+
+/* ---------- OAuth / Switch ---------- */
+.oauth{ margin-top:8px; display:flex; flex-direction:column; gap:10px }
+.switch{ text-align:center; color:var(--muted); margin-top:10px }
+
+/* ---------- Medidor de força ---------- */
+.pass-strength{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:8px;
+}
+.pass-strength .bar{
+  height:6px; border-radius:6px; background:#24303B; border:1px solid #2A3745;
+}
+.pass-strength .bar.on{
+  background:linear-gradient(90deg, var(--secondary), var(--primary));
+  border-color:transparent;
+}
+
+/* ---------- Responsivo ---------- */
+
+/* Mobile (até 480px) */
+@media (max-width:480px){
+  .auth-card{ padding:18px 16px }
+  .auth-title{ font-size:24px }
+  .auth-subtitle{ font-size:14px }
+  .field input, .field select{ padding:10px; font-size:14px }
+  .btn{ padding:10px 14px; font-size:14px }
+  .input-pass .toggle{ width:30px; height:30px }
+}
+
+/* Tablet (até 768px) */
+@media (max-width:768px){
+  .auth-card{ max-width:440px; padding:20px 18px }
+  .auth-title{ font-size:26px }
+  .auth-subtitle{ font-size:15px }
+  .field input, .field select{ padding:11px; font-size:15px }
+  .btn{ padding:11px 15px; font-size:15px }
+  .input-pass .toggle{ width:32px; height:32px }
+}

@@ -1,0 +1,36 @@
+.notfound-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+    text-align: center;
+    background-color: #f4f4f4;
+  }
+  
+  .notfound-container h1 {
+    font-size: 6rem;
+    color: #10c66f;
+    margin-bottom: 10px;
+  }
+  
+  .notfound-container p {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: #555;
+  }
+  
+  .notfound-button {
+    padding: 10px 20px;
+    background: #10c66f;
+    color: white;
+    font-size: 16px;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: 0.3s;
+  }
+  
+  .notfound-button:hover {
+    background: #0da45a;
+  }
+  

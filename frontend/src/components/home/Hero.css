@@ -1,0 +1,35 @@
+.hero {
+  text-align: center;
+  padding: 5rem 2rem 3rem;
+  background-color: var(--black);
+}
+
+.hero h1 {
+  font-size: 3rem;
+  letter-spacing: 2px;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+.hero p {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  color: #CCC;
+}
+
+.cta-button {
+  margin-top: 2rem;
+  padding: 0.8rem 2rem;
+  background-color: var(--green);
+  border: none;
+  border-radius: 8px;
+  color: var(--black);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  transform: scale(1);
+}
+
+.cta-button:hover {
+  background-color: #0fa15b;
+  transform: scale(1.05);
+}
