@@ -123,5 +123,5 @@ api.interceptors.response.use(
   },
 );
 
-export { storage, isDevAuth, DEV_API_ENABLED };
+export { storage, isDevAuth, DEV_API_ENABLED, api };
 export default api;

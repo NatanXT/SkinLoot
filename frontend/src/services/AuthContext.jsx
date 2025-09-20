@@ -137,7 +137,7 @@ export const AuthProvider = ({ children }) => {
     return res;
   }, []);
 
-  // [NOVO] Expor setUser no contexto (útil para DEV LOGIN do front)
+  // Expor setUser no contexto (útil para DEV LOGIN do front)
   const value = useMemo(
     () => ({ user, loading, login, logout, register, setUser: saveUser }),
     [user, loading, login, logout, register],

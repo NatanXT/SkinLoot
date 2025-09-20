@@ -355,6 +355,60 @@ nav a:hover{ color:var(--text) }
   border: 1px solid #263140;
 }
 
+/* ==== NEON VISÍVEL NO HOVER (1–2px + glow) ========================= */
+/* base */
+.card{
+  --neon1: var(--primary);     /* verde */
+  --neon2: var(--secondary);   /* ciano */
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease,
+    border-color .2s ease;
+}
+
+/* aro de 2px + 2 glows coloridos (não depende de overflow) */
+.card:hover,
+.card:focus-within{
+  transform: translateY(-3px);
+  border-color: #2a3340;
+  box-shadow:
+    /* sombra profunda do card */
+    0 16px 40px rgba(0,0,0,.60),
+    /* ARO fino (1–2px) */
+    0 0 0 2px color-mix(in oklab, var(--neon1) 70%, transparent),
+    /* GLOW primário curto */
+    0 0 24px color-mix(in oklab, var(--neon1) 35%, transparent),
+    /* GLOW secundário mais amplo */
+    0 0 64px color-mix(in oklab, var(--neon2) 26%, transparent);
+}
+
+/* opcional: se quiser um aro ainda mais discreto, troque 2px -> 1px acima */
+
+/* reforça o brilho do banner (aquela película em card__media) no hover */
+.card:hover .card__media::after,
+.card:focus-within .card__media::after{
+  opacity: .9; /* antes ~1 com transparência baixa; agora aparece mais */
+  transition: opacity .2s ease;
+}
+
+/* variações por plano (se você aplica classes card--intermediario / card--plus) */
+.card--intermediario:hover,
+.card--intermediario:focus-within{
+  box-shadow:
+    0 16px 40px rgba(0,0,0,.60),
+    0 0 0 2px color-mix(in oklab, var(--secondary) 75%, transparent),
+    0 0 24px color-mix(in oklab, var(--secondary) 38%, transparent),
+    0 0 64px color-mix(in oklab, var(--primary) 24%, transparent);
+}
+.card--plus:hover,
+.card--plus:focus-within{
+  box-shadow:
+    0 16px 40px rgba(0,0,0,.60),
+    0 0 0 2px color-mix(in oklab, var(--primary) 85%, transparent),
+    0 0 26px color-mix(in oklab, var(--primary) 42%, transparent),
+    0 0 72px color-mix(in oklab, var(--secondary) 30%, transparent);
+}
+
 @keyframes pmenu-in{
   from{ transform: translateY(-6px); opacity: 0 }
   to  { transform: translateY(0);    opacity: 1 }

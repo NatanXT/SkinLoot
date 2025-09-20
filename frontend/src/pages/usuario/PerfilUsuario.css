@@ -5,6 +5,10 @@
    - Grid de cards igual à vitrine
    - HOVER/FIELD: bordas com anel/realce
    - Modal/Overlay para Renovar/Upgrade
+   - Form do modal de edição (hover/focus iguais aos campos do perfil)
+   - Uploader clicável + preview
+   - Confirmação/desativação com lista/checkbox
+   - Visual de card inativa
    ========================================================================== */
 
 :root{
@@ -21,6 +25,7 @@
   --container-max: 1200px;
 }
 
+/* ====================== Shell / Layout ====================== */
 .perfil-root{
   min-height:100vh;
   background:var(--bg);
@@ -55,7 +60,7 @@
 .perfil-block{ margin: 16px 0 28px }
 .perfil-block h2{ margin:0 0 12px }
 
-/* Grid básico */
+/* ====================== Grid ====================== */
 .perfil-grid{
   display:grid; gap:16px;
 }
@@ -66,6 +71,7 @@
   .perfil-grid--2{ grid-template-columns: 1fr; }
 }
 
+/* ====================== Cards ====================== */
 .perfil-card{
   background:linear-gradient(180deg,#12171E, #0F1319);
   border:1px solid #1A2129;
@@ -101,6 +107,7 @@
   box-shadow:0 0 0 4px rgba(57,255,20,.12);
 }
 
+/* Plano / Cota */
 .perfil-plano-header{
   display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px;
 }
@@ -130,7 +137,7 @@
   display:flex; align-items:center; justify-content:space-between; gap:12px;
 }
 
-/* Grid de cards das skins */
+/* ====================== Grid de cards das skins ====================== */
 .perfil-grid-cards{
   display:grid;
   grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
@@ -138,7 +145,7 @@
   margin-top:12px;
 }
 
-/* Botões */
+/* ====================== Botões ====================== */
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
   border:1px solid #1C2430; background:transparent; color:var(--text);
@@ -151,7 +158,7 @@
 .btn--ghost:hover{ border-color:#3A4451 }
 .btn--full{ width:100% }
 
-/* Card (igual vitrine) */
+/* ====================== Card (igual vitrine) ====================== */
 .card{
   display:flex; flex-direction:column;
   background:linear-gradient(180deg,#12171E, #0F1319);
@@ -192,6 +199,7 @@
 }
 .seller .cta{ display:flex; gap:10px }
 
+/* Empty state */
 .perfil-empty{
   background:var(--panel); border:1px solid #1A2129; border-radius:18px; padding:18px;
   display:flex; align-items:center; justify-content:space-between; gap:12px; color:var(--muted);
@@ -247,12 +255,82 @@
 }
 .perfil-modal__item .k{ display:block; font-size:12px; color:var(--muted) }
 .perfil-modal__item .v{ font-weight:600 }
-
 .perfil-modal__actions{
   display:flex; gap:10px; justify-content:flex-end; margin-top:8px;
 }
 
-/* Upgrade cards */
+/* ====================== Form do modal de edição ====================== */
+.perfil-form{ display:grid; gap:12px; }
+.perfil-form__row{ display:grid; gap:6px; }
+.perfil-form__row label{ font-size:12px; color:var(--muted); }
+
+/* No JSX, a URL é text para aceitar arquivo+preview sem travar validação nativa */
+.perfil-form__row input[type="text"],
+.perfil-form__row input[type="number"]{
+  background:#0E1217;
+  border:1px solid #1C2430;
+  border-radius:10px;
+  padding:10px 12px;
+  color:var(--text);
+  outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.perfil-form__row input:hover{
+  border-color:#314151;
+  box-shadow:0 0 0 4px rgba(57,255,20,.07);
+}
+.perfil-form__row input:focus{
+  border-color:var(--secondary);
+  box-shadow:0 0 0 4px rgba(57,255,20,.12);
+}
+.perfil-form__hint{ display:block; font-size:12px; color:var(--muted); }
+
+/* ====================== Uploader clicável + preview ====================== */
+.perfil-upload{
+  background:#0E1217;
+  border:1px solid #1C2430;
+  border-radius:14px;
+  padding:16px;
+  display:grid;
+  place-items:center;
+  min-height:220px;
+  cursor:pointer;
+  transition:border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+  margin-bottom:12px;
+}
+.perfil-upload:hover{
+  border-color:#314151;
+  box-shadow:0 0 0 4px rgba(57,255,20,.07);
+  transform: translateY(-1px);
+}
+.perfil-upload:focus{
+  outline:none;
+  border-color:var(--secondary);
+  box-shadow:0 0 0 4px rgba(57,255,20,.12);
+}
+.perfil-upload img{
+  max-width:100%;
+  max-height:320px;
+  object-fit:contain;
+  filter:saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.55));
+}
+.perfil-upload__placeholder{
+  color:var(--muted);
+  font-size:14px;
+}
+
+/* ====================== Lista de alerta / checkbox ====================== */
+.perfil-alerta{ margin:0 0 12px 18px; color:#E9FFF1; }
+.perfil-check{
+  display:flex; align-items:flex-start; gap:8px; margin-top:6px; color:var(--muted);
+}
+.perfil-check input{ transform: translateY(2px); }
+
+/* ====================== Card inativa (visual) ====================== */
+.card.card--inativa{ opacity:.7; filter:grayscale(.2); }
+.card.card--inativa .badge{ background:#8b8f97; color:#0B0D10; }
+
+/* ====================== Upgrade cards ====================== */
 .perfil-upgrade-grid{
   display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin: 8px 0 10px;
 }

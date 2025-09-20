@@ -23,11 +23,15 @@ import ReactDOM from 'react-dom/client';
 import { AuthProvider } from './services/AuthContext.jsx';
 import App from './App.jsx';
 import './index.css';
+import "./context/ToastContext.css";
+import { ToastProvider } from "./context/ToastContext";
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
+    <ToastProvider>
     <AuthProvider>
       <App />
     </AuthProvider>
+    </ToastProvider>
   </React.StrictMode>,
 );
