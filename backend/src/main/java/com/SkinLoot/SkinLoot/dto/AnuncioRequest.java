@@ -11,7 +11,7 @@ public class AnuncioRequest {
     private String descricao;
     private BigDecimal preco;
     private Status status;
-    private Long steamItemId;    // O ID do item que vem da API da Steam
+    //private Long steamItemId;    // O ID do item que vem da API da Steam
     private UUID skinId;
     private Double desgasteFloat;
     private String qualidade;
@@ -26,14 +26,6 @@ public class AnuncioRequest {
     public void setPreco(BigDecimal preco) { this.preco = preco; }
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
-
-    public Long getSteamItemId() {
-        return steamItemId;
-    }
-
-    public void setSteamItemId(Long steamItemId) {
-        this.steamItemId = steamItemId;
-    }
 
     public UUID getSkinId() {
         return skinId;

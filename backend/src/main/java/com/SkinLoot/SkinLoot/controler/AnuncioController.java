@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -37,9 +38,9 @@ public class AnuncioController {
     }
 
     // O método de criar anúncio agora recebe o ID do item da Steam pela URL
-    @PostMapping("/save/{itemId}")
+    @PostMapping("/save")
     public ResponseEntity<AnuncioResponse> criarAnuncio(
-            @PathVariable Long itemId,
+            //@PathVariable Long itemId,
             @RequestBody AnuncioRequest anuncioRequest, // DTO com titulo, descricao, preco
             Authentication authentication) {
 
@@ -86,6 +87,21 @@ public class AnuncioController {
         return ResponseEntity.ok(dtos);
     }
 
+    @GetMapping("/user")
+    public ResponseEntity<List<AnuncioResponse>> listarAnunciosByUsuario(Authentication authentication) {
+        // 1. Pega o email do usuário logado
+        String email = authentication.getName();
+
+        // 2. Busca o objeto completo do usuário
+        Usuario usuario = usuarioService.buscarUsuarioPorEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
+
+        // 3. Chama o serviço para buscar os anúncios daquele usuário
+        List<AnuncioResponse> anunciosDoUsuario = anuncioService.listarPorUsuario(usuario.getId());
+
+        // 4. Retorna a lista de anúncios
+        return ResponseEntity.ok(anunciosDoUsuario);
+    }
 
     @PostMapping("/{id}/like")
     public ResponseEntity<Void> likeAnuncio(@PathVariable UUID id, Authentication authentication) {

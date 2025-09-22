@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -57,7 +56,7 @@ public class SkinController {
         return ResponseEntity.status(HttpStatus.CREATED).body(skinService.salvarERetornarDto(skin));
     }
 
-    @GetMapping("/list")
+    @GetMapping("/user")
     public ResponseEntity<List<SkinResponse>> minhasSkins(@AuthenticationPrincipal UserDetails userDetails) {
         Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
@@ -71,12 +70,12 @@ public class SkinController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SkinResponse>> listarJogos(){
+    public ResponseEntity<List<SkinResponse>> listarTodas(){
         return ResponseEntity.ok(skinService.listarTodas());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SkinResponse> buscarPorId(
+    public ResponseEntity<SkinResponse> buscarPorSkinId(
             @PathVariable UUID id,
             @AuthenticationPrincipal UserDetails userDetails) {
 

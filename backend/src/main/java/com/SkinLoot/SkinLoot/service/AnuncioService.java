@@ -1,6 +1,7 @@
 package com.SkinLoot.SkinLoot.service;
 
 import com.SkinLoot.SkinLoot.dto.AnuncioRequest;
+import com.SkinLoot.SkinLoot.dto.AnuncioResponse;
 import com.SkinLoot.SkinLoot.dto.MochilaPlayerDto;
 import com.SkinLoot.SkinLoot.model.Anuncio;
 import com.SkinLoot.SkinLoot.model.AnuncioLike;
@@ -11,15 +12,18 @@ import com.SkinLoot.SkinLoot.repository.AnuncioLikeRepository;
 import com.SkinLoot.SkinLoot.repository.AnuncioRepository;
 import com.SkinLoot.SkinLoot.repository.SkinRepository;
 import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional; // Importe a anotação
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import java.util.stream.Collectors; // Importe o Collectors
+
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class AnuncioService {
@@ -103,6 +107,14 @@ public class AnuncioService {
 
         // Apenas tenta deletar. Nenhuma leitura prévia é feita.
         anuncioLikeRepository.deleteByAnuncioIdAndUsuarioId(anuncioId, usuario.getId());
+    }
+
+    @Transactional(readOnly = true) // Otimiza a consulta e evita erros de Lazy Loading
+    public List<AnuncioResponse> listarPorUsuario(UUID usuarioId) {
+        return anuncioRepository.findByUsuarioId(usuarioId)
+                .stream()
+                .map(AnuncioResponse::new) // Converte cada Anuncio para AnuncioResponse
+                .collect(Collectors.toList());
     }
 
     public Anuncio save(Anuncio anuncio) {

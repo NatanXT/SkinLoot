@@ -21,7 +21,7 @@
 //    }
 //
 //    // Buscar categoria por ID
-//    public Optional<CategoriaJogo> buscarPorId(UUID id) {
+//    public Optional<CategoriaJogo> buscarPorSkinId(UUID id) {
 //        return categoriaJogoRepository.findById(id);
 //    }
 //

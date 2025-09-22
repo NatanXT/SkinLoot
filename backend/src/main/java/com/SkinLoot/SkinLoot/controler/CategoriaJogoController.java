@@ -26,7 +26,7 @@
 //
 //    @GetMapping("/{id}") // Buscar categoria por ID
 //    public ResponseEntity<CategoriaJogo> buscarCategoriaPorId(@PathVariable UUID id) {
-//        Optional<CategoriaJogo> categoria = categoriaJogoService.buscarPorId(id);
+//        Optional<CategoriaJogo> categoria = categoriaJogoService.buscarPorSkinId(id);
 //        return categoria.map(ResponseEntity::ok)
 //                        .orElseGet(() -> ResponseEntity.notFound().build());
 //    }

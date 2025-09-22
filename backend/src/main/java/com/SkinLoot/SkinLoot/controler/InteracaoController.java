@@ -37,7 +37,7 @@
 //        Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
 //                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 //
-//        Skin skin = skinService.buscarPorId(request.getSkinId())
+//        Skin skin = skinService.buscarPorSkinId(request.getSkinId())
 //                .orElseThrow(() -> new RuntimeException("Skin não encontrada"));
 //
 ////        InteracaoUsuarioSkin i = new InteracaoUsuarioSkin();
