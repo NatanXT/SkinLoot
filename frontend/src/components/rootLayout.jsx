@@ -8,7 +8,14 @@ const RootLayout = () => {
   if (loading) {
     // Você pode criar um componente de Spinner/Loader mais bonito aqui
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
+      >
         <h1>Carregando aplicação...</h1>
       </div>
     );

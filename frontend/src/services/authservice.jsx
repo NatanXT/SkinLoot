@@ -34,37 +34,28 @@
 
 // export default authService;
 
-
-
-
-
-
-// Mock : 
-
-
-
-
+// Mock :
 
 // src/services/api.js
 // Instância única do Axios com interceptors.
 // Exporta default (api) e também named (api) para compatibilidade.
 
-import axios from "axios";
+import axios from 'axios';
 
 // Cria a instância com baseURL centralizada
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080",
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
   timeout: 20000,
 });
 
 // (Opcional) Pequeno helper pra tokens caso você use depois
 export const storage = {
   get access() {
-    return localStorage.getItem("accessToken");
+    return localStorage.getItem('accessToken');
   },
   set access(v) {
-    if (v) localStorage.setItem("accessToken", v);
-    else localStorage.removeItem("accessToken");
+    if (v) localStorage.setItem('accessToken', v);
+    else localStorage.removeItem('accessToken');
   },
 };
 
@@ -78,7 +69,7 @@ api.interceptors.request.use((config) => {
 // Interceptor de response — por agora só propaga o erro
 api.interceptors.response.use(
   (res) => res,
-  (err) => Promise.reject(err)
+  (err) => Promise.reject(err),
 );
 
 // Export default para suportar: import api from "./api"

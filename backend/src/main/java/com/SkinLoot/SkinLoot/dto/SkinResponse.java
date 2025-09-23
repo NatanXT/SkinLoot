@@ -8,6 +8,9 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+
+@Getter
+@Setter
 @NoArgsConstructor
 public class SkinResponse {
 
@@ -147,5 +150,6 @@ public class SkinResponse {
 
     public void setUsuarioNome(String usuarioNome) {
         this.usuarioNome = usuarioNome;
+
     }
 }

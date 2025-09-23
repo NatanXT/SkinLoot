@@ -1,11 +1,11 @@
 // Header.jsx
-import React from "react";
-import "./Header.css";
-import { FaBars, FaTimes } from "react-icons/fa";
+import React from 'react';
+import './Header.css';
+import { FaBars, FaTimes } from 'react-icons/fa';
 
 /**
  * Cabeçalho principal com logo, busca, navegação e botão de menu lateral.
- * 
+ *
  * @param {boolean} isOpen - Estado de visibilidade da sidebar
  * @param {function} toggleSidebar - Função para alternar a sidebar
  */
