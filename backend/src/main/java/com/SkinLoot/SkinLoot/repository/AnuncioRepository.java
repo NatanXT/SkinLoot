@@ -1,6 +1,8 @@
 package com.SkinLoot.SkinLoot.repository;
 
 import com.SkinLoot.SkinLoot.model.Anuncio;
+import com.SkinLoot.SkinLoot.model.Usuario;
+import com.SkinLoot.SkinLoot.model.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,5 +17,9 @@ public interface AnuncioRepository extends JpaRepository<Anuncio, UUID> {
 //    List<Anuncio> findByStatusAndJogo(@Param("status") Status status, @Param("jogoId") UUID jogoId);
 
     List<Anuncio> findByUsuarioId(UUID usuarioId);
+
+    // Spring Data JPA vai gerar a query: "SELECT COUNT(*) FROM Anuncio a WHERE a.usuario = ?1 AND a.status = ?2"
+    long countByUsuarioAndStatus(Usuario usuario, Status status);
+
 
 }

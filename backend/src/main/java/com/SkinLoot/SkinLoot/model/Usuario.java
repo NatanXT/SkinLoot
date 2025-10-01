@@ -2,12 +2,14 @@ package com.SkinLoot.SkinLoot.model;
 
 import com.SkinLoot.SkinLoot.model.enums.Genero;
 import com.SkinLoot.SkinLoot.model.enums.Role;
+import com.SkinLoot.SkinLoot.model.enums.StatusAssinatura;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,8 +44,17 @@ public class Usuario {
     private PlanoAssinatura planoAssinatura;
 
     @Enumerated(EnumType.STRING)
+    private StatusAssinatura statusAssinatura;
+
+    private LocalDate dataExpira;
+
+    // OPCIONAL, MAS RECOMENDADO: ID da assinatura no gateway de pagamento
+    private String idAssinaturaGateway; // Ex: "sub_1L2Y3Z..." do Stripe
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
 
 
 
@@ -122,5 +133,21 @@ public class Usuario {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public StatusAssinatura getStatusAssinatura() {
+        return statusAssinatura;
+    }
+
+    public void setStatusAssinatura(StatusAssinatura statusAssinatura) {
+        this.statusAssinatura = statusAssinatura;
+    }
+
+    public LocalDate getDataExpira() {
+        return dataExpira;
+    }
+
+    public void setDataExpira(LocalDate dataExpira) {
+        this.dataExpira = dataExpira;
     }
 }
