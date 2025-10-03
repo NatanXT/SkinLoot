@@ -6,6 +6,7 @@ import com.SkinLoot.SkinLoot.model.enums.Status;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 public class AnuncioResponse {
@@ -20,9 +21,8 @@ public class AnuncioResponse {
     private Status status;
     private LocalDateTime dataCriacao;
     private String usuarioNome;
-    private Double desgasteFloat;
-    private String qualidade;
     private int likesCount;
+    private Map<String, Object> detalhesEspecificos;
 
 
     public AnuncioResponse() {
@@ -40,9 +40,9 @@ public class AnuncioResponse {
         this.skinId = anuncio.getSteamItemId();
         this.skinNome = anuncio.getSkinName();
         this.skinIcon = anuncio.getSkinImageUrl();
-        this.qualidade = anuncio.getQualidade();
-        this.desgasteFloat = anuncio.getDesgasteFloat();
         this.likesCount = anuncio.getLikesCount();
+        this.detalhesEspecificos = anuncio.getDetalhesEspecificos(); // Mapeia o campo da entidade
+
 
         // Verifica se o usuário associado ao anúncio não é nulo
         if (anuncio.getUsuario() != null) {
@@ -144,27 +144,19 @@ public class AnuncioResponse {
         this.planoNome = planoNome;
     }
 
-    public Double getDesgasteFloat() {
-        return desgasteFloat;
-    }
-
-    public void setDesgasteFloat(Double desgasteFloat) {
-        this.desgasteFloat = desgasteFloat;
-    }
-
-    public String getQualidade() {
-        return qualidade;
-    }
-
-    public void setQualidade(String qualidade) {
-        this.qualidade = qualidade;
-    }
-
     public int getLikesCount() {
         return likesCount;
     }
 
     public void setLikesCount(int likesCount) {
         this.likesCount = likesCount;
+    }
+
+    public Map<String, Object> getDetalhesEspecificos() {
+        return detalhesEspecificos;
+    }
+
+    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {
+        this.detalhesEspecificos = detalhesEspecificos;
     }
 }

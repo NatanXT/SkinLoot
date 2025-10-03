@@ -8,8 +8,11 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -55,15 +58,14 @@ public class Skin {
     @Column(nullable = false)
     private String icon;
 
-    @Column(name = "asset_id")
-    private String assetId;
+//    @Column(name = "asset_id")
+//    private String assetId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatusModeracao statusModeracao;
 
     private LocalDateTime dataSubmissao;
-
 
 
     //    // Construtores que já fizemos antes...
@@ -133,14 +135,6 @@ public class Skin {
 
     public void setIcon(@NotBlank String icon) {
         this.icon = icon;
-    }
-
-    public String getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(String assetId) {
-        this.assetId = assetId;
     }
 
     public StatusModeracao getStatusModeracao() {

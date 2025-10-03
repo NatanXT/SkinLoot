@@ -4,18 +4,17 @@ import com.SkinLoot.SkinLoot.model.Usuario;
 import com.SkinLoot.SkinLoot.model.enums.Status;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.UUID;
 
 public class AnuncioRequest {
     private String titulo;
     private String descricao;
     private BigDecimal preco;
+    private Map<String, Object> detalhesEspecificos;
     private Status status;
     //private Long steamItemId;    // O ID do item que vem da API da Steam
     private UUID skinId;
-    private Double desgasteFloat;
-    private String qualidade;
-
 
     // Getters e Setters para todos os campos
     public String getTitulo() { return titulo; }
@@ -34,18 +33,13 @@ public class AnuncioRequest {
     public void setSkinId(UUID skinId) {
         this.skinId = skinId;
     }
-    public Double getDesgasteFloat() { return desgasteFloat; }
 
-    public void setDesgasteFloat(Double desgasteFloat) {
-        this.desgasteFloat = desgasteFloat;
+    public Map<String, Object> getDetalhesEspecificos() {
+        return detalhesEspecificos;
     }
 
-    public String getQualidade() {
-        return qualidade;
-    }
-
-    public void setQualidade(String qualidade) {
-        this.qualidade = qualidade;
+    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {
+        this.detalhesEspecificos = detalhesEspecificos;
     }
 }
 

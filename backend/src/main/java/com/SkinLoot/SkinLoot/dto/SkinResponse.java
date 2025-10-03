@@ -19,7 +19,6 @@ public class SkinResponse {
     private String descricao;
     private String icon;
     private String raridade;
-    private String assetId;
     private UUID jogoId;
     private String jogoNome;
     private String statusModeracao;
@@ -36,7 +35,6 @@ public class SkinResponse {
         this.nome = skin.getNome();
         this.descricao = skin.getDescricao();
         this.icon = skin.getIcon();
-        this.assetId = skin.getAssetId();
         this.dataSubmissao = skin.getDataSubmissao();
         if (skin.getStatusModeracao() != null) {
             this.statusModeracao = skin.getStatusModeracao().name(); // Converte o enum para String
@@ -94,14 +92,6 @@ public class SkinResponse {
 
     public void setRaridade(String raridade) {
         this.raridade = raridade;
-    }
-
-    public String getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(String assetId) {
-        this.assetId = assetId;
     }
 
     public UUID getJogoId() {

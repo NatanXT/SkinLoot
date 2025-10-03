@@ -5,9 +5,12 @@ import com.SkinLoot.SkinLoot.model.enums.Status;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -49,10 +52,10 @@ public class Anuncio {
     @Formula("(select count(*) from anuncio_like al where al.anuncio_id = id)")
     private int likesCount;
 
-    private String qualidade;
+    @JdbcTypeCode(SqlTypes.JSON)                // Informa ao Hibernate o tipo JDBC a ser usado
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Object> detalhesEspecificos;
 
-    @Column(name = "desgaste_float")
-    private Double desgasteFloat;
 
     // Construtores, Getters e Setters para TODOS os campos acima...
     // (É importante ter todos os getters e setters para que o Spring funcione corretamente)
@@ -60,7 +63,7 @@ public class Anuncio {
     public Anuncio() {}
 
     public Anuncio(UUID id, String titulo, String descricao, BigDecimal preco, Status status, String skinName, String skinImageUrl, Usuario usuario, LocalDateTime dataCriacao, Long steamItemId,
-                   Set<AnuncioLike> likes, int likesCount, String qualidade, Double desgasteFloat) {
+                   Set<AnuncioLike> likes, int likesCount) {
         this.id = id;
         this.titulo = titulo;
         this.descricao = descricao;
@@ -73,8 +76,7 @@ public class Anuncio {
         this.steamItemId = steamItemId;
         this.likes = likes;
         this.likesCount = likesCount;
-        this.qualidade = qualidade;
-        this.desgasteFloat = desgasteFloat;
+
     }
 
     public Anuncio(UUID anuncioId) {
@@ -105,22 +107,8 @@ public class Anuncio {
     public void setLikes(Set<AnuncioLike> likes) { this.likes = likes; }
     public int getLikesCount() { return likesCount; }
     public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
-
-    public String getQualidade() {
-        return qualidade;
+    public Map<String, Object> getDetalhesEspecificos() {return detalhesEspecificos;
     }
-
-    public void setQualidade(String qualidade) {
-        this.qualidade = qualidade;
+    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {this.detalhesEspecificos = detalhesEspecificos;
     }
-
-    public Double getDesgasteFloat() {
-        return desgasteFloat;
-    }
-
-    public void setDesgasteFloat(Double desgasteFloat) {
-        this.desgasteFloat = desgasteFloat;
-    }
-
-
 }

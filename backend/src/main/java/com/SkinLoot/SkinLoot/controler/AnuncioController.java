@@ -70,8 +70,6 @@ public class AnuncioController {
         dto.setSkinIcon(a.getSkinImageUrl()); // Usa o novo campo
         dto.setSkinNome(a.getSkinName());
         dto.setUsuarioNome(a.getUsuario().getNome());
-        dto.setQualidade(a.getQualidade());
-        dto.setDesgasteFloat(a.getDesgasteFloat());
         dto.setLikesCount(a.getLikesCount());
         return dto;
     }

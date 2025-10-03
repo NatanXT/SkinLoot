@@ -71,7 +71,6 @@ public class DataImportService {
                 // --- AQUI ACONTECE O MAPEAMENTO ---
                 novaSkin.setNome(championName + " | " + skinName);
                 novaSkin.setDescricao(championLore); // Usando a lore do campeão como descrição
-                novaSkin.setAssetId(skinId);
 
                 // Construindo a URL do ícone
                 // Ex: http://ddragon.leagueoflegends.com/cdn/img/champion/loading/Aatrox_1.jpg

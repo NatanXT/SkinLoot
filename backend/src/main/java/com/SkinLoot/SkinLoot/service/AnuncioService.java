@@ -64,10 +64,6 @@ public class AnuncioService {
             novoAnuncio.setDescricao(request.getDescricao());
             novoAnuncio.setPreco(request.getPreco());
 
-            // 3. Define os detalhes da instância da skin
-            novoAnuncio.setDesgasteFloat(request.getDesgasteFloat());
-            novoAnuncio.setQualidade(request.getQualidade());
-
             // 4. Copia (desnormaliza) os dados do catálogo para o anúncio
             novoAnuncio.setSkinName(skinDeCatalogo.getNome());
             novoAnuncio.setSkinImageUrl(skinDeCatalogo.getIcon());
