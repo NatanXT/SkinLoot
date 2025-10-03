@@ -13,7 +13,11 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
   timeout: 20000,
+  withCredentials: true,
 });
+
+// Interceptor de request: NADA de Authorization (cookie já vai sozinho)
+api.interceptors.request.use((config) => config);
 
 // ---------- Storage de tokens (com remember) ----------
 /** Lê/grava tokens — se "remember" = true usa localStorage, senão sessionStorage */
@@ -119,6 +123,33 @@ api.interceptors.response.use(
       }
     }
 
+    throw err;
+  },
+);
+
+// Interceptor de resposta: se 401, tenta /usuarios/auth/refresh (sua rota)
+let refreshing = null;
+api.interceptors.response.use(
+  (res) => res,
+  async (err) => {
+    const { response, config } = err || {};
+    if (!response) throw err;
+
+    if (response.status === 401 && !config.__isRetry) {
+      try {
+        if (!refreshing) {
+          refreshing = api.post('/usuarios/auth/refresh'); // backend coloca novo cookie
+        }
+        await refreshing;
+        refreshing = null;
+
+        config.__isRetry = true;
+        return api(config); // reexecuta
+      } catch (e) {
+        refreshing = null;
+        throw err;
+      }
+    }
     throw err;
   },
 );

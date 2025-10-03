@@ -1,0 +1,37 @@
+
+Anuncios
+
+Base
+http://localhost:8080/anuncios
+
+Criar Anúncio – POST
+http://localhost:8080/anuncios/save
+(Requer Bearer JWT)
+
+{
+  "titulo": "AK-47 | Redline",
+  "descricao": "Field-Tested, adesivo Vox",
+  "preco": 199.99
+}
+
+
+Listar Anúncios – GET
+http://localhost:8080/anuncios
+
+Listar Anúncios do Usuário – GET
+http://localhost:8080/anuncios/user
+(Requer Bearer JWT)
+
+Curtir Anúncio – POST
+http://localhost:8080/anuncios/{id}/like
+(Requer Bearer JWT)
+
+Remover Like – DELETE
+http://localhost:8080/anuncios/{id}/unlike
+(Requer Bearer JWT)
+
+Observações
+
+Resposta padrão (AnuncioResponse) inclui: id, titulo, descricao, preco, status, dataCriacao, skinId, skinIcon, skinNome, usuarioNome, qualidade, desgasteFloat, likesCount.
+
+Erros seguem o padrão Spring (status, error, message, path).

@@ -193,6 +193,7 @@ export default function DashboardVitrine() {
   // Mock e Minhas
   const [skinsMock] = useState(() => enrichFromMock(MockSkins));
   const [minhasSkins, setMinhasSkins] = useState([]);
+  const [feedApi, setFeedApi] = useState([]);
   const [carregandoMinhas, setCarregandoMinhas] = useState(false);
   const [erroMinhas, setErroMinhas] = useState('');
 
@@ -304,6 +305,40 @@ export default function DashboardVitrine() {
       ativo = false;
     };
   }, [user]);
+
+  useEffect(() => {
+    // FEED geral (todo mundo)
+    let vivo = true;
+    (async () => {
+      try {
+        const data = await anuncioService.listarFeedNormalizado();
+        if (vivo) setFeedApi(data);
+      } catch (e) {
+        if (vivo) setFeedApi([]);
+      }
+    })();
+    return () => {
+      vivo = false;
+    };
+  }, []);
+
+  +(
+    // Polling leve do feed a cada 5s (até ligar SSE)
+    useEffect(() => {
+      let alive = true;
+      const tick = async () => {
+        try {
+          const data = await anuncioService.listarFeedNormalizado();
+          if (alive) setFeedApi(data);
+        } catch {}
+      };
+      const id = setInterval(tick, 5000);
+      return () => {
+        alive = false;
+        clearInterval(id);
+      };
+    }, [])
+  );
 
   // Lista combinada: minhas + mock
   const listaCombinada = useMemo(() => {
