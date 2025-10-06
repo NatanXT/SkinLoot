@@ -36,7 +36,7 @@ public class Skin {
     @Column(nullable = false)
     private String nome;
 
-    @Column(length = 500)
+    @Column(columnDefinition = "TEXT")
     private String descricao;
 
     @NotNull

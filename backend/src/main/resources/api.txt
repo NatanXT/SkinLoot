@@ -1,0 +1,178 @@
+##Skins
+
+criar uman nova skin
+localhost:8080/skins/save POST
+{ //dto de request
+  "nome": "Phantom Protocolo 781-A",
+  "descricao": "Uma skin de Phantom com tema militar futurista, com animações e efeitos sonoros customizados.",
+  "icon": "https://cdn1.dotesports.com/wp-content/uploads/2022/01/10103759/image-10.png",
+  "raridade": "RARO",
+  "assetId": "1234567890",
+  "jogoId": "7ada8b6a-3153-410c-a7c5-b237538929df"
+}
+{//dto de resposta do backend de skin salva
+    "id": "045316f8-9112-4e37-af1c-ec737b506374",
+    "nome": "Phantom Protocolo 781-A",
+    "descricao": "Uma skin de Phantom com tema militar futurista, com animações e efeitos sonoros customizados.",
+    "icon": "https://cdn1.dotesports.com/wp-content/uploads/2022/01/10103759/image-10.png",
+    "raridade": "RARO",
+    "assetId": "1234567890",
+    "jogoId": "7ada8b6a-3153-410c-a7c5-b237538929df",
+    "jogoNome": "Valorant",
+    "statusModeracao": "PENDENTE",
+    "dataSubmissao": "2025-09-24T09:21:04.4269391",
+    "usuarioId": "d174b27b-9b73-43df-8616-e18d42098bf2",
+    "usuarioNome": "cuvisa"
+}
+
+listar todas as skins
+localhost:8080/skins
+
+listar skins do usuario
+localhost:8080/skins/user GET
+{
+    "id": "045316f8-9112-4e37-af1c-ec737b506374",
+    "nome": "Phantom Protocolo 781-A",
+    "descricao": "Uma skin de Phantom com tema militar futurista, com animações e efeitos sonoros customizados.",
+    "icon": "https://cdn1.dotesports.com/wp-content/uploads/2022/01/10103759/image-10.png",
+    "raridade": "RARO",
+    "assetId": "1234567890",
+    "jogoId": "7ada8b6a-3153-410c-a7c5-b237538929df",
+    "jogoNome": "Valorant",
+    "statusModeracao": "PENDENTE",
+    "dataSubmissao": "2025-09-24T09:21:04.4269391",
+    "usuarioId": "d174b27b-9b73-43df-8616-e18d42098bf2",
+    "usuarioNome": "cuvisa"
+}
+
+listar skins por jogo
+localhost:8080/jogos/{jogoId} GET
+
+buscar skin por id
+localhost:8080/skins/{id}
+
+##Anuncio
+localhost:8080/anuncios
+listagem de todos os anúncios
+[
+    {
+        "id": "3895355c-0bb2-4bd9-a711-f6553fea3767",
+        "titulo": "AK-47 | Redline",
+        "descricao": "Skin popular para CS:GO com acabamento fosco.",
+        "preco": 129.99,
+        "skinId": null,
+        "skinIcon": "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2U072d2pzAaA/360fx360f",
+        "skinNome": "AK-47 | Réquiem Congelado",
+        "planoNome": "GRATUITO",
+        "status": "ATIVO",
+        "dataCriacao": "2025-09-22T10:33:27.506969",
+        "usuarioNome": "cuvisa",
+        "desgasteFloat": null,
+        "qualidade": "NOVA",
+        "likesCount": 0
+    }
+]
+
+localhost:8080/anuncios/save
+cria um novo anúncio
+{//dto de request para criar um novo anuncio
+  "titulo": "AK-47 | Redline",
+  "descricao": "Skin popular para CS:GO com acabamento fosco.",
+  "preco": 129.99,
+  "status": "ATIVO",
+  "skinId": "6ec23c73-59f6-4e67-b06b-1fcfbe074d8a",
+  "desgastefloat": 0.05,
+  "qualidade": "NOVA"
+}
+{//resposta do anuncio novo
+    "id": "29c67576-8346-49e8-a32e-e19228c9b9a9",
+    "titulo": "AWP| Dragon Lore",
+    "descricao": "Skin popular para CS:GO com acabamento fosco.",
+    "preco": 930.00,
+    "skinId": null,
+    "skinIcon": "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2U072d2pzAaA/360fx360f",
+    "skinNome": "AK-47 | Réquiem Congelado",
+    "planoNome": null,
+    "status": "ATIVO",
+    "dataCriacao": "2025-09-24T09:42:16.7446777",
+    "usuarioNome": "cuvisa",
+    "desgasteFloat": null,
+    "qualidade": "NOVA",
+    "likesCount": 0
+}
+localhost:8080/anuncios/{id}/like
+envia um like para o banco
+
+localhost:8080/anuncios/{id}/unlike
+remover like
+
+##Jogo
+localhost:8080/jogos/save POST
+{//dto de request para adicionar um novo jogo no banco de dados
+  "nome": "CS:GO",
+  "categorias": ["FPS", "P2W"]
+}
+
+localhost:8080/jogos GET
+{
+   [
+       {
+           "id": "6e15361e-ccbb-4708-bb7a-5a189213d336",
+           "nome": "CS:GO",
+           "categorias": []
+       },
+       {
+           "id": "7ada8b6a-3153-410c-a7c5-b237538929df",
+           "nome": "Valorant",
+           "categorias": []
+       },
+       {
+           "id": "fee9fef7-dd17-4a63-b125-84ff8c4fcf31",
+           "nome": "Dota 2",
+           "categorias": []
+       },
+       {
+           "id": "d4c8a531-7f66-440b-8aaa-36b96e6deacd",
+           "nome": "League of Legends",
+           "categorias": []
+       },
+       {
+           "id": "e08f4241-bdd7-447e-845b-b65c020d6f6b",
+           "nome": "Rust",
+           "categorias": []
+       }
+   ]
+}
+
+
+//categorias é uma classe com enum com os seguintes valores
+CategoriaJogo{
+    FPS,
+    RPG,
+    MOBA,
+    ESTRATEGIA,
+    SANDBOX,
+    P2W,
+    TATICO,
+    COMPETITIVO,
+    HERO_SHOOTER,
+    SOBREVIVENCIA,
+    MUNDO_ABERTO
+}
+tem 2 classes enum de Status, uma para skin e outra para anuncio
+Status {
+    ATIVO,
+    PENDENTE,
+    VENDIDO
+}
+StatusModeracao {
+        PENDENTE, // Acabou de ser enviado, aguardando revisão
+        APROVADO, // Visível para todos os usuários criarem anúncios
+        REJEITADO  // Recusado por um moderador
+}
+
+
+
+
+
+
