@@ -1,12 +1,12 @@
-// Login.jsx
+// frontend/src/pages/auth/Login.jsx
 import React, { useState } from 'react';
 import { useAuth } from '../../services/AuthContext';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import './Auth.css';
 import AuthBrand from '../../components/logo/AuthBrand';
 
-// storage: para salvar tokens mock no dev-login
-import { storage } from '../../services/api';
+// Wrapper da API e storage (tokens)
+import api, { storage } from '../../services/api';
 
 // E-mail simples
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -43,12 +43,11 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
 
-  // 🔹 seu AuthContext (mantido)
-  const { login, setUser } = useAuth(); // [NOVO] se seu contexto não tiver setUser, ele será undefined e ignoramos
+  // seu AuthContext
+  const { login, setUser } = useAuth();
   const navigate = useNavigate();
   const [qs] = useSearchParams();
 
-  // inputs normais (sem cortar teclas)
   const onChange = (e) => {
     const { name, type, value, checked } = e.target;
     setFormData((prev) => ({
@@ -59,7 +58,6 @@ export default function Login() {
 
   const validate = () => {
     const e = {};
-    // 🔹 Validação padrão (mantida). O DEV LOGIN pula essa etapa no onSubmit.
     if (!EMAIL_RE.test(formData.email)) e.email = 'Informe um e-mail válido.';
     if (!formData.senha || formData.senha.length < 8)
       e.senha = 'Senha precisa ter ao menos 8 caracteres.';
@@ -71,7 +69,7 @@ export default function Login() {
     ev.preventDefault();
     setApiError('');
 
-    // 🔹 [NOVO] Caminho curto: DEV LOGIN (não passa pela validação de 8+ caracteres)
+    // DEV LOGIN (somente dentro do onSubmit)
     if (
       DEV_ENABLED &&
       formData.email.trim() === DEV_EMAIL &&
@@ -80,26 +78,27 @@ export default function Login() {
       try {
         setIsLoading(true);
 
-        // salva preferência "lembrar" para decidir storage (localStorage ou sessionStorage)
+        // Onde salvar os tokens mock (localStorage x sessionStorage)
         storage.remember = !!formData.lembrar;
-
-        // tokens mockados só para navegação no front
         storage.access = 'dev-access-token';
         storage.refresh = 'dev-refresh-token';
 
-        // opcional: setar um usuário mock no contexto (se existir setUser no AuthContext)
-        if (typeof setUser === 'function') {
-          const devUser = {
-            id: 0,
-            nome: 'Natan (DEV)',
-            email: DEV_EMAIL,
-            plano: 'plus', // você pode trocar para "intermediario" ou "gratuito"
-          };
-          setUser(devUser);
-          localStorage.setItem('auth_user', JSON.stringify(devUser));
-        }
+        // Semear/atualizar o usuário no backend DEV
+        const devUserSeed = {
+          email: DEV_EMAIL,
+          nome: 'Natan (DEV)',
+          plano: 'plus', // mude para "intermediario" ou "gratuito" se quiser
+        };
 
-        // mantém seu redirecionamento original
+        // sem chamar backend em DEV: só hidrata localmente
+        const seeded = {
+          id: 'dev-user-id',
+          ...devUserSeed,
+          criadoEm: new Date().toISOString(),
+        };
+        if (typeof setUser === 'function') setUser(seeded);
+        localStorage.setItem('auth_user', JSON.stringify(seeded));
+
         const backTo = qs.get('from') || '/';
         navigate(backTo, { replace: true });
         return;
@@ -111,7 +110,7 @@ export default function Login() {
       }
     }
 
-    // 🔹 Fluxo NORMAL (mantido)
+    // Fluxo NORMAL
     if (!validate()) return;
 
     setIsLoading(true);
@@ -138,14 +137,12 @@ export default function Login() {
   return (
     <div className="auth-root">
       <div className="auth-card">
-        {/* 🔗 Logo → "/" */}
         <AuthBrand />
         <h1 className="auth-title">Entrar</h1>
         <p className="auth-subtitle">
           Bem-vindo de volta! Acesse sua conta para anunciar e favoritar skins.
         </p>
 
-        {/* aviso visual quando o DEV LOGIN estiver ativo */}
         {DEV_ENABLED && (
           <div
             style={{
@@ -166,7 +163,6 @@ export default function Login() {
         <form className="auth-form" onSubmit={onSubmit} noValidate>
           {apiError && <div className="api-error-message">{apiError}</div>}
 
-          {/* E-mail */}
           <div className="field">
             <label htmlFor="email">E-mail</label>
             <input
@@ -184,7 +180,6 @@ export default function Login() {
             )}
           </div>
 
-          {/* Senha */}
           <div className="field">
             <label htmlFor="senha">Senha</label>
             <div className="input-pass">
@@ -214,7 +209,6 @@ export default function Login() {
             )}
           </div>
 
-          {/* Lembrar / Esqueci */}
           <div className="form-row">
             <label className="check">
               <input
@@ -230,7 +224,6 @@ export default function Login() {
             </Link>
           </div>
 
-          {/* CTA */}
           <button
             type="submit"
             className="btn btn--primary btn--full"
@@ -239,7 +232,6 @@ export default function Login() {
             {isLoading ? 'Entrando...' : 'Entrar'}
           </button>
 
-          {/* OAuth placeholder + cadastro */}
           <div className="oauth">
             <button type="button" className="btn btn--ghost btn--full">
               <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>

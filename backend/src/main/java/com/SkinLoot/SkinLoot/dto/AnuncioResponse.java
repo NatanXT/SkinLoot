@@ -24,7 +24,6 @@ public class AnuncioResponse {
     private String qualidade;
     private int likesCount;
 
-
     public AnuncioResponse() {
     }
 

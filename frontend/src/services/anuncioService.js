@@ -1,72 +1,85 @@
 // frontend/src/services/anuncioService.js
-// Serviço responsável por buscar e normalizar os anúncios (skins) do usuário logado.
-// Usa a instância Axios centralizada (api) e retorna os itens prontos para a Dashboard.
-// ------------------------------------------------------------------------------
+import api from './api';
 
-import api from './api.js';
+const DEV_ENABLED = import.meta.env.VITE_ENABLE_DEV_LOGIN === 'true';
+const LS_KEY = 'dev_skins';
 
-/**
- * CAMINHO DA API:
- * - Ajuste aqui caso seu backend utilize outra rota (ex.: '/usuarios/me/anuncios' ou '/anuncios/minhas').
- * - Padrão usado: GET /anuncios/me  -> lista os anúncios do usuário autenticado.
- */
-const CAMINHO_MINHAS = '/anuncios/user';
-const CAMINHO_FEED = '/anuncios';
+// ---------------- DEV store helpers ----------------
+function devLoad() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  // seed inicial
+  const seed = [
+    {
+      id: 'm1',
+      skinNome: 'AWP | Asiimov',
+      preco: 799.9,
+      imagemUrl: '/img/awp_asiimov.png',
+      ativo: true,
+    },
+    {
+      id: 'm2',
+      skinNome: 'AK-47 | Neon Rider',
+      preco: 499.0,
+      imagemUrl: '/img/ak47_neon_rider.png',
+      ativo: true,
+    },
+    {
+      id: 'm3',
+      skinNome: 'Butterfly | Slaughter',
+      preco: 3299.0,
+      imagemUrl: '/img/butterfly_slaughter.png',
+      ativo: false,
+    },
+  ];
+  localStorage.setItem(LS_KEY, JSON.stringify(seed));
+  return seed;
+}
+function devSave(arr) {
+  localStorage.setItem(LS_KEY, JSON.stringify(arr));
+  return arr;
+}
+function uid() {
+  return 'm' + Math.random().toString(36).slice(2, 9);
+}
 
-/**
- * normalizarDoBackend
- * Converte o anúncio do backend para o formato que a Dashboard usa no ranking.
- * Mantemos nomes em português e garantimos chaves: id, title, image, game, price, currency,
- * seller, plan, likes, listedAt.
- */
-export function normalizarDoBackend(anuncio) {
-  // Id robusto (pega a primeira alternativa disponível)
-  const id = anuncio.id || anuncio.uuid || anuncio._id;
-
-  // Título da skin
+// ------------ Normalização (para quando usar backend) ------------
+function normalizarDoBackend(anuncio = {}) {
+  const id = anuncio.id ?? anuncio.uuid ?? anuncio._id ?? uid();
   const title =
-    anuncio.skinNome ||
-    anuncio.skinName ||
-    anuncio.titulo ||
-    anuncio.nome ||
+    anuncio.skinNome ??
+    anuncio.skinName ??
+    anuncio.titulo ??
+    anuncio.nome ??
     'Skin';
-
-  // Imagem principal
   const image =
-    anuncio.skinIcon ||
-    anuncio.skinImageUrl ||
-    anuncio.imagemUrl ||
-    anuncio.imagem ||
-    anuncio.fotoUrl ||
+    anuncio.skinIcon ??
+    anuncio.skinImageUrl ??
+    anuncio.imagemUrl ??
+    anuncio.imagem ??
+    anuncio.fotoUrl ??
     '';
-
-  // Jogo (se não vier do backend, padronizamos como CS2 por enquanto)
-  const game = anuncio.jogo || anuncio.jogoNome || 'CS2';
-
-  // Preço numérico (tenta múltiplos campos)
+  const game = anuncio.jogo ?? anuncio.jogoNome ?? 'CS2';
   const precoNum = Number(anuncio.preco ?? anuncio.price ?? anuncio.valor ?? 0);
-
-  // Plano (gratuito/intermediario/plus) — fallback para 'gratuito'
-  const planRaw = anuncio?.plano || anuncio?.plan || 'gratuito';
-  const plan = String(planRaw).toLowerCase();
-
-  // Curtidas (fallback 0)
-  const likes = Number(anuncio?.likes ?? anuncio?.curtidas ?? 0);
-
-  // Data de listagem: tenta vários campos, cai para "agora" se faltar
+  const plan = String(
+    anuncio.plano ?? anuncio.plan ?? 'gratuito',
+  ).toLowerCase();
+  const likes = Number(
+    anuncio.likesCount ?? anuncio.likes ?? anuncio.curtidas ?? 0,
+  );
   const dataStr =
-    anuncio?.dataCriacao ||
-    anuncio?.criadoEm ||
-    anuncio?.createdAt ||
-    anuncio?.atualizadoEm;
-  const listedAt = dataStr ? Date.parse(dataStr) || Date.now() : Date.now();
-  const listedAt =
-    Date.parse(
-      anuncio.dataCriacao || anuncio.criadoEm || anuncio.createdAt || '',
-    ) || Date.now();
-
-  // Vendedor (nome visível no card + fallback)
-  const sellerName = anuncio.usuarioNome || anuncio.vendedorNome || '—';
+    anuncio.dataCriacao ??
+    anuncio.criadoEm ??
+    anuncio.createdAt ??
+    anuncio.atualizadoEm ??
+    '';
+  const parsed = Date.parse(dataStr);
+  const listedAt = Number.isFinite(parsed) ? parsed : Date.now();
+  const sellerName = anuncio.usuarioNome ?? anuncio.vendedorNome ?? '—';
+  const status = anuncio.status ?? anuncio._status;
+  const ativo = String(status || 'ATIVO').toUpperCase() === 'ATIVO';
 
   return {
     id,
@@ -76,41 +89,151 @@ export function normalizarDoBackend(anuncio) {
     price: Number.isFinite(precoNum) ? precoNum : 0,
     currency: 'BRL',
     seller: { name: sellerName },
-    plan: (anuncio.plano || anuncio.plan || 'gratuito').toLowerCase(),
-    likes: anuncio.likesCount ?? anuncio.likes ?? 0,
+    plan,
+    likes,
     listedAt,
-    // Mantemos alguns campos originais caso precise em outro lugar
+    ativo,
     _raw: anuncio,
+    // campos que o Perfil espera
+    skinNome: title,
+    imagemUrl: image,
+    preco: Number.isFinite(precoNum) ? precoNum : 0,
   };
 }
 
-/**
- * listarMinhasNormalizadas
- * Busca as skins do usuário e entrega já normalizadas para a Dashboard.
- * Aceita retornos em formatos diferentes: array direto ou paginado ({results}, {items}, {content}).
- */
+function extrairArray(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.results)) return data.results;
+  return [];
+}
+
+// ================= LISTAGENS =================
 export async function listarMinhasNormalizadas() {
-  const { data } = await api.get(CAMINHO_MINHAS);
-  const arr = Array.isArray(data) ? data : [];
-  return arr.map(normalizarDoBackend);
+  if (DEV_ENABLED) {
+    // ✅ DEV: lê do localStorage
+    const arr = devLoad();
+    return arr;
+  }
+
+  // PROD: ajuste o endpoint para o seu backend (ex.: /anuncios/user)
+  const { data } = await api.get('/anuncios/user');
+  return extrairArray(data).map(normalizarDoBackend);
 }
 
 export async function listarFeedNormalizado() {
-  const { data } = await api.get(CAMINHO_FEED);
-  const arr = Array.isArray(data) ? data : [];
-  return arr.map(normalizarDoBackend);
+  if (DEV_ENABLED) {
+    // em DEV, pode simplesmente reaproveitar as mesmas
+    return devLoad();
+  }
+  const { data } = await api.get('/anuncios');
+  return extrairArray(data).map(normalizarDoBackend);
 }
 
+// ================= CRUD =================
+export async function criarAnuncio(payload) {
+  if (DEV_ENABLED) {
+    const arr = devLoad();
+    const novo = {
+      id: uid(),
+      skinNome: payload.skinName || payload.titulo || 'Skin',
+      preco: Number(payload.preco) || 0,
+      imagemUrl: payload.skinImageUrl || '/img/placeholder.png',
+      ativo: true,
+    };
+    devSave([novo, ...arr]);
+    return novo;
+  }
+
+  // PROD: seu backend Spring usa /anuncios/save
+  // Se precisar enviar arquivo, adapte para multipart conforme sua UI
+  const body = {
+    titulo: payload.titulo,
+    descricao: payload.descricao ?? '',
+    preco: payload.preco,
+    skinName: payload.skinName,
+    skinImageUrl: payload.skinImageUrl,
+    // qualidade: payload.qualidade,
+    // desgasteFloat: payload.desgasteFloat,
+    // skinId: payload.skinId, // quando integrar com catálogo real
+  };
+  const { data } = await api.post('/anuncios/save', body);
+  return normalizarDoBackend(data);
+}
+
+export async function editarAnuncio(id, payload) {
+  if (DEV_ENABLED) {
+    const arr = devLoad();
+    const i = arr.findIndex((x) => String(x.id) === String(id));
+    if (i >= 0) {
+      const atualizado = {
+        ...arr[i],
+        skinNome: payload.skinName || payload.titulo || arr[i].skinNome,
+        preco: Number(payload.preco ?? arr[i].preco),
+        imagemUrl: payload.skinImageUrl || arr[i].imagemUrl,
+      };
+      arr[i] = atualizado;
+      devSave(arr);
+      return atualizado;
+    }
+    return null;
+  }
+
+  const body = {
+    titulo: payload.titulo,
+    descricao: payload.descricao ?? '',
+    preco: payload.preco,
+    skinName: payload.skinName,
+    skinImageUrl: payload.skinImageUrl,
+    // qualidade: payload.qualidade,
+    // desgasteFloat: payload.desgasteFloat,
+    // skinId: payload.skinId,
+  };
+  const { data } = await api.put(`/anuncios/${id}`, body);
+  return normalizarDoBackend(data);
+}
+
+export async function desativarAnuncio(id) {
+  if (DEV_ENABLED) {
+    const arr = devLoad().map((x) =>
+      String(x.id) === String(id) ? { ...x, ativo: false } : x,
+    );
+    devSave(arr);
+    return;
+  }
+  // Spring: altera status -> recomendado ter endpoint específico
+  await api.post(`/anuncios/${id}/desativar`);
+}
+
+export async function reativarAnuncio(id) {
+  if (DEV_ENABLED) {
+    const arr = devLoad().map((x) =>
+      String(x.id) === String(id) ? { ...x, ativo: true } : x,
+    );
+    devSave(arr);
+    return;
+  }
+  await api.post(`/anuncios/${id}/reativar`);
+}
+
+// (opcional) likes, caso você use
 export async function likeAnuncio(id) {
+  if (DEV_ENABLED) return;
   await api.post(`/anuncios/${id}/like`);
 }
 export async function unlikeAnuncio(id) {
+  if (DEV_ENABLED) return;
   await api.delete(`/anuncios/${id}/unlike`);
 }
 
 export default {
   listarMinhasNormalizadas,
   listarFeedNormalizado,
+  criarAnuncio,
+  editarAnuncio,
+  desativarAnuncio,
+  reativarAnuncio,
   likeAnuncio,
   unlikeAnuncio,
 };

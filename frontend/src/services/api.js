@@ -1,8 +1,8 @@
 // src/services/api.js
 // ============================================================================
 // Instância Axios única + interceptors para JWT e refresh.
-// - Respeita VITE_API_BASE_URL do .env
-// - Armazenamento de tokens com "remember" (localStorage ou sessionStorage)
+// - Usa VITE_API_BASE_URL do .env (fallback http://localhost:8080)
+// - Armazena tokens com "remember" (localStorage ou sessionStorage)
 // - Helper isDevAuth(): detecta se estamos em "login dev" (token especial)
 // - Suporte a MODO MOCK via VITE_AUTH_MODE=mock ou VITE_ENABLE_DEV_API=true
 // ============================================================================
@@ -13,16 +13,13 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
   timeout: 20000,
-  withCredentials: true,
+  withCredentials: true, // ok manter true; não atrapalha Bearer e ajuda se usar cookies em outras rotas
 });
 
-// Interceptor de request: NADA de Authorization (cookie já vai sozinho)
-api.interceptors.request.use((config) => config);
-
 // ---------- Storage de tokens (com remember) ----------
-/** Lê/grava tokens — se "remember" = true usa localStorage, senão sessionStorage */
+// Lê/grava tokens — se "remember" = true usa localStorage, senão sessionStorage
 const storage = {
-  // Flag de “lembrar sessão” no localStorage (sempre aqui)
+  // Flag "lembrar sessão" (sempre no localStorage)
   get remember() {
     return localStorage.getItem('remember') === 'true';
   },
@@ -62,31 +59,32 @@ const storage = {
 };
 
 // ---------- Modo DEV/Mock helpers ----------
-// Ativa mocks se:
-// - VITE_AUTH_MODE=mock, OU
-// - VITE_ENABLE_DEV_API=true (chave auxiliar de desenvolvimento)
 const DEV_API_ENABLED =
   import.meta.env.VITE_AUTH_MODE === 'mock' ||
   import.meta.env.VITE_ENABLE_DEV_API === 'true';
 
 /**
  * Retorna true se estivermos “logados” com token de desenvolvimento.
- * Convenção: o DEV Login grava "dev-access-token" como accessToken.
+ * Convenção: o DEV Login grava "dev-*" como accessToken.
  */
 function isDevAuth() {
   const t = storage.access || '';
   return t.startsWith('dev-');
 }
 
-// ---------- Interceptors JWT ----------
-// Injeta Authorization: Bearer <accessToken> se houver
+// ---------- Interceptors ----------
+
+// Request: injeta Authorization: Bearer <accessToken> se houver
 api.interceptors.request.use((config) => {
   const token = storage.access;
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
-// Tenta refresh automático no 401 (se houver refreshToken)
+// Response: tenta refresh automático no 401 usando /auth/refresh
 let refreshing = null;
 api.interceptors.response.use(
   (res) => res,
@@ -94,7 +92,7 @@ api.interceptors.response.use(
     const { response, config } = err || {};
     if (!response) throw err;
 
-    // Evita loop e tenta refresh uma única vez
+    // Evita loop e só tenta 1x por request
     if (response.status === 401 && !config.__isRetry && storage.refresh) {
       try {
         if (!refreshing) {
@@ -115,6 +113,7 @@ api.interceptors.response.use(
 
         // Reexecuta a requisição original com o novo access
         config.__isRetry = true;
+        config.headers = config.headers || {};
         config.headers.Authorization = `Bearer ${newAccess}`;
         return api(config);
       } catch {
@@ -123,33 +122,6 @@ api.interceptors.response.use(
       }
     }
 
-    throw err;
-  },
-);
-
-// Interceptor de resposta: se 401, tenta /usuarios/auth/refresh (sua rota)
-let refreshing = null;
-api.interceptors.response.use(
-  (res) => res,
-  async (err) => {
-    const { response, config } = err || {};
-    if (!response) throw err;
-
-    if (response.status === 401 && !config.__isRetry) {
-      try {
-        if (!refreshing) {
-          refreshing = api.post('/usuarios/auth/refresh'); // backend coloca novo cookie
-        }
-        await refreshing;
-        refreshing = null;
-
-        config.__isRetry = true;
-        return api(config); // reexecuta
-      } catch (e) {
-        refreshing = null;
-        throw err;
-      }
-    }
     throw err;
   },
 );

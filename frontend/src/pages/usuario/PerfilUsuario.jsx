@@ -16,14 +16,14 @@ import './PerfilUsuario.css';
 import { useAuth } from '../../services/AuthContext';
 import { getMyProfile } from '../../services/users';
 import { useToast } from '../../context/ToastContext';
+import { getPlanoLimit } from '../../services/skinsService';
 import {
-  getMinhasSkins,
-  getPlanoLimit,
-  criarSkin,
-  editarSkin, // mockável — trocável por API real
-  desativarSkin, // mockável — trocável por API real
-  reativarSkin, // mockável — trocável por API real
-} from '../../services/skins';
+  listarMinhasNormalizadas as getMinhasSkins,
+  criarAnuncio as criarSkin,
+  editarAnuncio as editarSkin,
+  desativarAnuncio as desativarSkin,
+  reativarAnuncio as reativarSkin,
+} from '../../services/anuncioService';
 import AuthBrand from '../../components/logo/AuthBrand';
 
 // ---------- Helpers ----------
@@ -82,6 +82,11 @@ export default function PerfilUsuario() {
   const [confirmCheck, setConfirmCheck] = useState(false);
   const [desativando, setDesativando] = useState(false);
 
+  // 🔔 dispara para a vitrine recarregar quando suas skins mudarem
+  function notifySkinsChanged() {
+    window.dispatchEvent(new CustomEvent('skins:changed'));
+  }
+
   // Carregamento inicial (perfil + skins do mock)
   useEffect(() => {
     let cancel = false;
@@ -89,11 +94,17 @@ export default function PerfilUsuario() {
       try {
         setLoading(true);
         setErr('');
+        // 1) Perfil (se falhar, aí sim mostra erro)
         const p = await getMyProfile();
         if (!cancel) setPerfil(p);
 
-        const s = await getMinhasSkins(); // busca do service mock
-        if (!cancel) setSkins(Array.isArray(s) ? s : s?.content || []);
+        // 2) Skins: NUNCA derruba a página
+        try {
+          const s = await getMinhasSkins();
+          if (!cancel) setSkins(Array.isArray(s) ? s : s?.content || []);
+        } catch {
+          if (!cancel) setSkins([]); // só mostra vazio
+        }
       } catch (e) {
         if (!cancel)
           setErr(e?.message || 'Não foi possível carregar seu perfil.');
@@ -227,7 +238,7 @@ export default function PerfilUsuario() {
   async function salvarEdicao() {
     setSalvandoEdicao(true);
     try {
-      // ✅ validação
+      // Validação
       const nomeOk = String(formEdicao.skinNome || '').trim().length > 0;
       const precoNum = Number(String(formEdicao.preco).replace(',', '.'));
       if (!nomeOk || !Number.isFinite(precoNum) || precoNum < 0) {
@@ -238,10 +249,19 @@ export default function PerfilUsuario() {
 
       const id = skinEditando?.id || skinEditando?._id;
       const payload = {
-        skinNome: String(formEdicao.skinNome || '').trim(),
+        // campos de AnuncioRequest:
+        titulo: formEdicao.skinNome,
+        descricao: '', // opcional
         preco: precoNum,
-        imagemUrl: String(formEdicao.imagemUrl || '').trim(),
-        imagemFile, // arquivo tem prioridade se existir
+
+        // campos que seu service de anúncio usa para popular a skin no anúncio:
+        skinName: formEdicao.skinNome,
+        skinImageUrl: formEdicao.imagemUrl,
+        ...(imagemFile ? { imagemFile } : {}),
+
+        // se quiser guardar qualidade/desgaste, pode ligar estes também:
+        // qualidade: formEdicao.qualidade,
+        // desgasteFloat: formEdicao.desgasteFloat,
       };
 
       if (id) {
@@ -262,15 +282,19 @@ export default function PerfilUsuario() {
 
         addToast(
           reativarDepoisDeSalvar
-            ? 'Skin salva e reativada! (mock)'
-            : 'Skin atualizada! (mock)',
+            ? 'Skin salva e reativada!'
+            : 'Skin atualizada!',
           'success',
         );
+
+        notifySkinsChanged(); // << notifica vitrine
       } else {
         // ------- CRIAR -------
         const nova = await criarSkin(payload);
         setSkins((lista) => [nova, ...lista]); // topo
-        addToast('Skin criada! (mock)', 'success');
+        addToast('Skin criada!', 'success');
+
+        notifySkinsChanged(); // << notifica vitrine
       }
 
       fecharEditar();
@@ -319,7 +343,9 @@ export default function PerfilUsuario() {
           String(s.id || s._id) === String(id) ? { ...s, ativo: false } : s,
         ),
       );
-      addToast('Skin desativada com sucesso. (mock)', 'success');
+      addToast('Skin desativada com sucesso.', 'success');
+
+      notifySkinsChanged(); // << notifica vitrine
       fecharDesativar();
     } catch (e) {
       addToast(e?.message || 'Falha ao desativar a skin.', 'error');

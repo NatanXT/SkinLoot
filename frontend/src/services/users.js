@@ -1,24 +1,20 @@
-// src/services/users.js
-// ============================================================================
-// Serviços para Perfil/Minha Conta
-// - getMyProfile(): busca o perfil no backend
-// - Em MODO MOCK, retorna um usuário local (de auth_user ou fallback padrão)
-// ============================================================================
+// frontend/src/services/users.js
+import api from './api';
 
-import api, { isDevAuth, DEV_API_ENABLED } from './api';
+const DEV_ENABLED = import.meta.env.VITE_ENABLE_DEV_LOGIN === 'true';
+const STORAGE_USER_KEY = 'auth_user';
 
-// ---------- Mock de perfil ----------
+// Fallback simples para DEV
 function mockPerfil() {
-  // Tenta reaproveitar o user salvo pelo DEV Login
-  const raw = localStorage.getItem('auth_user');
-  if (raw) {
-    try {
-      return JSON.parse(raw);
-    } catch {}
-  }
-  // Fallback (caso não exista no storage)
+  try {
+    const raw = localStorage.getItem(STORAGE_USER_KEY);
+    if (raw) {
+      const u = JSON.parse(raw);
+      if (u && typeof u === 'object') return u;
+    }
+  } catch {}
   return {
-    id: 0,
+    id: 'dev-user-id',
     nome: 'Usuário DEV',
     email: 'dev@skinloot.com',
     plano: 'plus',
@@ -26,49 +22,29 @@ function mockPerfil() {
   };
 }
 
-/**
- * Busca perfil do usuário logado
- */
 export async function getMyProfile() {
-  // Modo mock: se flag global estiver ativa ou se token for dev
-  if (DEV_API_ENABLED || isDevAuth()) {
-    await new Promise((r) => setTimeout(r, 250));
+  // ✅ Em DEV: não dependa do backend
+  if (DEV_ENABLED) {
     return mockPerfil();
   }
 
-  // ---------- CHAMADA REAL AO BACKEND (AJUSTE O ENDPOINT) ----------
-  // Ex.: GET /users/me
-  const { data } = await api.get('/users/me');
+  // PROD/real
+  const { data } = await api.get('/usuarios/me'); // ajuste se seu endpoint real for outro
   return data;
 }
 
-/**
- * Atualiza perfil básico (ajuste conforme seu DTO no Spring)
- */
 export async function updateMyProfile(payload) {
-  if (DEV_API_ENABLED || isDevAuth()) {
-    // Simula atualização local no auth_user
-    const atual = mockPerfil();
-    const novo = { ...atual, ...payload };
-    localStorage.setItem('auth_user', JSON.stringify(novo));
-    await new Promise((r) => setTimeout(r, 200));
-    return novo;
-  }
-
-  const { data } = await api.put('/users/me', payload);
+  const { data } = await api.put('/usuarios/me', payload);
   return data;
 }
 
-/**
- * Troca de senha (payload: { currentPassword, newPassword })
- */
 export async function changeMyPassword(payload) {
-  if (DEV_API_ENABLED || isDevAuth()) {
-    await new Promise((r) => setTimeout(r, 200));
-    // Apenas “ok” no mock
-    return { ok: true };
-  }
-
-  const { data } = await api.put('/users/me/password', payload);
+  const { data } = await api.put('/usuarios/me/password', payload);
   return data;
 }
+
+export default {
+  getMyProfile,
+  updateMyProfile,
+  changeMyPassword,
+};

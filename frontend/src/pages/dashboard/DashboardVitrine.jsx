@@ -9,8 +9,8 @@
 // - [Logado] Avatar com menu: atraso no mouseout + “pin” ao clicar,
 //   fecha ao clicar fora ou pressionar ESC.
 // - Botão Contato abre ChatFlutuante; mini-botão quando fechado.
-// - ✅ Mistura as skins mockadas com as skins do usuário logado.
-// - ✅ NOVO: “Mensagens” só aparece logado; “Contato”/“Comprar fora” redirecionam ao login se anônimo.
+// - Mistura feed (todos) + minhas skins com viés pelo plano do usuário.
+// - “Mensagens” só aparece logado; “Contato”/“Comprar fora” pedem login se anônimo.
 // ======================================================
 
 import { useEffect, useMemo, useState, useRef } from 'react';
@@ -21,7 +21,7 @@ import MockSkins from '../../components/mock/MockSkins.js';
 import AuthBrand from '../../components/logo/AuthBrand.jsx';
 import ChatFlutuante from '../../components/chat/ChatFlutuante';
 
-// Service para pegar minhas skins no backend
+// Service para pegar feed/minhas no backend
 import anuncioService from '../../services/anuncioService.js';
 
 /* ---------- Metadados dos planos ---------- */
@@ -101,26 +101,11 @@ function enrichFromMock(list) {
       Math.round((200 + ((i * 137) % 5400) + (i % 3 === 2 ? 800 : 0)) * 10) /
       10,
     currency: 'BRL',
-    seller: { name: `@seller_${i + 1}`, contactUrl: '#' }, // contactUrl só vale quando logado
+    seller: { name: `@seller_${i + 1}`, contactUrl: '#' },
     plan: plans[i % plans.length],
     likes: 20 + ((i * 73) % 900),
     listedAt: Date.now() - (i + 1) * 1000 * 60 * 60 * (3 + (i % 6)),
   }));
-}
-
-/** Junta mock + minhas evitando duplicidades visuais */
-function juntarSemDuplicar(listaA, listaB) {
-  const chave = (x) =>
-    `${(x.title || '').toLowerCase()}|${Number(x.price || 0)}`;
-  const set = new Set();
-  const saida = [];
-  for (const item of [...listaB, ...listaA]) {
-    const k = chave(item);
-    if (set.has(k)) continue;
-    set.add(k);
-    saida.push(item);
-  }
-  return saida;
 }
 
 /* ---------- Ranking ---------- */
@@ -185,12 +170,12 @@ function smoothScrollToY(toY, duration = 500) {
 export default function DashboardVitrine() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation(); // ✅ usado para guardar rota de retorno pós-login
+  const location = useLocation(); // rota de retorno pós-login
 
   // estado inicial vindo do URL (ou defaults)
   const initial = readStateFromURL();
 
-  // Mock e Minhas
+  // Mock e dados do backend
   const [skinsMock] = useState(() => enrichFromMock(MockSkins));
   const [minhasSkins, setMinhasSkins] = useState([]);
   const [feedApi, setFeedApi] = useState([]);
@@ -206,14 +191,7 @@ export default function DashboardVitrine() {
   const [chatAberto, setChatAberto] = useState(null); // { id, nome }
   const [unreads, setUnreads] = useState(0);
 
-  // --------- ✅ Guardião de login para ações protegidas ----------
-  /**
-   * exigirLogin
-   * - Se não houver usuário autenticado, navega para /login passando:
-   *   - returnTo: rota atual (para redirecionar de volta após autenticar)
-   *   - acao + payload: ação pretendida (ex.: "contato" ou "comprar_fora")
-   * - Retorna true se a ação foi bloqueada (precisa logar), false se pode continuar.
-   */
+  // --------- Guardião de login para ações protegidas ----------
   function exigirLogin(acao, payload) {
     if (!user) {
       navigate('/login', {
@@ -224,16 +202,13 @@ export default function DashboardVitrine() {
         },
         replace: true,
       });
-      return true; // bloqueado
+      return true;
     }
-    return false; // permitido
+    return false;
   }
 
-  // Abre o chat com o vendedor (somente logado)
   function abrirChatPara(anuncio) {
-    // 🔒 Se não estiver logado, manda pro login e para aqui
     if (exigirLogin('contato', { anuncioId: anuncio?.id })) return;
-
     const nome =
       anuncio?.usuarioNome ??
       anuncio?.seller?.name ??
@@ -248,36 +223,25 @@ export default function DashboardVitrine() {
     setUnreads(0);
   }
 
-  // Abrir o link externo de compra (somente logado)
   function comprarFora(anuncio) {
-    // 🔒 Guardião de login
     if (exigirLogin('comprar_fora', { anuncioId: anuncio?.id })) return;
-
-    // Quando estiver logado, tenta abrir o link externo
     const url =
       anuncio?.linkExterno ||
       anuncio?._raw?.linkExterno ||
       anuncio?.seller?.contactUrl ||
       anuncio?._raw?.urlCompra ||
       '#';
-
-    if (url && url !== '#') {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    } else {
-      // Se não houver link no objeto, você pode:
-      // - Abrir o chat como fallback
-      // - Ou mostrar um aviso/toast
-      abrirChatPara(anuncio);
-    }
+    if (url && url !== '#') window.open(url, '_blank', 'noopener,noreferrer');
+    else abrirChatPara(anuncio);
   }
 
-  // estado visual dos inputs de preço (string mostrada no input)
+  // estado visual dos inputs de preço
   const [priceUI, setPriceUI] = useState({
     min: brlPlain(initial.filters.min),
     max: brlPlain(initial.filters.max),
   });
 
-  // Busca minhas skins quando loga/troca usuário
+  // Minhas skins quando loga/troca usuário
   useEffect(() => {
     let ativo = true;
     async function carregarMinhas() {
@@ -301,13 +265,20 @@ export default function DashboardVitrine() {
       }
     }
     carregarMinhas();
+
+    function onChanged() {
+      carregarMinhas();
+    }
+    window.addEventListener('skins:changed', onChanged);
+
     return () => {
       ativo = false;
+      window.removeEventListener('skins:changed', onChanged);
     };
   }, [user]);
 
+  // FEED geral (todo mundo)
   useEffect(() => {
-    // FEED geral (todo mundo)
     let vivo = true;
     (async () => {
       try {
@@ -322,71 +293,80 @@ export default function DashboardVitrine() {
     };
   }, []);
 
-  +(
-    // Polling leve do feed a cada 5s (até ligar SSE)
-    useEffect(() => {
-      let alive = true;
-      const tick = async () => {
-        try {
-          const data = await anuncioService.listarFeedNormalizado();
-          if (alive) setFeedApi(data);
-        } catch {}
-      };
-      const id = setInterval(tick, 5000);
-      return () => {
-        alive = false;
-        clearInterval(id);
-      };
-    }, [])
-  );
-
-  // Lista combinada: minhas + mock
-  const listaCombinada = useMemo(() => {
-    return juntarSemDuplicar(skinsMock, minhasSkins);
-  }, [skinsMock, minhasSkins]);
-
-  // sincroniza URL quando filtros/ordenar mudam
-  const minRef = useRef(null);
-  const maxRef = useRef(null);
+  // Polling leve do feed a cada 5s (até ligar SSE)
   useEffect(() => {
-    if (filters.min > filters.max) {
-      setFilters((f) => ({ ...f, max: f.min }));
-      return;
-    }
-    writeStateToURL(filters, sortBy, true);
-    setPriceUI((p) => ({
-      min:
-        document.activeElement === minRef?.current
-          ? p.min
-          : brlPlain(filters.min),
-      max:
-        document.activeElement === maxRef?.current
-          ? p.max
-          : brlPlain(filters.max),
-    }));
-  }, [filters, sortBy]);
-
-  // scroll suave para âncoras
-  useEffect(() => {
-    const onClick = (e) => {
-      const a = e.target.closest('a[href^="#"]');
-      if (!a) return;
-      const hash = a.getAttribute('href');
-      if (!hash || hash === '#') return;
-
-      const el = document.querySelector(hash);
-      if (!el) return;
-
-      e.preventDefault();
-      const header = document.querySelector('.topbar');
-      const offset = (header?.offsetHeight ?? 0) + 8;
-      const y = el.getBoundingClientRect().top + window.scrollY - offset;
-      history.pushState(null, '', hash);
-      smoothScrollToY(y, 600);
+    let alive = true;
+    const tick = async () => {
+      try {
+        const data = await anuncioService.listarFeedNormalizado();
+        if (alive) setFeedApi(data);
+      } catch {}
     };
-    document.addEventListener('click', onClick, { passive: false });
-    return () => document.removeEventListener('click', onClick);
+    const id = setInterval(tick, 5000);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
   }, []);
+
+  // ---------- Helpers de mistura por plano ----------
+  function uniqById(list) {
+    const seen = new Set();
+    const out = [];
+    for (const it of list) {
+      const k = String(it.id ?? it._id ?? '');
+      if (!k || seen.has(k)) continue;
+      seen.add(k);
+      out.push(it);
+    }
+    return out;
+  }
+
+  /**
+   * Intercala "mine" e "others" mantendo aproximadamente a razão:
+   * mine : others ~= ratio : 1
+   * Ex.: ratio=1.6 => ~1.6 meus p/ cada 1 de outros (alternando 1 e 2).
+   */
+  function mixByPlanRatio(mine, others, ratio) {
+    const res = [];
+    let i = 0,
+      j = 0;
+    let acc = 0;
+    while (i < mine.length || j < others.length) {
+      acc += ratio;
+      while (acc >= 1 && i < mine.length) {
+        res.push(mine[i++]);
+        acc -= 1;
+      }
+      if (j < others.length) res.push(others[j++]);
+    }
+    return res;
+  }
+
+  // Lista combinada: feed (todos) + minhas, com viés de quantidade pelo plano do usuário.
+  const listaCombinada = useMemo(() => {
+    // 1) tira duplicatas entre feed e minhas
+    const minhasIds = new Set(
+      (minhasSkins || []).map((m) => String(m.id ?? m._id)),
+    );
+    const others = (feedApi || []).filter(
+      (a) => !minhasIds.has(String(a.id ?? a._id)),
+    );
+
+    // 2) ratio do plano do usuário logado
+    const planKey = String(
+      user?.plano || user?.plan || 'gratuito',
+    ).toLowerCase();
+    const ratio = plansMeta[planKey]?.weight ?? 1.0; // 1.0, 1.6, 2.2...
+
+    // 3) intercala para “mostrar mais” dos meus conforme o ratio
+    let base = mixByPlanRatio(minhasSkins || [], others, ratio);
+
+    // 4) opcional: adiciona mocks no fim, sem duplicar ids
+    base = uniqById([...base, ...skinsMock]);
+
+    return base;
+  }, [feedApi, minhasSkins, skinsMock, user]);
 
   // Ranking com a lista combinada
   const ranked = useRankedSkins(listaCombinada, sortBy, filters);
@@ -430,6 +410,7 @@ export default function DashboardVitrine() {
   }
 
   // ----- MIN -----
+  const minRef = useRef(null);
   const handleMinChange = (e) => {
     const cleaned = onlyDigits(e.target.value);
     setPriceUI((p) => ({ ...p, min: cleaned }));
@@ -446,6 +427,7 @@ export default function DashboardVitrine() {
   };
 
   // ----- MAX -----
+  const maxRef = useRef(null);
   const handleMaxChange = (e) => {
     const cleaned = onlyDigits(e.target.value);
     setPriceUI((p) => ({ ...p, max: cleaned }));
@@ -742,8 +724,8 @@ export default function DashboardVitrine() {
             data={anuncio}
             liked={likes.has(anuncio.id)}
             onLike={() => handleLikeToggle(anuncio.id)}
-            onContato={() => abrirChatPara(anuncio)} // 🔒 protegido
-            onComprarFora={() => comprarFora(anuncio)} // 🔒 protegido
+            onContato={() => abrirChatPara(anuncio)} // protegido
+            onComprarFora={() => comprarFora(anuncio)} // protegido
           />
         ))}
       </section>
@@ -782,7 +764,7 @@ export default function DashboardVitrine() {
         </p>
       </footer>
 
-      {/* 🔒 Chat flutuante só aparece quando LOGADO */}
+      {/* Chat flutuante só aparece quando LOGADO */}
       {user &&
         (chatAberto ? (
           <ChatFlutuante
@@ -857,7 +839,6 @@ function SkinCard({ data, liked, onLike, onContato, onComprarFora }) {
         <div className="seller">
           <span>Vendedor: {vendedor}</span>
           <div className="cta">
-            {/* 🔒 Agora são botões (não links), para passar pelo guardião */}
             <button
               className="btn btn--ghost"
               type="button"

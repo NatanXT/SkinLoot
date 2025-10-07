@@ -1,6 +1,5 @@
 package com.SkinLoot.SkinLoot.model;
 
-import com.SkinLoot.SkinLoot.model.enums.Qualidade;
 import com.SkinLoot.SkinLoot.model.enums.Status;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Formula;
@@ -21,19 +20,15 @@ public class Anuncio {
     private UUID id;
 
     private String titulo;
-
     private String descricao;
-
     private BigDecimal preco;
 
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    // --- Campos que substituem a relação com a entidade Skin ---
-    private Long steamItemId; // O ID do item que vem da API da Steam
-
+    // Catálogo (desnormalizado)
+    private Long steamItemId;
     private String skinName;
-
     private String skinImageUrl;
 
     @ManyToOne
@@ -45,7 +40,6 @@ public class Anuncio {
     @OneToMany(mappedBy = "anuncio", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AnuncioLike> likes;
 
-    // ✅ Esta fórmula mágica calcula os likes diretamente no banco de dados!
     @Formula("(select count(*) from anuncio_like al where al.anuncio_id = id)")
     private int likesCount;
 
@@ -54,13 +48,13 @@ public class Anuncio {
     @Column(name = "desgaste_float")
     private Double desgasteFloat;
 
-    // Construtores, Getters e Setters para TODOS os campos acima...
-    // (É importante ter todos os getters e setters para que o Spring funcione corretamente)
+    public Anuncio() {
+    }
 
-    public Anuncio() {}
-
-    public Anuncio(UUID id, String titulo, String descricao, BigDecimal preco, Status status, String skinName, String skinImageUrl, Usuario usuario, LocalDateTime dataCriacao, Long steamItemId,
-                   Set<AnuncioLike> likes, int likesCount, String qualidade, Double desgasteFloat) {
+    public Anuncio(UUID id, String titulo, String descricao, BigDecimal preco, Status status,
+            String skinName, String skinImageUrl, Usuario usuario, LocalDateTime dataCriacao,
+            Long steamItemId, Set<AnuncioLike> likes, int likesCount,
+            String qualidade, Double desgasteFloat) {
         this.id = id;
         this.titulo = titulo;
         this.descricao = descricao;
@@ -77,34 +71,107 @@ public class Anuncio {
         this.desgasteFloat = desgasteFloat;
     }
 
+    /** Construtor auxiliar usado em relações (precisa setar o id!). */
     public Anuncio(UUID anuncioId) {
+        this.id = anuncioId;
     }
 
     // GETTERS E SETTERS
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-    public String getTitulo() { return titulo; }
-    public void setTitulo(String titulo) { this.titulo = titulo; }
-    public String getDescricao() { return descricao; }
-    public void setDescricao(String descricao) { this.descricao = descricao; }
-    public BigDecimal getPreco() { return preco; }
-    public void setPreco(BigDecimal preco) { this.preco = preco; }
-    public Status getStatus() { return status; }
-    public void setStatus(Status status) { this.status = status; }
-    public Long getSteamItemId() { return steamItemId; }
-    public void setSteamItemId(Long steamItemId) { this.steamItemId = steamItemId; }
-    public String getSkinName() { return skinName; }
-    public void setSkinName(String skinName) { this.skinName = skinName; }
-    public String getSkinImageUrl() { return skinImageUrl; }
-    public void setSkinImageUrl(String skinImageUrl) { this.skinImageUrl = skinImageUrl; }
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
-    public LocalDateTime getDataCriacao() { return dataCriacao; }
-    public void setDataCriacao(LocalDateTime dataCriacao) { this.dataCriacao = dataCriacao; }
-    public Set<AnuncioLike> getLikes() { return likes; }
-    public void setLikes(Set<AnuncioLike> likes) { this.likes = likes; }
-    public int getLikesCount() { return likesCount; }
-    public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public BigDecimal getPreco() {
+        return preco;
+    }
+
+    public void setPreco(BigDecimal preco) {
+        this.preco = preco;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public Long getSteamItemId() {
+        return steamItemId;
+    }
+
+    public void setSteamItemId(Long steamItemId) {
+        this.steamItemId = steamItemId;
+    }
+
+    public String getSkinName() {
+        return skinName;
+    }
+
+    public void setSkinName(String skinName) {
+        this.skinName = skinName;
+    }
+
+    public String getSkinImageUrl() {
+        return skinImageUrl;
+    }
+
+    public void setSkinImageUrl(String skinImageUrl) {
+        this.skinImageUrl = skinImageUrl;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public LocalDateTime getDataCriacao() {
+        return dataCriacao;
+    }
+
+    public void setDataCriacao(LocalDateTime dataCriacao) {
+        this.dataCriacao = dataCriacao;
+    }
+
+    public Set<AnuncioLike> getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Set<AnuncioLike> likes) {
+        this.likes = likes;
+    }
+
+    public int getLikesCount() {
+        return likesCount;
+    }
+
+    public void setLikesCount(int likesCount) {
+        this.likesCount = likesCount;
+    }
 
     public String getQualidade() {
         return qualidade;
@@ -121,6 +188,5 @@ public class Anuncio {
     public void setDesgasteFloat(Double desgasteFloat) {
         this.desgasteFloat = desgasteFloat;
     }
-
 
 }
