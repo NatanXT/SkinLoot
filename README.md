@@ -56,6 +56,11 @@ Crie um banco no PostgreSQL e configure as credenciais no `application.propertie
 spring.datasource.url=jdbc:postgresql://localhost:5432/skinloot
 spring.datasource.username=seu_usuario
 spring.datasource.password=sua_senha
+
+taskkill /IM pgAdmin4.exe /F 2>$null
+taskkill /IM python.exe /F 2>$null
+Remove-Item "$env:APPDATA\pgAdmin\pgadmin4.db*" -Force -ErrorAction SilentlyContinue
+& "C:\Program Files\pgAdmin 4\runtime\pgAdmin4.exe"
 ```
 
 ### **3️⃣ Execute o Back-end**
