@@ -1,5 +1,6 @@
 package com.SkinLoot.SkinLoot.service;
 
+import com.SkinLoot.SkinLoot.dto.CsgoDto.Csgo2SkinDto;
 import com.SkinLoot.SkinLoot.model.Jogo;
 import com.SkinLoot.SkinLoot.model.Skin;
 import com.SkinLoot.SkinLoot.model.Usuario;
@@ -8,16 +9,20 @@ import com.SkinLoot.SkinLoot.model.enums.StatusModeracao;
 import com.SkinLoot.SkinLoot.repository.JogoRepository;
 import com.SkinLoot.SkinLoot.repository.SkinRepository;
 import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DataImportService {
@@ -33,6 +38,9 @@ public class DataImportService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    public RestTemplate restTemplate;
 
     /**
      * ✅ MÉTODO PRINCIPAL (SEM ARGUMENTOS)
@@ -93,5 +101,67 @@ public class DataImportService {
         });
 
         skinRepository.saveAll(novasSkins);
+    }
+
+    private static final String CSGO_API_URL = "https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/api/en/skins.json";
+
+    public void importarSkinsCsgo() throws IOException {
+        // Busca o JSON da URL
+        String jsonString = restTemplate.getForObject(CSGO_API_URL, String.class);
+
+        // Converte o array de JSON para uma lista de DTOs
+        List<Csgo2SkinDto> csgoSkins = objectMapper.readValue(jsonString, new TypeReference<List<Csgo2SkinDto>>() {});
+
+        Jogo csgo = jogoRepository.findByNome("CS:GO").orElseThrow();
+        Usuario admin = usuarioRepository.findByEmail("felipereis4k@gmail.com").orElseThrow();
+
+        List<Skin> novasSkins = new ArrayList<>();
+
+        for (Csgo2SkinDto dto : csgoSkins) {
+            Skin novaSkin = new Skin();
+
+            // --- Mapeamento Básico ---
+            novaSkin.setNome(dto.getName());
+            novaSkin.setDescricao(dto.getDescription());
+            novaSkin.setIcon(dto.getImage());
+
+            // --- Mapeamento com Lógica ---
+
+            // Mapeia a string de raridade para seu Enum
+            novaSkin.setRaridade(mapearRaridadeCsgo(dto.getRarity().getName()));
+
+            // --- Populando os Detalhes Específicos do CATÁLOGO ---
+            Map<String, Object> detalhes = new HashMap<>();
+            detalhes.put("min_float", dto.getMinFloat());
+            detalhes.put("max_float", dto.getMaxFloat());
+            detalhes.put("riot_skin_id", dto.getSkinId());
+            // Adicione outros detalhes do catálogo aqui, se necessário
+            novaSkin.setDetalhesEspecificos(detalhes);
+
+            // --- Dados da Plataforma ---
+            novaSkin.setJogo(csgo);
+            novaSkin.setUsuario(admin);
+            novaSkin.setStatusModeracao(StatusModeracao.APROVADO);
+
+            novasSkins.add(novaSkin);
+        }
+
+        skinRepository.saveAll(novasSkins);
+    }
+
+    // --- Método Auxiliar para converter a raridade ---
+    private Raridade mapearRaridadeCsgo(String nomeRaridade) {
+        if (nomeRaridade == null) return Raridade.COMUM;
+
+        // Converte a string para um formato comparável com o enum
+        String raridadeFormatada = nomeRaridade.toUpperCase().replace(" ", "_");
+
+        try {
+            return Raridade.valueOf(raridadeFormatada);
+        } catch (IllegalArgumentException e) {
+            // Se não encontrar um mapeamento direto, retorna um padrão
+            System.err.println("Raridade não mapeada: " + nomeRaridade);
+            return Raridade.COMUM;
+        }
     }
 }

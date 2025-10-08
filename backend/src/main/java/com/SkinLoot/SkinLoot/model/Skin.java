@@ -67,6 +67,10 @@ public class Skin {
 
     private LocalDateTime dataSubmissao;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Object> detalhesEspecificos;
+
 
     //    // Construtores que já fizemos antes...
 //    public Skin(String nome, Raridade raridade, Jogo jogo, Usuario usuario, String icon) {
@@ -151,5 +155,13 @@ public class Skin {
 
     public void setDataSubmissao(LocalDateTime dataSubmissao) {
         this.dataSubmissao = dataSubmissao;
+    }
+
+    public Map<String, Object> getDetalhesEspecificos() {
+        return detalhesEspecificos;
+    }
+
+    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {
+        this.detalhesEspecificos = detalhesEspecificos;
     }
 }
