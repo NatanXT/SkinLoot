@@ -1,16 +1,6 @@
 // ======================================================
 // DashboardVitrine.jsx
-// Caminho: frontend/src/pages/dashboard/DashboardVitrine.jsx
-// - Ranking (plano + likes + recência)
-// - Grid com cards grandes
-// - Filtros c/ máscara BRL nos preços, Limpar filtros,
-//   e sincronização de estado no URL (share/refresh).
-// - Scroll suave (manual) com compensação da topbar
-// - [Logado] Avatar com menu: atraso no mouseout + “pin” ao clicar,
-//   fecha ao clicar fora ou pressionar ESC.
-// - Botão Contato abre ChatFlutuante; mini-botão quando fechado.
-// - Mistura feed (todos) + minhas skins com viés pelo plano do usuário.
-// - “Mensagens” só aparece logado; “Contato”/“Comprar fora” pedem login se anônimo.
+// (mesmo cabeçalho de comentários que você já tinha)
 // ======================================================
 
 import { useEffect, useMemo, useState, useRef } from 'react';
@@ -20,8 +10,6 @@ import './DashboardVitrine.css';
 import MockSkins from '../../components/mock/MockSkins.js';
 import AuthBrand from '../../components/logo/AuthBrand.jsx';
 import ChatFlutuante from '../../components/chat/ChatFlutuante';
-
-// Service para pegar feed/minhas no backend
 import anuncioService from '../../services/anuncioService.js';
 
 /* ---------- Metadados dos planos ---------- */
@@ -56,7 +44,6 @@ const brlPlain = (n) =>
       })
     : '0,00';
 
-/** Lê filtros/sort do URL (se houver), senão usa defaults */
 function readStateFromURL() {
   const p = new URLSearchParams(window.location.search);
   const search = p.get('q') ?? DEFAULT_FILTERS.search;
@@ -74,7 +61,6 @@ function readStateFromURL() {
   return { filters: { search, game, plan, min, max }, sort };
 }
 
-/** Escreve filtros/sort no URL (remove params iguais aos defaults) */
 function writeStateToURL(filters, sort, replace = true) {
   const p = new URLSearchParams();
   if (filters.search) p.set('q', filters.search);
@@ -108,38 +94,50 @@ function enrichFromMock(list) {
   }));
 }
 
-/* ---------- Ranking ---------- */
+/* ---------- Ranking (agora coalescendo campos) ---------- */
 function useRankedSkins(list, sortBy, filters) {
   return useMemo(() => {
     const now = Date.now();
     const rec = (t) => Math.max(0.6, 1.4 - (now - t) / (1000 * 60 * 60 * 72));
 
-    let filtrados = list.filter(
-      (s) =>
-        (filters.plan === 'todos' || s.plan === filters.plan) &&
-        (filters.game === 'todos' || s.game === filters.game) &&
-        s.price >= filters.min &&
-        s.price <= filters.max &&
-        (s.title || '').toLowerCase().includes(filters.search.toLowerCase()),
-    );
+    const filtrados = list.filter((s) => {
+      if (s.ativo === false) return false; // esconde inativas
+
+      const planOk = filters.plan === 'todos' || s.plan === filters.plan;
+      const gameOk = filters.game === 'todos' || s.game === filters.game;
+
+      const nome = (s.title ?? s.skinNome ?? s.nome ?? '').toLowerCase();
+      const textoOk = nome.includes(filters.search.toLowerCase());
+
+      const priceVal = Number(s.price ?? s.preco ?? NaN);
+      const priceOk =
+        Number.isFinite(priceVal) &&
+        priceVal >= filters.min &&
+        priceVal <= filters.max;
+
+      return planOk && gameOk && textoOk && priceOk;
+    });
 
     const pontuados = filtrados.map((s) => {
       const meta = plansMeta[s.plan] || { weight: 1.0 };
+      const likes = Number(s.likes ?? 0);
+      const listedAt = s.listedAt ?? now;
       return {
         ...s,
-        score:
-          meta.weight *
-          Math.pow((s.likes ?? 0) + 1, 0.5) *
-          rec(s.listedAt ?? now),
+        score: meta.weight * Math.pow(likes + 1, 0.5) * rec(listedAt),
       };
     });
 
     if (sortBy === 'relevancia')
       return pontuados.sort((a, b) => b.score - a.score);
     if (sortBy === 'preco_asc')
-      return pontuados.sort((a, b) => a.price - b.price);
+      return pontuados.sort(
+        (a, b) => (a.price ?? a.preco) - (b.price ?? b.preco),
+      );
     if (sortBy === 'preco_desc')
-      return pontuados.sort((a, b) => b.price - a.price);
+      return pontuados.sort(
+        (a, b) => (b.price ?? b.preco) - (a.price ?? a.preco),
+      );
     if (sortBy === 'recentes')
       return pontuados.sort((a, b) => (b.listedAt ?? 0) - (a.listedAt ?? 0));
     return pontuados;
@@ -170,28 +168,23 @@ function smoothScrollToY(toY, duration = 500) {
 export default function DashboardVitrine() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation(); // rota de retorno pós-login
+  const location = useLocation();
 
-  // estado inicial vindo do URL (ou defaults)
   const initial = readStateFromURL();
 
-  // Mock e dados do backend
   const [skinsMock] = useState(() => enrichFromMock(MockSkins));
   const [minhasSkins, setMinhasSkins] = useState([]);
   const [feedApi, setFeedApi] = useState([]);
   const [carregandoMinhas, setCarregandoMinhas] = useState(false);
   const [erroMinhas, setErroMinhas] = useState('');
 
-  // UI
   const [likes, setLikes] = useState(() => new Set());
   const [sortBy, setSortBy] = useState(initial.sort);
   const [filters, setFilters] = useState(initial.filters);
 
-  // Chat
   const [chatAberto, setChatAberto] = useState(null); // { id, nome }
   const [unreads, setUnreads] = useState(0);
 
-  // --------- Guardião de login para ações protegidas ----------
   function exigirLogin(acao, payload) {
     if (!user) {
       navigate('/login', {
@@ -235,13 +228,12 @@ export default function DashboardVitrine() {
     else abrirChatPara(anuncio);
   }
 
-  // estado visual dos inputs de preço
   const [priceUI, setPriceUI] = useState({
     min: brlPlain(initial.filters.min),
     max: brlPlain(initial.filters.max),
   });
 
-  // Minhas skins quando loga/troca usuário
+  // Minhas skins quando loga/troca usuário + ouvir 'skins:changed'
   useEffect(() => {
     let ativo = true;
     async function carregarMinhas() {
@@ -277,7 +269,7 @@ export default function DashboardVitrine() {
     };
   }, [user]);
 
-  // FEED geral (todo mundo)
+  // FEED geral
   useEffect(() => {
     let vivo = true;
     (async () => {
@@ -293,7 +285,7 @@ export default function DashboardVitrine() {
     };
   }, []);
 
-  // Polling leve do feed a cada 5s (até ligar SSE)
+  // Polling leve do feed a cada 5s
   useEffect(() => {
     let alive = true;
     const tick = async () => {
@@ -309,7 +301,6 @@ export default function DashboardVitrine() {
     };
   }, []);
 
-  // ---------- Helpers de mistura por plano ----------
   function uniqById(list) {
     const seen = new Set();
     const out = [];
@@ -322,11 +313,6 @@ export default function DashboardVitrine() {
     return out;
   }
 
-  /**
-   * Intercala "mine" e "others" mantendo aproximadamente a razão:
-   * mine : others ~= ratio : 1
-   * Ex.: ratio=1.6 => ~1.6 meus p/ cada 1 de outros (alternando 1 e 2).
-   */
   function mixByPlanRatio(mine, others, ratio) {
     const res = [];
     let i = 0,
@@ -343,9 +329,7 @@ export default function DashboardVitrine() {
     return res;
   }
 
-  // Lista combinada: feed (todos) + minhas, com viés de quantidade pelo plano do usuário.
   const listaCombinada = useMemo(() => {
-    // 1) tira duplicatas entre feed e minhas
     const minhasIds = new Set(
       (minhasSkins || []).map((m) => String(m.id ?? m._id)),
     );
@@ -353,22 +337,16 @@ export default function DashboardVitrine() {
       (a) => !minhasIds.has(String(a.id ?? a._id)),
     );
 
-    // 2) ratio do plano do usuário logado
     const planKey = String(
       user?.plano || user?.plan || 'gratuito',
     ).toLowerCase();
-    const ratio = plansMeta[planKey]?.weight ?? 1.0; // 1.0, 1.6, 2.2...
+    const ratio = plansMeta[planKey]?.weight ?? 1.0;
 
-    // 3) intercala para “mostrar mais” dos meus conforme o ratio
     let base = mixByPlanRatio(minhasSkins || [], others, ratio);
-
-    // 4) opcional: adiciona mocks no fim, sem duplicar ids
     base = uniqById([...base, ...skinsMock]);
-
     return base;
   }, [feedApi, minhasSkins, skinsMock, user]);
 
-  // Ranking com a lista combinada
   const ranked = useRankedSkins(listaCombinada, sortBy, filters);
 
   const handleLikeToggle = (anuncioId) => {
@@ -379,7 +357,6 @@ export default function DashboardVitrine() {
     setLikes(newLikes);
   };
 
-  /* ---------- Price inputs: handlers ---------- */
   function allowOnlyDigitsKeyDown(e) {
     const allowed = [
       'Backspace',
@@ -409,7 +386,6 @@ export default function DashboardVitrine() {
     setFilters((f) => ({ ...f, [which]: cleaned ? parseInt(cleaned, 10) : 0 }));
   }
 
-  // ----- MIN -----
   const minRef = useRef(null);
   const handleMinChange = (e) => {
     const cleaned = onlyDigits(e.target.value);
@@ -426,7 +402,6 @@ export default function DashboardVitrine() {
     setPriceUI((p) => ({ ...p, min: brlPlain(filters.min) }));
   };
 
-  // ----- MAX -----
   const maxRef = useRef(null);
   const handleMaxChange = (e) => {
     const cleaned = onlyDigits(e.target.value);
@@ -462,7 +437,6 @@ export default function DashboardVitrine() {
     writeStateToURL(DEFAULT_FILTERS, DEFAULT_SORT, false);
   };
 
-  /* ---------- Menu do perfil ---------- */
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPinned, setMenuPinned] = useState(false);
   const menuRef = useRef(null);
@@ -483,7 +457,6 @@ export default function DashboardVitrine() {
     setMenuOpen(true);
   };
 
-  // Fecha ao clicar fora
   useEffect(() => {
     const onDocClick = (e) => {
       if (!menuRef.current) return;
@@ -496,7 +469,6 @@ export default function DashboardVitrine() {
     return () => document.removeEventListener('click', onDocClick);
   }, []);
 
-  // Fecha com ESC
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === 'Escape') {
@@ -508,14 +480,12 @@ export default function DashboardVitrine() {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  // Limpa o timer ao desmontar
   useEffect(() => {
     return () => {
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     };
   }, []);
 
-  /* ---------- Avatar (apenas quando logado) ---------- */
   const initials = (user?.nome || user?.email || '?')
     .split(' ')
     .map((p) => p[0])
@@ -698,7 +668,6 @@ export default function DashboardVitrine() {
             </div>
           </div>
 
-          {/* Ações dos filtros */}
           <div className="filters__actions">
             <button className="btn btn--ghost" onClick={handleClearFilters}>
               Limpar filtros
@@ -724,8 +693,8 @@ export default function DashboardVitrine() {
             data={anuncio}
             liked={likes.has(anuncio.id)}
             onLike={() => handleLikeToggle(anuncio.id)}
-            onContato={() => abrirChatPara(anuncio)} // protegido
-            onComprarFora={() => comprarFora(anuncio)} // protegido
+            onContato={() => abrirChatPara(anuncio)}
+            onComprarFora={() => comprarFora(anuncio)}
           />
         ))}
       </section>
@@ -792,13 +761,12 @@ export default function DashboardVitrine() {
 
 /* ---------- Card (componente) ---------- */
 function SkinCard({ data, liked, onLike, onContato, onComprarFora }) {
-  // Suporta formatos do MOCK e do BACKEND normalizado
   const title = data?.skinNome ?? data?.title ?? data?.nome ?? 'Skin';
   const image = data?.image ?? data?.imagemUrl ?? data?.imagem ?? '';
   const vendedor =
     data?.usuarioNome ?? data?.seller?.name ?? data?.vendedorNome ?? '—';
 
-  const precoNumber = Number(data?.preco ?? data?.price ?? NaN);
+  const precoNumber = Number(data?.price ?? data?.preco ?? NaN);
   const precoFmt = Number.isFinite(precoNumber)
     ? precoNumber.toLocaleString('pt-BR', {
         minimumFractionDigits: 2,
@@ -812,7 +780,14 @@ function SkinCard({ data, liked, onLike, onContato, onComprarFora }) {
   return (
     <article className="card">
       <div className="card__media">
-        <img src={image} alt={title} loading="lazy" />
+        <img
+          src={image}
+          alt={title}
+          loading="lazy"
+          onError={(e) => {
+            e.currentTarget.src = '/img/placeholder.png';
+          }}
+        />
         <span className="badge" style={{ background: planMeta.color }}>
           {planMeta.label}
         </span>

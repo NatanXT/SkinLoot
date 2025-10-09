@@ -115,7 +115,7 @@ export default function Login() {
 
     setIsLoading(true);
     try {
-      await login(formData.email.trim(), formData.senha);
+      await login(formData.email.trim(), formData.senha, formData.lembrar);
       const backTo = qs.get('from') || '/';
       navigate(backTo, { replace: true });
     } catch (error) {

@@ -1,16 +1,16 @@
 // frontend/src/services/anuncioService.js
 import api from './api';
 
-const DEV_ENABLED = import.meta.env.VITE_ENABLE_DEV_LOGIN === 'true';
+// ✅ agora quem decide usar localStorage (mock) é este flag:
+const USE_DEV_API = import.meta.env.VITE_ENABLE_DEV_API === 'true';
 const LS_KEY = 'dev_skins';
 
-// ---------------- DEV store helpers ----------------
+// --------- helpers DEV (localStorage) ----------
 function devLoad() {
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (raw) return JSON.parse(raw);
   } catch {}
-  // seed inicial
   const seed = [
     {
       id: 'm1',
@@ -45,7 +45,17 @@ function uid() {
   return 'm' + Math.random().toString(36).slice(2, 9);
 }
 
-// ------------ Normalização (para quando usar backend) ------------
+// converte File -> dataURL (persiste entre reloads)
+function fileToDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const rd = new FileReader();
+    rd.onload = () => resolve(String(rd.result || ''));
+    rd.onerror = reject;
+    rd.readAsDataURL(file);
+  });
+}
+
+// ------------ Normalização (quando usar backend) ------------
 function normalizarDoBackend(anuncio = {}) {
   const id = anuncio.id ?? anuncio.uuid ?? anuncio._id ?? uid();
   const title =
@@ -54,13 +64,16 @@ function normalizarDoBackend(anuncio = {}) {
     anuncio.titulo ??
     anuncio.nome ??
     'Skin';
+
   const image =
     anuncio.skinIcon ??
     anuncio.skinImageUrl ??
+    anuncio.skin_image_url ?? // snake_case
     anuncio.imagemUrl ??
     anuncio.imagem ??
     anuncio.fotoUrl ??
     '';
+
   const game = anuncio.jogo ?? anuncio.jogoNome ?? 'CS2';
   const precoNum = Number(anuncio.preco ?? anuncio.price ?? anuncio.valor ?? 0);
   const plan = String(
@@ -94,7 +107,8 @@ function normalizarDoBackend(anuncio = {}) {
     listedAt,
     ativo,
     _raw: anuncio,
-    // campos que o Perfil espera
+
+    // campos que o Perfil usa
     skinNome: title,
     imagemUrl: image,
     preco: Number.isFinite(precoNum) ? precoNum : 0,
@@ -111,21 +125,32 @@ function extrairArray(data) {
 
 // ================= LISTAGENS =================
 export async function listarMinhasNormalizadas() {
-  if (DEV_ENABLED) {
-    // ✅ DEV: lê do localStorage
-    const arr = devLoad();
-    return arr;
+  if (USE_DEV_API) {
+    // DEV: lê e traz todas (inclusive inativas) para o Perfil
+    return devLoad();
   }
-
-  // PROD: ajuste o endpoint para o seu backend (ex.: /anuncios/user)
   const { data } = await api.get('/anuncios/user');
   return extrairArray(data).map(normalizarDoBackend);
 }
 
 export async function listarFeedNormalizado() {
-  if (DEV_ENABLED) {
-    // em DEV, pode simplesmente reaproveitar as mesmas
-    return devLoad();
+  if (USE_DEV_API) {
+    // DEV: usa as mesmas, mas só ativas para a vitrine
+    return devLoad()
+      .filter((x) => x.ativo !== false)
+      .map((x) => ({
+        ...x,
+        id: x.id,
+        title: x.skinNome,
+        image: x.imagemUrl,
+        price: x.preco,
+        plan: 'gratuito',
+        likes: 0,
+        listedAt: Date.now(),
+        game: 'CS2',
+        ativo: x.ativo !== false,
+        seller: { name: '—' },
+      }));
   }
   const { data } = await api.get('/anuncios');
   return extrairArray(data).map(normalizarDoBackend);
@@ -133,45 +158,54 @@ export async function listarFeedNormalizado() {
 
 // ================= CRUD =================
 export async function criarAnuncio(payload) {
-  if (DEV_ENABLED) {
+  if (USE_DEV_API) {
     const arr = devLoad();
+
+    let imagemUrl = payload.skinImageUrl || '';
+    if (!imagemUrl && payload.imagemFile instanceof File) {
+      imagemUrl = await fileToDataURL(payload.imagemFile); // salva base64
+    }
+    if (!imagemUrl) imagemUrl = '/img/placeholder.png';
+
     const novo = {
       id: uid(),
       skinNome: payload.skinName || payload.titulo || 'Skin',
       preco: Number(payload.preco) || 0,
-      imagemUrl: payload.skinImageUrl || '/img/placeholder.png',
+      imagemUrl,
       ativo: true,
     };
     devSave([novo, ...arr]);
     return novo;
   }
 
-  // PROD: seu backend Spring usa /anuncios/save
-  // Se precisar enviar arquivo, adapte para multipart conforme sua UI
+  // PROD: envie camel e snake (o backend lê o que conhecer)
   const body = {
     titulo: payload.titulo,
     descricao: payload.descricao ?? '',
     preco: payload.preco,
+    skin_name: payload.skinName ?? payload.skin_name,
+    skin_image_url: payload.skinImageUrl ?? payload.skin_image_url,
     skinName: payload.skinName,
     skinImageUrl: payload.skinImageUrl,
-    // qualidade: payload.qualidade,
-    // desgasteFloat: payload.desgasteFloat,
-    // skinId: payload.skinId, // quando integrar com catálogo real
   };
   const { data } = await api.post('/anuncios/save', body);
   return normalizarDoBackend(data);
 }
 
 export async function editarAnuncio(id, payload) {
-  if (DEV_ENABLED) {
+  if (USE_DEV_API) {
     const arr = devLoad();
     const i = arr.findIndex((x) => String(x.id) === String(id));
     if (i >= 0) {
+      let imagemUrl = payload.skinImageUrl || arr[i].imagemUrl || '';
+      if (payload.imagemFile instanceof File) {
+        imagemUrl = await fileToDataURL(payload.imagemFile);
+      }
       const atualizado = {
         ...arr[i],
         skinNome: payload.skinName || payload.titulo || arr[i].skinNome,
         preco: Number(payload.preco ?? arr[i].preco),
-        imagemUrl: payload.skinImageUrl || arr[i].imagemUrl,
+        imagemUrl,
       };
       arr[i] = atualizado;
       devSave(arr);
@@ -184,30 +218,28 @@ export async function editarAnuncio(id, payload) {
     titulo: payload.titulo,
     descricao: payload.descricao ?? '',
     preco: payload.preco,
+    skin_name: payload.skinName ?? payload.skin_name,
+    skin_image_url: payload.skinImageUrl ?? payload.skin_image_url,
     skinName: payload.skinName,
     skinImageUrl: payload.skinImageUrl,
-    // qualidade: payload.qualidade,
-    // desgasteFloat: payload.desgasteFloat,
-    // skinId: payload.skinId,
   };
   const { data } = await api.put(`/anuncios/${id}`, body);
   return normalizarDoBackend(data);
 }
 
 export async function desativarAnuncio(id) {
-  if (DEV_ENABLED) {
+  if (USE_DEV_API) {
     const arr = devLoad().map((x) =>
       String(x.id) === String(id) ? { ...x, ativo: false } : x,
     );
     devSave(arr);
     return;
   }
-  // Spring: altera status -> recomendado ter endpoint específico
   await api.post(`/anuncios/${id}/desativar`);
 }
 
 export async function reativarAnuncio(id) {
-  if (DEV_ENABLED) {
+  if (USE_DEV_API) {
     const arr = devLoad().map((x) =>
       String(x.id) === String(id) ? { ...x, ativo: true } : x,
     );
@@ -217,13 +249,12 @@ export async function reativarAnuncio(id) {
   await api.post(`/anuncios/${id}/reativar`);
 }
 
-// (opcional) likes, caso você use
 export async function likeAnuncio(id) {
-  if (DEV_ENABLED) return;
+  if (USE_DEV_API) return;
   await api.post(`/anuncios/${id}/like`);
 }
 export async function unlikeAnuncio(id) {
-  if (DEV_ENABLED) return;
+  if (USE_DEV_API) return;
   await api.delete(`/anuncios/${id}/unlike`);
 }
 

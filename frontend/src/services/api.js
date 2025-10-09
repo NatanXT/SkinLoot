@@ -1,25 +1,14 @@
 // src/services/api.js
-// ============================================================================
-// Instância Axios única + interceptors para JWT e refresh.
-// - Usa VITE_API_BASE_URL do .env (fallback http://localhost:8080)
-// - Armazena tokens com "remember" (localStorage ou sessionStorage)
-// - Helper isDevAuth(): detecta se estamos em "login dev" (token especial)
-// - Suporte a MODO MOCK via VITE_AUTH_MODE=mock ou VITE_ENABLE_DEV_API=true
-// ============================================================================
-
 import axios from 'axios';
 
-// ---------- API base ----------
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
   timeout: 20000,
-  withCredentials: true, // ok manter true; não atrapalha Bearer e ajuda se usar cookies em outras rotas
+  withCredentials: true,
 });
 
-// ---------- Storage de tokens (com remember) ----------
-// Lê/grava tokens — se "remember" = true usa localStorage, senão sessionStorage
+// ----- storage (igual ao seu) -----
 const storage = {
-  // Flag "lembrar sessão" (sempre no localStorage)
   get remember() {
     return localStorage.getItem('remember') === 'true';
   },
@@ -27,7 +16,6 @@ const storage = {
     localStorage.setItem('remember', v ? 'true' : 'false');
   },
 
-  // Access token salvo no “box” conforme remember
   get access() {
     return (this.remember ? localStorage : sessionStorage).getItem(
       'accessToken',
@@ -38,7 +26,6 @@ const storage = {
     v ? box.setItem('accessToken', v) : box.removeItem('accessToken');
   },
 
-  // Refresh token salvo no “box” conforme remember
   get refresh() {
     return (this.remember ? localStorage : sessionStorage).getItem(
       'refreshToken',
@@ -49,7 +36,6 @@ const storage = {
     v ? box.setItem('refreshToken', v) : box.removeItem('refreshToken');
   },
 
-  // Limpa access/refresh dos dois storages
   clear() {
     ['accessToken', 'refreshToken'].forEach((k) => {
       localStorage.removeItem(k);
@@ -58,23 +44,10 @@ const storage = {
   },
 };
 
-// ---------- Modo DEV/Mock helpers ----------
-const DEV_API_ENABLED =
-  import.meta.env.VITE_AUTH_MODE === 'mock' ||
-  import.meta.env.VITE_ENABLE_DEV_API === 'true';
+// ⚙️ Permita configurar vias .env (e mantenha defaults sensatos)
+const AUTH_REFRESH_PATH =
+  import.meta.env.VITE_AUTH_REFRESH_PATH || '/usuarios/auth/refresh';
 
-/**
- * Retorna true se estivermos “logados” com token de desenvolvimento.
- * Convenção: o DEV Login grava "dev-*" como accessToken.
- */
-function isDevAuth() {
-  const t = storage.access || '';
-  return t.startsWith('dev-');
-}
-
-// ---------- Interceptors ----------
-
-// Request: injeta Authorization: Bearer <accessToken> se houver
 api.interceptors.request.use((config) => {
   const token = storage.access;
   if (token) {
@@ -84,7 +57,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response: tenta refresh automático no 401 usando /auth/refresh
 let refreshing = null;
 api.interceptors.response.use(
   (res) => res,
@@ -92,16 +64,20 @@ api.interceptors.response.use(
     const { response, config } = err || {};
     if (!response) throw err;
 
-    // Evita loop e só tenta 1x por request
     if (response.status === 401 && !config.__isRetry && storage.refresh) {
       try {
         if (!refreshing) {
           refreshing = api
-            .post('/auth/refresh', { refreshToken: storage.refresh })
+            .post(
+              AUTH_REFRESH_PATH,
+              { refreshToken: storage.refresh },
+              { withCredentials: true },
+            )
             .then((r) => {
-              const novoAccess = r?.data?.accessToken;
-              if (novoAccess) storage.access = novoAccess;
-              return novoAccess;
+              const newAccess =
+                r?.data?.accessToken || r?.data?.token || r?.data?.access;
+              if (newAccess) storage.access = newAccess;
+              return newAccess;
             })
             .finally(() => {
               refreshing = null;
@@ -111,20 +87,17 @@ api.interceptors.response.use(
         const newAccess = await refreshing;
         if (!newAccess) throw new Error('Refresh inválido');
 
-        // Reexecuta a requisição original com o novo access
         config.__isRetry = true;
         config.headers = config.headers || {};
         config.headers.Authorization = `Bearer ${newAccess}`;
         return api(config);
       } catch {
-        // Refresh falhou → limpa tokens e segue com erro
         storage.clear();
       }
     }
-
     throw err;
   },
 );
 
-export { storage, isDevAuth, DEV_API_ENABLED, api };
+export { api, storage };
 export default api;

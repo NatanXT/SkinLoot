@@ -51,8 +51,9 @@ public class UsuarioController {
     public ResponseEntity<Usuario> buscarUsuarioPorId(@PathVariable UUID id) {
         Optional<Usuario> usuario = usuarioRepository.findById(id);
         return usuario.map(ResponseEntity::ok)
-                      .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
     @GetMapping("/user")
     public ResponseEntity<UsuarioDto> getPerfil(Authentication authentication) {
         String email = authentication.getName(); // extraído do token
@@ -62,7 +63,6 @@ public class UsuarioController {
 
         return ResponseEntity.ok(new UsuarioDto(usuario));
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
@@ -80,9 +80,9 @@ public class UsuarioController {
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                 .httpOnly(true)
-                .secure(true)      // marque true em produção
-                .path("/")          // enviado em TODAS as requisições
-                .maxAge(10 * 60)    // 10 min de validade
+                .secure(true) // marque true em produção
+                .path("/") // enviado em TODAS as requisições
+                .maxAge(10 * 60) // 10 min de validade
                 .sameSite("None")
                 .build();
 
@@ -99,7 +99,7 @@ public class UsuarioController {
     @PostMapping("/auth/refresh")
     public ResponseEntity<Void> refreshToken(
             HttpServletRequest request,
-            HttpServletResponse response  // ← injete o response aqui
+            HttpServletResponse response // ← injete o response aqui
     ) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
@@ -121,9 +121,9 @@ public class UsuarioController {
 
         // ── AQUI: criar o cookie de accessToken ──
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
-                .httpOnly(true)            // JavaScript não consegue ler
-                .secure(false)             // troque para true em produção HTTPS
-                .path("/")                 // enviado em todas as rotas
+                .httpOnly(true) // JavaScript não consegue ler
+                .secure(false) // troque para true em produção HTTPS
+                .path("/") // enviado em todas as rotas
                 .maxAge(Duration.ofMinutes(15))
                 .sameSite("Strict")
                 .build();
@@ -162,7 +162,7 @@ public class UsuarioController {
         // Remover Access Token
         Cookie tokenCookie = new Cookie("accessToken", null);
         tokenCookie.setHttpOnly(true);
-        tokenCookie.setSecure(true);  // ou false se estiver local
+        tokenCookie.setSecure(true); // ou false se estiver local
         tokenCookie.setPath("/");
         tokenCookie.setMaxAge(0);
         response.addCookie(tokenCookie);
@@ -170,7 +170,7 @@ public class UsuarioController {
         // Remover Refresh Token
         Cookie refreshCookie = new Cookie("refreshToken", null);
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(true);  // ou false se estiver local
+        refreshCookie.setSecure(true); // ou false se estiver local
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(0);
         response.addCookie(refreshCookie);
@@ -178,22 +178,21 @@ public class UsuarioController {
         return ResponseEntity.ok().build();
     }
 
-
     @PostMapping("/register")
     public ResponseEntity<?> registrar(@RequestBody @Valid RegisterRequest request) {
         Usuario novoUsuario = usuarioService.cadastrarUsuario(request); // ✅ já salva e valida
 
         String accessToken = jwtTokenUtil.generateAccessToken(novoUsuario.getEmail());
-//        String refreshToken = jwtTokenUtil.generateRefreshToken(novoUsuario.getId().toString());
+        // String refreshToken =
+        // jwtTokenUtil.generateRefreshToken(novoUsuario.getId().toString());
 
         return ResponseEntity.ok(new LoginResponse(accessToken, novoUsuario));
 
     }
 
-
-
     @PutMapping("/{id}") // Atualiza um usuário existente
-    public ResponseEntity<Usuario> atualizarUsuario(@PathVariable UUID id, @Valid @RequestBody Usuario usuarioAtualizado) {
+    public ResponseEntity<Usuario> atualizarUsuario(@PathVariable UUID id,
+            @Valid @RequestBody Usuario usuarioAtualizado) {
         if (!usuarioRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }

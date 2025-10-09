@@ -29,12 +29,12 @@ export async function getMyProfile() {
   }
 
   // PROD/real
-  const { data } = await api.get('/usuarios/me'); // ajuste se seu endpoint real for outro
+  const { data } = await api.get('/usuarios/auth/me'); // ajuste se seu endpoint real for outro
   return data;
 }
 
 export async function updateMyProfile(payload) {
-  const { data } = await api.put('/usuarios/me', payload);
+  const { data } = await api.put('/usuarios/auth/me', payload);
   return data;
 }
 

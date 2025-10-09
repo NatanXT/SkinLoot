@@ -1,14 +1,50 @@
 // src/services/AuthService.js
-import api from './api';
+import api, { storage } from './api';
 
-// troque os endpoints caso seus controllers usem outros caminhos
-const register = (nome, email, senha, genero) =>
-  api.post('/usuarios/register', { nome, email, senha, genero });
+// Endpoints corretos conforme o backend Java
+const AUTH_LOGIN_PATH = '/usuarios/login';
+const AUTH_REGISTER_PATH = '/usuarios/register';
+const AUTH_ME_PATH = '/usuarios/auth/me';
 
-const login = (email, senha) => api.post('/usuarios/login', { email, senha });
+// ====================== LOGIN ======================
+export async function login(email, senha, remember = true) {
+  storage.remember = !!remember;
 
-const logout = () => api.post('/usuarios/auth/logout'); // se não tiver, pode só resolver uma Promise
+  const body = { email, senha };
 
-const getCurrentUser = () => api.get('/usuarios/auth/me'); // ou '/usuarios/me' se esse for o seu @GetMapping
+  const { data } = await api.post(AUTH_LOGIN_PATH, body, {
+    withCredentials: true,
+  });
 
-export default { register, login, logout, getCurrentUser };
+  const access = data?.accessToken || data?.token || null;
+  const refresh = data?.refreshToken || null;
+
+  if (access) storage.access = access;
+  if (refresh) storage.refresh = refresh;
+
+  return { data };
+}
+
+// ====================== REGISTER ======================
+export async function register(nome, email, senha, genero) {
+  const body = { nome, email, senha, genero };
+
+  const { data } = await api.post(AUTH_REGISTER_PATH, body, {
+    withCredentials: true,
+  });
+
+  return { data };
+}
+
+// ====================== GET CURRENT USER ======================
+export const getCurrentUser = () =>
+  api.get(AUTH_ME_PATH, { withCredentials: true });
+
+// ====================== LOGOUT ======================
+export async function logout() {
+  storage.clear();
+  await api.post('/usuarios/auth/logout', {}, { withCredentials: true });
+}
+
+// ====================== EXPORT ======================
+export default { login, register, getCurrentUser, logout };

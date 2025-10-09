@@ -1,6 +1,6 @@
 -- Garante que o nome do jogo é único passo1
-ALTER TABLE jogo
-    ADD CONSTRAINT uk_jogo_nome UNIQUE (nome);
+-- ALTER TABLE jogo
+--     ADD CONSTRAINT uk_jogo_nome UNIQUE (nome);
 
 ALTER TABLE jogo_categorias DROP CONSTRAINT IF EXISTS jogo_categorias_categoria_check;
 

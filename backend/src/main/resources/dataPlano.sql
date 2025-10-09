@@ -1,6 +1,6 @@
 -- Garante que a coluna 'nome' seja única para o ON CONFLICT funcionar
 -- Execute este comando uma vez no seu banco de dados se ainda não o fez.
--- ALTER TABLE plano_assinatura ADD CONSTRAINT uk_plano_assinatura_nome UNIQUE (nome);
+ALTER TABLE plano_assinatura ADD CONSTRAINT uk_plano_assinatura_nome UNIQUE (nome);
 
 -- Insere os planos com nomes em MAIÚSCULAS para corresponder ao Enum Java
 INSERT INTO plano_assinatura (nome, preco_mensal, limite_anuncios, destaque_anuncio)

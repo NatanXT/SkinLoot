@@ -94,16 +94,14 @@ export default function PerfilUsuario() {
       try {
         setLoading(true);
         setErr('');
-        // 1) Perfil (se falhar, aí sim mostra erro)
         const p = await getMyProfile();
         if (!cancel) setPerfil(p);
 
-        // 2) Skins: NUNCA derruba a página
         try {
           const s = await getMinhasSkins();
           if (!cancel) setSkins(Array.isArray(s) ? s : s?.content || []);
         } catch {
-          if (!cancel) setSkins([]); // só mostra vazio
+          if (!cancel) setSkins([]);
         }
       } catch (e) {
         if (!cancel)
@@ -138,8 +136,6 @@ export default function PerfilUsuario() {
 
   function handleNovaSkin() {
     if (atingiuLimite) return;
-
-    // abre o mesmo modal de edição, porém em modo "novo"
     setSkinEditando({ __novo: true });
     setFormEdicao({ skinNome: '', preco: '', imagemUrl: '' });
     setImagemFile(null);
@@ -179,7 +175,6 @@ export default function PerfilUsuario() {
   async function onEscolherPlano(planoNovo, label) {
     setBusy(true);
     try {
-      // Atualiza visualmente o plano no estado/contexto
       setPerfil((prev) => ({ ...prev, plano: planoNovo }));
       if (typeof setUser === 'function')
         setUser((prev) => ({ ...prev, plano: planoNovo }));
@@ -191,7 +186,6 @@ export default function PerfilUsuario() {
   }
 
   // ========================== EDITAR / CRIAR SKIN ============================
-  // Abre modal com dados atuais
   function abrirEditar(skin) {
     setSkinEditando(skin);
     const urlAtual = skin?.imagemUrl || skin?.image || skin?.imagem || '';
@@ -205,7 +199,6 @@ export default function PerfilUsuario() {
     setModalEdicaoAberto(true);
   }
 
-  // Fecha modal de edição
   function fecharEditar() {
     if (salvandoEdicao) return;
     setModalEdicaoAberto(false);
@@ -234,6 +227,14 @@ export default function PerfilUsuario() {
     reader.readAsDataURL(file);
   }
 
+  // Normaliza o objeto retornado pelo backend para garantir campo de imagem
+  function withImagemUrl(obj) {
+    if (!obj) return obj;
+    const imagemUrl =
+      obj.imagemUrl || obj.imageUrl || obj.image || obj.imagem || '';
+    return { ...obj, imagemUrl };
+  }
+
   // Salva (cria ou edita)
   async function salvarEdicao() {
     setSalvandoEdicao(true);
@@ -248,27 +249,23 @@ export default function PerfilUsuario() {
       }
 
       const id = skinEditando?.id || skinEditando?._id;
+
+      // IMPORTANTE: enviar "imagemUrl" (não "skinImageUrl")
       const payload = {
-        // campos de AnuncioRequest:
         titulo: formEdicao.skinNome,
-        descricao: '', // opcional
+        descricao: '',
         preco: precoNum,
-
-        // campos que seu service de anúncio usa para popular a skin no anúncio:
+        // campos que populam a skin no anúncio:
         skinName: formEdicao.skinNome,
-        skinImageUrl: formEdicao.imagemUrl,
+        imagemUrl: formEdicao.imagemUrl, // <- aqui!
         ...(imagemFile ? { imagemFile } : {}),
-
-        // se quiser guardar qualidade/desgaste, pode ligar estes também:
-        // qualidade: formEdicao.qualidade,
-        // desgasteFloat: formEdicao.desgasteFloat,
       };
 
       if (id) {
         // ------- EDITAR -------
-        const atualizado = await editarSkin(id, payload);
+        const atualizadoRaw = await editarSkin(id, payload);
+        const atualizado = withImagemUrl(atualizadoRaw);
 
-        // Se estava reativando via editor
         if (reativarDepoisDeSalvar) {
           await reativarSkin(id);
           atualizado.ativo = true;
@@ -286,15 +283,14 @@ export default function PerfilUsuario() {
             : 'Skin atualizada!',
           'success',
         );
-
-        notifySkinsChanged(); // << notifica vitrine
+        notifySkinsChanged();
       } else {
         // ------- CRIAR -------
-        const nova = await criarSkin(payload);
+        const novaRaw = await criarSkin(payload);
+        const nova = withImagemUrl(novaRaw);
         setSkins((lista) => [nova, ...lista]); // topo
         addToast('Skin criada!', 'success');
-
-        notifySkinsChanged(); // << notifica vitrine
+        notifySkinsChanged();
       }
 
       fecharEditar();
@@ -327,7 +323,6 @@ export default function PerfilUsuario() {
   async function confirmarDesativacaoFinal() {
     if (!skinDesativando?.id && !skinDesativando?._id) return;
 
-    // Confirmação: precisa digitar "Confirmo" (maiúsc./minúsc. indiferente) + checkbox
     const okTexto =
       String(confirmTexto || '')
         .trim()
@@ -344,8 +339,7 @@ export default function PerfilUsuario() {
         ),
       );
       addToast('Skin desativada com sucesso.', 'success');
-
-      notifySkinsChanged(); // << notifica vitrine
+      notifySkinsChanged();
       fecharDesativar();
     } catch (e) {
       addToast(e?.message || 'Falha ao desativar a skin.', 'error');
@@ -359,7 +353,6 @@ export default function PerfilUsuario() {
     const id = skin?.id || skin?._id;
     if (!id) return;
 
-    // Respeitar cota do plano (não permite passar do limite)
     if (Number.isFinite(limitePlano) && usados >= limitePlano) {
       addToast(
         'Você atingiu o limite do plano. Faça upgrade para reativar.',
@@ -368,9 +361,8 @@ export default function PerfilUsuario() {
       return;
     }
 
-    // Marca o flag e abre o mesmo modal de edição
     setReativarDepoisDeSalvar(true);
-    setSkinEditando({ ...skin }); // ainda inativa no storage; ativará após salvar
+    setSkinEditando({ ...skin });
     const urlAtual = skin?.imagemUrl || skin?.image || skin?.imagem || '';
     setFormEdicao({
       skinNome: skin?.skinNome || skin?.title || skin?.nome || '',
@@ -514,7 +506,7 @@ export default function PerfilUsuario() {
           </div>
         </section>
 
-        {/* Minhas skins (puxadas do mock) */}
+        {/* Minhas skins */}
         <section className="perfil-block">
           <div className="perfil-block-header">
             <h2>Minhas Skins</h2>
@@ -587,7 +579,6 @@ export default function PerfilUsuario() {
                     <div className="seller">
                       <span>ID: {s.id || s._id || '—'}</span>
                       <div className="cta">
-                        {/* Quando inativa: mostra "Reativar" */}
                         {s.ativo === false ? (
                           <button
                             className="btn btn--primary"
@@ -825,7 +816,6 @@ export default function PerfilUsuario() {
               />
             </div>
 
-            {/* noValidate: desliga validação nativa (evita bloqueio do submit) */}
             <form
               className="perfil-form"
               noValidate
@@ -868,7 +858,7 @@ export default function PerfilUsuario() {
                 <label htmlFor="f-imagem">URL da imagem (opcional)</label>
                 <input
                   id="f-imagem"
-                  type="text" // aceita qualquer string; se for URL válida, o service usa
+                  type="text"
                   placeholder="https://exemplo.com/imagem.png"
                   value={formEdicao.imagemUrl}
                   onChange={(e) => {
