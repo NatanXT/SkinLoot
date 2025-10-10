@@ -4,6 +4,8 @@ import com.SkinLoot.SkinLoot.dto.SkinResponse;
 import com.SkinLoot.SkinLoot.model.Skin;
 import com.SkinLoot.SkinLoot.repository.SkinRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +61,10 @@ public class SkinService {
     // ✅ NOVO MÉTODO:
     public Optional<Skin> buscarPorIdEUsuarioId(UUID id, UUID usuarioId) {
         return skinRepository.findByIdAndUsuarioId(id, usuarioId);
+    }
+    // Em SkinService.java (se você tiver um)
+    public Page<SkinResponse> buscarSkins(String termo, Pageable pageable) {
+        return skinRepository.buscarPorNome(termo, pageable).map(SkinResponse::new);
     }
 }
 

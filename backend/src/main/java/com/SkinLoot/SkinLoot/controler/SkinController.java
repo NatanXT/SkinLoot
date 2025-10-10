@@ -9,6 +9,9 @@ import com.SkinLoot.SkinLoot.service.JogoService;
 import com.SkinLoot.SkinLoot.service.SkinService;
 import com.SkinLoot.SkinLoot.service.UsuarioService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -86,6 +89,16 @@ public class SkinController {
         return skinService.buscarPorIdEUsuarioId(id, usuario.getId())
                 .map(skin -> ResponseEntity.ok(new SkinResponse(skin))) // 3a. Se encontrar, converte para DTO e retorna 200 OK
                 .orElseGet(() -> ResponseEntity.notFound().build());      // 3b. Se não encontrar, retorna 404 Not Found
+    }
+
+    // Em SkinController.java
+    @GetMapping("/search")
+    public ResponseEntity<Page<SkinResponse>> buscarSkins(
+            @RequestParam("termo") String termo,
+            @PageableDefault(size = 10) Pageable pageable) {
+
+        Page<SkinResponse> resultados = skinService.buscarSkins(termo, pageable);
+        return ResponseEntity.ok(resultados);
     }
 
 }

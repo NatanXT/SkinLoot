@@ -30,13 +30,16 @@ public class Anuncio {
     private Status status;
 
     // Catálogo (desnormalizado)
-    private Long steamItemId;
     private String skinName;
     private String skinImageUrl;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "skin_id", nullable = true) // ✅ A chave é nullable = true
+    private Skin skin;
 
     private LocalDateTime dataCriacao;
 
@@ -57,8 +60,7 @@ public class Anuncio {
 
     public Anuncio(UUID id, String titulo, String descricao, BigDecimal preco, Status status,
             String skinName, String skinImageUrl, Usuario usuario, LocalDateTime dataCriacao,
-            Long steamItemId, Set<AnuncioLike> likes, int likesCount,
-            String qualidade, Double desgasteFloat) {
+            Long steamItemId, Set<AnuncioLike> likes, int likesCount, Map<String, Object> detalhesEspecificos) {
 
 
         this.id = id;
@@ -70,10 +72,9 @@ public class Anuncio {
         this.skinImageUrl = skinImageUrl;
         this.usuario = usuario;
         this.dataCriacao = dataCriacao;
-        this.steamItemId = steamItemId;
         this.likes = likes;
         this.likesCount = likesCount;
-
+        this.detalhesEspecificos = detalhesEspecificos;
     }
 
     /** Construtor auxiliar usado em relações (precisa setar o id!). */
@@ -121,14 +122,6 @@ public class Anuncio {
 
     public void setStatus(Status status) {
         this.status = status;
-    }
-
-    public Long getSteamItemId() {
-        return steamItemId;
-    }
-
-    public void setSteamItemId(Long steamItemId) {
-        this.steamItemId = steamItemId;
     }
 
     public String getSkinName() {
@@ -179,20 +172,13 @@ public class Anuncio {
         this.likesCount = likesCount;
     }
 
-    public String getQualidade() {
-        return qualidade;
-
+    public Map<String, Object> getDetalhesEspecificos() {
+        return detalhesEspecificos;
     }
-    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {this.detalhesEspecificos = detalhesEspecificos;
-    }
-
-    public Double getDesgasteFloat() {
-        return desgasteFloat;
+    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {
+        this.detalhesEspecificos = detalhesEspecificos;
     }
 
-    public void setDesgasteFloat(Double desgasteFloat) {
-        this.desgasteFloat = desgasteFloat;
-    }
 
 
 }

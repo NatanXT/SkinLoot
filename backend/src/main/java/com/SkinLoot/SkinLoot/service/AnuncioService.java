@@ -54,33 +54,43 @@ public class AnuncioService {
     @Transactional
     public Anuncio criarAnuncio(AnuncioRequest request, Usuario usuario) {
         // valida skin
-        Skin skin = skinRepository.findById(request.getSkinId())
+        // Para garantir que estamos trabalhando com a versão mais atual do usuário no banco
+        Usuario usuarioAtualizado = usuarioRepository.findById(usuario.getId())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para criação de anúncio."));
+
+        // 1. Verifica se a assinatura do usuário está ativa e dentro da validade
+        if (usuarioAtualizado.getStatusAssinatura() != StatusAssinatura.ATIVA || usuarioAtualizado.getDataExpira().isBefore(LocalDate.now())) {
+            throw new AcessoNegadoException("Sua assinatura não está ativa ou expirou. Por favor, regularize seu plano para criar novos anúncios.");
+        }
+
+        // 2. Verifica se o usuário atingiu o limite de anúncios do seu plano
+        if (!podeCriarNovoAnuncio(usuarioAtualizado)) {
+            throw new LimiteExcedidoException("Você atingiu o limite de " + usuarioAtualizado.getPlanoAssinatura().getLimiteAnuncios() + " anúncios do seu plano.");
+        }
+
+        // 3. Valida a skin
+        Skin skinDeCatalogo = skinRepository.findById(request.getSkinId())
                 .orElseThrow(() -> new RuntimeException("Skin não encontrada no catálogo."));
 
+        Anuncio novoAnuncio = new Anuncio();
+        novoAnuncio.setUsuario(usuarioAtualizado);
+        novoAnuncio.setTitulo(request.getTitulo());
+        novoAnuncio.setDescricao(request.getDescricao());
+        novoAnuncio.setPreco(request.getPreco());
 
-        Anuncio a = new Anuncio();
-        a.setUsuario(usuario);
-        a.setTitulo(request.getTitulo());
-        a.setDescricao(request.getDescricao());
-        a.setPreco(request.getPreco());
+        // 4. Desnormaliza dados principais da skin do catálogo
+        novoAnuncio.setSkinName(skinDeCatalogo.getNome());
+        novoAnuncio.setSkinImageUrl(skinDeCatalogo.getIcon());
 
-        a.setDesgasteFloat(request.getDesgasteFloat());
-        a.setQualidade(request.getQualidade());
+        // 5. Copia os detalhes específicos do anúncio (float, pattern, etc.)
+        novoAnuncio.setDetalhesEspecificos(request.getDetalhesEspecificos());
 
-        // desnormaliza dados principais da skin do catálogo
-        a.setSkinName(skin.getNome());
-        a.setSkinImageUrl(skin.getIcon());
+        // 6. Define valores padrão
+        novoAnuncio.setStatus(Status.ATIVO);
+        novoAnuncio.setDataCriacao(LocalDateTime.now());
 
-        // TODO: ajuste setSteamItemId(...) conforme o tipo real do campo na entidade
-        // Anuncio.
-        // Se steamItemId for Long, não use skin.getId() com UUID. No exemplo mantive a
-        // ideia; adapte se necessário.
-        // a.setSteamItemId(...);
-
-        a.setStatus(Status.ATIVO);
-        a.setDataCriacao(LocalDateTime.now());
-
-        return anuncioRepository.save(a);
+        // 7. Salva o anúncio completo no banco de dados
+        return anuncioRepository.save(novoAnuncio);
     }
 
     @Transactional
@@ -103,65 +113,21 @@ public class AnuncioService {
         if (request.getPreco() != null) {
             a.setPreco(request.getPreco());
         }
-        if (request.getDesgasteFloat() != null) {
-            a.setDesgasteFloat(request.getDesgasteFloat());
-        }
-        if (request.getQualidade() != null) {
-            a.setQualidade(request.getQualidade());
-        }
 
-        // Se vier skinId, recarrega do catálogo e espelha nome/ícone
-        if (request.getSkinId() != null) {
-            Skin skin = skinRepository.findById(request.getSkinId())
-        // Para garantir que estamos trabalhando com a versão mais atual do usuário no banco
-        Usuario usuarioAtualizado = usuarioRepository.findById(usuario.getId())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para criação de anúncio."));
-
-        // ✅ ================= INÍCIO DA IMPLEMENTAÇÃO ================= ✅
-
-        // 1. Verifica se a assinatura do usuário está ativa e dentro da validade
-        if (usuarioAtualizado.getStatusAssinatura() != StatusAssinatura.ATIVA || usuarioAtualizado.getDataExpira().isBefore(LocalDate.now())) {
-            throw new AcessoNegadoException("Sua assinatura não está ativa ou expirou. Por favor, regularize seu plano para criar novos anúncios.");
-        }
-
-        // 2. Verifica se o usuário atingiu o limite de anúncios do seu plano
-        if (!podeCriarNovoAnuncio(usuarioAtualizado)) {
-            throw new LimiteExcedidoException("Você atingiu o limite de " + usuarioAtualizado.getPlanoAssinatura().getLimiteAnuncios() + " anúncios do seu plano.");
-        }
-
-        try {
-            Skin skinDeCatalogo = skinRepository.findById(request.getSkinId())
-                    .orElseThrow(() -> new RuntimeException("Skin não encontrada no catálogo."));
-
-            // TODO: ajuste setSteamItemId(...) conforme o tipo real do campo na entidade
-            // Anuncio.
-            // Se steamItemId for Long, não use skin.getId() com UUID. No exemplo mantive a
-            // ideia; adapte se necessário.
-            // a.setSteamItemId(...);
-
-
-            a.setSkinName(skin.getNome());
-            a.setSkinImageUrl(skin.getIcon());
-
-            // 4. Copia (desnormaliza) os dados do catálogo para o anúncio
-            novoAnuncio.setSkinName(skinDeCatalogo.getNome());
-            novoAnuncio.setSkinImageUrl(skinDeCatalogo.getIcon());
-
-            // 5. Define valores padrão
-            novoAnuncio.setStatus(Status.ATIVO);
-            novoAnuncio.setDataCriacao(LocalDateTime.now());
-
-            // 6. Salva o anúncio completo no banco de dados
-            return anuncioRepository.save(novoAnuncio);
-        } catch (Exception e) {
-            // Lança uma exceção mais específica para o controller tratar
-            throw new RuntimeException("Falha ao criar anúncio: " + e.getMessage(), e);
-
-        }
-
-        // Status opcional vindo do request
         if (request.getStatus() != null) {
             a.setStatus(request.getStatus());
+        }
+        if (request.getDetalhesEspecificos() != null) {
+            a.setDetalhesEspecificos(request.getDetalhesEspecificos());
+        }
+
+        // Se o usuário está tentando mudar a Skin base do anúncio
+        if (request.getSkinId() != null) {
+            Skin novaSkin = skinRepository.findById(request.getSkinId())
+                    .orElseThrow(() -> new RuntimeException("Nova skin não encontrada no catálogo."));
+            // Atualiza os dados desnormalizados
+            a.setSkinName(novaSkin.getNome());
+            a.setSkinImageUrl(novaSkin.getIcon());
         }
 
         return anuncioRepository.save(a);
