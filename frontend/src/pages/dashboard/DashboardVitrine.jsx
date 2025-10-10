@@ -6,18 +6,23 @@
 // - Filtros c/ máscara BRL nos preços, Limpar filtros,
 //   e sincronização de estado no URL (share/refresh).
 // - Scroll suave (manual) com compensação da topbar
-// - [Logado] Avatar com menu: atraso de 2s no mouseout, “pin” ao clicar,
+// - [Logado] Avatar com menu: atraso no mouseout + “pin” ao clicar,
 //   fecha ao clicar fora ou pressionar ESC.
+// - Botão Contato abre ChatFlutuante; mini-botão quando fechado.
+// - ✅ Mistura as skins mockadas com as skins do usuário logado.
+// - ✅ NOVO: “Mensagens” só aparece logado; “Contato”/“Comprar fora” redirecionam ao login se anônimo.
 // ======================================================
 
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useAuth } from '../../services/AuthContext.jsx';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './DashboardVitrine.css';
 import MockSkins from '../../components/mock/MockSkins.js';
 import AuthBrand from '../../components/logo/AuthBrand.jsx';
+import ChatFlutuante from '../../components/chat/ChatFlutuante';
 
-//import anuncioService from "../services/anuncioService"; // ✅ futuro
+// Service para pegar minhas skins no backend
+import anuncioService from '../../services/anuncioService.js';
 
 /* ---------- Metadados dos planos ---------- */
 const plansMeta = {
@@ -69,7 +74,7 @@ function readStateFromURL() {
   return { filters: { search, game, plan, min, max }, sort };
 }
 
-/** Escreve filtros/sort no URL (remove params que estão iguais aos defaults) */
+/** Escreve filtros/sort no URL (remove params iguais aos defaults) */
 function writeStateToURL(filters, sort, replace = true) {
   const p = new URLSearchParams();
   if (filters.search) p.set('q', filters.search);
@@ -88,7 +93,7 @@ function writeStateToURL(filters, sort, replace = true) {
 function enrichFromMock(list) {
   const plans = ['gratuito', 'intermediario', 'plus'];
   return list.map((s, i) => ({
-    id: String(i + 1),
+    id: `mock-${i + 1}`,
     title: s.nome,
     image: s.imagemUrl,
     game: 'CS2',
@@ -96,11 +101,26 @@ function enrichFromMock(list) {
       Math.round((200 + ((i * 137) % 5400) + (i % 3 === 2 ? 800 : 0)) * 10) /
       10,
     currency: 'BRL',
-    seller: { name: `@seller_${i + 1}`, contactUrl: '#' },
+    seller: { name: `@seller_${i + 1}`, contactUrl: '#' }, // contactUrl só vale quando logado
     plan: plans[i % plans.length],
     likes: 20 + ((i * 73) % 900),
     listedAt: Date.now() - (i + 1) * 1000 * 60 * 60 * (3 + (i % 6)),
   }));
+}
+
+/** Junta mock + minhas evitando duplicidades visuais */
+function juntarSemDuplicar(listaA, listaB) {
+  const chave = (x) =>
+    `${(x.title || '').toLowerCase()}|${Number(x.price || 0)}`;
+  const set = new Set();
+  const saida = [];
+  for (const item of [...listaB, ...listaA]) {
+    const k = chave(item);
+    if (set.has(k)) continue;
+    set.add(k);
+    saida.push(item);
+  }
+  return saida;
 }
 
 /* ---------- Ranking ---------- */
@@ -109,40 +129,45 @@ function useRankedSkins(list, sortBy, filters) {
     const now = Date.now();
     const rec = (t) => Math.max(0.6, 1.4 - (now - t) / (1000 * 60 * 60 * 72));
 
-    let filtered = list.filter(
+    let filtrados = list.filter(
       (s) =>
         (filters.plan === 'todos' || s.plan === filters.plan) &&
         (filters.game === 'todos' || s.game === filters.game) &&
         s.price >= filters.min &&
         s.price <= filters.max &&
-        s.title.toLowerCase().includes(filters.search.toLowerCase()),
+        (s.title || '').toLowerCase().includes(filters.search.toLowerCase()),
     );
 
-    const scored = filtered.map((s) => ({
-      ...s,
-      score:
-        plansMeta[s.plan].weight * Math.pow(s.likes + 1, 0.5) * rec(s.listedAt),
-    }));
+    const pontuados = filtrados.map((s) => {
+      const meta = plansMeta[s.plan] || { weight: 1.0 };
+      return {
+        ...s,
+        score:
+          meta.weight *
+          Math.pow((s.likes ?? 0) + 1, 0.5) *
+          rec(s.listedAt ?? now),
+      };
+    });
 
     if (sortBy === 'relevancia')
-      return scored.sort((a, b) => b.score - a.score);
-    if (sortBy === 'preco_asc') return scored.sort((a, b) => a.price - b.price);
+      return pontuados.sort((a, b) => b.score - a.score);
+    if (sortBy === 'preco_asc')
+      return pontuados.sort((a, b) => a.price - b.price);
     if (sortBy === 'preco_desc')
-      return scored.sort((a, b) => b.price - a.price);
+      return pontuados.sort((a, b) => b.price - a.price);
     if (sortBy === 'recentes')
-      return scored.sort((a, b) => b.listedAt - a.listedAt);
-    return scored;
+      return pontuados.sort((a, b) => (b.listedAt ?? 0) - (a.listedAt ?? 0));
+    return pontuados;
   }, [list, sortBy, filters]);
 }
 
-/* ========= smooth scroll util (independe de CSS/OS prefs) ========= */
+/* ========= smooth scroll util ========= */
 function smoothScrollToY(toY, duration = 500) {
   const startY = window.scrollY || window.pageYOffset || 0;
   const distance = toY - startY;
   const startTime = performance.now();
   const easeInOutCubic = (t) =>
     t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
   function step(now) {
     const elapsed = now - startTime;
     const t = Math.min(1, elapsed / duration);
@@ -160,14 +185,90 @@ function smoothScrollToY(toY, duration = 500) {
 export default function DashboardVitrine() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation(); // ✅ usado para guardar rota de retorno pós-login
 
   // estado inicial vindo do URL (ou defaults)
   const initial = readStateFromURL();
 
-  const [skins] = useState(() => enrichFromMock(MockSkins));
+  // Mock e Minhas
+  const [skinsMock] = useState(() => enrichFromMock(MockSkins));
+  const [minhasSkins, setMinhasSkins] = useState([]);
+  const [carregandoMinhas, setCarregandoMinhas] = useState(false);
+  const [erroMinhas, setErroMinhas] = useState('');
+
+  // UI
   const [likes, setLikes] = useState(() => new Set());
   const [sortBy, setSortBy] = useState(initial.sort);
   const [filters, setFilters] = useState(initial.filters);
+
+  // Chat
+  const [chatAberto, setChatAberto] = useState(null); // { id, nome }
+  const [unreads, setUnreads] = useState(0);
+
+  // --------- ✅ Guardião de login para ações protegidas ----------
+  /**
+   * exigirLogin
+   * - Se não houver usuário autenticado, navega para /login passando:
+   *   - returnTo: rota atual (para redirecionar de volta após autenticar)
+   *   - acao + payload: ação pretendida (ex.: "contato" ou "comprar_fora")
+   * - Retorna true se a ação foi bloqueada (precisa logar), false se pode continuar.
+   */
+  function exigirLogin(acao, payload) {
+    if (!user) {
+      navigate('/login', {
+        state: {
+          returnTo: location.pathname + location.search,
+          acao,
+          payload,
+        },
+        replace: true,
+      });
+      return true; // bloqueado
+    }
+    return false; // permitido
+  }
+
+  // Abre o chat com o vendedor (somente logado)
+  function abrirChatPara(anuncio) {
+    // 🔒 Se não estiver logado, manda pro login e para aqui
+    if (exigirLogin('contato', { anuncioId: anuncio?.id })) return;
+
+    const nome =
+      anuncio?.usuarioNome ??
+      anuncio?.seller?.name ??
+      anuncio?.vendedorNome ??
+      'Usuário';
+    const id =
+      anuncio?.usuarioId ??
+      anuncio?.seller?.id ??
+      anuncio?.vendedorId ??
+      `temp-${anuncio?.id}`;
+    setChatAberto({ id, nome });
+    setUnreads(0);
+  }
+
+  // Abrir o link externo de compra (somente logado)
+  function comprarFora(anuncio) {
+    // 🔒 Guardião de login
+    if (exigirLogin('comprar_fora', { anuncioId: anuncio?.id })) return;
+
+    // Quando estiver logado, tenta abrir o link externo
+    const url =
+      anuncio?.linkExterno ||
+      anuncio?._raw?.linkExterno ||
+      anuncio?.seller?.contactUrl ||
+      anuncio?._raw?.urlCompra ||
+      '#';
+
+    if (url && url !== '#') {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      // Se não houver link no objeto, você pode:
+      // - Abrir o chat como fallback
+      // - Ou mostrar um aviso/toast
+      abrirChatPara(anuncio);
+    }
+  }
 
   // estado visual dos inputs de preço (string mostrada no input)
   const [priceUI, setPriceUI] = useState({
@@ -175,7 +276,43 @@ export default function DashboardVitrine() {
     max: brlPlain(initial.filters.max),
   });
 
+  // Busca minhas skins quando loga/troca usuário
+  useEffect(() => {
+    let ativo = true;
+    async function carregarMinhas() {
+      if (!user) {
+        setMinhasSkins([]);
+        return;
+      }
+      try {
+        setCarregandoMinhas(true);
+        setErroMinhas('');
+        const lista = await anuncioService.listarMinhasNormalizadas();
+        if (!ativo) return;
+        setMinhasSkins(Array.isArray(lista) ? lista : []);
+      } catch (e) {
+        console.error('Falha ao buscar minhas skins:', e);
+        if (!ativo) return;
+        setErroMinhas('Não foi possível carregar suas skins.');
+        setMinhasSkins([]);
+      } finally {
+        if (ativo) setCarregandoMinhas(false);
+      }
+    }
+    carregarMinhas();
+    return () => {
+      ativo = false;
+    };
+  }, [user]);
+
+  // Lista combinada: minhas + mock
+  const listaCombinada = useMemo(() => {
+    return juntarSemDuplicar(skinsMock, minhasSkins);
+  }, [skinsMock, minhasSkins]);
+
   // sincroniza URL quando filtros/ordenar mudam
+  const minRef = useRef(null);
+  const maxRef = useRef(null);
   useEffect(() => {
     if (filters.min > filters.max) {
       setFilters((f) => ({ ...f, max: f.min }));
@@ -194,12 +331,11 @@ export default function DashboardVitrine() {
     }));
   }, [filters, sortBy]);
 
-  // Delegação global: qualquer <a href="#..."> faz scroll suave manual
+  // scroll suave para âncoras
   useEffect(() => {
     const onClick = (e) => {
       const a = e.target.closest('a[href^="#"]');
       if (!a) return;
-
       const hash = a.getAttribute('href');
       if (!hash || hash === '#') return;
 
@@ -207,21 +343,18 @@ export default function DashboardVitrine() {
       if (!el) return;
 
       e.preventDefault();
-
       const header = document.querySelector('.topbar');
       const offset = (header?.offsetHeight ?? 0) + 8;
-
       const y = el.getBoundingClientRect().top + window.scrollY - offset;
-
       history.pushState(null, '', hash);
       smoothScrollToY(y, 600);
     };
-
     document.addEventListener('click', onClick, { passive: false });
     return () => document.removeEventListener('click', onClick);
   }, []);
 
-  const ranked = useRankedSkins(skins, sortBy, filters);
+  // Ranking com a lista combinada
+  const ranked = useRankedSkins(listaCombinada, sortBy, filters);
 
   const handleLikeToggle = (anuncioId) => {
     const isCurrentlyLiked = likes.has(anuncioId);
@@ -229,16 +362,9 @@ export default function DashboardVitrine() {
     if (isCurrentlyLiked) newLikes.delete(anuncioId);
     else newLikes.add(anuncioId);
     setLikes(newLikes);
-
-    // chamada à API em segundo plano (opcional)
-    // (isCurrentlyLiked ? anuncioService.unlikeAnuncio(anuncioId) : anuncioService.likeAnuncio(anuncioId))
-    //   .catch(() => setLikes(likes));
   };
 
-  /* ---------- Price inputs: refs + handlers ---------- */
-  const minRef = useRef(null);
-  const maxRef = useRef(null);
-
+  /* ---------- Price inputs: handlers ---------- */
   function allowOnlyDigitsKeyDown(e) {
     const allowed = [
       'Backspace',
@@ -319,7 +445,7 @@ export default function DashboardVitrine() {
     writeStateToURL(DEFAULT_FILTERS, DEFAULT_SORT, false);
   };
 
-  /* ---------- Menu do perfil: atraso de 2s no mouseout + pin por clique ---------- */
+  /* ---------- Menu do perfil ---------- */
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPinned, setMenuPinned] = useState(false);
   const menuRef = useRef(null);
@@ -329,13 +455,11 @@ export default function DashboardVitrine() {
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     setMenuOpen(true);
   };
-
   const scheduleClose = () => {
     if (menuPinned) return;
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    hideTimerRef.current = setTimeout(() => setMenuOpen(false), 500); // 2s
+    hideTimerRef.current = setTimeout(() => setMenuOpen(false), 500);
   };
-
   const togglePinned = () => {
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     setMenuPinned((v) => !v);
@@ -568,12 +692,23 @@ export default function DashboardVitrine() {
 
       {/* Grid de Cards */}
       <section className="grid">
+        {user && carregandoMinhas && (
+          <p style={{ gridColumn: '1 / -1', color: '#7B8694' }}>
+            Carregando suas skins…
+          </p>
+        )}
+        {user && !carregandoMinhas && erroMinhas && (
+          <p style={{ gridColumn: '1 / -1', color: '#ff9c9c' }}>{erroMinhas}</p>
+        )}
+
         {ranked.map((anuncio) => (
           <SkinCard
             key={anuncio.id}
             data={anuncio}
             liked={likes.has(anuncio.id)}
             onLike={() => handleLikeToggle(anuncio.id)}
+            onContato={() => abrirChatPara(anuncio)} // 🔒 protegido
+            onComprarFora={() => comprarFora(anuncio)} // 🔒 protegido
           />
         ))}
       </section>
@@ -611,13 +746,36 @@ export default function DashboardVitrine() {
           e comprador.
         </p>
       </footer>
+
+      {/* 🔒 Chat flutuante só aparece quando LOGADO */}
+      {user &&
+        (chatAberto ? (
+          <ChatFlutuante
+            usuarioAlvo={chatAberto}
+            onFechar={() => {
+              setChatAberto(null);
+            }}
+          />
+        ) : (
+          <button
+            className="chat-mini-bubble"
+            title="Mensagens"
+            onClick={() => setChatAberto({ id: 'ultimo', nome: 'Mensagens' })}
+          >
+            <span className="chat-mini-bubble__icon">💬</span>
+            <span className="chat-mini-bubble__label">Mensagens</span>
+            {unreads > 0 && (
+              <span className="chat-mini-bubble__badge">{unreads}</span>
+            )}
+          </button>
+        ))}
     </div>
   );
 }
 
 /* ---------- Card (componente) ---------- */
-function SkinCard({ data, liked, onLike }) {
-  // ✅ Suporta formatos do MOCK (price/title/seller) e do BACKEND (preco/skinNome/usuarioNome)
+function SkinCard({ data, liked, onLike, onContato, onComprarFora }) {
+  // Suporta formatos do MOCK e do BACKEND normalizado
   const title = data?.skinNome ?? data?.title ?? data?.nome ?? 'Skin';
   const image = data?.image ?? data?.imagemUrl ?? data?.imagem ?? '';
   const vendedor =
@@ -664,22 +822,21 @@ function SkinCard({ data, liked, onLike }) {
         <div className="seller">
           <span>Vendedor: {vendedor}</span>
           <div className="cta">
-            <a
+            {/* 🔒 Agora são botões (não links), para passar pelo guardião */}
+            <button
               className="btn btn--ghost"
-              href="#"
-              target="_blank"
-              rel="noreferrer"
+              type="button"
+              onClick={onContato}
             >
               Contato
-            </a>
-            <a
+            </button>
+            <button
               className="btn btn--primary"
-              href="#"
-              target="_blank"
-              rel="noreferrer"
+              type="button"
+              onClick={onComprarFora}
             >
               Comprar fora
-            </a>
+            </button>
           </div>
         </div>
       </div>

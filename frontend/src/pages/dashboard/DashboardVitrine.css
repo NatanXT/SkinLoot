@@ -367,8 +367,7 @@ nav a:hover{ color:var(--text) }
 }
 
 /* aro de 2px + 2 glows coloridos (não depende de overflow) */
-.card:hover,
-.card:focus-within{
+.card:hover{
   transform: translateY(-3px);
   border-color: #2a3340;
   box-shadow:
@@ -385,10 +384,88 @@ nav a:hover{ color:var(--text) }
 /* opcional: se quiser um aro ainda mais discreto, troque 2px -> 1px acima */
 
 /* reforça o brilho do banner (aquela película em card__media) no hover */
-.card:hover .card__media::after,
-.card:focus-within .card__media::after{
+.card:hover .card__media::after, .card__media::after{
   opacity: .9; /* antes ~1 com transparência baixa; agora aparece mais */
   transition: opacity .2s ease;
+}
+
+/* ---------- Tokens / Variáveis ---------- */
+:root {
+  --bg: #0B0D10;
+  --panel: #11151A;
+  --muted: #7B8694;
+  --text: #E8F1F2;
+  --primary: #39FF14;
+  --secondary: #00C896;
+  --ring: rgba(57,255,20,.6);
+  --shadow: 0 10px 30px rgba(0,0,0,.45);
+
+  --media-ratio: 4/3;
+  --media-min-h: 360px;
+  --media-pad: 20px;
+  --media-pad-top: 48px;
+
+  --card-min-col: 370px;
+  --card-gap: 22px;
+
+  --btn-h: 48px;
+  --radius: 18px;
+  --container-max: 1550px;
+
+  --topbar-h: 64px;
+}
+
+/* ... (todo o CSS que você já tem permanece igual até o final) ... */
+
+/* ---------- Chat Mini Bubble ---------- */
+.chat-mini-bubble {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2000;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  background: var(--panel);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+
+  border: 1px solid #2A323C;
+  border-radius: 12px;
+  padding: 10px 16px;
+  min-width: 200px;
+
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+
+  transition: background .2s ease, transform .2s ease;
+}
+.chat-mini-bubble:hover {
+  background: #1A1F27;
+  transform: translateY(-2px);
+}
+
+.chat-mini-bubble__icon {
+  font-size: 18px;
+}
+.chat-mini-bubble__label {
+  flex: 1;
+  text-align: left;
+}
+.chat-mini-bubble__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: red;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 3px 7px;
+  box-shadow: 0 0 8px rgba(0,0,0,.5);
 }
 
 /* variações por plano (se você aplica classes card--intermediario / card--plus) */
