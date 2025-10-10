@@ -139,8 +139,24 @@ public class AnuncioService {
             // ideia; adapte se necessário.
             // a.setSteamItemId(...);
 
+
             a.setSkinName(skin.getNome());
             a.setSkinImageUrl(skin.getIcon());
+
+            // 4. Copia (desnormaliza) os dados do catálogo para o anúncio
+            novoAnuncio.setSkinName(skinDeCatalogo.getNome());
+            novoAnuncio.setSkinImageUrl(skinDeCatalogo.getIcon());
+
+            // 5. Define valores padrão
+            novoAnuncio.setStatus(Status.ATIVO);
+            novoAnuncio.setDataCriacao(LocalDateTime.now());
+
+            // 6. Salva o anúncio completo no banco de dados
+            return anuncioRepository.save(novoAnuncio);
+        } catch (Exception e) {
+            // Lança uma exceção mais específica para o controller tratar
+            throw new RuntimeException("Falha ao criar anúncio: " + e.getMessage(), e);
+
         }
 
         // Status opcional vindo do request

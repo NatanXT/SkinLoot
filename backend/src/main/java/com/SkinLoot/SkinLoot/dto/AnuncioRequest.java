@@ -3,6 +3,7 @@ package com.SkinLoot.SkinLoot.dto;
 import com.SkinLoot.SkinLoot.model.enums.Status;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.UUID;
 
 public class AnuncioRequest {
@@ -10,10 +11,12 @@ public class AnuncioRequest {
     private String titulo;
     private String descricao;
     private BigDecimal preco;
+    private Map<String, Object> detalhesEspecificos;
     private Status status;
 
     // ID da skin do catálogo (UUID)
     private UUID skinId;
+
 
     // Metadados opcionais da instância
     private Double desgasteFloat;
@@ -23,6 +26,7 @@ public class AnuncioRequest {
     public String getTitulo() {
         return titulo;
     }
+
 
     public void setTitulo(String titulo) {
         this.titulo = titulo;
@@ -64,15 +68,12 @@ public class AnuncioRequest {
         return desgasteFloat;
     }
 
-    public void setDesgasteFloat(Double desgasteFloat) {
-        this.desgasteFloat = desgasteFloat;
+
+    public Map<String, Object> getDetalhesEspecificos() {
+        return detalhesEspecificos;
     }
 
-    public String getQualidade() {
-        return qualidade;
-    }
-
-    public void setQualidade(String qualidade) {
-        this.qualidade = qualidade;
+    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {
+        this.detalhesEspecificos = detalhesEspecificos;
     }
 }

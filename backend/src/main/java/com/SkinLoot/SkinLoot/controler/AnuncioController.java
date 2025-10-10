@@ -46,20 +46,23 @@ public class AnuncioController {
         return ResponseEntity.ok(toDto(salvo));
     }
 
-    // multipart (json + arquivo)
-    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AnuncioResponse> criarMultipart(
-            @RequestPart("json") AnuncioRequest req,
-            @RequestPart(value = "imagem", required = false) MultipartFile imagem,
-            Authentication authentication) {
 
-        String email = authentication.getName();
-        Usuario usuario = usuarioService.buscarUsuarioPorEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
+    // Método para converter a entidade Anuncio para o DTO de resposta
+    private AnuncioResponse toDto(Anuncio a) {
+        AnuncioResponse dto = new AnuncioResponse();
+        dto.setId(a.getId());
+        dto.setTitulo(a.getTitulo());
+        dto.setDescricao(a.getDescricao());
+        dto.setPreco(a.getPreco());
+        dto.setStatus(a.getStatus());
+        dto.setDataCriacao(a.getDataCriacao());
+        dto.setSkinId(a.getSteamItemId()); // Usa o novo campo
+        dto.setSkinIcon(a.getSkinImageUrl()); // Usa o novo campo
+        dto.setSkinNome(a.getSkinName());
+        dto.setUsuarioNome(a.getUsuario().getNome());
+        dto.setLikesCount(a.getLikesCount());
+        return dto;
 
-        // TODO: salvar imagem e setar URL se for usar storage futuramente
-        Anuncio salvo = anuncioService.criarAnuncio(req, usuario);
-        return ResponseEntity.ok(toDto(salvo));
     }
 
     // ===================== ATUALIZAR =====================

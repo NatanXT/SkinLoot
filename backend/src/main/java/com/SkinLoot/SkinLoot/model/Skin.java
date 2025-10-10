@@ -8,8 +8,11 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -33,7 +36,7 @@ public class Skin {
     @Column(nullable = false)
     private String nome;
 
-    @Column(length = 500)
+    @Column(columnDefinition = "TEXT")
     private String descricao;
 
     @NotNull
@@ -55,8 +58,8 @@ public class Skin {
     @Column(nullable = false)
     private String icon;
 
-    @Column(name = "asset_id")
-    private String assetId;
+//    @Column(name = "asset_id")
+//    private String assetId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -64,6 +67,9 @@ public class Skin {
 
     private LocalDateTime dataSubmissao;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Object> detalhesEspecificos;
 
 
     //    // Construtores que já fizemos antes...
@@ -135,14 +141,6 @@ public class Skin {
         this.icon = icon;
     }
 
-    public String getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(String assetId) {
-        this.assetId = assetId;
-    }
-
     public StatusModeracao getStatusModeracao() {
         return statusModeracao;
     }
@@ -157,5 +155,13 @@ public class Skin {
 
     public void setDataSubmissao(LocalDateTime dataSubmissao) {
         this.dataSubmissao = dataSubmissao;
+    }
+
+    public Map<String, Object> getDetalhesEspecificos() {
+        return detalhesEspecificos;
+    }
+
+    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {
+        this.detalhesEspecificos = detalhesEspecificos;
     }
 }

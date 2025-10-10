@@ -4,6 +4,7 @@ import com.SkinLoot.SkinLoot.model.enums.Qualidade;
 import com.SkinLoot.SkinLoot.model.enums.Raridade;
 import jakarta.validation.constraints.NotBlank;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class SkinRequest{
@@ -13,7 +14,6 @@ public class SkinRequest{
     private Raridade raridade;
     private UUID jogoId;
     private String icon;
-    private String assetId;
 
     public String getNome() {
         return nome;
@@ -54,15 +54,6 @@ public class SkinRequest{
     public void setIcon(String icon) {
         this.icon = icon;
     }
-
-    public String getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(String assetId) {
-        this.assetId = assetId;
-    }
-
 }
 
 

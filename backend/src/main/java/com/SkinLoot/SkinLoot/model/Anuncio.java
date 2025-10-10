@@ -4,9 +4,12 @@ import com.SkinLoot.SkinLoot.model.enums.Status;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -43,18 +46,21 @@ public class Anuncio {
     @Formula("(select count(*) from anuncio_like al where al.anuncio_id = id)")
     private int likesCount;
 
-    private String qualidade;
+    @JdbcTypeCode(SqlTypes.JSON)                // Informa ao Hibernate o tipo JDBC a ser usado
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Object> detalhesEspecificos;
 
-    @Column(name = "desgaste_float")
-    private Double desgasteFloat;
 
     public Anuncio() {
     }
+
 
     public Anuncio(UUID id, String titulo, String descricao, BigDecimal preco, Status status,
             String skinName, String skinImageUrl, Usuario usuario, LocalDateTime dataCriacao,
             Long steamItemId, Set<AnuncioLike> likes, int likesCount,
             String qualidade, Double desgasteFloat) {
+
+
         this.id = id;
         this.titulo = titulo;
         this.descricao = descricao;
@@ -67,8 +73,7 @@ public class Anuncio {
         this.steamItemId = steamItemId;
         this.likes = likes;
         this.likesCount = likesCount;
-        this.qualidade = qualidade;
-        this.desgasteFloat = desgasteFloat;
+
     }
 
     /** Construtor auxiliar usado em relações (precisa setar o id!). */
@@ -77,6 +82,7 @@ public class Anuncio {
     }
 
     // GETTERS E SETTERS
+
     public UUID getId() {
         return id;
     }
@@ -175,10 +181,9 @@ public class Anuncio {
 
     public String getQualidade() {
         return qualidade;
-    }
 
-    public void setQualidade(String qualidade) {
-        this.qualidade = qualidade;
+    }
+    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {this.detalhesEspecificos = detalhesEspecificos;
     }
 
     public Double getDesgasteFloat() {
@@ -188,5 +193,6 @@ public class Anuncio {
     public void setDesgasteFloat(Double desgasteFloat) {
         this.desgasteFloat = desgasteFloat;
     }
+
 
 }

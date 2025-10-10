@@ -48,7 +48,6 @@ public class SkinController {
         skin.setDescricao(request.getDescricao());
         skin.setIcon(request.getIcon());
         skin.setRaridade(request.getRaridade());
-        skin.setAssetId(request.getAssetId());
         skin.setJogo(jogo);
         skin.setUsuario(usuario);
 
