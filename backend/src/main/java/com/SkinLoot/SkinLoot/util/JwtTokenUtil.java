@@ -14,33 +14,28 @@ import java.util.Date;
 import java.util.function.Function;
 
 /**
- * Classe utilitária para geração e validação de tokens JWT (HS256).
- * Usa uma chave secreta codificada em Base64 e define expirações separadas
- * para tokens de acesso e refresh.
+ * Utilitário de JWT (HS256).
+ * Suporte completo para geração, validação e extração de claims.
  */
 @Component
 public class JwtTokenUtil {
 
-    // 🔐 Chave secreta em Base64 (mínimo 256 bits)
+    // 🔐 Chave secreta em Base64 (256 bits)
     private static final String SECRET_KEY_B64 = "aG9nZXJzZWNyZXRvLXNraW5sb290LWF1dGgtdG9rZW4tc2VjcmV0";
 
-    // ⏰ Tempos de expiração (em milissegundos)
-    private static final long ACCESS_TOKEN_EXPIRATION = 30 * 60 * 1000L; // 30 minutos
+    // ⏰ Tempo de expiração
+    private static final long ACCESS_TOKEN_EXPIRATION = 30 * 60 * 1000L; // 30 min
     private static final long REFRESH_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000L; // 1 dia
 
-    /**
-     * Retorna a chave HMAC derivada da SECRET_KEY (decodificada de Base64).
-     */
+    // --------------------------- CHAVE ---------------------------
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY_B64);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // ---------------------- GERAÇÃO ----------------------
+    // --------------------------- GERAÇÃO ---------------------------
 
-    /**
-     * Gera um token de acesso (curta duração).
-     */
+    /** ✅ Novo método padrão (String subject) */
     public String generateAccessToken(String subject) {
         return Jwts.builder()
                 .setSubject(subject)
@@ -50,9 +45,7 @@ public class JwtTokenUtil {
                 .compact();
     }
 
-    /**
-     * Gera um token de refresh (longa duração).
-     */
+    /** ✅ Novo método para refresh */
     public String generateRefreshToken(String subject) {
         return Jwts.builder()
                 .setSubject(subject)
@@ -62,11 +55,18 @@ public class JwtTokenUtil {
                 .compact();
     }
 
-    // ---------------------- VALIDAÇÃO ----------------------
+    /** 🔙 Compatibilidade: usado no UsuarioController (UserDetails) */
+    public String generateToken(UserDetails userDetails) {
+        return generateAccessToken(userDetails.getUsername());
+    }
 
-    /**
-     * Verifica se o token é válido sintaticamente e não expirou.
-     */
+    /** 🔙 Compatibilidade: usado no UsuarioController (email) */
+    public String generateTokenFromEmail(String email) {
+        return generateAccessToken(email);
+    }
+
+    // --------------------------- VALIDAÇÃO ---------------------------
+
     public boolean isTokenValid(String token) {
         try {
             parseToken(token);
@@ -76,9 +76,6 @@ public class JwtTokenUtil {
         }
     }
 
-    /**
-     * Valida o token comparando o username interno com o do UserDetails.
-     */
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username != null &&
@@ -86,11 +83,8 @@ public class JwtTokenUtil {
                 !isTokenExpired(token));
     }
 
-    // ---------------------- EXTRAÇÃO ----------------------
+    // --------------------------- EXTRAÇÃO ---------------------------
 
-    /**
-     * Retorna todas as claims do token.
-     */
     public Claims parseToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -99,31 +93,19 @@ public class JwtTokenUtil {
                 .getBody();
     }
 
-    /**
-     * Extrai o nome do usuário (subject) do token.
-     */
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    /**
-     * Extrai a data de expiração.
-     */
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    /**
-     * Extrai uma claim genérica usando um resolver.
-     */
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = parseToken(token);
         return claimsResolver.apply(claims);
     }
 
-    /**
-     * Retorna se o token já expirou.
-     */
     private boolean isTokenExpired(String token) {
         final Date exp = extractExpiration(token);
         return exp.before(new Date());

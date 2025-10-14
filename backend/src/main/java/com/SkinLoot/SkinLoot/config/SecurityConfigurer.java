@@ -26,12 +26,11 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
- * Configuração de segurança principal da aplicação.
- * Define CORS, filtros, permissões e gerenciamento de sessão.
+ * Configuração de segurança principal do sistema.
+ * Define CORS, filtros JWT, permissões e gerenciamento de sessão sem estado.
  */
 @Configuration
 @EnableWebSecurity
@@ -53,6 +52,7 @@ public class SecurityConfigurer {
             HttpSecurity http,
             PasswordEncoder passwordEncoder,
             UserDetailsService userDetailsService) throws Exception {
+
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
         builder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
         return builder.build();
@@ -64,7 +64,7 @@ public class SecurityConfigurer {
         return new BCryptPasswordEncoder();
     }
 
-    // Configuração de segurança HTTP
+    // Configuração principal de segurança
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -79,17 +79,25 @@ public class SecurityConfigurer {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**")
                         .permitAll()
-                        // GET público de anúncios
+
+                        // Anúncios públicos (GET)
                         .requestMatchers(HttpMethod.GET, "/anuncios/**").permitAll()
-                        // Admin
+
+                        // Anúncios protegidos (POST, PUT, DELETE) — qualquer usuário logado
+                        .requestMatchers(HttpMethod.POST, "/anuncios/save").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/anuncios/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/anuncios/**").authenticated()
+
+                        // Área admin
                         .requestMatchers("/api/user/**").hasAuthority(Role.ADMIN.name())
-                        // Todo o resto exige autenticação
+
+                        // Outras rotas exigem autenticação
                         .anyRequest().authenticated())
-                // Sem estado (JWT)
+                // JWT = stateless
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Filtro JWT antes do filtro padrão do Spring
+                // Adiciona o filtro JWT antes do UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-                // Tratamento de exceções
+                // Tratamento de erros
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                         .accessDeniedHandler(new AccessDeniedHandlerImpl()));
@@ -97,7 +105,7 @@ public class SecurityConfigurer {
         return http.build();
     }
 
-    // Configuração de CORS
+    // Configuração CORS — necessária para enviar cookies e headers Authorization
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
