@@ -3,7 +3,6 @@ package com.SkinLoot.SkinLoot.model;
 import com.SkinLoot.SkinLoot.model.enums.Status;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Formula;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -13,12 +12,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Entidade que representa um anúncio de venda de skin.
+ */
 @Entity
 public class Anuncio {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
 
@@ -34,6 +35,9 @@ public class Anuncio {
     private String skinName;
     private String skinImageUrl;
 
+    // Atributo adicional da instância
+    private String qualidade;
+
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
@@ -46,20 +50,16 @@ public class Anuncio {
     @Formula("(select count(*) from anuncio_like al where al.anuncio_id = id)")
     private int likesCount;
 
-    @JdbcTypeCode(SqlTypes.JSON)                // Informa ao Hibernate o tipo JDBC a ser usado
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> detalhesEspecificos;
-
 
     public Anuncio() {
     }
 
-
     public Anuncio(UUID id, String titulo, String descricao, BigDecimal preco, Status status,
             String skinName, String skinImageUrl, Usuario usuario, LocalDateTime dataCriacao,
-            Long steamItemId, Set<AnuncioLike> likes, int likesCount,
-            String qualidade, Double desgasteFloat) {
-
+            Long steamItemId, Set<AnuncioLike> likes, int likesCount, String qualidade) {
 
         this.id = id;
         this.titulo = titulo;
@@ -73,7 +73,7 @@ public class Anuncio {
         this.steamItemId = steamItemId;
         this.likes = likes;
         this.likesCount = likesCount;
-
+        this.qualidade = qualidade;
     }
 
     /** Construtor auxiliar usado em relações (precisa setar o id!). */
@@ -82,7 +82,6 @@ public class Anuncio {
     }
 
     // GETTERS E SETTERS
-
     public UUID getId() {
         return id;
     }
@@ -181,18 +180,17 @@ public class Anuncio {
 
     public String getQualidade() {
         return qualidade;
-
-    }
-    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {this.detalhesEspecificos = detalhesEspecificos;
     }
 
-    public Double getDesgasteFloat() {
-        return desgasteFloat;
+    public void setQualidade(String qualidade) {
+        this.qualidade = qualidade;
     }
 
-    public void setDesgasteFloat(Double desgasteFloat) {
-        this.desgasteFloat = desgasteFloat;
+    public Map<String, Object> getDetalhesEspecificos() {
+        return detalhesEspecificos;
     }
 
-
+    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {
+        this.detalhesEspecificos = detalhesEspecificos;
+    }
 }

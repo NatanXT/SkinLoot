@@ -1,147 +1,131 @@
 package com.SkinLoot.SkinLoot.util;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 import java.util.Date;
 import java.util.function.Function;
 
-import jakarta.servlet.http.HttpServletRequest;
-
+/**
+ * Classe utilitária para geração e validação de tokens JWT (HS256).
+ * Usa uma chave secreta codificada em Base64 e define expirações separadas
+ * para tokens de acesso e refresh.
+ */
 @Component
 public class JwtTokenUtil {
 
-    // Chave secreta para assinar os tokens — isso pode vir de uma variável de ambiente futuramente
-    private final String SECRET_KEY = "aG9nZXJzZWNyZXRvLXNraW5sb290LWF1dGgtdG9rZW4tc2VjcmV0"; // mínimo 256 bits para HS256
+    // 🔐 Chave secreta em Base64 (mínimo 256 bits)
+    private static final String SECRET_KEY_B64 = "aG9nZXJzZWNyZXRvLXNraW5sb290LWF1dGgtdG9rZW4tc2VjcmV0";
 
-    private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10 horas
-    private static final long ACCESS_TOKEN_EXPIRATION = 30 * 60 * 1000; // 30 min
-    private static final long REFRESH_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000; // 1 dia
-//    @Value("${jwt.secret}")
-    private String jwtSecret;
-    
+    // ⏰ Tempos de expiração (em milissegundos)
+    private static final long ACCESS_TOKEN_EXPIRATION = 30 * 60 * 1000L; // 30 minutos
+    private static final long REFRESH_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000L; // 1 dia
 
-//    private final PrivateKey privateKey;
-//    private final PublicKey publicKey;
-
-    public JwtTokenUtil() throws Exception {
-//        this.privateKey = loadPrivateKeyFromResource("private_key.pem");
-//        this.publicKey = loadPublicKeyFromResource("public_key.pem");
-    }
-
-     public String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7); // Remove o prefixo "Bearer "
-        }
-        return null;
-    }
-
-    public String getUsernameFromToken(String token) {
-        return extractUsername(token);
-    }
-
+    /**
+     * Retorna a chave HMAC derivada da SECRET_KEY (decodificada de Base64).
+     */
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY_B64);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String extractUsername(String token) {
+    // ---------------------- GERAÇÃO ----------------------
 
-        return extractClaim(token, Claims::getSubject);
+    /**
+     * Gera um token de acesso (curta duração).
+     */
+    public String generateAccessToken(String subject) {
+        return Jwts.builder()
+                .setSubject(subject)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
-    public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+    /**
+     * Gera um token de refresh (longa duração).
+     */
+    public String generateRefreshToken(String subject) {
+        return Jwts.builder()
+                .setSubject(subject)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+    // ---------------------- VALIDAÇÃO ----------------------
+
+    /**
+     * Verifica se o token é válido sintaticamente e não expirou.
+     */
+    public boolean isTokenValid(String token) {
+        try {
+            parseToken(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException ex) {
+            return false;
+        }
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
+    /**
+     * Valida o token comparando o username interno com o do UserDetails.
+     */
+    public boolean validateToken(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username != null &&
+                username.equals(userDetails.getUsername()) &&
+                !isTokenExpired(token));
+    }
+
+    // ---------------------- EXTRAÇÃO ----------------------
+
+    /**
+     * Retorna todas as claims do token.
+     */
+    public Claims parseToken(String token) {
+        return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
+    /**
+     * Extrai o nome do usuário (subject) do token.
+     */
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    /**
+     * Extrai a data de expiração.
+     */
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    /**
+     * Extrai uma claim genérica usando um resolver.
+     */
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = parseToken(token);
+        return claimsResolver.apply(claims);
+    }
+
+    /**
+     * Retorna se o token já expirou.
+     */
     private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        final Date exp = extractExpiration(token);
+        return exp.before(new Date());
     }
-
-    public String generateToken(UserDetails userDetails) {
-        return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
-    
-    public String generateTokenFromEmail(String email) {
-        return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 10 * 60 * 1000)) // 10 min
-                .compact();
-    }
-
-    public String generateAccessToken(String username) {
-        return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
-    public String generateRefreshToken(String sessionId) {
-        return Jwts.builder()
-                .setId(sessionId)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
-    // Valida se o token é legítimo e não expirou
-    public boolean isTokenValid(String token) {
-        try {
-            parseToken(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
-    }
-
-    // Extrai os dados do token
-    public Claims parseToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-    }
-
 }
-

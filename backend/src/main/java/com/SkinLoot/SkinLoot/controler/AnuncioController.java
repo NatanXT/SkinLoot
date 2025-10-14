@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Controlador REST responsável pelo gerenciamento de anúncios.
+ */
 @RestController
 @RequestMapping("/anuncios")
 public class AnuncioController {
@@ -31,8 +34,6 @@ public class AnuncioController {
     }
 
     // ===================== CRIAR =====================
-
-    // JSON puro
     @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AnuncioResponse> criarJson(
             @RequestBody AnuncioRequest req,
@@ -43,31 +44,10 @@ public class AnuncioController {
                 .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
 
         Anuncio salvo = anuncioService.criarAnuncio(req, usuario);
-        return ResponseEntity.ok(toDto(salvo));
-    }
-
-
-    // Método para converter a entidade Anuncio para o DTO de resposta
-    private AnuncioResponse toDto(Anuncio a) {
-        AnuncioResponse dto = new AnuncioResponse();
-        dto.setId(a.getId());
-        dto.setTitulo(a.getTitulo());
-        dto.setDescricao(a.getDescricao());
-        dto.setPreco(a.getPreco());
-        dto.setStatus(a.getStatus());
-        dto.setDataCriacao(a.getDataCriacao());
-        dto.setSkinId(a.getSteamItemId()); // Usa o novo campo
-        dto.setSkinIcon(a.getSkinImageUrl()); // Usa o novo campo
-        dto.setSkinNome(a.getSkinName());
-        dto.setUsuarioNome(a.getUsuario().getNome());
-        dto.setLikesCount(a.getLikesCount());
-        return dto;
-
+        return ResponseEntity.ok(new AnuncioResponse(salvo));
     }
 
     // ===================== ATUALIZAR =====================
-
-    // JSON puro
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AnuncioResponse> atualizarJson(
             @PathVariable UUID id,
@@ -79,10 +59,9 @@ public class AnuncioController {
                 .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
 
         Anuncio atualizado = anuncioService.atualizar(id, req, usuario);
-        return ResponseEntity.ok(toDto(atualizado));
+        return ResponseEntity.ok(new AnuncioResponse(atualizado));
     }
 
-    // multipart (json + arquivo)
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AnuncioResponse> atualizarMultipart(
             @PathVariable UUID id,
@@ -94,18 +73,16 @@ public class AnuncioController {
         Usuario usuario = usuarioService.buscarUsuarioPorEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
 
-        // TODO: salvar imagem e setar URL se for usar storage futuramente
         Anuncio atualizado = anuncioService.atualizar(id, req, usuario);
-        return ResponseEntity.ok(toDto(atualizado));
+        return ResponseEntity.ok(new AnuncioResponse(atualizado));
     }
 
     // ===================== LISTAGENS =====================
-
     @GetMapping
     public ResponseEntity<List<AnuncioResponse>> listarAnuncios() {
         List<AnuncioResponse> dtos = anuncioService.findAll()
                 .stream()
-                .map(this::toDto)
+                .map(AnuncioResponse::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
@@ -120,7 +97,6 @@ public class AnuncioController {
     }
 
     // ===================== LIKES =====================
-
     @PostMapping("/{id}/like")
     public ResponseEntity<Void> likeAnuncio(@PathVariable UUID id, Authentication authentication) {
         String userEmail = authentication.getName();
@@ -136,7 +112,6 @@ public class AnuncioController {
     }
 
     // ===================== STATUS =====================
-
     @PostMapping("/{id}/desativar")
     public ResponseEntity<Void> desativar(@PathVariable UUID id, Authentication auth) {
         String email = auth.getName();
@@ -149,28 +124,5 @@ public class AnuncioController {
         String email = auth.getName();
         anuncioService.alterarStatus(id, email, Status.ATIVO);
         return ResponseEntity.ok().build();
-    }
-
-    // --------- Mapper entidade -> DTO ---------
-    private AnuncioResponse toDto(Anuncio a) {
-        AnuncioResponse dto = new AnuncioResponse();
-        dto.setId(a.getId());
-        dto.setTitulo(a.getTitulo());
-        dto.setDescricao(a.getDescricao());
-        dto.setPreco(a.getPreco());
-        dto.setStatus(a.getStatus());
-        dto.setDataCriacao(a.getDataCriacao());
-
-        // campos de skin usados no frontend
-        dto.setSkinId(a.getSteamItemId());
-        dto.setSkinIcon(a.getSkinImageUrl());
-        dto.setSkinNome(a.getSkinName());
-
-        // metadados
-        dto.setUsuarioNome(a.getUsuario().getNome());
-        dto.setQualidade(a.getQualidade());
-        dto.setDesgasteFloat(a.getDesgasteFloat());
-        dto.setLikesCount(a.getLikesCount());
-        return dto;
     }
 }

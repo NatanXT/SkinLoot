@@ -1,13 +1,14 @@
 // src/services/api.js
 import axios from 'axios';
 
+// ---------- instancia ----------
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
   timeout: 20000,
-  withCredentials: true,
+  withCredentials: true, // ok manter; não atrapalha o header Bearer
 });
 
-// ----- storage (igual ao seu) -----
+// ---------- storage unificado ----------
 const storage = {
   get remember() {
     return localStorage.getItem('remember') === 'true';
@@ -37,17 +38,18 @@ const storage = {
   },
 
   clear() {
-    ['accessToken', 'refreshToken'].forEach((k) => {
+    ['accessToken', 'refreshToken', 'auth_user', 'remember'].forEach((k) => {
       localStorage.removeItem(k);
       sessionStorage.removeItem(k);
     });
   },
 };
 
-// ⚙️ Permita configurar vias .env (e mantenha defaults sensatos)
+// Permite customizar a rota de refresh no .env
 const AUTH_REFRESH_PATH =
   import.meta.env.VITE_AUTH_REFRESH_PATH || '/usuarios/auth/refresh';
 
+// ---------- request interceptor: injeta Bearer ----------
 api.interceptors.request.use((config) => {
   const token = storage.access;
   if (token) {
@@ -57,14 +59,32 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// ---------- response interceptor: tenta refresh 401 ----------
 let refreshing = null;
+
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
     const { response, config } = err || {};
     if (!response) throw err;
 
-    if (response.status === 401 && !config.__isRetry && storage.refresh) {
+    const is401 = response.status === 401;
+    const isRetry = config.__isRetry === true;
+    const hasRefresh = !!storage.refresh;
+
+    // rotas que NÃO devem tentar refresh
+    const publicAuthEndpoints = [
+      '/usuarios/login',
+      '/usuarios/register',
+      AUTH_REFRESH_PATH,
+    ];
+
+    if (
+      is401 &&
+      !isRetry &&
+      hasRefresh &&
+      !publicAuthEndpoints.some((p) => (config?.url || '').startsWith(p))
+    ) {
       try {
         if (!refreshing) {
           refreshing = api
@@ -74,9 +94,12 @@ api.interceptors.response.use(
               { withCredentials: true },
             )
             .then((r) => {
+              // adapte ao shape real do seu backend
               const newAccess =
                 r?.data?.accessToken || r?.data?.token || r?.data?.access;
+              const newRefresh = r?.data?.refreshToken || storage.refresh;
               if (newAccess) storage.access = newAccess;
+              if (newRefresh) storage.refresh = newRefresh;
               return newAccess;
             })
             .finally(() => {
@@ -87,6 +110,7 @@ api.interceptors.response.use(
         const newAccess = await refreshing;
         if (!newAccess) throw new Error('Refresh inválido');
 
+        // refaz a request original
         config.__isRetry = true;
         config.headers = config.headers || {};
         config.headers.Authorization = `Bearer ${newAccess}`;
@@ -95,6 +119,7 @@ api.interceptors.response.use(
         storage.clear();
       }
     }
+
     throw err;
   },
 );

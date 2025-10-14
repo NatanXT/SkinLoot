@@ -2,8 +2,6 @@ package com.SkinLoot.SkinLoot.service;
 
 import com.SkinLoot.SkinLoot.dto.AnuncioRequest;
 import com.SkinLoot.SkinLoot.dto.AnuncioResponse;
-
-import com.SkinLoot.SkinLoot.dto.MochilaPlayerDto;
 import com.SkinLoot.SkinLoot.exceptions.AcessoNegadoException;
 import com.SkinLoot.SkinLoot.exceptions.LimiteExcedidoException;
 import com.SkinLoot.SkinLoot.model.Anuncio;
@@ -17,21 +15,19 @@ import com.SkinLoot.SkinLoot.repository.AnuncioRepository;
 import com.SkinLoot.SkinLoot.repository.SkinRepository;
 import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.time.LocalDate;
-import java.util.stream.Collectors; // Importe o Collectors
-
-
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Serviço responsável por gerenciar anúncios (CRUD, likes e regras de
+ * assinatura).
+ */
 @Service
 public class AnuncioService {
 
@@ -51,115 +47,81 @@ public class AnuncioService {
         this.anuncioRepository = anuncioRepository;
     }
 
+    /**
+     * Cria um novo anúncio, respeitando as regras de assinatura e limite de
+     * anúncios.
+     */
     @Transactional
     public Anuncio criarAnuncio(AnuncioRequest request, Usuario usuario) {
-        // valida skin
+
+        // Garante que o usuário está atualizado
+        Usuario usuarioAtualizado = usuarioRepository.findById(usuario.getId())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para criação de anúncio."));
+
+        // 1. Verifica se a assinatura está ativa e dentro da validade
+        if (usuarioAtualizado.getStatusAssinatura() != StatusAssinatura.ATIVA
+                || usuarioAtualizado.getDataExpira().isBefore(LocalDate.now())) {
+            throw new AcessoNegadoException(
+                    "Sua assinatura não está ativa ou expirou. Regularize seu plano para criar novos anúncios.");
+        }
+
+        // 2. Verifica se o usuário atingiu o limite de anúncios do plano
+        if (!podeCriarNovoAnuncio(usuarioAtualizado)) {
+            throw new LimiteExcedidoException("Você atingiu o limite de "
+                    + usuarioAtualizado.getPlanoAssinatura().getLimiteAnuncios() + " anúncios do seu plano.");
+        }
+
+        // 3. Valida e busca a skin do catálogo
         Skin skin = skinRepository.findById(request.getSkinId())
                 .orElseThrow(() -> new RuntimeException("Skin não encontrada no catálogo."));
 
+        // 4. Monta o novo anúncio
+        Anuncio novoAnuncio = new Anuncio();
+        novoAnuncio.setUsuario(usuarioAtualizado);
+        novoAnuncio.setTitulo(request.getTitulo());
+        novoAnuncio.setDescricao(request.getDescricao());
+        novoAnuncio.setPreco(request.getPreco());
+        novoAnuncio.setQualidade(request.getQualidade());
+        novoAnuncio.setSkinName(skin.getNome());
+        novoAnuncio.setSkinImageUrl(skin.getIcon());
+        novoAnuncio.setStatus(Status.ATIVO);
+        novoAnuncio.setDataCriacao(LocalDateTime.now());
 
-        Anuncio a = new Anuncio();
-        a.setUsuario(usuario);
-        a.setTitulo(request.getTitulo());
-        a.setDescricao(request.getDescricao());
-        a.setPreco(request.getPreco());
-
-        a.setDesgasteFloat(request.getDesgasteFloat());
-        a.setQualidade(request.getQualidade());
-
-        // desnormaliza dados principais da skin do catálogo
-        a.setSkinName(skin.getNome());
-        a.setSkinImageUrl(skin.getIcon());
-
-        // TODO: ajuste setSteamItemId(...) conforme o tipo real do campo na entidade
-        // Anuncio.
-        // Se steamItemId for Long, não use skin.getId() com UUID. No exemplo mantive a
-        // ideia; adapte se necessário.
-        // a.setSteamItemId(...);
-
-        a.setStatus(Status.ATIVO);
-        a.setDataCriacao(LocalDateTime.now());
-
-        return anuncioRepository.save(a);
+        return anuncioRepository.save(novoAnuncio);
     }
 
+    /**
+     * Atualiza um anúncio existente, apenas se o usuário for o dono.
+     */
     @Transactional
     public Anuncio atualizar(UUID id, AnuncioRequest request, Usuario usuario) {
         Anuncio a = anuncioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Anúncio não encontrado."));
 
-        // segurança básica: só o dono edita
+        // Segurança: só o dono pode editar
         if (a.getUsuario() == null || !a.getUsuario().getId().equals(usuario.getId())) {
             throw new RuntimeException("Você não tem permissão para editar este anúncio.");
         }
 
         // Atualiza campos principais
-        if (request.getTitulo() != null) {
+        if (request.getTitulo() != null)
             a.setTitulo(request.getTitulo());
-        }
-        if (request.getDescricao() != null) {
+        if (request.getDescricao() != null)
             a.setDescricao(request.getDescricao());
-        }
-        if (request.getPreco() != null) {
+        if (request.getPreco() != null)
             a.setPreco(request.getPreco());
-        }
-        if (request.getDesgasteFloat() != null) {
-            a.setDesgasteFloat(request.getDesgasteFloat());
-        }
-        if (request.getQualidade() != null) {
+        if (request.getQualidade() != null)
             a.setQualidade(request.getQualidade());
-        }
 
-        // Se vier skinId, recarrega do catálogo e espelha nome/ícone
+        // Se vier um novo skinId, atualiza o nome e ícone
         if (request.getSkinId() != null) {
             Skin skin = skinRepository.findById(request.getSkinId())
-        // Para garantir que estamos trabalhando com a versão mais atual do usuário no banco
-        Usuario usuarioAtualizado = usuarioRepository.findById(usuario.getId())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para criação de anúncio."));
-
-        // ✅ ================= INÍCIO DA IMPLEMENTAÇÃO ================= ✅
-
-        // 1. Verifica se a assinatura do usuário está ativa e dentro da validade
-        if (usuarioAtualizado.getStatusAssinatura() != StatusAssinatura.ATIVA || usuarioAtualizado.getDataExpira().isBefore(LocalDate.now())) {
-            throw new AcessoNegadoException("Sua assinatura não está ativa ou expirou. Por favor, regularize seu plano para criar novos anúncios.");
-        }
-
-        // 2. Verifica se o usuário atingiu o limite de anúncios do seu plano
-        if (!podeCriarNovoAnuncio(usuarioAtualizado)) {
-            throw new LimiteExcedidoException("Você atingiu o limite de " + usuarioAtualizado.getPlanoAssinatura().getLimiteAnuncios() + " anúncios do seu plano.");
-        }
-
-        try {
-            Skin skinDeCatalogo = skinRepository.findById(request.getSkinId())
                     .orElseThrow(() -> new RuntimeException("Skin não encontrada no catálogo."));
-
-            // TODO: ajuste setSteamItemId(...) conforme o tipo real do campo na entidade
-            // Anuncio.
-            // Se steamItemId for Long, não use skin.getId() com UUID. No exemplo mantive a
-            // ideia; adapte se necessário.
-            // a.setSteamItemId(...);
-
-
             a.setSkinName(skin.getNome());
             a.setSkinImageUrl(skin.getIcon());
-
-            // 4. Copia (desnormaliza) os dados do catálogo para o anúncio
-            novoAnuncio.setSkinName(skinDeCatalogo.getNome());
-            novoAnuncio.setSkinImageUrl(skinDeCatalogo.getIcon());
-
-            // 5. Define valores padrão
-            novoAnuncio.setStatus(Status.ATIVO);
-            novoAnuncio.setDataCriacao(LocalDateTime.now());
-
-            // 6. Salva o anúncio completo no banco de dados
-            return anuncioRepository.save(novoAnuncio);
-        } catch (Exception e) {
-            // Lança uma exceção mais específica para o controller tratar
-            throw new RuntimeException("Falha ao criar anúncio: " + e.getMessage(), e);
-
         }
 
-        // Status opcional vindo do request
+        // Atualiza status, se enviado
         if (request.getStatus() != null) {
             a.setStatus(request.getStatus());
         }
@@ -167,12 +129,14 @@ public class AnuncioService {
         return anuncioRepository.save(a);
     }
 
+    /**
+     * Altera o status de um anúncio (ex: ativo, pausado, vendido)
+     */
     @Transactional
     public void alterarStatus(UUID id, String emailDono, Status novoStatus) {
         Anuncio a = anuncioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Anúncio não encontrado."));
 
-        // só o dono pode alterar status
         if (a.getUsuario() == null ||
                 a.getUsuario().getEmail() == null ||
                 !a.getUsuario().getEmail().equalsIgnoreCase(emailDono)) {
@@ -185,21 +149,23 @@ public class AnuncioService {
 
     // ---------- Likes ----------
 
+    /**
+     * Adiciona um like a um anúncio.
+     */
     public void likeAnuncio(UUID anuncioId, String userEmail) {
         Usuario usuario = usuarioRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         Anuncio anuncio = anuncioRepository.findById(anuncioId)
-            .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
 
-        // Observação: exige que exista um construtor Anuncio(UUID id) ou então recupere
-        // a entidade.
-        AnuncioLike like = new AnuncioLike(usuario, new Anuncio(anuncioId));
+        AnuncioLike like = new AnuncioLike(usuario, anuncio);
         anuncioLikeRepository.save(like);
     }
 
-    
-
+    /**
+     * Remove o like de um anúncio.
+     */
     @Transactional
     public void unlikeAnuncio(UUID anuncioId, String userEmail) {
         Usuario usuario = usuarioRepository.findByEmail(userEmail)
@@ -209,6 +175,9 @@ public class AnuncioService {
 
     // ---------- Listagens ----------
 
+    /**
+     * Lista todos os anúncios de um usuário.
+     */
     @Transactional(readOnly = true)
     public List<AnuncioResponse> listarPorUsuario(UUID usuarioId) {
         return anuncioRepository.findByUsuarioId(usuarioId)
@@ -217,15 +186,19 @@ public class AnuncioService {
                 .collect(Collectors.toList());
     }
 
+    // ---------- Auxiliares ----------
 
+    /**
+     * Verifica se o usuário pode criar um novo anúncio de acordo com o limite do
+     * plano.
+     */
     private boolean podeCriarNovoAnuncio(Usuario usuario) {
-        // Conta quantos anúncios ATIVOS o usuário já possui
-        long anunciosAtuais = anuncioRepository.countByUsuarioAndStatus(usuario, Status.ATIVO);
-        // Pega o limite definido no plano de assinatura do usuário
-        int limiteDoPlano = usuario.getPlanoAssinatura().getLimiteAnuncios();
-
-        return anunciosAtuais < limiteDoPlano;
+        long anunciosAtivos = anuncioRepository.countByUsuarioAndStatus(usuario, Status.ATIVO);
+        int limite = usuario.getPlanoAssinatura().getLimiteAnuncios();
+        return anunciosAtivos < limite;
     }
+
+    // ---------- Métodos utilitários ----------
 
     public Anuncio save(Anuncio anuncio) {
         return anuncioRepository.save(anuncio);

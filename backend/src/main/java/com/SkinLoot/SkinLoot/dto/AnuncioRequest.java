@@ -1,11 +1,13 @@
 package com.SkinLoot.SkinLoot.dto;
 
 import com.SkinLoot.SkinLoot.model.enums.Status;
-
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * DTO usado para criar ou atualizar anúncios.
+ */
 public class AnuncioRequest {
 
     private String titulo;
@@ -13,20 +15,13 @@ public class AnuncioRequest {
     private BigDecimal preco;
     private Map<String, Object> detalhesEspecificos;
     private Status status;
-
-    // ID da skin do catálogo (UUID)
     private UUID skinId;
-
-
-    // Metadados opcionais da instância
-    private Double desgasteFloat;
     private String qualidade;
 
-    // Getters/Setters
+    // Getters e Setters
     public String getTitulo() {
         return titulo;
     }
-
 
     public void setTitulo(String titulo) {
         this.titulo = titulo;
@@ -64,10 +59,13 @@ public class AnuncioRequest {
         this.skinId = skinId;
     }
 
-    public Double getDesgasteFloat() {
-        return desgasteFloat;
+    public String getQualidade() {
+        return qualidade;
     }
 
+    public void setQualidade(String qualidade) {
+        this.qualidade = qualidade;
+    }
 
     public Map<String, Object> getDetalhesEspecificos() {
         return detalhesEspecificos;

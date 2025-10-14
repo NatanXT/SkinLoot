@@ -4,6 +4,7 @@ import com.SkinLoot.SkinLoot.model.enums.Role;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -28,80 +29,92 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Configuração de segurança principal da aplicação.
+ * Define CORS, filtros, permissões e gerenciamento de sessão.
+ */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // ✅ Habilita o @PreAuthorize
-
+@EnableMethodSecurity
 public class SecurityConfigurer {
 
-    private final JwtRequestFilter jwtRequestFilter; // Filtro para interceptar as requisições e validar o JWT.
-    
-    @Value("${backend.allowed.origins}")
-    private List<String> allowedOrigins; // Lista de origens permitidas para CORS, obtida do arquivo de configurações.
+    private final JwtRequestFilter jwtRequestFilter;
 
-    // Construtor que recebe o filtro de requisição JWT.
+    @Value("${backend.allowed.origins:http://localhost:5173}")
+    private List<String> allowedOrigins;
+
     public SecurityConfigurer(JwtRequestFilter jwtRequestFilter) {
         this.jwtRequestFilter = jwtRequestFilter;
     }
 
-    // Bean que cria o AuthenticationManager, configurando a autenticação do usuário e a senha.
+    // Gerenciador de autenticação (usado no login)
     @Bean
     public AuthenticationManager authenticationManager(
-            HttpSecurity http, 
-            PasswordEncoder passwordEncoder, 
-            UserDetailsService userDetailsService
-    ) throws Exception {
-        AuthenticationManagerBuilder authManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-        authManagerBuilder
-                .userDetailsService(userDetailsService) // Serviço que carrega os detalhes do usuário.
-                .passwordEncoder(passwordEncoder); // Codificador de senha (BCrypt, no caso).
-        return authManagerBuilder.build(); // Retorna o AuthenticationManager configurado.
+            HttpSecurity http,
+            PasswordEncoder passwordEncoder,
+            UserDetailsService userDetailsService) throws Exception {
+        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        builder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+        return builder.build();
     }
 
-    // Bean que define o PasswordEncoder a ser utilizado (BCryptPasswordEncoder).
+    // Encoder padrão (BCrypt)
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Retorna o codificador de senha com o algoritmo BCrypt.
+        return new BCryptPasswordEncoder();
     }
 
-    // Bean que configura as regras de segurança para as requisições HTTP.
+    // Configuração de segurança HTTP
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults()) // Habilita CORS (Cross-Origin Resource Sharing).
-                .csrf(AbstractHttpConfigurer::disable) // Desabilita a proteção CSRF, já que estamos usando JWT.
-                .anonymous(AbstractHttpConfigurer::disable) // Desabilita a configuração de acesso anônimo.
-                .authorizeHttpRequests(authorize -> authorize // Configura as permissões de acesso às rotas.
+                .cors(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        // Endpoints públicos
                         .requestMatchers(
-                                "/usuarios/login", // Permite acesso sem autenticação a essas rotas.
+                                "/usuarios/login",
                                 "/usuarios/register",
-                                "/anuncios/**",
-                                "/ofertas"
-                               // "/api/dmarket/**"
-                        ).permitAll()
-                        .requestMatchers("/api/user/**").hasAuthority(Role.ADMIN.name()) // Apenas admins podem acessar rotas /api/user/**
-                        .anyRequest().authenticated()) // Exige autenticação para todas as outras requisições.
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Define que não será usada sessão HTTP.
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class) // Adiciona o filtro JWT antes do filtro de autenticação padrão.
-                .exceptionHandling(handling -> handling // Configura o tratamento de exceções de autenticação e acesso negado.
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) // Retorna 401 em caso de falha na autenticação.
-                        .accessDeniedHandler(new AccessDeniedHandlerImpl())); // Retorna 403 em caso de acesso negado.
-        return http.build(); // Retorna a configuração de segurança.
+                                "/usuarios/auth/refresh",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**")
+                        .permitAll()
+                        // GET público de anúncios
+                        .requestMatchers(HttpMethod.GET, "/anuncios/**").permitAll()
+                        // Admin
+                        .requestMatchers("/api/user/**").hasAuthority(Role.ADMIN.name())
+                        // Todo o resto exige autenticação
+                        .anyRequest().authenticated())
+                // Sem estado (JWT)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Filtro JWT antes do filtro padrão do Spring
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                // Tratamento de exceções
+                .exceptionHandling(handling -> handling
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .accessDeniedHandler(new AccessDeniedHandlerImpl()));
+
+        return http.build();
     }
 
-    // Bean que configura as permissões de CORS.
+    // Configuração de CORS
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(allowedOrigins); // Configura as origens permitidas para CORS.
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // Permite os métodos HTTP.
-        configuration.setAllowCredentials(true);                         // libera cookies
-
-        configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token")); // Permite os cabeçalhos necessários para a API.
-        configuration.setExposedHeaders(Collections.singletonList("x-auth-token")); // Expõe o cabeçalho x-auth-token para o cliente.
+        CorsConfiguration cfg = new CorsConfiguration();
+        cfg.setAllowedOriginPatterns(allowedOrigins);
+        cfg.setAllowCredentials(true);
+        cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        cfg.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "X-Auth-Token",
+                "Accept",
+                "Origin"));
+        cfg.setExposedHeaders(Arrays.asList("Authorization", "X-Auth-Token"));
+        cfg.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Aplica a configuração de CORS para todas as rotas.
-        return source; // Retorna a configuração de CORS.
+        source.registerCorsConfiguration("/**", cfg);
+        return source;
     }
 }
