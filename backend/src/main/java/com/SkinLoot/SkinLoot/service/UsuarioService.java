@@ -5,6 +5,7 @@ import com.SkinLoot.SkinLoot.model.PlanoAssinatura;
 import com.SkinLoot.SkinLoot.model.Usuario;
 import com.SkinLoot.SkinLoot.model.enums.Genero;
 import com.SkinLoot.SkinLoot.model.enums.Role;
+import com.SkinLoot.SkinLoot.model.enums.StatusAssinatura;
 import com.SkinLoot.SkinLoot.model.enums.TipoPlano;
 import com.SkinLoot.SkinLoot.repository.PlanoAssinaturaRepository;
 import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -82,6 +84,8 @@ public class UsuarioService {
         novo.setSenha(passwordEncoder.encode(request.getSenha()));
         novo.setRole(Role.USER);
         novo.setPlanoAssinatura(planoPadrao);
+        novo.setStatusAssinatura(StatusAssinatura.ATIVA);
+        novo.setDataExpira(LocalDate.now().plusYears(100));
 
         return usuarioRepository.save(novo);
     }

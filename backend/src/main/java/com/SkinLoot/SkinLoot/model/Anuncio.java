@@ -59,7 +59,7 @@ public class Anuncio {
 
 
     public Anuncio(UUID id, String titulo, String descricao, BigDecimal preco, Status status,
-            String skinName, String skinImageUrl, Usuario usuario, LocalDateTime dataCriacao,
+            String skinName, String skinImageUrl, Usuario usuario, Skin skin, LocalDateTime dataCriacao,
             Long steamItemId, Set<AnuncioLike> likes, int likesCount, Map<String, Object> detalhesEspecificos) {
 
 
@@ -71,6 +71,7 @@ public class Anuncio {
         this.skinName = skinName;
         this.skinImageUrl = skinImageUrl;
         this.usuario = usuario;
+        this.skin = skin;
         this.dataCriacao = dataCriacao;
         this.likes = likes;
         this.likesCount = likesCount;
@@ -146,6 +147,14 @@ public class Anuncio {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public Skin getSkin() {
+        return skin;
+    }
+
+    public void setSkin(Skin skin) {
+        this.skin = skin;
     }
 
     public LocalDateTime getDataCriacao() {

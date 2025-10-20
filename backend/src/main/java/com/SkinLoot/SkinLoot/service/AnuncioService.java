@@ -53,43 +53,49 @@ public class AnuncioService {
 
     @Transactional
     public Anuncio criarAnuncio(AnuncioRequest request, Usuario usuario) {
-        // valida skin
-        // Para garantir que estamos trabalhando com a versão mais atual do usuário no banco
+        // 1. Busca o usuário e valida a assinatura (você já tem essa lógica)
         Usuario usuarioAtualizado = usuarioRepository.findById(usuario.getId())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para criação de anúncio."));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
 
-        // 1. Verifica se a assinatura do usuário está ativa e dentro da validade
         if (usuarioAtualizado.getStatusAssinatura() != StatusAssinatura.ATIVA || usuarioAtualizado.getDataExpira().isBefore(LocalDate.now())) {
-            throw new AcessoNegadoException("Sua assinatura não está ativa ou expirou. Por favor, regularize seu plano para criar novos anúncios.");
+            throw new AcessoNegadoException("Sua assinatura não está ativa ou expirou.");
         }
 
-        // 2. Verifica se o usuário atingiu o limite de anúncios do seu plano
         if (!podeCriarNovoAnuncio(usuarioAtualizado)) {
-            throw new LimiteExcedidoException("Você atingiu o limite de " + usuarioAtualizado.getPlanoAssinatura().getLimiteAnuncios() + " anúncios do seu plano.");
+            throw new LimiteExcedidoException("Você atingiu o limite de anúncios do seu plano.");
         }
 
-        // 3. Valida a skin
-        Skin skinDeCatalogo = skinRepository.findById(request.getSkinId())
-                .orElseThrow(() -> new RuntimeException("Skin não encontrada no catálogo."));
-
+        // 2. Cria o novo anúncio
         Anuncio novoAnuncio = new Anuncio();
         novoAnuncio.setUsuario(usuarioAtualizado);
         novoAnuncio.setTitulo(request.getTitulo());
         novoAnuncio.setDescricao(request.getDescricao());
         novoAnuncio.setPreco(request.getPreco());
-
-        // 4. Desnormaliza dados principais da skin do catálogo
-        novoAnuncio.setSkinName(skinDeCatalogo.getNome());
-        novoAnuncio.setSkinImageUrl(skinDeCatalogo.getIcon());
-
-        // 5. Copia os detalhes específicos do anúncio (float, pattern, etc.)
         novoAnuncio.setDetalhesEspecificos(request.getDetalhesEspecificos());
-
-        // 6. Define valores padrão
-        novoAnuncio.setStatus(Status.ATIVO);
+        novoAnuncio.setStatus(request.getStatus() != null ? request.getStatus() : Status.ATIVO);
         novoAnuncio.setDataCriacao(LocalDateTime.now());
 
-        // 7. Salva o anúncio completo no banco de dados
+        // 3. ✅ LÓGICA DO MODELO HÍBRIDO
+        if (request.getSkinId() != null) {
+            // --- CAMINHO A: Anúncio VINCULADO ao catálogo ---
+            Skin skinDeCatalogo = skinRepository.findById(request.getSkinId())
+                    .orElseThrow(() -> new RuntimeException("Skin do catálogo não encontrada."));
+
+            novoAnuncio.setSkin(skinDeCatalogo); // Define o relacionamento
+            novoAnuncio.setSkinName(skinDeCatalogo.getNome()); // Desnormaliza o nome oficial
+            novoAnuncio.setSkinImageUrl(skinDeCatalogo.getIcon()); // Desnormaliza a imagem oficial
+
+        } else {
+            // --- CAMINHO B: Anúncio LIVRE (não vinculado) ---
+            if (request.getSkinName() == null || request.getSkinName().isBlank()) {
+                throw new IllegalArgumentException("O nome da skin é obrigatório para anúncios não vinculados ao catálogo.");
+            }
+
+            novoAnuncio.setSkin(null); // O relacionamento fica nulo
+            novoAnuncio.setSkinName(request.getSkinName()); // Usa o nome digitado pelo usuário
+            novoAnuncio.setSkinImageUrl(request.getSkinImageUrl()); // Usa a URL (opcional)
+        }
+
         return anuncioRepository.save(novoAnuncio);
     }
 
