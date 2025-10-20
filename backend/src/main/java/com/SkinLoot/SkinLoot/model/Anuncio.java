@@ -31,7 +31,6 @@ public class Anuncio {
     private Status status;
 
     // Catálogo (desnormalizado)
-    private Long steamItemId;
     private String skinName;
     private String skinImageUrl;
 
@@ -41,6 +40,10 @@ public class Anuncio {
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "skin_id", nullable = true) // ✅ A chave é nullable = true
+    private Skin skin;
 
     private LocalDateTime dataCriacao;
 
@@ -58,8 +61,8 @@ public class Anuncio {
     }
 
     public Anuncio(UUID id, String titulo, String descricao, BigDecimal preco, Status status,
-            String skinName, String skinImageUrl, Usuario usuario, LocalDateTime dataCriacao,
-            Long steamItemId, Set<AnuncioLike> likes, int likesCount, String qualidade) {
+            String skinName, String skinImageUrl, Usuario usuario, Skin skin, LocalDateTime dataCriacao,
+            Long steamItemId, Set<AnuncioLike> likes, int likesCount, Map<String, Object> detalhesEspecificos) {
 
         this.id = id;
         this.titulo = titulo;
@@ -69,11 +72,12 @@ public class Anuncio {
         this.skinName = skinName;
         this.skinImageUrl = skinImageUrl;
         this.usuario = usuario;
+        this.skin = skin;
         this.dataCriacao = dataCriacao;
-        this.steamItemId = steamItemId;
         this.likes = likes;
         this.likesCount = likesCount;
-        this.qualidade = qualidade;
+        this.detalhesEspecificos = detalhesEspecificos;
+
     }
 
     /** Construtor auxiliar usado em relações (precisa setar o id!). */
@@ -122,14 +126,6 @@ public class Anuncio {
         this.status = status;
     }
 
-    public Long getSteamItemId() {
-        return steamItemId;
-    }
-
-    public void setSteamItemId(Long steamItemId) {
-        this.steamItemId = steamItemId;
-    }
-
     public String getSkinName() {
         return skinName;
     }
@@ -154,6 +150,14 @@ public class Anuncio {
         this.usuario = usuario;
     }
 
+    public Skin getSkin() {
+        return skin;
+    }
+
+    public void setSkin(Skin skin) {
+        this.skin = skin;
+    }
+
     public LocalDateTime getDataCriacao() {
         return dataCriacao;
     }
@@ -176,14 +180,6 @@ public class Anuncio {
 
     public void setLikesCount(int likesCount) {
         this.likesCount = likesCount;
-    }
-
-    public String getQualidade() {
-        return qualidade;
-    }
-
-    public void setQualidade(String qualidade) {
-        this.qualidade = qualidade;
     }
 
     public Map<String, Object> getDetalhesEspecificos() {

@@ -16,6 +16,15 @@ public class AnuncioRequest {
     private Map<String, Object> detalhesEspecificos;
     private Status status;
     private UUID skinId;
+
+    // ✅ NOVO CAMPO: O nome da skin digitado pelo usuário
+    private String skinName;
+
+    // (Opcional, mas recomendado)
+    private String skinImageUrl;
+
+    // Metadados opcionais da instância
+    private Double desgasteFloat;
     private String qualidade;
 
     // Getters e Setters
@@ -73,5 +82,21 @@ public class AnuncioRequest {
 
     public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {
         this.detalhesEspecificos = detalhesEspecificos;
+    }
+
+    public String getSkinName() {
+        return skinName;
+    }
+
+    public void setSkinName(String skinName) {
+        this.skinName = skinName;
+    }
+
+    public String getSkinImageUrl() {
+        return skinImageUrl;
+    }
+
+    public void setSkinImageUrl(String skinImageUrl) {
+        this.skinImageUrl = skinImageUrl;
     }
 }

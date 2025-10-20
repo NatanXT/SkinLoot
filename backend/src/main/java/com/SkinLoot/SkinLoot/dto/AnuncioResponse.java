@@ -16,7 +16,7 @@ public class AnuncioResponse {
     private String titulo;
     private String descricao;
     private BigDecimal preco;
-    private Long skinId;
+    private UUID skinId;
     private String skinIcon;
     private String skinNome;
     private String planoNome;
@@ -40,7 +40,9 @@ public class AnuncioResponse {
         this.preco = anuncio.getPreco();
         this.status = anuncio.getStatus();
         this.dataCriacao = anuncio.getDataCriacao();
-        this.skinId = anuncio.getSteamItemId();
+
+        // Mapeando os campos da skin que já existem no Anuncio
+
         this.skinNome = anuncio.getSkinName();
         this.skinIcon = anuncio.getSkinImageUrl();
         this.likesCount = anuncio.getLikesCount();
@@ -53,6 +55,9 @@ public class AnuncioResponse {
                     && anuncio.getUsuario().getPlanoAssinatura().getNome() != null) {
                 this.planoNome = anuncio.getUsuario().getPlanoAssinatura().getNome().name();
             }
+        }
+        if (anuncio.getSkin() != null) {
+            this.skinId = anuncio.getSkin().getId();
         }
     }
 
@@ -89,11 +94,11 @@ public class AnuncioResponse {
         this.preco = preco;
     }
 
-    public Long getSkinId() {
+    public UUID getSkinId() {
         return skinId;
     }
 
-    public void setSkinId(Long skinId) {
+    public void setSkinId(UUID skinId) {
         this.skinId = skinId;
     }
 

@@ -10,6 +10,7 @@ import com.SkinLoot.SkinLoot.service.UsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,44 +36,26 @@ public class AnuncioController {
 
     // ===================== CRIAR =====================
     @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("isAuthenticated()") // Apenas usuários autenticados podem criar anúncios
     public ResponseEntity<AnuncioResponse> criarJson(
             @RequestBody AnuncioRequest req,
             Authentication authentication) {
 
-        String email = authentication.getName();
-        Usuario usuario = usuarioService.buscarUsuarioPorEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
-
+        Usuario usuario = getUsuarioAutenticado(authentication);
         Anuncio salvo = anuncioService.criarAnuncio(req, usuario);
-        return ResponseEntity.ok(new AnuncioResponse(salvo));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toDto(salvo));
     }
 
     // ===================== ATUALIZAR =====================
+
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AnuncioResponse> atualizarJson(
             @PathVariable UUID id,
             @RequestBody AnuncioRequest req,
             Authentication authentication) {
 
-        String email = authentication.getName();
-        Usuario usuario = usuarioService.buscarUsuarioPorEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
-
-        Anuncio atualizado = anuncioService.atualizar(id, req, usuario);
-        return ResponseEntity.ok(new AnuncioResponse(atualizado));
-    }
-
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AnuncioResponse> atualizarMultipart(
-            @PathVariable UUID id,
-            @RequestPart("json") AnuncioRequest req,
-            @RequestPart(value = "imagem", required = false) MultipartFile imagem,
-            Authentication authentication) {
-
-        String email = authentication.getName();
-        Usuario usuario = usuarioService.buscarUsuarioPorEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
-
+        Usuario usuario = getUsuarioAutenticado(authentication);
         Anuncio atualizado = anuncioService.atualizar(id, req, usuario);
         return ResponseEntity.ok(new AnuncioResponse(atualizado));
     }
@@ -82,22 +65,24 @@ public class AnuncioController {
     public ResponseEntity<List<AnuncioResponse>> listarAnuncios() {
         List<AnuncioResponse> dtos = anuncioService.findAll()
                 .stream()
-                .map(AnuncioResponse::new)
+                .map(this::toDto) // Usando o toDto unificado
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/user")
-    public ResponseEntity<List<AnuncioResponse>> listarAnunciosByUsuario(Authentication authentication) {
-        String email = authentication.getName();
-        Usuario usuario = usuarioService.buscarUsuarioPorEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<AnuncioResponse>> listarAnunciosDoUsuario(Authentication authentication) {
+        Usuario usuario = getUsuarioAutenticado(authentication);
         List<AnuncioResponse> anunciosDoUsuario = anuncioService.listarPorUsuario(usuario.getId());
+        // O método do service já retorna List<AnuncioResponse>, não precisa de
+        // mapeamento aqui.
         return ResponseEntity.ok(anunciosDoUsuario);
     }
 
     // ===================== LIKES =====================
     @PostMapping("/{id}/like")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> likeAnuncio(@PathVariable UUID id, Authentication authentication) {
         String userEmail = authentication.getName();
         anuncioService.likeAnuncio(id, userEmail);
@@ -105,24 +90,75 @@ public class AnuncioController {
     }
 
     @DeleteMapping("/{id}/unlike")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> unlikeAnuncio(@PathVariable UUID id, Authentication authentication) {
         String userEmail = authentication.getName();
         anuncioService.unlikeAnuncio(id, userEmail);
         return ResponseEntity.noContent().build();
     }
 
-    // ===================== STATUS =====================
-    @PostMapping("/{id}/desativar")
+    // ===================== STATUS (AÇÕES DO DONO DO ANÚNCIO) =====================
+
+    @PatchMapping("/{id}/desativar")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> desativar(@PathVariable UUID id, Authentication auth) {
         String email = auth.getName();
         anuncioService.alterarStatus(id, email, Status.INATIVO);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{id}/reativar")
+    @PatchMapping("/{id}/reativar")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> reativar(@PathVariable UUID id, Authentication auth) {
         String email = auth.getName();
         anuncioService.alterarStatus(id, email, Status.ATIVO);
         return ResponseEntity.ok().build();
+    }
+
+    // ===================== MÉTODOS AUXILIARES PRIVADOS =====================
+
+    /**
+     * Converte uma entidade Anuncio para um DTO AnuncioResponse.
+     * Este método unificado agora contém todos os campos necessários.
+     */
+    private AnuncioResponse toDto(Anuncio a) {
+        AnuncioResponse dto = new AnuncioResponse();
+        dto.setId(a.getId());
+        dto.setTitulo(a.getTitulo());
+        dto.setDescricao(a.getDescricao());
+        dto.setPreco(a.getPreco());
+        dto.setStatus(a.getStatus());
+        dto.setDataCriacao(a.getDataCriacao());
+
+        // Campos desnormalizados da Skin
+        dto.setSkinNome(a.getSkinName());
+        dto.setSkinIcon(a.getSkinImageUrl());
+
+        // Relacionamento com a Skin (catálogo)
+        if (a.getSkin() != null) {
+            dto.setSkinId(a.getSkin().getId());
+        }
+
+        // Relacionamento com o Usuário
+        if (a.getUsuario() != null) {
+            dto.setUsuarioNome(a.getUsuario().getNome());
+        }
+
+        // Campos calculados
+        dto.setLikesCount(a.getLikesCount());
+
+        // Detalhes específicos do anúncio (float, pattern, etc.)
+        dto.setDetalhesEspecificos(a.getDetalhesEspecificos());
+
+        return dto;
+    }
+
+    /**
+     * Busca o usuário autenticado a partir do objeto Authentication.
+     */
+    private Usuario getUsuarioAutenticado(Authentication authentication) {
+        String email = authentication.getName();
+        return usuarioService.buscarUsuarioPorEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
     }
 }

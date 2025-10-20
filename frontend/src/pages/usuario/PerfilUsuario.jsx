@@ -65,6 +65,8 @@ export default function PerfilUsuario() {
     skinNome: '',
     preco: '',
     imagemUrl: '',
+    descricao: '',
+    detalhes: '', // Usaremos um <textarea> para o JSON
   });
   const [imagemFile, setImagemFile] = useState(null); // arquivo selecionado
   const [previewImagem, setPreviewImagem] = useState(''); // preview (arquivo ou URL)
@@ -137,7 +139,7 @@ export default function PerfilUsuario() {
   function handleNovaSkin() {
     if (atingiuLimite) return;
     setSkinEditando({ __novo: true });
-    setFormEdicao({ skinNome: '', preco: '', imagemUrl: '' });
+    setFormEdicao({ skinNome: '', preco: '', imagemUrl: '',descricao: '', detalhes: '{\n  "pattern": 0,\n  "stat_trak": false\n}' });
     setImagemFile(null);
     setPreviewImagem('');
     setModalEdicaoAberto(true);
@@ -189,10 +191,16 @@ export default function PerfilUsuario() {
   function abrirEditar(skin) {
     setSkinEditando(skin);
     const urlAtual = skin?.imagemUrl || skin?.image || skin?.imagem || '';
+    const raw = skin?._raw || {};
     setFormEdicao({
       skinNome: skin?.skinNome || skin?.title || skin?.nome || '',
       preco: skin?.preco ?? skin?.price ?? '',
       imagemUrl: urlAtual,
+      // --- Campos novos (lendo do _raw se existir) ---
+      descricao: raw.descricao ?? '',
+      detalhes: raw.detalhesEspecificos
+          ? JSON.stringify(raw.detalhesEspecificos, null, 2)
+          : '',
     });
     setImagemFile(null);
     setPreviewImagem(urlAtual || '');
@@ -248,16 +256,37 @@ export default function PerfilUsuario() {
         return;
       }
 
+      // --- NOVO: Validar e Parsear JSON ---
+      let detalhesJson = {};
+      try {
+        // Permite detalhes vazios
+        if (formEdicao.detalhes && formEdicao.detalhes.trim()) {
+          detalhesJson = JSON.parse(formEdicao.detalhes);
+        }
+      } catch (jsonError) {
+        addToast('O campo "Detalhes Específicos" não é um JSON válido.', 'error');
+        setSalvandoEdicao(false);
+        return;
+      }
+
       const id = skinEditando?.id || skinEditando?._id;
 
       // IMPORTANTE: enviar "imagemUrl" (não "skinImageUrl")
       const payload = {
         titulo: formEdicao.skinNome,
-        descricao: '',
+        descricao: formEdicao.descricao ?? '',
         preco: precoNum,
-        // campos que populam a skin no anúncio:
+
+        // Lógica Híbrida:
+        // Este formulário NÃO tem o autocomplete de Skin (skinId).
+        // Então, skinId será sempre null e skinName será o texto digitado.
+        skinId: null,
         skinName: formEdicao.skinNome,
-        imagemUrl: formEdicao.imagemUrl, // <- aqui!
+        detalhesEspecificos: detalhesJson,
+
+        // Campos de imagem (para o mock/service antigo lidar)
+        // Corrigindo o bug: o service antigo esperava skinImageUrl
+        skinImageUrl: formEdicao.imagemUrl,
         ...(imagemFile ? { imagemFile } : {}),
       };
 
@@ -830,11 +859,25 @@ export default function PerfilUsuario() {
                   id="f-nome"
                   type="text"
                   required
-                  placeholder="Nome da skin"
+                  placeholder="Nome da skin (Ex: AWP | Dragon Lore)"
                   value={formEdicao.skinNome}
                   onChange={(e) =>
                     setFormEdicao((v) => ({ ...v, skinNome: e.target.value }))
                   }
+                />
+              </div>
+
+              {/* --- Descrição (NOVO) --- */}
+              <div className="perfil-form__row">
+                <label htmlFor="f-descricao">Descrição</label>
+                <textarea
+                    id="f-descricao"
+                    placeholder="Descrição do anúncio, detalhes, etc."
+                    rows={3}
+                    value={formEdicao.descricao}
+                    onChange={(e) =>
+                        setFormEdicao((v) => ({ ...v, descricao: e.target.value }))
+                    }
                 />
               </div>
 
@@ -869,6 +912,23 @@ export default function PerfilUsuario() {
                 <small className="perfil-form__hint">
                   Dica: cole uma URL <strong>ou</strong> clique na imagem acima
                   para enviar um arquivo.
+                </small>
+              </div>
+
+              {/* --- Detalhes Específicos (JSON) (NOVO) --- */}
+              <div className="perfil-form__row">
+                <label htmlFor="f-detalhes">Detalhes Específicos (JSON)</label>
+                <textarea
+                    id="f-detalhes"
+                    placeholder='{ "pattern": 123, "stat_trak": true }'
+                    rows={4}
+                    value={formEdicao.detalhes}
+                    onChange={(e) =>
+                        setFormEdicao((v) => ({ ...v, detalhes: e.target.value }))
+                    }
+                />
+                <small className="perfil-form__hint">
+                  Envie dados extras como um JSON.
                 </small>
               </div>
 
