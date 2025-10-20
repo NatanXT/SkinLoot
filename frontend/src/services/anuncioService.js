@@ -187,6 +187,7 @@ export async function criarAnuncio(payload) {
     skin_image_url: payload.skinImageUrl ?? payload.skin_image_url,
     skinName: payload.skinName,
     skinImageUrl: payload.skinImageUrl,
+    detalhesEspecificos: payload.detalhesEspecificos ?? {}, // Envia um objeto JSON
   };
   const { data } = await api.post('/anuncios/save', body);
   return normalizarDoBackend(data);
@@ -222,6 +223,7 @@ export async function editarAnuncio(id, payload) {
     skin_image_url: payload.skinImageUrl ?? payload.skin_image_url,
     skinName: payload.skinName,
     skinImageUrl: payload.skinImageUrl,
+    detalhesEspecificos: payload.detalhesEspecificos ?? {},
   };
   const { data } = await api.put(`/anuncios/${id}`, body);
   return normalizarDoBackend(data);
