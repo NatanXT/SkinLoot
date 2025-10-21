@@ -24,6 +24,7 @@ import {
   desativarAnuncio as desativarSkin,
   reativarAnuncio as reativarSkin,
 } from '../../services/anuncioService';
+import { renovarPlano, upgradePlano } from '../../services/planos';
 import AuthBrand from '../../components/logo/AuthBrand';
 
 // ---------- Helpers ----------
@@ -199,8 +200,24 @@ export default function PerfilUsuario() {
   async function onConfirmarRenovar() {
     setBusy(true);
     try {
+      // 1. Chama a API real. 'planoKey' já contém o plano atual (ex: "gratuito")
+      // Não precisamos do objeto retornado, apenas da confirmação.
+      await renovarPlano(planoKey);
+
+      // 2. A API retornou OK.
+      // Para garantir que vemos novas datas (se houver),
+      // vamos buscar o perfil atualizado do backend.
+      const p = await getMyProfile(); //
+      setPerfil(p);
+      if (typeof setUser === 'function') {
+        setUser(p);
+      }
+
       addToast('Plano renovado com sucesso!', 'success');
       setPainel(null);
+    } catch (error) {
+      console.error("Falha ao renovar plano:", error);
+      addToast(error?.response?.data?.message || 'Erro ao renovar plano.', 'error');
     } finally {
       setBusy(false);
     }
@@ -208,11 +225,22 @@ export default function PerfilUsuario() {
   async function onEscolherPlano(planoNovo, label) {
     setBusy(true);
     try {
-      setPerfil((prev) => ({ ...prev, plano: planoNovo }));
-      if (typeof setUser === 'function')
-        setUser((prev) => ({ ...prev, plano: planoNovo }));
+      // 1. Chama a API real. Não precisamos do objeto retornado.
+      await upgradePlano(planoNovo);
+
+      // 2. A API retornou 200 OK. O backend mudou o plano.
+      // Agora, atualizamos o estado do frontend para *refletir* essa mudança.
+      // Usamos a lógica do mock original, que o componente entende:
+      setPerfil((prev) => ({ ...prev, plano: planoNovo })); //
+      if (typeof setUser === 'function') {
+        setUser((prev) => ({ ...prev, plano: planoNovo })); //
+      }
+
       addToast(`Upgrade para ${label} realizado!`, 'success');
       setPainel(null);
+    } catch (error) {
+      console.error("Falha ao fazer upgrade:", error);
+      addToast(error?.response?.data?.message || 'Erro ao fazer upgrade.', 'error');
     } finally {
       setBusy(false);
     }

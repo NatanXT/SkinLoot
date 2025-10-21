@@ -135,6 +135,51 @@ public class UsuarioService {
         return usuarioRepository.save(u);
     }
 
+    @Transactional
+    public Usuario atualizarPlanoUsuario(String email, String planoKey) {
+        // 1. Busca o usuário
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        // 2. Mapeia a string "plus" para o enum TipoPlano.PLUS
+        // (Usando o helper mapPlano que você já tem!)
+        TipoPlano novoTipoPlano = mapPlano(planoKey);
+
+        // 3. Busca o novo PlanoAssinatura no banco
+        // O frontend mostra os limites (5, 20, ∞)
+        // O backend busca o plano correspondente
+        PlanoAssinatura novoPlano = planoAssinaturaRepository.findByNome(novoTipoPlano)
+                .orElseThrow(() -> new RuntimeException("Plano '" + planoKey + "' não encontrado no DB."));
+
+        // 4. Atualiza o usuário
+        usuario.setPlanoAssinatura(novoPlano);
+        usuario.setStatusAssinatura(StatusAssinatura.ATIVA);
+        // Define uma nova data de expiração (ex: +30 dias)
+        usuario.setDataExpira(LocalDate.now().plusMonths(1));
+
+        return usuarioRepository.save(usuario);
+    }
+
+    /**
+     * Renova a assinatura atual do usuário.
+     */
+    @Transactional
+    public Usuario renovarPlanoUsuario(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        // Lógica de renovação: Adiciona +1 mês à data de expiração
+        // Se a assinatura já expirou, renova a partir de hoje
+        LocalDate dataBase = usuario.getDataExpira().isAfter(LocalDate.now())
+                ? usuario.getDataExpira() // Renova a partir do vencimento
+                : LocalDate.now();      // Renova a partir de hoje
+
+        usuario.setDataExpira(dataBase.plusMonths(1));
+        usuario.setStatusAssinatura(StatusAssinatura.ATIVA);
+
+        return usuarioRepository.save(usuario);
+    }
+
     private TipoPlano mapPlano(String key) {
         switch (key.toLowerCase(Locale.ROOT)) {
             case "plus":

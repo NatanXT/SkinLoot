@@ -115,7 +115,7 @@ export default function Cadastro() {
         formData.senha,
         formData.genero,
       );
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     } catch (error) {
       if (error.response)
         setApiError(

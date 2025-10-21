@@ -87,9 +87,13 @@ public class SecurityConfigurer {
                         .requestMatchers(HttpMethod.POST, "/anuncios/save").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/anuncios/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/anuncios/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/planos/renovar").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/planos/upgrade").authenticated()
+
 
                         // Área admin
                         .requestMatchers("/api/user/**").hasAuthority(Role.ADMIN.name())
+
 
                         // Outras rotas exigem autenticação
                         .anyRequest().authenticated())

@@ -27,11 +27,11 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Duration;
 import java.util.*;
 
-@RestController
-@RequestMapping("/usuarios")
+@RestController // Define esta classe como um controlador REST
+@RequestMapping("/usuarios") // Define o endpoint base para esse controlador
 public class UsuarioController {
 
-    @Autowired
+    @Autowired // Injeta automaticamente a dependência do repositório
     private UsuarioRepository usuarioRepository;
 
     private final UsuarioService usuarioService;
@@ -42,51 +42,65 @@ public class UsuarioController {
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
-    // ===================== LOGIN =====================
+    @GetMapping // Lista todos os usuários
+    public List<Usuario> listarUsuarios() {
+        return usuarioRepository.findAll();
+    }
+
+    @GetMapping("/{id}") // Obtém um usuário específico pelo ID
+    public ResponseEntity<Usuario> buscarUsuarioPorId(@PathVariable UUID id) {
+        Optional<Usuario> usuario = usuarioRepository.findById(id);
+        return usuario.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<UsuarioDto> getPerfil(Authentication authentication) {
+        String email = authentication.getName(); // extraído do token
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+
+        return ResponseEntity.ok(new UsuarioDto(usuario));
+    }
+
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(
-            @RequestBody LoginRequest loginRequest,
-            HttpServletResponse response) {
-
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         UserDetails userDetails = usuarioService.autenticar(loginRequest.getEmail(), loginRequest.getSenha());
-        String accessToken = jwtTokenUtil.generateToken(userDetails);
-        String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails.getUsername());
+        String accessToken = jwtTokenUtil.generateToken(userDetails); // curto (10 min)
+        String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails.getUsername()); // longo (ex: 30h)
 
-        boolean isLocalhost = true; // ✅ altere para false em produção
-
-        // Cookie de acesso (curto prazo)
-        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
-                .httpOnly(true)
-                .secure(false) // ⚠️ deve ser false em localhost (true só em produção HTTPS)
-                .path("/")
-                .maxAge(10 * 60) // 10 minutos
-                .sameSite("Lax") // ⚠️ essencial para localhost
-                .build();
-
-        // Cookie de refresh (longo prazo)
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(false)
-                .path("/")
+                .secure(true) // true se for HTTPS
+                .path("/") // só é enviado quando acessar esta rota
                 .maxAge(30 * 60 * 60) // 30h
-                .sameSite("Lax")
+                .sameSite("None")
+                .build();
+
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(true) // marque true em produção
+                .path("/") // enviado em TODAS as requisições
+                .maxAge(10 * 60) // 10 min de validade
+                .sameSite("None")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+        String token = jwtTokenUtil.generateToken(userDetails);
 
         Usuario usuario = usuarioService.buscarUsuarioPorEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        return ResponseEntity.ok(new LoginResponse(accessToken, usuario));
+        return ResponseEntity.ok(new LoginResponse(token, usuario));
     }
 
-    // ===================== REFRESH TOKEN =====================
     @PostMapping("/auth/refresh")
     public ResponseEntity<Void> refreshToken(
             HttpServletRequest request,
-            HttpServletResponse response) {
-
+            HttpServletResponse response // ← injete o response aqui
+    ) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -105,25 +119,25 @@ public class UsuarioController {
         String email = jwtTokenUtil.parseToken(refreshToken).getSubject();
         String newAccessToken = jwtTokenUtil.generateTokenFromEmail(email);
 
+        // ── AQUI: criar o cookie de accessToken ──
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
+                .httpOnly(true) // JavaScript não consegue ler
+                .secure(false) // troque para true em produção HTTPS
+                .path("/") // enviado em todas as rotas
                 .maxAge(Duration.ofMinutes(15))
-                .sameSite("Lax")
+                .sameSite("Strict")
                 .build();
-
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+
+        // Você pode retornar vazio, já que o token está no cookie
         return ResponseEntity.ok().build();
     }
 
-    // ===================== STATUS =====================
     @GetMapping("/auth/status")
     public ResponseEntity<?> authStatus() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = auth != null && auth.isAuthenticated()
                 && !(auth instanceof AnonymousAuthenticationToken);
-
         if (isAuthenticated) {
             return ResponseEntity.ok(Collections.singletonMap("authenticated", true));
         } else {
@@ -132,41 +146,93 @@ public class UsuarioController {
         }
     }
 
-    // ===================== PERFIL ATUAL =====================
     @GetMapping("/auth/me")
     public ResponseEntity<Usuario> getCurrentUser() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
 
         Optional<Usuario> usuarioOpt = usuarioService.buscarUsuarioPorEmail(email);
+
         return usuarioOpt.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    // ===================== LOGOUT =====================
     @PostMapping("/auth/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        ResponseCookie tokenCookie = ResponseCookie.from("accessToken", "")
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(0)
-                .sameSite("Lax")
-                .build();
+        // Remover Access Token
+        Cookie tokenCookie = new Cookie("accessToken", null);
+        tokenCookie.setHttpOnly(true);
+        tokenCookie.setSecure(true); // ou false se estiver local
+        tokenCookie.setPath("/");
+        tokenCookie.setMaxAge(0);
+        response.addCookie(tokenCookie);
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(0)
-                .sameSite("Lax")
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, tokenCookie.toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+        // Remover Refresh Token
+        Cookie refreshCookie = new Cookie("refreshToken", null);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(true); // ou false se estiver local
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(0);
+        response.addCookie(refreshCookie);
 
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registrar(@RequestBody @Valid RegisterRequest request, HttpServletResponse response) {
+        Usuario novoUsuario = usuarioService.cadastrarUsuario(request); // ✅ já salva e valida
+
+        // 7. Autentique o usuário recém-criado para obter os UserDetails
+        UserDetails userDetails = usuarioService.autenticar(request.getEmail(), request.getSenha());
+
+        // 8. Gere os tokens (copiado do seu /login)
+        String accessToken = jwtTokenUtil.generateToken(userDetails);
+        String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails.getUsername());
+
+        // 9. Crie os cookies (copiado do seu /login)
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(false) // Mantenha false para localhost (HTTP)
+                .path("/")
+                .maxAge(10 * 60) // 10 minutos
+                .sameSite("Lax")
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(30 * 60 * 60) // 30h
+                .sameSite("Lax")
+                .build();
+
+        // 10. Adicione os cookies à resposta
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+        // String refreshToken =
+        // jwtTokenUtil.generateRefreshToken(novoUsuario.getId().toString());
+
+        return ResponseEntity.ok(new LoginResponse(accessToken, novoUsuario));
+
+    }
+
+    @PutMapping("/{id}") // Atualiza um usuário existente
+    public ResponseEntity<Usuario> atualizarUsuario(@PathVariable UUID id,
+                                                    @Valid @RequestBody Usuario usuarioAtualizado) {
+        if (!usuarioRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        usuarioAtualizado.setId(id);
+        Usuario usuarioSalvo = usuarioRepository.save(usuarioAtualizado);
+        return ResponseEntity.ok(usuarioSalvo);
+    }
+
+    @DeleteMapping("/{id}") // Remove um usuário pelo ID
+    public ResponseEntity<Void> deletarUsuario(@PathVariable UUID id) {
+        if (!usuarioRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        usuarioRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
