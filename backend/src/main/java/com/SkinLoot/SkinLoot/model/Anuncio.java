@@ -14,15 +14,19 @@ import java.util.UUID;
 
 /**
  * Entidade que representa um anúncio de venda de skin.
+ * Agora com suporte a imagem em Base64 bruto (além de URL).
  */
 @Entity
+@Table(name = "anuncio")
 public class Anuncio {
 
+    // ===================== Identificação =====================
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
 
+    // ===================== Dados principais =====================
     private String titulo;
     private String descricao;
     private BigDecimal preco;
@@ -30,19 +34,33 @@ public class Anuncio {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    // Catálogo (desnormalizado)
+    // Catálogo (campos desnormalizados para exibição)
     private String skinName;
+
+    // URL pública da imagem (fallback quando não usamos Base64)
+    @Column(name = "skin_image_url")
     private String skinImageUrl;
+
+    // ======== NOVOS CAMPOS PARA BASE64 =========
+    /** Conteúdo Base64 cru (apenas a parte depois da vírgula do data URL). */
+    @Column(name = "skin_image_b64", columnDefinition = "text")
+    private String skinImageBase64;
+
+    /** Mime type correspondente ao Base64 (ex.: image/png, image/jpeg). */
+    @Column(name = "skin_image_mime", length = 100)
+    private String skinImageMime;
+    // ===========================================
 
     // Atributo adicional da instância
     private String qualidade;
 
+    // ===================== Relacionamentos =====================
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "skin_id", nullable = true) // ✅ A chave é nullable = true
+    @JoinColumn(name = "skin_id", nullable = true) // a relação é opcional
     private Skin skin;
 
     private LocalDateTime dataCriacao;
@@ -57,13 +75,25 @@ public class Anuncio {
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> detalhesEspecificos;
 
+    // ===================== Construtores =====================
     public Anuncio() {
     }
 
-    public Anuncio(UUID id, String titulo, String descricao, BigDecimal preco, Status status,
-            String skinName, String skinImageUrl, Usuario usuario, Skin skin, LocalDateTime dataCriacao,
-            Long steamItemId, Set<AnuncioLike> likes, int likesCount, Map<String, Object> detalhesEspecificos) {
-
+    public Anuncio(
+            UUID id,
+            String titulo,
+            String descricao,
+            BigDecimal preco,
+            Status status,
+            String skinName,
+            String skinImageUrl,
+            Usuario usuario,
+            Skin skin,
+            LocalDateTime dataCriacao,
+            Long steamItemId, // (mantido conforme sua assinatura anterior)
+            Set<AnuncioLike> likes,
+            int likesCount,
+            Map<String, Object> detalhesEspecificos) {
         this.id = id;
         this.titulo = titulo;
         this.descricao = descricao;
@@ -77,7 +107,6 @@ public class Anuncio {
         this.likes = likes;
         this.likesCount = likesCount;
         this.detalhesEspecificos = detalhesEspecificos;
-
     }
 
     /** Construtor auxiliar usado em relações (precisa setar o id!). */
@@ -85,7 +114,22 @@ public class Anuncio {
         this.id = anuncioId;
     }
 
-    // GETTERS E SETTERS
+    // ===================== Helper de exibição =====================
+    /**
+     * Retorna a imagem pronta para o front consumir em &lt;img src="..."&gt;.
+     * Se houver Base64, devolve "data:&lt;mime&gt;;base64,&lt;conteudo&gt;",
+     * caso contrário, retorna a URL (pode ser nula).
+     */
+    @Transient
+    public String getSkinImageDataUrl() {
+        if (skinImageBase64 != null && !skinImageBase64.isBlank()) {
+            String mime = (skinImageMime != null && !skinImageMime.isBlank()) ? skinImageMime : "image/*";
+            return "data:" + mime + ";base64," + skinImageBase64;
+        }
+        return skinImageUrl;
+    }
+
+    // ===================== Getters / Setters =====================
     public UUID getId() {
         return id;
     }
@@ -140,6 +184,30 @@ public class Anuncio {
 
     public void setSkinImageUrl(String skinImageUrl) {
         this.skinImageUrl = skinImageUrl;
+    }
+
+    public String getSkinImageBase64() {
+        return skinImageBase64;
+    }
+
+    public void setSkinImageBase64(String skinImageBase64) {
+        this.skinImageBase64 = skinImageBase64;
+    }
+
+    public String getSkinImageMime() {
+        return skinImageMime;
+    }
+
+    public void setSkinImageMime(String skinImageMime) {
+        this.skinImageMime = skinImageMime;
+    }
+
+    public String getQualidade() {
+        return qualidade;
+    }
+
+    public void setQualidade(String qualidade) {
+        this.qualidade = qualidade;
     }
 
     public Usuario getUsuario() {

@@ -55,6 +55,20 @@ function fileToDataURL(file) {
   });
 }
 
+/** Extrai { base64, mime } de uma dataURL (ex.: "data:image/png;base64,...."). */
+function dataUrlToParts(dataUrl) {
+  try {
+    if (!dataUrl || typeof dataUrl !== 'string') return {};
+    if (!dataUrl.startsWith('data:')) return {};
+    const [head, b64] = dataUrl.split(',');
+    if (!head || !b64) return {};
+    const mime = head.substring(5, head.indexOf(';')) || 'image/*';
+    return { base64: b64, mime };
+  } catch {
+    return {};
+  }
+}
+
 // ------------ Normalização (quando usar backend) ------------
 function normalizarDoBackend(anuncio = {}) {
   const id = anuncio.id ?? anuncio.uuid ?? anuncio._id ?? uid();
@@ -65,14 +79,21 @@ function normalizarDoBackend(anuncio = {}) {
     anuncio.nome ??
     'Skin';
 
-  const image =
-    anuncio.skinIcon ??
-    anuncio.skinImageUrl ??
-    anuncio.skin_image_url ?? // snake_case
-    anuncio.imagemUrl ??
-    anuncio.imagem ??
-    anuncio.fotoUrl ??
-    '';
+  // Se vier Base64 do backend, monta uma dataURL para exibição
+  let image = '';
+  if (anuncio.skinImageBase64) {
+    const mime = anuncio.skinImageMime || 'image/*';
+    image = `data:${mime};base64,${anuncio.skinImageBase64}`;
+  } else {
+    image =
+      anuncio.skinIcon ??
+      anuncio.skinImageUrl ??
+      anuncio.skin_image_url ?? // snake_case
+      anuncio.imagemUrl ??
+      anuncio.imagem ??
+      anuncio.fotoUrl ??
+      '';
+  }
 
   const game = anuncio.jogo ?? anuncio.jogoNome ?? 'CS2';
   const precoNum = Number(anuncio.preco ?? anuncio.price ?? anuncio.valor ?? 0);
@@ -110,7 +131,7 @@ function normalizarDoBackend(anuncio = {}) {
 
     // campos que o Perfil usa
     skinNome: title,
-    imagemUrl: image,
+    imagemUrl: image, // <- o Perfil lê aqui
     preco: Number.isFinite(precoNum) ? precoNum : 0,
   };
 }
@@ -161,9 +182,15 @@ export async function criarAnuncio(payload) {
   if (USE_DEV_API) {
     const arr = devLoad();
 
-    let imagemUrl = payload.skinImageUrl || '';
-    if (!imagemUrl && payload.imagemFile instanceof File) {
-      imagemUrl = await fileToDataURL(payload.imagemFile); // salva base64
+    // Prioriza base64 (se veio do form). Senão, tente File -> dataURL; senão, use a URL.
+    let imagemUrl = '';
+    if (payload.skinImageBase64) {
+      const mime = payload.skinImageMime || 'image/*';
+      imagemUrl = `data:${mime};base64,${payload.skinImageBase64}`;
+    } else if (payload.imagemFile instanceof File) {
+      imagemUrl = await fileToDataURL(payload.imagemFile); // salva dataURL (contém base64)
+    } else if (payload.skinImageUrl) {
+      imagemUrl = payload.skinImageUrl;
     }
     if (!imagemUrl) imagemUrl = '/img/placeholder.png';
 
@@ -178,15 +205,21 @@ export async function criarAnuncio(payload) {
     return novo;
   }
 
-  // PROD: envie camel e snake (o backend lê o que conhecer)
+  // PROD: envie campos compatíveis com Base64
   const body = {
     titulo: payload.titulo,
     descricao: payload.descricao ?? '',
     preco: payload.preco,
     skin_name: payload.skinName ?? payload.skin_name,
-    skin_image_url: payload.skinImageUrl ?? payload.skin_image_url,
     skinName: payload.skinName,
-    skinImageUrl: payload.skinImageUrl,
+
+    // Preferência por Base64:
+    skinImageBase64: payload.skinImageBase64 ?? null,
+    skinImageMime: payload.skinImageMime ?? null,
+
+    // Fallback opcional: se quiser manter compat com uma API antiga (URL)
+    skinImageUrl: payload.skinImageUrl ?? null,
+
     detalhesEspecificos: payload.detalhesEspecificos ?? {}, // Envia um objeto JSON
   };
   const { data } = await api.post('/anuncios/save', body);
@@ -198,10 +231,21 @@ export async function editarAnuncio(id, payload) {
     const arr = devLoad();
     const i = arr.findIndex((x) => String(x.id) === String(id));
     if (i >= 0) {
-      let imagemUrl = payload.skinImageUrl || arr[i].imagemUrl || '';
-      if (payload.imagemFile instanceof File) {
+      // Preferência por base64 (se veio); senão, tenta File -> dataURL; senão mantém a existente/URL
+      let imagemUrl =
+        (payload.skinImageBase64 &&
+          `data:${payload.skinImageMime || 'image/*'};base64,${
+            payload.skinImageBase64
+          }`) ||
+        arr[i].imagemUrl ||
+        '';
+
+      if (!payload.skinImageBase64 && payload.imagemFile instanceof File) {
         imagemUrl = await fileToDataURL(payload.imagemFile);
+      } else if (!payload.skinImageBase64 && payload.skinImageUrl) {
+        imagemUrl = payload.skinImageUrl;
       }
+
       const atualizado = {
         ...arr[i],
         skinNome: payload.skinName || payload.titulo || arr[i].skinNome,
@@ -215,14 +259,21 @@ export async function editarAnuncio(id, payload) {
     return null;
   }
 
+  // PROD: atualizar com Base64 preferencialmente
   const body = {
     titulo: payload.titulo,
     descricao: payload.descricao ?? '',
     preco: payload.preco,
     skin_name: payload.skinName ?? payload.skin_name,
-    skin_image_url: payload.skinImageUrl ?? payload.skin_image_url,
     skinName: payload.skinName,
-    skinImageUrl: payload.skinImageUrl,
+
+    // Preferência por Base64:
+    skinImageBase64: payload.skinImageBase64 ?? null,
+    skinImageMime: payload.skinImageMime ?? null,
+
+    // Fallback opcional (URL):
+    skinImageUrl: payload.skinImageUrl ?? null,
+
     detalhesEspecificos: payload.detalhesEspecificos ?? {},
   };
   const { data } = await api.put(`/anuncios/${id}`, body);

@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 /**
  * Serviço responsável por gerenciar anúncios (CRUD, likes e regras de
  * assinatura).
+ * Agora com suporte a imagem em Base64 bruto.
  */
 @Service
 public class AnuncioService {
@@ -50,10 +51,11 @@ public class AnuncioService {
     /**
      * Cria um novo anúncio, respeitando as regras de assinatura e limite de
      * anúncios.
+     * Prioriza imagem em Base64 caso enviada.
      */
     @Transactional
     public Anuncio criarAnuncio(AnuncioRequest request, Usuario usuario) {
-        // 1. Busca o usuário e valida a assinatura (você já tem essa lógica)
+        // 1) Validação de usuário e assinatura
         Usuario usuarioAtualizado = usuarioRepository.findById(usuario.getId())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
 
@@ -66,7 +68,7 @@ public class AnuncioService {
             throw new LimiteExcedidoException("Você atingiu o limite de anúncios do seu plano.");
         }
 
-        // 2. Cria o novo anúncio
+        // 2) Criação do anúncio
         Anuncio novoAnuncio = new Anuncio();
         novoAnuncio.setUsuario(usuarioAtualizado);
         novoAnuncio.setTitulo(request.getTitulo());
@@ -76,26 +78,37 @@ public class AnuncioService {
         novoAnuncio.setStatus(request.getStatus() != null ? request.getStatus() : Status.ATIVO);
         novoAnuncio.setDataCriacao(LocalDateTime.now());
 
-        // 3. ✅ LÓGICA DO MODELO HÍBRIDO
+        // 3) Lógica híbrida (catálogo vs. livre)
         if (request.getSkinId() != null) {
-            // --- CAMINHO A: Anúncio VINCULADO ao catálogo ---
+            // Vinculado a uma Skin do catálogo
             Skin skinDeCatalogo = skinRepository.findById(request.getSkinId())
                     .orElseThrow(() -> new RuntimeException("Skin do catálogo não encontrada."));
-
-            novoAnuncio.setSkin(skinDeCatalogo); // Define o relacionamento
-            novoAnuncio.setSkinName(skinDeCatalogo.getNome()); // Desnormaliza o nome oficial
-            novoAnuncio.setSkinImageUrl(skinDeCatalogo.getIcon()); // Desnormaliza a imagem oficial
-
+            novoAnuncio.setSkin(skinDeCatalogo);
+            novoAnuncio.setSkinName(skinDeCatalogo.getNome());
+            // Quando vinculado ao catálogo, a imagem oficial pode ser a do catálogo;
+            // mas ainda assim priorizamos Base64 se o usuário mandou.
+            if (temBase64(request)) {
+                aplicarImagemBase64(novoAnuncio, request);
+            } else {
+                novoAnuncio.setSkinImageUrl(skinDeCatalogo.getIcon());
+                limparBase64(novoAnuncio);
+            }
         } else {
-            // --- CAMINHO B: Anúncio LIVRE (não vinculado) ---
+            // Modo LIVRE (não vinculado)
             if (request.getSkinName() == null || request.getSkinName().isBlank()) {
                 throw new IllegalArgumentException(
                         "O nome da skin é obrigatório para anúncios não vinculados ao catálogo.");
             }
+            novoAnuncio.setSkin(null);
+            novoAnuncio.setSkinName(request.getSkinName());
 
-            novoAnuncio.setSkin(null); // O relacionamento fica nulo
-            novoAnuncio.setSkinName(request.getSkinName()); // Usa o nome digitado pelo usuário
-            novoAnuncio.setSkinImageUrl(request.getSkinImageUrl()); // Usa a URL (opcional)
+            // ✅ Prioriza Base64; fallback para URL
+            if (temBase64(request)) {
+                aplicarImagemBase64(novoAnuncio, request);
+            } else {
+                novoAnuncio.setSkinImageUrl(request.getSkinImageUrl());
+                limparBase64(novoAnuncio);
+            }
         }
 
         return anuncioRepository.save(novoAnuncio);
@@ -103,6 +116,7 @@ public class AnuncioService {
 
     /**
      * Atualiza um anúncio existente, apenas se o usuário for o dono.
+     * Mantém a prioridade para Base64 quando enviado.
      */
     @Transactional
     public Anuncio atualizar(UUID id, AnuncioRequest request, Usuario usuario) {
@@ -114,27 +128,42 @@ public class AnuncioService {
             throw new RuntimeException("Você não tem permissão para editar este anúncio.");
         }
 
-        // Atualiza campos principais
+        // Atualiza campos principais (se vierem no request)
         if (request.getTitulo() != null)
             a.setTitulo(request.getTitulo());
         if (request.getDescricao() != null)
             a.setDescricao(request.getDescricao());
         if (request.getPreco() != null)
             a.setPreco(request.getPreco());
-        if (request.getStatus() != null) {
+        if (request.getStatus() != null)
             a.setStatus(request.getStatus());
-        }
-        if (request.getDetalhesEspecificos() != null) {
+        if (request.getDetalhesEspecificos() != null)
             a.setDetalhesEspecificos(request.getDetalhesEspecificos());
+
+        // Lógica de imagem: se chegou Base64, prioriza; se chegou URL (e não veio
+        // base64), atualiza URL
+        if (temBase64(request)) {
+            aplicarImagemBase64(a, request);
+        } else if (request.getSkinImageUrl() != null) {
+            a.setSkinImageUrl(request.getSkinImageUrl());
+            limparBase64(a);
         }
 
-        // Se o usuário está tentando mudar a Skin base do anúncio
+        // Troca de Skin de catálogo (opcional)
         if (request.getSkinId() != null) {
             Skin novaSkin = skinRepository.findById(request.getSkinId())
                     .orElseThrow(() -> new RuntimeException("Nova skin não encontrada no catálogo."));
-            // Atualiza os dados desnormalizados
+            a.setSkin(novaSkin);
             a.setSkinName(novaSkin.getNome());
-            a.setSkinImageUrl(novaSkin.getIcon());
+            // Se NÃO veio base64/URL no request, mantenha a imagem da skin do catálogo
+            if (!temBase64(request) && request.getSkinImageUrl() == null) {
+                a.setSkinImageUrl(novaSkin.getIcon());
+                limparBase64(a);
+            }
+        } else if (request.getSkinName() != null) {
+            // Modo LIVRE: desfaz vínculo
+            a.setSkin(null);
+            a.setSkinName(request.getSkinName());
         }
 
         return anuncioRepository.save(a);
@@ -160,23 +189,17 @@ public class AnuncioService {
 
     // ---------- Likes ----------
 
-    /**
-     * Adiciona um like a um anúncio.
-     */
+    /** Adiciona um like a um anúncio. */
     public void likeAnuncio(UUID anuncioId, String userEmail) {
         Usuario usuario = usuarioRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
         Anuncio anuncio = anuncioRepository.findById(anuncioId)
                 .orElseThrow(() -> new RuntimeException("Anúncio não encontrado"));
-
         AnuncioLike like = new AnuncioLike(usuario, anuncio);
         anuncioLikeRepository.save(like);
     }
 
-    /**
-     * Remove o like de um anúncio.
-     */
+    /** Remove o like de um anúncio. */
     @Transactional
     public void unlikeAnuncio(UUID anuncioId, String userEmail) {
         Usuario usuario = usuarioRepository.findByEmail(userEmail)
@@ -186,9 +209,7 @@ public class AnuncioService {
 
     // ---------- Listagens ----------
 
-    /**
-     * Lista todos os anúncios de um usuário.
-     */
+    /** Lista todos os anúncios de um usuário. */
     @Transactional(readOnly = true)
     public List<AnuncioResponse> listarPorUsuario(UUID usuarioId) {
         return anuncioRepository.findByUsuarioId(usuarioId)
@@ -221,5 +242,25 @@ public class AnuncioService {
 
     public Optional<Anuncio> findById(UUID id) {
         return anuncioRepository.findById(id);
+    }
+
+    // ===== Helpers de imagem =====
+
+    /** Verifica se o request veio com Base64 válido. */
+    private boolean temBase64(AnuncioRequest r) {
+        return r.getSkinImageBase64() != null && !r.getSkinImageBase64().isBlank();
+    }
+
+    /** Aplica Base64 + mime no anúncio e limpa URL. */
+    private void aplicarImagemBase64(Anuncio a, AnuncioRequest r) {
+        a.setSkinImageBase64(r.getSkinImageBase64());
+        a.setSkinImageMime(r.getSkinImageMime());
+        a.setSkinImageUrl(null); // opcional: evita inconsistência
+    }
+
+    /** Limpa campos de Base64 quando a opção for URL. */
+    private void limparBase64(Anuncio a) {
+        a.setSkinImageBase64(null);
+        a.setSkinImageMime(null);
     }
 }

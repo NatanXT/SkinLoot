@@ -10,6 +10,7 @@ import java.util.UUID;
 
 /**
  * DTO de resposta usado para enviar dados de anúncios ao frontend.
+ * Agora o campo skinIcon prioriza Data URL gerado a partir do Base64 salvo.
  */
 public class AnuncioResponse {
     private UUID id;
@@ -17,7 +18,10 @@ public class AnuncioResponse {
     private String descricao;
     private BigDecimal preco;
     private UUID skinId;
+
+    /** URL da imagem OU Data URL (data:image/...;base64,...) */
     private String skinIcon;
+
     private String skinNome;
     private String planoNome;
     private Status status;
@@ -25,7 +29,7 @@ public class AnuncioResponse {
     private String usuarioNome;
     private int likesCount;
     private Map<String, Object> detalhesEspecificos;
-    private String qualidade;
+    // private String qualidade;
 
     public AnuncioResponse() {
     }
@@ -41,13 +45,14 @@ public class AnuncioResponse {
         this.status = anuncio.getStatus();
         this.dataCriacao = anuncio.getDataCriacao();
 
-        // Mapeando os campos da skin que já existem no Anuncio
-
+        // Mapeando campos relacionados à Skin
         this.skinNome = anuncio.getSkinName();
-        this.skinIcon = anuncio.getSkinImageUrl();
+
+        // ✅ Prioriza o Data URL gerado a partir do Base64 (ou volta para URL)
+        this.skinIcon = anuncio.getSkinImageDataUrl();
+
         this.likesCount = anuncio.getLikesCount();
         this.detalhesEspecificos = anuncio.getDetalhesEspecificos();
-        this.qualidade = anuncio.getQualidade();
 
         if (anuncio.getUsuario() != null) {
             this.usuarioNome = anuncio.getUsuario().getNome();
@@ -61,7 +66,8 @@ public class AnuncioResponse {
         }
     }
 
-    // Getters e Setters
+    // ---------------- Getters / Setters ----------------
+
     public UUID getId() {
         return id;
     }
@@ -166,11 +172,11 @@ public class AnuncioResponse {
         this.detalhesEspecificos = detalhesEspecificos;
     }
 
-    public String getQualidade() {
-        return qualidade;
-    }
+    // public String getQualidade() {
+    //     return qualidade;
+    // }
 
-    public void setQualidade(String qualidade) {
-        this.qualidade = qualidade;
-    }
+    // public void setQualidade(String qualidade) {
+    //     this.qualidade = qualidade;
+    // }
 }

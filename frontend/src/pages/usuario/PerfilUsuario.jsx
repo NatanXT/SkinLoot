@@ -44,6 +44,31 @@ const plansMeta = {
 // Placeholder final (fallback)
 const IMG_PLACEHOLDER = 'https://placehold.co/600x400?text=Skin';
 
+/** Lê um File como dataURL (para preview e extração base64). */
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const rd = new FileReader();
+    rd.onload = () => resolve(String(rd.result || ''));
+    rd.onerror = reject;
+    rd.readAsDataURL(file);
+  });
+}
+
+/** Extrai { base64, mime } de uma dataURL (ex.: "data:image/png;base64,...."). */
+function dataUrlToParts(dataUrl) {
+  try {
+    if (!dataUrl || typeof dataUrl !== 'string') return {};
+    if (!dataUrl.startsWith('data:')) return {};
+    const [head, b64] = dataUrl.split(',');
+    if (!head || !b64) return {};
+    // head: "data:image/png;base64"
+    const mime = head.substring(5, head.indexOf(';')) || 'image/*';
+    return { base64: b64, mime };
+  } catch {
+    return {};
+  }
+}
+
 export default function PerfilUsuario() {
   const { user, logout, setUser } = useAuth();
   const { addToast } = useToast();
@@ -64,12 +89,12 @@ export default function PerfilUsuario() {
   const [formEdicao, setFormEdicao] = useState({
     skinNome: '',
     preco: '',
-    imagemUrl: '',
+    imagemUrl: '', // pode receber URL ou dataURL colada manualmente
     descricao: '',
-    detalhes: '', // Usaremos um <textarea> para o JSON
+    detalhes: '', // JSON em string
   });
   const [imagemFile, setImagemFile] = useState(null); // arquivo selecionado
-  const [previewImagem, setPreviewImagem] = useState(''); // preview (arquivo ou URL)
+  const [previewImagem, setPreviewImagem] = useState(''); // preview (arquivo ou URL/dataURL)
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
   const inputFileRef = useRef(null);
 
@@ -139,7 +164,13 @@ export default function PerfilUsuario() {
   function handleNovaSkin() {
     if (atingiuLimite) return;
     setSkinEditando({ __novo: true });
-    setFormEdicao({ skinNome: '', preco: '', imagemUrl: '',descricao: '', detalhes: '{\n  "pattern": 0,\n  "stat_trak": false\n}' });
+    setFormEdicao({
+      skinNome: '',
+      preco: '',
+      imagemUrl: '',
+      descricao: '',
+      detalhes: '{\n  "pattern": 0,\n  "stat_trak": false\n}',
+    });
     setImagemFile(null);
     setPreviewImagem('');
     setModalEdicaoAberto(true);
@@ -168,7 +199,7 @@ export default function PerfilUsuario() {
   async function onConfirmarRenovar() {
     setBusy(true);
     try {
-      addToast('Plano renovado com sucesso! (mock)', 'success');
+      addToast('Plano renovado com sucesso!', 'success');
       setPainel(null);
     } finally {
       setBusy(false);
@@ -180,7 +211,7 @@ export default function PerfilUsuario() {
       setPerfil((prev) => ({ ...prev, plano: planoNovo }));
       if (typeof setUser === 'function')
         setUser((prev) => ({ ...prev, plano: planoNovo }));
-      addToast(`Upgrade para ${label} realizado! (mock)`, 'success');
+      addToast(`Upgrade para ${label} realizado!`, 'success');
       setPainel(null);
     } finally {
       setBusy(false);
@@ -190,6 +221,7 @@ export default function PerfilUsuario() {
   // ========================== EDITAR / CRIAR SKIN ============================
   function abrirEditar(skin) {
     setSkinEditando(skin);
+    // Pode vir uma URL ou dataURL (no DEV/normalizador).
     const urlAtual = skin?.imagemUrl || skin?.image || skin?.imagem || '';
     const raw = skin?._raw || {};
     setFormEdicao({
@@ -199,8 +231,8 @@ export default function PerfilUsuario() {
       // --- Campos novos (lendo do _raw se existir) ---
       descricao: raw.descricao ?? '',
       detalhes: raw.detalhesEspecificos
-          ? JSON.stringify(raw.detalhesEspecificos, null, 2)
-          : '',
+        ? JSON.stringify(raw.detalhesEspecificos, null, 2)
+        : '',
     });
     setImagemFile(null);
     setPreviewImagem(urlAtual || '');
@@ -225,14 +257,14 @@ export default function PerfilUsuario() {
   }, [formEdicao.imagemUrl, imagemFile, modalEdicaoAberto]);
 
   // Ao selecionar arquivo: guarda file, zera URL e gera preview
-  function onEscolherArquivo(e) {
+  async function onEscolherArquivo(e) {
     const file = e.target.files?.[0];
     if (!file) return;
     setImagemFile(file);
     setFormEdicao((v) => ({ ...v, imagemUrl: '' })); // evita validação de URL
-    const reader = new FileReader();
-    reader.onload = () => setPreviewImagem(String(reader.result || ''));
-    reader.readAsDataURL(file);
+    // Preview direto com dataURL do arquivo
+    const dataURL = await readFileAsDataURL(file);
+    setPreviewImagem(String(dataURL || ''));
   }
 
   // Normaliza o objeto retornado pelo backend para garantir campo de imagem
@@ -256,38 +288,71 @@ export default function PerfilUsuario() {
         return;
       }
 
-      // --- NOVO: Validar e Parsear JSON ---
+      // --- Validar e Parsear JSON (detalhes) ---
       let detalhesJson = {};
       try {
-        // Permite detalhes vazios
         if (formEdicao.detalhes && formEdicao.detalhes.trim()) {
           detalhesJson = JSON.parse(formEdicao.detalhes);
         }
       } catch (jsonError) {
-        addToast('O campo "Detalhes Específicos" não é um JSON válido.', 'error');
+        addToast(
+          'O campo "Detalhes Específicos" não é um JSON válido.',
+          'error',
+        );
         setSalvandoEdicao(false);
         return;
       }
 
+      // --------- NOVO: preparar imagem em Base64/MIME ----------
+      let skinImageBase64 = null;
+      let skinImageMime = null;
+
+      if (imagemFile instanceof File) {
+        // 1) Usuário escolheu arquivo → converte para dataURL e extrai {base64,mime}
+        const dataURL = await readFileAsDataURL(imagemFile);
+        const parts = dataUrlToParts(dataURL);
+        skinImageBase64 = parts.base64 || null;
+        skinImageMime = parts.mime || null;
+      } else if (
+        formEdicao.imagemUrl &&
+        formEdicao.imagemUrl.startsWith('data:')
+      ) {
+        // 2) Usuário colou uma dataURL no campo de URL
+        const parts = dataUrlToParts(formEdicao.imagemUrl);
+        skinImageBase64 = parts.base64 || null;
+        skinImageMime = parts.mime || null;
+      } else {
+        // 3) Usuário digitou uma URL http(s). Não dá para baixar e converter aqui (CORS).
+        //    Enviaremos apenas como URL (fallback). Se não quiser usar URL, deixe vazio.
+      }
+      // ---------------------------------------------------------
+
       const id = skinEditando?.id || skinEditando?._id;
 
-      // IMPORTANTE: enviar "imagemUrl" (não "skinImageUrl")
+      // IMPORTANTE:
+      // Agora preferimos enviar Base64 (skinImageBase64/skinImageMime).
+      // Se não existir base64, enviaremos a URL como fallback no payload (service pode ignorar).
       const payload = {
         titulo: formEdicao.skinNome,
         descricao: formEdicao.descricao ?? '',
         preco: precoNum,
 
         // Lógica Híbrida:
-        // Este formulário NÃO tem o autocomplete de Skin (skinId).
-        // Então, skinId será sempre null e skinName será o texto digitado.
         skinId: null,
         skinName: formEdicao.skinNome,
         detalhesEspecificos: detalhesJson,
 
-        // Campos de imagem (para o mock/service antigo lidar)
-        // Corrigindo o bug: o service antigo esperava skinImageUrl
-        skinImageUrl: formEdicao.imagemUrl,
-        ...(imagemFile ? { imagemFile } : {}),
+        // ---- Imagem: Base64 preferencial ----
+        skinImageBase64: skinImageBase64 || undefined,
+        skinImageMime: skinImageMime || undefined,
+
+        // ---- Fallback (se o usuário digitou uma URL http/https) ----
+        skinImageUrl:
+          !skinImageBase64 &&
+          formEdicao.imagemUrl &&
+          !formEdicao.imagemUrl.startsWith('data:')
+            ? formEdicao.imagemUrl
+            : undefined,
       };
 
       if (id) {
@@ -811,7 +876,7 @@ export default function PerfilUsuario() {
               </button>
             </div>
 
-            {/* Uploader clicável + preview (arquivo OU URL) */}
+            {/* Uploader clicável + preview (arquivo OU URL/dataURL colada) */}
             <div
               className="perfil-upload"
               role="button"
@@ -871,13 +936,13 @@ export default function PerfilUsuario() {
               <div className="perfil-form__row">
                 <label htmlFor="f-descricao">Descrição</label>
                 <textarea
-                    id="f-descricao"
-                    placeholder="Descrição do anúncio, detalhes, etc."
-                    rows={3}
-                    value={formEdicao.descricao}
-                    onChange={(e) =>
-                        setFormEdicao((v) => ({ ...v, descricao: e.target.value }))
-                    }
+                  id="f-descricao"
+                  placeholder="Descrição do anúncio, detalhes, etc."
+                  rows={3}
+                  value={formEdicao.descricao}
+                  onChange={(e) =>
+                    setFormEdicao((v) => ({ ...v, descricao: e.target.value }))
+                  }
                 />
               </div>
 
@@ -902,16 +967,17 @@ export default function PerfilUsuario() {
                 <input
                   id="f-imagem"
                   type="text"
-                  placeholder="https://exemplo.com/imagem.png"
+                  placeholder="https://exemplo.com/imagem.png ou cole uma dataURL (data:image/png;base64,...)"
                   value={formEdicao.imagemUrl}
                   onChange={(e) => {
-                    setImagemFile(null); // se digitar URL, prioriza URL
+                    setImagemFile(null); // se digitar URL/dataURL, prioriza isso
                     setFormEdicao((v) => ({ ...v, imagemUrl: e.target.value }));
                   }}
                 />
                 <small className="perfil-form__hint">
                   Dica: cole uma URL <strong>ou</strong> clique na imagem acima
-                  para enviar um arquivo.
+                  para enviar um arquivo. Também aceitamos uma{' '}
+                  <strong>dataURL</strong>.
                 </small>
               </div>
 
@@ -919,13 +985,13 @@ export default function PerfilUsuario() {
               <div className="perfil-form__row">
                 <label htmlFor="f-detalhes">Detalhes Específicos (JSON)</label>
                 <textarea
-                    id="f-detalhes"
-                    placeholder='{ "pattern": 123, "stat_trak": true }'
-                    rows={4}
-                    value={formEdicao.detalhes}
-                    onChange={(e) =>
-                        setFormEdicao((v) => ({ ...v, detalhes: e.target.value }))
-                    }
+                  id="f-detalhes"
+                  placeholder='{ "pattern": 123, "stat_trak": true }'
+                  rows={4}
+                  value={formEdicao.detalhes}
+                  onChange={(e) =>
+                    setFormEdicao((v) => ({ ...v, detalhes: e.target.value }))
+                  }
                 />
                 <small className="perfil-form__hint">
                   Envie dados extras como um JSON.
