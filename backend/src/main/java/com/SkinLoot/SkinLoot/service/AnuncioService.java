@@ -211,11 +211,8 @@ public class AnuncioService {
 
     /** Lista todos os anúncios de um usuário. */
     @Transactional(readOnly = true)
-    public List<AnuncioResponse> listarPorUsuario(UUID usuarioId) {
-        return anuncioRepository.findByUsuarioId(usuarioId)
-                .stream()
-                .map(AnuncioResponse::new)
-                .collect(Collectors.toList());
+    public List<Anuncio> listarPorUsuario(UUID usuarioId) {
+        return anuncioRepository.findByUsuarioId(usuarioId);
     }
 
     // ---------- Auxiliares ----------

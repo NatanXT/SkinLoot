@@ -323,8 +323,13 @@ export default function PerfilUsuario() {
   function withImagemUrl(obj) {
     if (!obj) return obj;
     const imagemUrl =
-      obj.imagemUrl || obj.imageUrl || obj.image || obj.imagem || '';
-    return { ...obj, imagemUrl };
+        obj.skinIcon || // <-- ADICIONE ESTA VERIFICAÇÃO (do AnuncioResponse)
+        obj.imagemUrl ||
+        obj.imageUrl ||
+        obj.image ||
+        obj.imagem ||
+        '';
+    return { ...obj, imagemUrl }
   }
 
   // Salva (cria ou edita)

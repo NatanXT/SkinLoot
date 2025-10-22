@@ -172,7 +172,7 @@ export default function DashboardVitrine() {
 
   const initial = readStateFromURL();
 
-  const [skinsMock] = useState(() => enrichFromMock(MockSkins));
+  //const [skinsMock] = useState(() => enrichFromMock(MockSkins));
   const [minhasSkins, setMinhasSkins] = useState([]);
   const [feedApi, setFeedApi] = useState([]);
   const [carregandoMinhas, setCarregandoMinhas] = useState(false);
@@ -343,9 +343,9 @@ export default function DashboardVitrine() {
     const ratio = plansMeta[planKey]?.weight ?? 1.0;
 
     let base = mixByPlanRatio(minhasSkins || [], others, ratio);
-    base = uniqById([...base, ...skinsMock]);
+    base = uniqById([...base]);
     return base;
-  }, [feedApi, minhasSkins, skinsMock, user]);
+  }, [feedApi, minhasSkins, user]);
 
   const ranked = useRankedSkins(listaCombinada, sortBy, filters);
 
@@ -774,7 +774,7 @@ function SkinCard({ data, liked, onLike, onContato, onComprarFora }) {
       })
     : '—';
 
-  const planKey = data?.plan ?? data?.plano ?? 'gratuito';
+  const planKey = data?.planoNome ?? data?.plan ?? data?.plano ?? 'gratuito';
   const planMeta = plansMeta[planKey] || { label: '—', color: '#999' };
 
   return (

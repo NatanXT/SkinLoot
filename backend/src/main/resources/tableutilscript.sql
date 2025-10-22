@@ -52,3 +52,12 @@ ALTER TABLE skin DROP COLUMN IF EXISTS jogo_nome;
 -- O "IF NOT EXISTS" é para a sintaxe de alguns sistemas, mas no PostgreSQL padrão
 -- o ideal é verificar se a constraint já existe antes de rodar. O comando simples é:
 ALTER TABLE jogo ADD CONSTRAINT uk_jogo_nome UNIQUE (nome);
+
+-- 1. Remove a regra antiga que está causando o erro
+ALTER TABLE anuncio
+    DROP CONSTRAINT anuncio_status_check;
+
+-- 2. Adiciona a regra nova, incluindo TODOS os valores do seu enum Status.java
+ALTER TABLE anuncio
+    ADD CONSTRAINT anuncio_status_check
+        CHECK (status IN ('ATIVO', 'INATIVO', 'PENDENTE', 'VENDIDO'));

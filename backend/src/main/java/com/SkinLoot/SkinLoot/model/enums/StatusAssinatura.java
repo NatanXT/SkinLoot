@@ -2,7 +2,7 @@ package com.SkinLoot.SkinLoot.model.enums;
 
 public enum StatusAssinatura {
     ATIVA,
-    INADIMPLENTE,
+    INATIVO,
     CANCELADA,
     GRATUITA
 }

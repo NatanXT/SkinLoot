@@ -57,7 +57,7 @@ public class AnuncioController {
 
         Usuario usuario = getUsuarioAutenticado(authentication);
         Anuncio atualizado = anuncioService.atualizar(id, req, usuario);
-        return ResponseEntity.ok(new AnuncioResponse(atualizado));
+        return ResponseEntity.ok(toDto(atualizado));
     }
 
     // ===================== LISTAGENS =====================
@@ -74,10 +74,13 @@ public class AnuncioController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<AnuncioResponse>> listarAnunciosDoUsuario(Authentication authentication) {
         Usuario usuario = getUsuarioAutenticado(authentication);
-        List<AnuncioResponse> anunciosDoUsuario = anuncioService.listarPorUsuario(usuario.getId());
-        // O método do service já retorna List<AnuncioResponse>, não precisa de
-        // mapeamento aqui.
-        return ResponseEntity.ok(anunciosDoUsuario);
+        // 1. Busque as entidades
+        List<Anuncio> anuncios = anuncioService.listarPorUsuario(usuario.getId());
+        // 2. Converta usando o toDto (que tem a lógica do plano)
+        List<AnuncioResponse> dtos = anuncios.stream()
+                .map(this::toDto) // <-- USE O toDto
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     // ===================== LIKES =====================
@@ -134,6 +137,21 @@ public class AnuncioController {
         dto.setSkinNome(a.getSkinName());
         dto.setSkinIcon(a.getSkinImageUrl());
 
+        // --- INÍCIO DA CORREÇÃO ---
+        // Verifica se a URL existe (armazenamento externo)
+        if (a.getSkinImageUrl() != null) {
+            dto.setSkinIcon(a.getSkinImageUrl());
+        }
+        // Se não houver URL, verifica se há Base64 (armazenamento interno)
+        else if (a.getSkinImageBase64() != null && a.getSkinImageMime() != null) {
+            // Reconstrói a string dataURL para o frontend
+            dto.setSkinIcon("data:" + a.getSkinImageMime() + ";base64," + a.getSkinImageBase64());
+        }
+        // Caso contrário, é nulo
+        else {
+            dto.setSkinIcon(null);
+        }
+
         // Relacionamento com a Skin (catálogo)
         if (a.getSkin() != null) {
             dto.setSkinId(a.getSkin().getId());
@@ -142,6 +160,11 @@ public class AnuncioController {
         // Relacionamento com o Usuário
         if (a.getUsuario() != null) {
             dto.setUsuarioNome(a.getUsuario().getNome());
+            if (a.getUsuario().getPlanoAssinatura() != null) {
+                // Pega o enum (ex: TipoPlano.PLUS) e converte para string (ex: "plus")
+                String planoNome = a.getUsuario().getPlanoAssinatura().getNome().name().toLowerCase();
+                dto.setPlanoNome(planoNome); // Assumindo que seu AnuncioResponse DTO tem 'setPlanoNome'
+            }
         }
 
         // Campos calculados
