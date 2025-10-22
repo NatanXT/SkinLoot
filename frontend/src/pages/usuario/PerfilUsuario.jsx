@@ -144,10 +144,17 @@ export default function PerfilUsuario() {
   }, []);
 
   // Plano e cota
-  const planoKey = String(
-    perfil?.plano || perfil?.plan || user?.plano || 'gratuito',
-  ).toLowerCase();
-  const planoInfo = plansMeta[planoKey] || plansMeta.gratuito;
+    const planoKey = String(
+        // 1. (NOVO) Tenta ler a estrutura do backend (ex: { planoAssinatura: { nome: 'PLUS' } })
+        perfil?.planoAssinatura?.nome ||
+        // 2. Fallback para o estado local (que o 'upgrade' define manualmente, ex: { plano: 'plus' })
+        perfil?.plano ||
+        user?.plano ||
+        // 3. Default
+        'gratuito'
+    ).toLowerCase();
+
+    const planoInfo = plansMeta[planoKey] || plansMeta.gratuito;
 
   const limitePlano = getPlanoLimit(planoKey);
   const usados = skins.filter((s) => s.ativo !== false).length; // conta ativos
@@ -222,29 +229,46 @@ export default function PerfilUsuario() {
       setBusy(false);
     }
   }
-  async function onEscolherPlano(planoNovo, label) {
-    setBusy(true);
-    try {
-      // 1. Chama a API real. Não precisamos do objeto retornado.
-      await upgradePlano(planoNovo);
+  async function onEscolherPlano(planoNovo, label) { // 'planoNovo' é a string, ex: "plus"
+        setBusy(true);
+        try {
+            // 1. Chama a API real.
+            // Não precisamos do *retorno* da chamada, apenas que ela funcione (200 OK).
+            await upgradePlano(planoNovo);
 
-      // 2. A API retornou 200 OK. O backend mudou o plano.
-      // Agora, atualizamos o estado do frontend para *refletir* essa mudança.
-      // Usamos a lógica do mock original, que o componente entende:
-      setPerfil((prev) => ({ ...prev, plano: planoNovo })); //
-      if (typeof setUser === 'function') {
-        setUser((prev) => ({ ...prev, plano: planoNovo })); //
-      }
+            // 2. A API retornou 200 OK. O backend mudou o plano.
+            // Agora, atualizamos o estado local (perfil) e global (user)
+            // para *exatamente* a estrutura que a tela espera.
 
-      addToast(`Upgrade para ${label} realizado!`, 'success');
-      setPainel(null);
-    } catch (error) {
-      console.error("Falha ao fazer upgrade:", error);
-      addToast(error?.response?.data?.message || 'Erro ao fazer upgrade.', 'error');
-    } finally {
-      setBusy(false);
+            const novoNomePlano = planoNovo.toUpperCase(); // ex: "PLUS"
+
+            // Atualiza o estado local (perfil)
+            setPerfil((prev) => ({
+                ...prev,
+                // Atualiza a estrutura que o 'planoKey' lê após o reload
+                planoAssinatura: { ...prev.planoAssinatura, nome: novoNomePlano },
+                // Atualiza a estrutura que o 'planoKey' lê para o instantâneo (fallback)
+                plano: planoNovo
+            }));
+
+            // Atualiza o estado global (user) da mesma forma
+            if (typeof setUser === 'function') { //
+                setUser((prev) => ({
+                    ...prev,
+                    planoAssinatura: { ...prev.planoAssinatura, nome: novoNomePlano },
+                    plano: planoNovo
+                }));
+            }
+
+            addToast(`Upgrade para ${label} realizado!`, 'success');
+            setPainel(null);
+        } catch (error) {
+            console.error("Falha ao fazer upgrade:", error);
+            addToast(error?.response?.data?.message || 'Erro ao fazer upgrade.', 'error');
+        } finally {
+            setBusy(false);
+        }
     }
-  }
 
   // ========================== EDITAR / CRIAR SKIN ============================
   function abrirEditar(skin) {

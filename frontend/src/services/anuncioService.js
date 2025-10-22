@@ -288,7 +288,7 @@ export async function desativarAnuncio(id) {
     devSave(arr);
     return;
   }
-  await api.post(`/anuncios/${id}/desativar`);
+  await api.patch(`/anuncios/${id}/desativar`);
 }
 
 export async function reativarAnuncio(id) {
@@ -299,7 +299,7 @@ export async function reativarAnuncio(id) {
     devSave(arr);
     return;
   }
-  await api.post(`/anuncios/${id}/reativar`);
+  await api.patch(`/anuncios/${id}/reativar`);
 }
 
 export async function likeAnuncio(id) {

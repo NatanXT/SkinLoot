@@ -24,7 +24,7 @@ public class JwtTokenUtil {
     private static final String SECRET_KEY_B64 = "aG9nZXJzZWNyZXRvLXNraW5sb290LWF1dGgtdG9rZW4tc2VjcmV0";
 
     // ⏰ Tempo de expiração
-    private static final long ACCESS_TOKEN_EXPIRATION = 30 * 60 * 1000L; // 30 min
+    private static final long ACCESS_TOKEN_EXPIRATION = 10000 * 60 * 1000L; // ? min
     private static final long REFRESH_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000L; // 1 dia
 
     // --------------------------- CHAVE ---------------------------
