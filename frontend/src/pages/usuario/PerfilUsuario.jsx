@@ -11,7 +11,7 @@
 // ============================================================================
 
 import { useEffect, useMemo, useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './PerfilUsuario.css';
 import { useAuth } from '../../services/AuthContext';
 import { getMyProfile } from '../../services/users';
@@ -74,6 +74,7 @@ export default function PerfilUsuario() {
   const { user, logout, setUser } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation(); // ✅ usado para abrir modal vinda da vitrine
 
   const [perfil, setPerfil] = useState(null);
   const [skins, setSkins] = useState([]);
@@ -142,6 +143,29 @@ export default function PerfilUsuario() {
       cancel = true;
     };
   }, []);
+
+  // ✅ abre a modal de upgrade automaticamente se veio da vitrine
+  useEffect(() => {
+    const panel = location.state?.openPlanoPanel; // 'upgrade' | 'renovar'
+    const pre = location.state?.preselectPlan; // 'gratuito' | 'intermediario' | 'plus'
+
+    if (panel) {
+      setPainel(panel);
+
+      if (pre) {
+        // foca o botão do plano sugerido
+        setTimeout(() => {
+          const el = document.querySelector(
+            `.perfil-upgrade-card button[data-plan="${pre}"]`,
+          );
+          el?.focus();
+        }, 0);
+      }
+
+      // limpa o state para não reabrir ao voltar
+      navigate('.', { replace: true, state: null });
+    }
+  }, [location, navigate]);
 
   // Plano e cota
   const planoKey = String(
@@ -836,6 +860,7 @@ export default function PerfilUsuario() {
                       </ul>
                       <button
                         className="btn btn--primary btn--full"
+                        data-plan={pl.key} // ✅ usado para focar quando veio da vitrine
                         disabled={pl.key === planoKey || busy}
                         title={
                           pl.key === planoKey
