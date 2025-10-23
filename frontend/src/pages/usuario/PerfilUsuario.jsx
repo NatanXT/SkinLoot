@@ -4,9 +4,9 @@
 // - Dados da conta
 // - Plano/cota
 // - Minhas Skins: puxa do mock via service
-// - Modal de Renovar/Upgrade (mock)
-// - Editar Skin: preview clicável + upload de arquivo OU URL
-// - Desativar Skin: confirmação dupla com a palavra "Confirmo" (case-insensitive)
+// - Modal de Renovar/Upgrade
+// - Editar Skin: preview clicável + upload de arquivo OU URL/dataURL
+// - Desativar Skin: confirmação dupla com a palavra "Confirmo"
 // - Reativar Skin: abre editor e só ativa após salvar, respeitando limite
 // ============================================================================
 
@@ -144,17 +144,14 @@ export default function PerfilUsuario() {
   }, []);
 
   // Plano e cota
-    const planoKey = String(
-        // 1. (NOVO) Tenta ler a estrutura do backend (ex: { planoAssinatura: { nome: 'PLUS' } })
-        perfil?.planoAssinatura?.nome ||
-        // 2. Fallback para o estado local (que o 'upgrade' define manualmente, ex: { plano: 'plus' })
-        perfil?.plano ||
-        user?.plano ||
-        // 3. Default
-        'gratuito'
-    ).toLowerCase();
+  const planoKey = String(
+    perfil?.planoAssinatura?.nome || // estrutura do backend
+      perfil?.plano || // fallback local
+      user?.plano || // fallback global
+      'gratuito',
+  ).toLowerCase();
 
-    const planoInfo = plansMeta[planoKey] || plansMeta.gratuito;
+  const planoInfo = plansMeta[planoKey] || plansMeta.gratuito;
 
   const limitePlano = getPlanoLimit(planoKey);
   const usados = skins.filter((s) => s.ativo !== false).length; // conta ativos
@@ -203,84 +200,65 @@ export default function PerfilUsuario() {
     }
   }
 
-  // --------------------------- Plano (mock) -------------------------------
+  // --------------------------- Plano -------------------------------
   async function onConfirmarRenovar() {
     setBusy(true);
     try {
-      // 1. Chama a API real. 'planoKey' já contém o plano atual (ex: "gratuito")
-      // Não precisamos do objeto retornado, apenas da confirmação.
       await renovarPlano(planoKey);
-
-      // 2. A API retornou OK.
-      // Para garantir que vemos novas datas (se houver),
-      // vamos buscar o perfil atualizado do backend.
-      const p = await getMyProfile(); //
+      const p = await getMyProfile();
       setPerfil(p);
-      if (typeof setUser === 'function') {
-        setUser(p);
-      }
-
+      if (typeof setUser === 'function') setUser(p);
       addToast('Plano renovado com sucesso!', 'success');
       setPainel(null);
     } catch (error) {
-      console.error("Falha ao renovar plano:", error);
-      addToast(error?.response?.data?.message || 'Erro ao renovar plano.', 'error');
+      console.error('Falha ao renovar plano:', error);
+      addToast(
+        error?.response?.data?.message || 'Erro ao renovar plano.',
+        'error',
+      );
     } finally {
       setBusy(false);
     }
   }
-  async function onEscolherPlano(planoNovo, label) { // 'planoNovo' é a string, ex: "plus"
-        setBusy(true);
-        try {
-            // 1. Chama a API real.
-            // Não precisamos do *retorno* da chamada, apenas que ela funcione (200 OK).
-            await upgradePlano(planoNovo);
-
-            // 2. A API retornou 200 OK. O backend mudou o plano.
-            // Agora, atualizamos o estado local (perfil) e global (user)
-            // para *exatamente* a estrutura que a tela espera.
-
-            const novoNomePlano = planoNovo.toUpperCase(); // ex: "PLUS"
-
-            // Atualiza o estado local (perfil)
-            setPerfil((prev) => ({
-                ...prev,
-                // Atualiza a estrutura que o 'planoKey' lê após o reload
-                planoAssinatura: { ...prev.planoAssinatura, nome: novoNomePlano },
-                // Atualiza a estrutura que o 'planoKey' lê para o instantâneo (fallback)
-                plano: planoNovo
-            }));
-
-            // Atualiza o estado global (user) da mesma forma
-            if (typeof setUser === 'function') { //
-                setUser((prev) => ({
-                    ...prev,
-                    planoAssinatura: { ...prev.planoAssinatura, nome: novoNomePlano },
-                    plano: planoNovo
-                }));
-            }
-
-            addToast(`Upgrade para ${label} realizado!`, 'success');
-            setPainel(null);
-        } catch (error) {
-            console.error("Falha ao fazer upgrade:", error);
-            addToast(error?.response?.data?.message || 'Erro ao fazer upgrade.', 'error');
-        } finally {
-            setBusy(false);
-        }
+  async function onEscolherPlano(planoNovo, label) {
+    setBusy(true);
+    try {
+      await upgradePlano(planoNovo);
+      const novoNomePlano = planoNovo.toUpperCase();
+      setPerfil((prev) => ({
+        ...prev,
+        planoAssinatura: { ...prev?.planoAssinatura, nome: novoNomePlano },
+        plano: planoNovo,
+      }));
+      if (typeof setUser === 'function') {
+        setUser((prev) => ({
+          ...prev,
+          planoAssinatura: { ...prev?.planoAssinatura, nome: novoNomePlano },
+          plano: planoNovo,
+        }));
+      }
+      addToast(`Upgrade para ${label} realizado!`, 'success');
+      setPainel(null);
+    } catch (error) {
+      console.error('Falha ao fazer upgrade:', error);
+      addToast(
+        error?.response?.data?.message || 'Erro ao fazer upgrade.',
+        'error',
+      );
+    } finally {
+      setBusy(false);
     }
+  }
 
   // ========================== EDITAR / CRIAR SKIN ============================
   function abrirEditar(skin) {
     setSkinEditando(skin);
-    // Pode vir uma URL ou dataURL (no DEV/normalizador).
     const urlAtual = skin?.imagemUrl || skin?.image || skin?.imagem || '';
     const raw = skin?._raw || {};
     setFormEdicao({
       skinNome: skin?.skinNome || skin?.title || skin?.nome || '',
       preco: skin?.preco ?? skin?.price ?? '',
       imagemUrl: urlAtual,
-      // --- Campos novos (lendo do _raw se existir) ---
       descricao: raw.descricao ?? '',
       detalhes: raw.detalhesEspecificos
         ? JSON.stringify(raw.detalhesEspecificos, null, 2)
@@ -314,29 +292,27 @@ export default function PerfilUsuario() {
     if (!file) return;
     setImagemFile(file);
     setFormEdicao((v) => ({ ...v, imagemUrl: '' })); // evita validação de URL
-    // Preview direto com dataURL do arquivo
     const dataURL = await readFileAsDataURL(file);
     setPreviewImagem(String(dataURL || ''));
   }
 
-  // Normaliza o objeto retornado pelo backend para garantir campo de imagem
+  // Normaliza backend para garantir campo de imagem
   function withImagemUrl(obj) {
     if (!obj) return obj;
     const imagemUrl =
-        obj.skinIcon || // <-- ADICIONE ESTA VERIFICAÇÃO (do AnuncioResponse)
-        obj.imagemUrl ||
-        obj.imageUrl ||
-        obj.image ||
-        obj.imagem ||
-        '';
-    return { ...obj, imagemUrl }
+      obj.skinIcon ||
+      obj.imagemUrl ||
+      obj.imageUrl ||
+      obj.image ||
+      obj.imagem ||
+      '';
+    return { ...obj, imagemUrl };
   }
 
   // Salva (cria ou edita)
   async function salvarEdicao() {
     setSalvandoEdicao(true);
     try {
-      // Validação
       const nomeOk = String(formEdicao.skinNome || '').trim().length > 0;
       const precoNum = Number(String(formEdicao.preco).replace(',', '.'));
       if (!nomeOk || !Number.isFinite(precoNum) || precoNum < 0) {
@@ -345,13 +321,13 @@ export default function PerfilUsuario() {
         return;
       }
 
-      // --- Validar e Parsear JSON (detalhes) ---
+      // Validar JSON (detalhes)
       let detalhesJson = {};
       try {
         if (formEdicao.detalhes && formEdicao.detalhes.trim()) {
           detalhesJson = JSON.parse(formEdicao.detalhes);
         }
-      } catch (jsonError) {
+      } catch {
         addToast(
           'O campo "Detalhes Específicos" não é um JSON válido.',
           'error',
@@ -360,50 +336,32 @@ export default function PerfilUsuario() {
         return;
       }
 
-      // --------- NOVO: preparar imagem em Base64/MIME ----------
+      // Preparar imagem Base64/MIME se for arquivo ou dataURL
       let skinImageBase64 = null;
       let skinImageMime = null;
-
       if (imagemFile instanceof File) {
-        // 1) Usuário escolheu arquivo → converte para dataURL e extrai {base64,mime}
         const dataURL = await readFileAsDataURL(imagemFile);
         const parts = dataUrlToParts(dataURL);
         skinImageBase64 = parts.base64 || null;
         skinImageMime = parts.mime || null;
-      } else if (
-        formEdicao.imagemUrl &&
-        formEdicao.imagemUrl.startsWith('data:')
-      ) {
-        // 2) Usuário colou uma dataURL no campo de URL
+      } else if (formEdicao.imagemUrl?.startsWith('data:')) {
         const parts = dataUrlToParts(formEdicao.imagemUrl);
         skinImageBase64 = parts.base64 || null;
         skinImageMime = parts.mime || null;
-      } else {
-        // 3) Usuário digitou uma URL http(s). Não dá para baixar e converter aqui (CORS).
-        //    Enviaremos apenas como URL (fallback). Se não quiser usar URL, deixe vazio.
       }
-      // ---------------------------------------------------------
 
       const id = skinEditando?.id || skinEditando?._id;
 
-      // IMPORTANTE:
-      // Agora preferimos enviar Base64 (skinImageBase64/skinImageMime).
-      // Se não existir base64, enviaremos a URL como fallback no payload (service pode ignorar).
+      // Payload híbrido — preferir base64, senão URL como fallback
       const payload = {
         titulo: formEdicao.skinNome,
         descricao: formEdicao.descricao ?? '',
         preco: precoNum,
-
-        // Lógica Híbrida:
         skinId: null,
         skinName: formEdicao.skinNome,
         detalhesEspecificos: detalhesJson,
-
-        // ---- Imagem: Base64 preferencial ----
         skinImageBase64: skinImageBase64 || undefined,
         skinImageMime: skinImageMime || undefined,
-
-        // ---- Fallback (se o usuário digitou uma URL http/https) ----
         skinImageUrl:
           !skinImageBase64 &&
           formEdicao.imagemUrl &&
@@ -413,7 +371,6 @@ export default function PerfilUsuario() {
       };
 
       if (id) {
-        // ------- EDITAR -------
         const atualizadoRaw = await editarSkin(id, payload);
         const atualizado = withImagemUrl(atualizadoRaw);
 
@@ -436,10 +393,9 @@ export default function PerfilUsuario() {
         );
         notifySkinsChanged();
       } else {
-        // ------- CRIAR -------
         const novaRaw = await criarSkin(payload);
         const nova = withImagemUrl(novaRaw);
-        setSkins((lista) => [nova, ...lista]); // topo
+        setSkins((lista) => [nova, ...lista]);
         addToast('Skin criada!', 'success');
         notifySkinsChanged();
       }
@@ -499,7 +455,6 @@ export default function PerfilUsuario() {
     }
   }
 
-  // Reativar: abre o editor e só ativa após salvar
   async function handleReativar(skin) {
     const id = skin?.id || skin?._id;
     if (!id) return;
@@ -766,7 +721,7 @@ export default function PerfilUsuario() {
         </section>
       </div>
 
-      {/* Modal: Renovar / Upgrade (mock) */}
+      {/* Modal: Renovar / Upgrade */}
       {painel && (
         <div className="perfil-modal" role="dialog" aria-modal="true">
           <div className="perfil-modal__backdrop" onClick={fecharPainel} />
@@ -813,7 +768,7 @@ export default function PerfilUsuario() {
                     </span>
                   </div>
                 </div>
-                <div className="perfil-modal__actions">
+                <div className="perfil-modal__actions perfil-modal__actions--inline">
                   <button
                     className="btn btn--ghost"
                     onClick={fecharPainel}
@@ -898,7 +853,7 @@ export default function PerfilUsuario() {
                     </div>
                   ))}
                 </div>
-                <div className="perfil-modal__actions">
+                <div className="perfil-modal__actions perfil-modal__actions--inline">
                   <button
                     className="btn btn--ghost"
                     onClick={fecharPainel}
@@ -933,150 +888,164 @@ export default function PerfilUsuario() {
               </button>
             </div>
 
-            {/* Uploader clicável + preview (arquivo OU URL/dataURL colada) */}
-            <div
-              className="perfil-upload"
-              role="button"
-              tabIndex={0}
-              onClick={() => inputFileRef.current?.click()}
-              onKeyDown={(e) =>
-                (e.key === 'Enter' || e.key === ' ') &&
-                inputFileRef.current?.click()
-              }
-              title="Clique para selecionar uma imagem do computador"
-            >
-              {previewImagem ? (
-                <img
-                  src={previewImagem}
-                  alt="Pré-visualização"
-                  onError={(e) => {
-                    e.currentTarget.src = IMG_PLACEHOLDER;
-                  }}
+            {/* TUDO QUE CRESCE FICA ROLÁVEL AQUI */}
+            <div className="perfil-modal__scroll">
+              {/* Uploader clicável + preview (arquivo OU URL/dataURL colada) */}
+              <div
+                className="perfil-upload"
+                role="button"
+                tabIndex={0}
+                onClick={() => inputFileRef.current?.click()}
+                onKeyDown={(e) =>
+                  (e.key === 'Enter' || e.key === ' ') &&
+                  inputFileRef.current?.click()
+                }
+                title="Clique para selecionar uma imagem do computador"
+              >
+                {previewImagem ? (
+                  <img
+                    src={previewImagem}
+                    alt="Pré-visualização"
+                    onError={(e) => {
+                      e.currentTarget.src = IMG_PLACEHOLDER;
+                    }}
+                  />
+                ) : (
+                  <div className="perfil-upload__placeholder">
+                    Clique para enviar uma imagem
+                  </div>
+                )}
+                <input
+                  ref={inputFileRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={onEscolherArquivo}
                 />
-              ) : (
-                <div className="perfil-upload__placeholder">
-                  Clique para enviar uma imagem
+              </div>
+
+              <form
+                className="perfil-form"
+                noValidate
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  salvarEdicao();
+                }}
+              >
+                <div className="perfil-form__row">
+                  <label htmlFor="f-nome">Nome</label>
+                  <input
+                    id="f-nome"
+                    type="text"
+                    required
+                    placeholder="Nome da skin (Ex: AWP | Dragon Lore)"
+                    value={formEdicao.skinNome}
+                    onChange={(e) =>
+                      setFormEdicao((v) => ({ ...v, skinNome: e.target.value }))
+                    }
+                  />
                 </div>
-              )}
-              <input
-                ref={inputFileRef}
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={onEscolherArquivo}
-              />
+
+                {/* --- Descrição --- */}
+                <div className="perfil-form__row">
+                  <label htmlFor="f-descricao">Descrição</label>
+                  <textarea
+                    id="f-descricao"
+                    className="textarea"
+                    placeholder="Descrição do anúncio, detalhes, etc."
+                    rows={4}
+                    value={formEdicao.descricao}
+                    onChange={(e) =>
+                      setFormEdicao((v) => ({
+                        ...v,
+                        descricao: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div className="perfil-form__row">
+                  <label htmlFor="f-preco">Preço (R$)</label>
+                  <input
+                    id="f-preco"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    required
+                    placeholder="0,00"
+                    value={formEdicao.preco}
+                    onChange={(e) =>
+                      setFormEdicao((v) => ({ ...v, preco: e.target.value }))
+                    }
+                  />
+                </div>
+
+                <div className="perfil-form__row">
+                  <label htmlFor="f-imagem">URL da imagem (opcional)</label>
+                  <input
+                    id="f-imagem"
+                    type="text"
+                    placeholder="https://exemplo.com/imagem.png ou cole uma dataURL (data:image/png;base64,...)"
+                    value={formEdicao.imagemUrl}
+                    onChange={(e) => {
+                      setImagemFile(null); // se digitar URL/dataURL, prioriza isso
+                      setFormEdicao((v) => ({
+                        ...v,
+                        imagemUrl: e.target.value,
+                      }));
+                    }}
+                  />
+                  <small className="perfil-form__hint">
+                    Dica: cole uma URL <strong>ou</strong> clique na imagem
+                    acima para enviar um arquivo. Também aceitamos uma{' '}
+                    <strong>dataURL</strong>.
+                  </small>
+                </div>
+
+                {/* --- Detalhes Específicos (JSON) --- */}
+                <div className="perfil-form__row">
+                  <label htmlFor="f-detalhes">
+                    Detalhes Específicos (JSON)
+                  </label>
+                  <textarea
+                    id="f-detalhes"
+                    className="textarea textarea--code"
+                    placeholder='{ "pattern": 123, "stat_trak": true }'
+                    rows={6}
+                    value={formEdicao.detalhes}
+                    onChange={(e) =>
+                      setFormEdicao((v) => ({ ...v, detalhes: e.target.value }))
+                    }
+                  />
+                  <small className="perfil-form__hint">
+                    Envie dados extras como um JSON.
+                  </small>
+                </div>
+
+                {/* Rodapé sempre visível dentro da área rolável */}
+                <div className="perfil-modal__actions">
+                  <button
+                    type="button"
+                    className="btn btn--ghost"
+                    onClick={fecharEditar}
+                    disabled={salvandoEdicao}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn--primary"
+                    disabled={salvandoEdicao}
+                  >
+                    {salvandoEdicao
+                      ? 'Salvando...'
+                      : skinEditando?.id || skinEditando?._id
+                      ? 'Salvar alterações'
+                      : 'Criar skin'}
+                  </button>
+                </div>
+              </form>
             </div>
-
-            <form
-              className="perfil-form"
-              noValidate
-              onSubmit={(e) => {
-                e.preventDefault();
-                salvarEdicao();
-              }}
-            >
-              <div className="perfil-form__row">
-                <label htmlFor="f-nome">Nome</label>
-                <input
-                  id="f-nome"
-                  type="text"
-                  required
-                  placeholder="Nome da skin (Ex: AWP | Dragon Lore)"
-                  value={formEdicao.skinNome}
-                  onChange={(e) =>
-                    setFormEdicao((v) => ({ ...v, skinNome: e.target.value }))
-                  }
-                />
-              </div>
-
-              {/* --- Descrição (NOVO) --- */}
-              <div className="perfil-form__row">
-                <label htmlFor="f-descricao">Descrição</label>
-                <textarea
-                  id="f-descricao"
-                  placeholder="Descrição do anúncio, detalhes, etc."
-                  rows={3}
-                  value={formEdicao.descricao}
-                  onChange={(e) =>
-                    setFormEdicao((v) => ({ ...v, descricao: e.target.value }))
-                  }
-                />
-              </div>
-
-              <div className="perfil-form__row">
-                <label htmlFor="f-preco">Preço (R$)</label>
-                <input
-                  id="f-preco"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  required
-                  placeholder="0,00"
-                  value={formEdicao.preco}
-                  onChange={(e) =>
-                    setFormEdicao((v) => ({ ...v, preco: e.target.value }))
-                  }
-                />
-              </div>
-
-              <div className="perfil-form__row">
-                <label htmlFor="f-imagem">URL da imagem (opcional)</label>
-                <input
-                  id="f-imagem"
-                  type="text"
-                  placeholder="https://exemplo.com/imagem.png ou cole uma dataURL (data:image/png;base64,...)"
-                  value={formEdicao.imagemUrl}
-                  onChange={(e) => {
-                    setImagemFile(null); // se digitar URL/dataURL, prioriza isso
-                    setFormEdicao((v) => ({ ...v, imagemUrl: e.target.value }));
-                  }}
-                />
-                <small className="perfil-form__hint">
-                  Dica: cole uma URL <strong>ou</strong> clique na imagem acima
-                  para enviar um arquivo. Também aceitamos uma{' '}
-                  <strong>dataURL</strong>.
-                </small>
-              </div>
-
-              {/* --- Detalhes Específicos (JSON) (NOVO) --- */}
-              <div className="perfil-form__row">
-                <label htmlFor="f-detalhes">Detalhes Específicos (JSON)</label>
-                <textarea
-                  id="f-detalhes"
-                  placeholder='{ "pattern": 123, "stat_trak": true }'
-                  rows={4}
-                  value={formEdicao.detalhes}
-                  onChange={(e) =>
-                    setFormEdicao((v) => ({ ...v, detalhes: e.target.value }))
-                  }
-                />
-                <small className="perfil-form__hint">
-                  Envie dados extras como um JSON.
-                </small>
-              </div>
-
-              <div className="perfil-modal__actions">
-                <button
-                  type="button"
-                  className="btn btn--ghost"
-                  onClick={fecharEditar}
-                  disabled={salvandoEdicao}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn--primary"
-                  disabled={salvandoEdicao}
-                >
-                  {salvandoEdicao
-                    ? 'Salvando...'
-                    : skinEditando?.id || skinEditando?._id
-                    ? 'Salvar alterações'
-                    : 'Criar skin'}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
@@ -1108,7 +1077,7 @@ export default function PerfilUsuario() {
                   <li>Você poderá reativá-la depois.</li>
                 </ul>
 
-                <div className="perfil-modal__actions">
+                <div className="perfil-modal__actions perfil-modal__actions--inline">
                   <button className="btn btn--ghost" onClick={fecharDesativar}>
                     Cancelar
                   </button>
@@ -1150,7 +1119,7 @@ export default function PerfilUsuario() {
                   </span>
                 </label>
 
-                <div className="perfil-modal__actions">
+                <div className="perfil-modal__actions perfil-modal__actions--inline">
                   <button
                     className="btn btn--ghost"
                     onClick={fecharDesativar}

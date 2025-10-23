@@ -8,7 +8,8 @@
    - Form do modal de edição (hover/focus iguais aos campos do perfil)
    - Uploader clicável + preview
    - Confirmação/desativação com lista/checkbox
-   - Visual de card inativa
+   - Textareas com o MESMO visual dos inputs (descrição/JSON)
+   - Modal de edição com área rolável + ações sticky
    ========================================================================== */
 
 :root{
@@ -205,7 +206,7 @@
   display:flex; align-items:center; justify-content:space-between; gap:12px; color:var(--muted);
 }
 
-/* ====================== Modal/Painel ====================== */
+/* ====================== Modal/Painel (base) ====================== */
 .perfil-modal{
   position: fixed;
   inset: 0;
@@ -221,12 +222,14 @@
 .perfil-modal__card{
   position:relative;
   width:min(720px, 92vw);
+  max-height:92vh;                 /* impede estourar a janela */
   background:linear-gradient(180deg,#12171E, #0F1319);
   border:1px solid #1A2129;
   border-radius:20px;
   box-shadow: 0 24px 60px rgba(0,0,0,.6);
   padding:18px;
   animation: modalIn .18s ease-out both;
+  display:flex; flex-direction:column;
 }
 @keyframes modalIn {
   from { transform: translateY(8px); opacity: 0 }
@@ -235,6 +238,7 @@
 .perfil-modal__head{
   display:flex; align-items:center; justify-content:space-between; gap:12px;
   border-bottom:1px solid #1A2129; padding-bottom:10px; margin-bottom:12px;
+  flex: 0 0 auto;
 }
 .perfil-modal__close{
   all:unset; cursor:pointer; width:36px; height:36px; line-height:36px; text-align:center;
@@ -255,7 +259,30 @@
 }
 .perfil-modal__item .k{ display:block; font-size:12px; color:var(--muted) }
 .perfil-modal__item .v{ font-weight:600 }
+
+/* ===== Scroll interno da modal de edição ===== */
+.perfil-modal__scroll{
+  overflow:auto;                    /* <- permite rolar o conteúdo grande */
+  padding-right:4px;
+  display:flex; flex-direction:column; gap:12px;
+  scrollbar-gutter: stable both-edges;
+}
+.perfil-modal__scroll::-webkit-scrollbar{ width:10px; height:10px }
+.perfil-modal__scroll::-webkit-scrollbar-thumb{ background:#26313D; border-radius:999px }
+.perfil-modal__scroll::-webkit-scrollbar-track{ background:transparent }
+
+/* ===== Rodapé da modal (ações) ===== */
 .perfil-modal__actions{
+  position: sticky;                 /* fica visível durante o scroll */
+  bottom: 0;
+  display:flex; gap:10px; justify-content:flex-end;
+  padding-top:10px;
+  margin-top:12px;
+  background:linear-gradient(180deg, transparent, rgba(15,19,25,.7) 40%, rgba(15,19,25,.95));
+  backdrop-filter: blur(2px);
+  border-top:1px solid #1A2129;
+}
+.perfil-modal__actions--inline{
   display:flex; gap:10px; justify-content:flex-end; margin-top:8px;
 }
 
@@ -264,7 +291,7 @@
 .perfil-form__row{ display:grid; gap:6px; }
 .perfil-form__row label{ font-size:12px; color:var(--muted); }
 
-/* No JSX, a URL é text para aceitar arquivo+preview sem travar validação nativa */
+/* Inputs */
 .perfil-form__row input[type="text"],
 .perfil-form__row input[type="number"]{
   background:#0E1217;
@@ -285,18 +312,62 @@
 }
 .perfil-form__hint{ display:block; font-size:12px; color:var(--muted); }
 
+/* === Textareas com o MESMO visual dos inputs === */
+.textarea,
+.perfil-form__row textarea{
+  background:#0E1217;
+  border:1px solid #1C2430;
+  border-radius:10px;
+  padding:10px 12px;
+  color:#E8F1F2;
+  outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
+  min-height:120px;
+  resize:vertical;
+  line-height:1.5;
+}
+.textarea:hover,
+.perfil-form__row textarea:hover{
+  border-color:#314151;
+  box-shadow:0 0 0 4px rgba(57,255,20,.07);
+}
+.textarea:focus,
+.perfil-form__row textarea:focus{
+  border-color:#00C896;
+  box-shadow:0 0 0 4px rgba(57,255,20,.12);
+}
+
+/* === Variante monoespaçada para JSON === */
+.textarea--code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  white-space: pre;
+  tab-size: 2;
+  overflow: auto;
+  caret-color: #fff;
+}
+
+/* Placeholders consistentes */
+.perfil-form__row input::placeholder,
+.perfil-form__row textarea::placeholder{
+  color:#96A0AD;
+  opacity:.8;
+}
+
 /* ====================== Uploader clicável + preview ====================== */
+/* >>> ALTERADO para flex (cresce com o conteúdo) e impede sobreposição */
 .perfil-upload{
   background:#0E1217;
   border:1px solid #1C2430;
   border-radius:14px;
   padding:16px;
-  display:grid;
-  place-items:center;
+  display:flex;                     /* antes: grid */
+  align-items:center;
+  justify-content:center;
   min-height:220px;
   cursor:pointer;
   transition:border-color .15s ease, box-shadow .15s ease, transform .15s ease;
   margin-bottom:12px;
+  overflow:hidden;                  /* evita que a img passe por cima dos campos */
 }
 .perfil-upload:hover{
   border-color:#314151;
@@ -309,8 +380,11 @@
   box-shadow:0 0 0 4px rgba(57,255,20,.12);
 }
 .perfil-upload img{
+  display:block;
+  width:auto;
   max-width:100%;
-  max-height:320px;
+  height:auto;
+  max-height: min(48vh, 420px);  /* impede imagem gigante */
   object-fit:contain;
   filter:saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.55));
 }
