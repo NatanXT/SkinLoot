@@ -98,8 +98,11 @@ function normalizarDoBackend(anuncio = {}) {
   const game = anuncio.jogo ?? anuncio.jogoNome ?? 'CS2';
   const precoNum = Number(anuncio.preco ?? anuncio.price ?? anuncio.valor ?? 0);
   const plan = String(
-    anuncio.plano ?? anuncio.plan ?? 'gratuito',
-  ).toLowerCase();
+      anuncio.planoNome ?? // <-- 1. Prioridade para o campo que o backend envia
+      anuncio.plano ??     // <-- 2. Fallback
+      anuncio.plan ??      // <-- 3. Fallback
+      'gratuito'           // <-- 4. Default
+      ).toLowerCase();
   const likes = Number(
     anuncio.likesCount ?? anuncio.likes ?? anuncio.curtidas ?? 0,
   );
