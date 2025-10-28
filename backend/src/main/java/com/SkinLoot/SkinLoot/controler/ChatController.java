@@ -74,7 +74,9 @@ public class ChatController {
                 msgSalva.getConteudo(),
                 msgSalva.getTimestamp(),
                 remetente.getNome(),
-                destinatario.getNome()
+                destinatario.getNome(),
+                remetente.getId(), // <-- Adicionado ID do remetente
+                destinatario.getId()
         );
 
         // ✅ MUDANÇA 4: Envia a mensagem em tempo real para o destinatário
@@ -102,11 +104,8 @@ public class ChatController {
     @ResponseBody // Necessário porque a classe é @Controller, não @RestController
     public List<ChatMessageResponse> buscarMensagens(
             @PathVariable UUID destinatarioId,
-            Principal principal // <-- MUDANÇA: Usar Principal (ou Authentication)
+            Principal principal
     ) {
-        // String token = jwtTokenUtil.resolveToken(servletRequest); // REMOVIDO
-        // String username = jwtTokenUtil.getUsernameFromToken(token); // REMOVIDO
-
         // Pega o utilizador logado diretamente do 'Principal'
         String username = principal.getName();
         Usuario remetente = usuarioRepository.findByEmail(username)
@@ -116,16 +115,15 @@ public class ChatController {
                 .orElseThrow(() -> new RuntimeException("Utilizador destinatário não encontrado."));
 
         // A lógica de busca no repositório está perfeita
-        return chatRepository
-                .findByRemetenteAndDestinatarioOrDestinatarioAndRemetenteOrderByTimestampAsc(
-                        remetente, destinatario, remetente, destinatario
-                ).stream()
+        return chatRepository.findByRemetenteAndDestinatarioOrDestinatarioAndRemetenteOrderByTimestampAsc(remetente, destinatario, remetente, destinatario).stream()
                 .map(m -> new ChatMessageResponse( // Simplificado o DTO
                         m.getId(),
                         m.getConteudo(),
                         m.getTimestamp(),
                         m.getRemetente().getNome(),
-                        m.getDestinatario().getNome()
+                        m.getDestinatario().getNome(),
+                        m.getRemetente().getId(),
+                        m.getDestinatario().getId()
                 )).collect(Collectors.toList());
     }
 }

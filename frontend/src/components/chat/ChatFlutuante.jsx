@@ -198,23 +198,16 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
 
     // NOVO: Função que é chamada pela inscrição do WebSocket
     const receberMensagem = (novaMensagem) => {
-        // 'novaMensagem' é o ChatMessageResponse do backend
+        // { id, conteudo, timestamp, remetenteNome, destinatarioNome, remetenteId, destinatarioId }
 
-        // Descobre de quem é (remetente) ou para quem é (destinatário)
-        const autorDaMensagem = novaMensagem.remetenteNome;
-        const souEu = autorDaMensagem === user.nome;
-
-        // O 'id' do outro usuário na conversa
-        const outroUsuarioId = souEu
-            ? contatos.find(c => c.nome === novaMensagem.destinatarioNome)?.id
-            : contatos.find(c => c.nome === novaMensagem.remetenteNome)?.id;
-
-        if (!outroUsuarioId) {
-            // Se é uma conversa nova iniciada por outra pessoa, você precisaria
-            // buscar os dados do usuário e adicionar um novo contato. (Lógica futura)
-            console.warn("Recebi msg de um contato que não conheço:", novaMensagem);
+        if (!user || !user.id) {
+            console.error("Usuário logado não encontrado ou sem ID no AuthContext.");
             return;
         }
+
+        const souEu = novaMensagem.remetenteId === user.id;
+        const outroUsuarioId = souEu ? novaMensagem.destinatarioId : novaMensagem.remetenteId;
+        const outroUsuarioNome = souEu ? novaMensagem.destinatarioNome : novaMensagem.remetenteNome;
 
         const msgFormatada = {
             id: novaMensagem.id,
@@ -223,18 +216,39 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
             timestamp: novaMensagem.timestamp,
         };
 
-        setContatos((prev) =>
-            prev.map((c) =>
-                c.id === outroUsuarioId
-                    ? {
-                        ...c,
-                        mensagens: [...c.mensagens, msgFormatada],
-                        // Incrementa 'não lidas' SÓ se a janela estiver fechada ou em outra conversa
-                        naoLidas: (aberto && contatoAtivoId === outroUsuarioId) ? 0 : (c.naoLidas || 0) + 1,
-                    }
-                    : c,
-            ),
-        );
+        setContatos((prevContatos) => {
+            const contatoIndex = prevContatos.findIndex(c => c.id === outroUsuarioId);
+            let contatosAtualizados = [...prevContatos];
+
+            if (contatoIndex > -1) {
+                // --- Contato JÁ EXISTE ---
+                const contatoAntigo = contatosAtualizados[contatoIndex];
+                // Evita adicionar a mesma mensagem duas vezes (caso o backend envie de volta para o remetente)
+                if (contatoAntigo.mensagens.some(m => m.id === msgFormatada.id)) {
+                    return prevContatos; // Nenhuma mudança necessária
+                }
+                contatosAtualizados[contatoIndex] = {
+                    ...contatoAntigo,
+                    mensagens: [...contatoAntigo.mensagens, msgFormatada]
+                        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)),
+                    naoLidas: (aberto && contatoAtivoId === outroUsuarioId) ? 0 : (contatoAntigo.naoLidas || 0) + 1,
+                    nome: outroUsuarioNome, // Atualiza nome
+                };
+            } else {
+                // --- Contato NÃO EXISTE ---
+                contatosAtualizados.push({
+                    id: outroUsuarioId,
+                    nome: outroUsuarioNome,
+                    foto: 'https://i.pravatar.cc/60?u=' + outroUsuarioId,
+                    status: 'online agora',
+                    naoLidas: (aberto && contatoAtivoId === outroUsuarioId) ? 0 : 1,
+                    mensagens: [msgFormatada],
+                });
+            }
+            // Ordena a lista de contatos pela última mensagem (opcional)
+            // contatosAtualizados.sort((a,b) => ...);
+            return contatosAtualizados;
+        });
     };
 
     function toggleChat() {
