@@ -160,6 +160,7 @@ public class AnuncioController {
         // Relacionamento com o Usuário
         if (a.getUsuario() != null) {
             dto.setUsuarioNome(a.getUsuario().getNome());
+            dto.setUsuarioId(a.getUsuario().getId());
             if (a.getUsuario().getPlanoAssinatura() != null) {
                 // Pega o enum (ex: TipoPlano.PLUS) e converte para string (ex: "plus")
                 String planoNome = a.getUsuario().getPlanoAssinatura().getNome().name().toLowerCase();

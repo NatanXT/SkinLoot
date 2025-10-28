@@ -27,6 +27,7 @@ public class AnuncioResponse {
     private Status status;
     private LocalDateTime dataCriacao;
     private String usuarioNome;
+    private UUID usuarioId; // <-- ADICIONE ESTE CAMPO
     private int likesCount;
     private Map<String, Object> detalhesEspecificos;
     // private String qualidade;
@@ -154,6 +155,14 @@ public class AnuncioResponse {
 
     public void setUsuarioNome(String usuarioNome) {
         this.usuarioNome = usuarioNome;
+    }
+
+    public UUID getUsuarioId() {
+        return usuarioId;
+    }
+
+    public void setUsuarioId(UUID usuarioId) {
+        this.usuarioId = usuarioId;
     }
 
     public int getLikesCount() {

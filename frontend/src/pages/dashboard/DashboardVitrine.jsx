@@ -1,13 +1,11 @@
 // ======================================================
 // DashboardVitrine.jsx
-// (mesmo cabeçalho de comentários que você já tinha)
 // ======================================================
 
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useAuth } from '../../services/AuthContext.jsx';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './DashboardVitrine.css';
-import MockSkins from '../../components/mock/MockSkins.js';
 import AuthBrand from '../../components/logo/AuthBrand.jsx';
 import ChatFlutuante from '../../components/chat/ChatFlutuante';
 import anuncioService from '../../services/anuncioService.js';
@@ -94,6 +92,12 @@ function enrichFromMock(list) {
   }));
 }
 
+/* ---------- Helpers de normalização ---------- */
+const toMs = (v) => {
+  const t = typeof v === 'string' ? Date.parse(v) : Number(v);
+  return Number.isFinite(t) ? t : Date.now();
+};
+
 /* ---------- Ranking (agora coalescendo campos) ---------- */
 function useRankedSkins(list, sortBy, filters) {
   return useMemo(() => {
@@ -101,7 +105,7 @@ function useRankedSkins(list, sortBy, filters) {
     const rec = (t) => Math.max(0.6, 1.4 - (now - t) / (1000 * 60 * 60 * 72));
 
     const filtrados = list.filter((s) => {
-      if (s.ativo === false) return false; // esconde inativas
+      if (s.ativo === false) return false;
 
       const planOk = filters.plan === 'todos' || s.plan === filters.plan;
       const gameOk = filters.game === 'todos' || s.game === filters.game;
@@ -121,9 +125,10 @@ function useRankedSkins(list, sortBy, filters) {
     const pontuados = filtrados.map((s) => {
       const meta = plansMeta[s.plan] || { weight: 1.0 };
       const likes = Number(s.likes ?? 0);
-      const listedAt = s.listedAt ?? now;
+      const listedAt = toMs(s.listedAt ?? now);
       return {
         ...s,
+        listedAt,
         score: meta.weight * Math.pow(likes + 1, 0.5) * rec(listedAt),
       };
     });
@@ -172,7 +177,7 @@ export default function DashboardVitrine() {
 
   const initial = readStateFromURL();
 
-  //const [skinsMock] = useState(() => enrichFromMock(MockSkins));
+  // const [skinsMock] = useState(() => enrichFromMock(MockSkins));
   const [minhasSkins, setMinhasSkins] = useState([]);
   const [feedApi, setFeedApi] = useState([]);
   const [carregandoMinhas, setCarregandoMinhas] = useState(false);
@@ -208,10 +213,10 @@ export default function DashboardVitrine() {
       anuncio?.vendedorNome ??
       'Usuário';
     const id =
-      anuncio?.usuarioId ??
-      anuncio?.seller?.id ??
-      anuncio?.vendedorId ??
-      `temp-${anuncio?.id}`;
+        anuncio?.usuarioId ?? // <-- Agora este campo existirá
+        anuncio?.seller?.id ??
+        anuncio?.vendedorId ??
+      `temp-${anuncio?.id || anuncio?._id}`;
     setChatAberto({ id, nome });
     setUnreads(0);
   }
@@ -245,8 +250,17 @@ export default function DashboardVitrine() {
         setCarregandoMinhas(true);
         setErroMinhas('');
         const lista = await anuncioService.listarMinhasNormalizadas();
+        const planKey = String(
+          user?.plano || user?.plan || 'gratuito',
+        ).toLowerCase();
+        const normalizada = (Array.isArray(lista) ? lista : []).map((a) => ({
+          ...a,
+          plan: planKey, // força badge e ranking do usuário
+          listedAt: toMs(a?.listedAt ?? a?.createdAt),
+          isMine: true,
+        }));
         if (!ativo) return;
-        setMinhasSkins(Array.isArray(lista) ? lista : []);
+        setMinhasSkins(normalizada);
       } catch (e) {
         console.error('Falha ao buscar minhas skins:', e);
         if (!ativo) return;
@@ -269,13 +283,31 @@ export default function DashboardVitrine() {
     };
   }, [user]);
 
+  // quando o plano do usuário muda, reflete nas minhas skins já em memória
+  useEffect(() => {
+    const planKey = String(
+      user?.plano || user?.plan || 'gratuito',
+    ).toLowerCase();
+    setMinhasSkins((prev) =>
+      Array.isArray(prev)
+        ? prev.map((a) => (a?.isMine ? { ...a, plan: planKey } : a))
+        : prev,
+    );
+  }, [user?.plano, user?.plan]);
+
   // FEED geral
   useEffect(() => {
     let vivo = true;
     (async () => {
       try {
         const data = await anuncioService.listarFeedNormalizado();
-        if (vivo) setFeedApi(data);
+        if (vivo) {
+          const normalized = (Array.isArray(data) ? data : []).map((a) => ({
+            ...a,
+            listedAt: toMs(a?.listedAt ?? a?.createdAt),
+          }));
+          setFeedApi(normalized);
+        }
       } catch (e) {
         if (vivo) setFeedApi([]);
       }
@@ -291,7 +323,13 @@ export default function DashboardVitrine() {
     const tick = async () => {
       try {
         const data = await anuncioService.listarFeedNormalizado();
-        if (alive) setFeedApi(data);
+        if (alive) {
+          const normalized = (Array.isArray(data) ? data : []).map((a) => ({
+            ...a,
+            listedAt: toMs(a?.listedAt ?? a?.createdAt),
+          }));
+          setFeedApi(normalized);
+        }
       } catch {}
     };
     const id = setInterval(tick, 5000);
@@ -300,6 +338,11 @@ export default function DashboardVitrine() {
       clearInterval(id);
     };
   }, []);
+
+  // Sincroniza filtros/sort com a URL (replaceState para não poluir histórico)
+  useEffect(() => {
+    writeStateToURL(filters, sortBy, true);
+  }, [filters, sortBy]);
 
   function uniqById(list) {
     const seen = new Set();
@@ -349,11 +392,11 @@ export default function DashboardVitrine() {
 
   const ranked = useRankedSkins(listaCombinada, sortBy, filters);
 
-  const handleLikeToggle = (anuncioId) => {
-    const isCurrentlyLiked = likes.has(anuncioId);
+  const handleLikeToggle = (keyId) => {
+    const isCurrentlyLiked = likes.has(keyId);
     const newLikes = new Set(likes);
-    if (isCurrentlyLiked) newLikes.delete(anuncioId);
-    else newLikes.add(anuncioId);
+    if (isCurrentlyLiked) newLikes.delete(keyId);
+    else newLikes.add(keyId);
     setLikes(newLikes);
   };
 
@@ -493,6 +536,26 @@ export default function DashboardVitrine() {
     .join('')
     .toUpperCase();
 
+  // ✅ handler pra abrir perfil já com modal de upgrade
+  function irParaUpgrade(planoDesejado) {
+    if (!user) {
+      navigate('/login', {
+        state: {
+          returnTo: '/perfil',
+          openPlanoPanel: 'upgrade',
+          preselectPlan: planoDesejado,
+        },
+      });
+      return;
+    }
+    navigate('/perfil', {
+      state: {
+        openPlanoPanel: 'upgrade',
+        preselectPlan: planoDesejado,
+      },
+    });
+  }
+
   return (
     <div className="dash-root">
       <div className="backdrop" aria-hidden />
@@ -551,10 +614,10 @@ export default function DashboardVitrine() {
       {/* Hero */}
       <header className="hero">
         <div className="hero__copy">
-          <h1>Vitrine das Skins</h1>
+          <h1>SkinLoot</h1>
           <p>
-            Somos apenas a vitrine. Anuncie, favorite e, ao comprar,
-            redirecionamos para o site do vendedor.
+            Anuncie, favorite, converse com outros usuarios e ao comprar,
+            redirecionamos para o vendedor.
           </p>
           <div className="hero__cta">
             <a className="btn btn--primary" href="#grid">
@@ -687,16 +750,19 @@ export default function DashboardVitrine() {
           <p style={{ gridColumn: '1 / -1', color: '#ff9c9c' }}>{erroMinhas}</p>
         )}
 
-        {ranked.map((anuncio) => (
-          <SkinCard
-            key={anuncio.id}
-            data={anuncio}
-            liked={likes.has(anuncio.id)}
-            onLike={() => handleLikeToggle(anuncio.id)}
-            onContato={() => abrirChatPara(anuncio)}
-            onComprarFora={() => comprarFora(anuncio)}
-          />
-        ))}
+        {ranked.map((anuncio) => {
+          const k = anuncio.id || anuncio._id;
+          return (
+            <SkinCard
+              key={k}
+              data={anuncio}
+              liked={likes.has(k)}
+              onLike={() => handleLikeToggle(k)}
+              onContato={() => abrirChatPara(anuncio)}
+              onComprarFora={() => comprarFora(anuncio)}
+            />
+          );
+        })}
       </section>
 
       {/* Planos */}
@@ -719,7 +785,13 @@ export default function DashboardVitrine() {
                 {key !== 'gratuito' && <li>Relatórios de visualização</li>}
                 {key === 'plus' && <li>Spotlight na página inicial</li>}
               </ul>
-              <button className="btn btn--primary">Assinar</button>
+              {/* ✅ agora chama o handler */}
+              <button
+                className="btn btn--primary"
+                onClick={() => irParaUpgrade(key)}
+              >
+                Assinar
+              </button>
             </div>
           ))}
         </div>
@@ -774,7 +846,8 @@ function SkinCard({ data, liked, onLike, onContato, onComprarFora }) {
       })
     : '—';
 
-  const planKey = data?.planoNome ?? data?.plan ?? data?.plano ?? 'gratuito';
+  const planKeyRaw = data?.planoNome ?? data?.plan ?? data?.plano ?? 'gratuito';
+  const planKey = String(planKeyRaw).toLowerCase();
   const planMeta = plansMeta[planKey] || { label: '—', color: '#999' };
 
   return (
