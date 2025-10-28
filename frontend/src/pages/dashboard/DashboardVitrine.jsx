@@ -213,9 +213,9 @@ export default function DashboardVitrine() {
       anuncio?.vendedorNome ??
       'Usuário';
     const id =
-      anuncio?.usuarioId ??
-      anuncio?.seller?.id ??
-      anuncio?.vendedorId ??
+        anuncio?.usuarioId ?? // <-- Agora este campo existirá
+        anuncio?.seller?.id ??
+        anuncio?.vendedorId ??
       `temp-${anuncio?.id || anuncio?._id}`;
     setChatAberto({ id, nome });
     setUnreads(0);

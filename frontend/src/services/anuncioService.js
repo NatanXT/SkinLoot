@@ -114,7 +114,7 @@ function normalizarDoBackend(anuncio = {}) {
   const sellerName = anuncio.usuarioNome ?? anuncio.vendedorNome ?? '—';
   const status = anuncio.status ?? anuncio._status;
   const ativo = String(status || 'ATIVO').toUpperCase() === 'ATIVO';
-
+  const sellerId = anuncio.usuarioId ?? anuncio.vendedorId ?? null;
   return {
     id,
     title,
@@ -122,7 +122,7 @@ function normalizarDoBackend(anuncio = {}) {
     game,
     price: Number.isFinite(precoNum) ? precoNum : 0,
     currency: 'BRL',
-    seller: { name: sellerName },
+    seller: { name: sellerName,id: sellerId },
     plan,
     likes,
     listedAt,
@@ -133,6 +133,9 @@ function normalizarDoBackend(anuncio = {}) {
     skinNome: title,
     imagemUrl: image, // <- o Perfil lê aqui
     preco: Number.isFinite(precoNum) ? precoNum : 0,
+      usuarioId: sellerId, // Para o DashboardVitrine ler diretamente
+      usuarioNome: sellerName, // Já estava implícito, mas bom ter explícito
+      planoNome: plan, // Para o DashboardVitrine ler diretamente
   };
 }
 
