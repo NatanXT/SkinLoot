@@ -213,9 +213,9 @@ export default function DashboardVitrine() {
       anuncio?.vendedorNome ??
       'Usuário';
     const id =
-        anuncio?.usuarioId ?? // <-- Agora este campo existirá
-        anuncio?.seller?.id ??
-        anuncio?.vendedorId ??
+      anuncio?.usuarioId ?? // <-- Agora este campo existirá
+      anuncio?.seller?.id ??
+      anuncio?.vendedorId ??
       `temp-${anuncio?.id || anuncio?._id}`;
     setChatAberto({ id, nome });
     setUnreads(0);
@@ -833,6 +833,7 @@ export default function DashboardVitrine() {
 
 /* ---------- Card (componente) ---------- */
 function SkinCard({ data, liked, onLike, onContato, onComprarFora }) {
+  const navigate = useNavigate();
   const title = data?.skinNome ?? data?.title ?? data?.nome ?? 'Skin';
   const image = data?.image ?? data?.imagemUrl ?? data?.imagem ?? '';
   const vendedor =
@@ -884,24 +885,29 @@ function SkinCard({ data, liked, onLike, onContato, onComprarFora }) {
         <div className="meta">
           <span className="price">R$ {precoFmt}</span>
         </div>
+
+        {/* Nova estrutura dentro do card */}
         <div className="seller">
           <span>Vendedor: {vendedor}</span>
+
           <div className="cta">
-            <button
-              className="btn btn--ghost"
-              type="button"
-              onClick={onContato}
-            >
+            <button className="btn btn--ghost" onClick={onContato}>
               Contato
             </button>
             <button
-              className="btn btn--primary"
-              type="button"
-              onClick={onComprarFora}
+              className="btn btn--ghost"
+              onClick={() => navigate(`/anuncio/${data.id || data._id}`)}
             >
-              Comprar fora
+              Ver detalhes
             </button>
           </div>
+        </div>
+
+        {/* Fora da seller, o botão de compra ocupa 100% */}
+        <div className="cta cta--bottom">
+          <button className="btn btn--primary full" onClick={onComprarFora}>
+            Comprar
+          </button>
         </div>
       </div>
     </article>

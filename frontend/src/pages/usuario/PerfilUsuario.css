@@ -423,3 +423,31 @@
 .perfil-upgrade-list{
   margin:0 0 12px 0; padding-left: 18px; color:#CFE5D6;
 }
+/* ---------- Filtro de status (ativas/inativas) ---------- */
+.perfil-filter-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.perfil-select {
+  background: #0E1217;
+  border: 1px solid #1C2430;
+  border-radius: 10px;
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.perfil-select:hover {
+  border-color: #314151;
+  box-shadow: 0 0 0 3px rgba(57,255,20,.07);
+}
+
+.perfil-select:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(57,255,20,.12);
+}

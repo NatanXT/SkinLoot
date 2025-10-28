@@ -317,9 +317,33 @@ export async function unlikeAnuncio(id) {
   await api.delete(`/anuncios/${id}/unlike`);
 }
 
+// ================= BUSCAR POR ID =================
+export async function buscarPorId(id) {
+  if (USE_DEV_API) {
+    // DEV: busca no localStorage
+    const arr = devLoad();
+    const encontrado = arr.find((x) => String(x.id) === String(id));
+    return (
+      encontrado || {
+        id,
+        skinNome: 'Skin não encontrada',
+        preco: 0,
+        imagemUrl: '/img/placeholder.png',
+        ativo: false,
+        descricao: 'Sem descrição (modo DEV)',
+      }
+    );
+  }
+
+  // PROD: busca via backend real
+  const { data } = await api.get(`/anuncios/${id}`);
+  return normalizarDoBackend(data);
+}
+
 export default {
   listarMinhasNormalizadas,
   listarFeedNormalizado,
+  buscarPorId,
   criarAnuncio,
   editarAnuncio,
   desativarAnuncio,

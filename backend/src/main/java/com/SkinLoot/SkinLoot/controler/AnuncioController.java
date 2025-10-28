@@ -118,6 +118,14 @@ public class AnuncioController {
         return ResponseEntity.ok().build();
     }
 
+    // ===================== BUSCAR POR ID =====================
+    @GetMapping("/{id}")
+    public ResponseEntity<AnuncioResponse> buscarPorId(@PathVariable UUID id) {
+        return anuncioService.findById(id)
+                .map(a -> ResponseEntity.ok(toDto(a)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     // ===================== MÉTODOS AUXILIARES PRIVADOS =====================
 
     /**

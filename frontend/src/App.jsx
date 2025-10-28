@@ -20,6 +20,7 @@ import Historico from './pages/historico/Historico';
 import Suporte from './pages/suporte/Suporte';
 import NotFound from './pages/notfound/NotFound';
 import DashboardVitrine from './pages/dashboard/DashboardVitrine.jsx';
+import DetalheAnuncio from './pages/detalhes/DetalheAnuncio.jsx';
 
 import PerfilUsuario from './pages/usuario/PerfilUsuario';
 
@@ -57,6 +58,7 @@ export default function App() {
         <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/historico" element={<Historico />} />
         <Route path="/suporte" element={<Suporte />} />
+        <Route path="/anuncio/:id" element={<DetalheAnuncio />} />
 
         {/* Usuario/Perfil (PROTEGIDA) */}
         <Route

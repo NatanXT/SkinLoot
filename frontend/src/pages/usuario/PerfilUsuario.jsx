@@ -85,6 +85,15 @@ export default function PerfilUsuario() {
   const [painel, setPainel] = useState(null); // "renovar" | "upgrade" | null
   const [busy, setBusy] = useState(false);
 
+  const [filtroStatus, setFiltroStatus] = useState('todas');
+  const skinsFiltradas = useMemo(() => {
+    if (filtroStatus === 'ativas')
+      return skins.filter((s) => s.ativo !== false);
+    if (filtroStatus === 'inativas')
+      return skins.filter((s) => s.ativo === false);
+    return skins;
+  }, [skins, filtroStatus]);
+
   // -------------------- Estado do modal de edição --------------------
   const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
   const [skinEditando, setSkinEditando] = useState(null);
@@ -640,18 +649,31 @@ export default function PerfilUsuario() {
         <section className="perfil-block">
           <div className="perfil-block-header">
             <h2>Minhas Skins</h2>
-            <button
-              className="btn btn--primary"
-              onClick={handleNovaSkin}
-              disabled={atingiuLimite}
-              title={
-                atingiuLimite
-                  ? 'Limite atingido para seu plano'
-                  : 'Cadastrar nova skin'
-              }
-            >
-              Cadastrar nova skin
-            </button>
+
+            <div className="perfil-filter-area">
+              <select
+                className="perfil-select"
+                value={filtroStatus}
+                onChange={(e) => setFiltroStatus(e.target.value)}
+              >
+                <option value="todas">Todas</option>
+                <option value="ativas">Apenas ativas</option>
+                <option value="inativas">Apenas inativas</option>
+              </select>
+
+              <button
+                className="btn btn--primary"
+                onClick={handleNovaSkin}
+                disabled={atingiuLimite}
+                title={
+                  atingiuLimite
+                    ? 'Limite atingido para seu plano'
+                    : 'Cadastrar nova skin'
+                }
+              >
+                Cadastrar nova skin
+              </button>
+            </div>
           </div>
 
           {skins.filter((s) => s.ativo !== false).length === 0 ? (
@@ -667,7 +689,7 @@ export default function PerfilUsuario() {
             </div>
           ) : (
             <div className="perfil-grid-cards">
-              {skins.map((s) => (
+              {skinsFiltradas.map((s) => (
                 <article
                   key={s.id || s._id}
                   className={`card ${s.ativo === false ? 'card--inativa' : ''}`}
