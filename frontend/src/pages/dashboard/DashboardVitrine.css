@@ -78,14 +78,19 @@ body {
   backdrop-filter: saturate(140%) blur(8px);
   border-bottom: 1px solid #131920;
 }
+
+/* Garantir que o bloco de ações não “apertará” demais no mobile */
+.actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+/* Mantém o texto de boas-vindas, quando houver */
 .topbar .actions .welcome-user {
   color: #fff;
   margin-right: 1rem;
   font-size: 0.9rem;
 }
+
 nav a { margin: 0 10px; color: var(--muted); text-decoration: none; }
 nav a:hover { color: var(--text); }
-.actions { display: flex; gap: 8px; }
 
 /* ---------- Hero ---------- */
 .hero {
@@ -311,7 +316,7 @@ nav a:hover { color: var(--text); }
   gap: 8px;
   border: 1px solid #1C2430;
   background: transparent;
-  color: var(--text);
+  color: #fff; /* reforça contraste nos botões */
   text-decoration: none;
   cursor: pointer;
   border-radius: 12px;
@@ -369,9 +374,18 @@ nav a:hover { color: var(--text); }
   .filters__row { grid-template-columns: 1fr 1fr 1fr; }
   .hero h1 { font-size: 36px; }
 }
+
 @media (max-width: 640px) {
   .filters__row { grid-template-columns: 1fr; }
   :root { --card-min-col: 310px; --media-min-h: 300px; --btn-h: 44px; }
+
+  /* Ajustes de densidade da topbar no mobile:
+     - reduz levemente padding
+     - diminui espaçamento dos links
+     - evita quebra do bloco de ações (login/perfil) */
+  .topbar { padding: 10px 14px; }
+  nav a { margin: 0 6px; font-size: 0.95rem; }
+  .actions { gap: 6px; }
 }
 
 /* ---------- Avatar / Profile Menu ---------- */
@@ -545,4 +559,110 @@ nav a:hover { color: var(--text); }
   border-radius: 10px;
   justify-content: center;
   align-self: stretch;
+}
+
+/* ====================== Responsividade: espaçamento dos botões Entrar / Criar Conta ====================== */
+@media (max-width: 640px) {
+  .topbar {
+    padding: 10px 14px;           /* reduz padding lateral */
+    flex-wrap: wrap;              /* permite quebra quando faltar espaço */
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;                    /* adiciona espaço entre os botões */
+    flex-wrap: wrap;              /* empilha se não couberem lado a lado */
+    justify-content: flex-end;    /* mantém à direita */
+    width: 100%;                  /* força quebra abaixo do logo no mobile */
+    margin-top: 6px;              /* cria respiro entre logo e botões */
+  }
+
+  .actions .btn {
+    flex: 1 1 45%;                /* divide largura entre os dois */
+    justify-content: center;      /* centraliza o texto */
+    min-width: 120px;             /* evita botão minúsculo */
+  }
+}
+/* ====================== Centralização da navbar no mobile ====================== */
+@media (max-width: 640px) {
+  /* Centraliza os itens de texto/links */
+  nav {
+    width: 100%;
+    display: flex;
+    justify-content: center;     /* centraliza horizontalmente */
+    text-align: center;
+    flex-wrap: wrap;
+    margin-top: 8px;             /* pequeno respiro abaixo do logo */
+  }
+
+  nav a {
+    margin: 4px 10px;            /* espaço vertical/horizontal equilibrado */
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+
+
+  /* Ajuste visual final: mantém botões centralizados */
+  .actions {
+    justify-content: center;     /* alinha botões ao centro */
+  }
+}
+
+/* ====================== Navbar compacta (logo + links na mesma linha) ====================== */
+@media (max-width: 640px) {
+  /* Oculta o texto do logotipo, mantém só o ícone quadrado */
+  .topbar .brand-text,
+  .topbar .brand-name {
+    display: none !important;
+  }
+
+  /* Reorganiza a topbar para alinhar tudo na mesma linha */
+  .topbar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;       /* centraliza logo + nav */
+    gap: 18px;                     /* espaçamento entre logo e links */
+    padding: 10px 12px;
+  }
+
+  /* Garante que a logo mantenha tamanho adequado */
+  .topbar .logo,
+  .topbar img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+  }
+
+  /* Links principais centralizados na mesma linha */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: nowrap;             /* mantém tudo na mesma linha */
+    margin: 0;
+    width: auto;
+  }
+
+  nav a {
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  nav a:hover {
+    color: var(--primary);
+  }
+
+  /* Botões de login / criar conta permanecem abaixo da linha principal */
+  .actions {
+    width: 100%;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
 }

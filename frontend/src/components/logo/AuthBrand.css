@@ -36,15 +36,28 @@
 }
 
 /* ---------- Responsivo ---------- */
-@media (max-width: 480px) {
+/* 1) Telas pequenas: escondemos o texto "SkinLoot" e mantemos apenas o ícone.
+   Isso libera espaço na topbar para o texto/links e o botão de perfil. */
+@media (max-width: 640px) {
+  .auth-brand span {
+    display: none;          /* some apenas o texto da marca */
+  }
+  .auth-brand {
+    gap: 0;                 /* encosta o ícone na margem para ganhar pixels */
+  }
   .brand, .auth-brand {
-    gap: 6px;
-    font-size: 1rem;
     justify-content: flex-start; /* mantém à esquerda no mobile */
   }
-
   .brand svg, .auth-brand svg {
-    width: 28px;
+    width: 28px;            /* ícone levemente maior no mobile */
     height: 28px;
+  }
+}
+
+/* 2) Ajuste opcional para aparelhos muito estreitos.
+   Mantém apenas o ícone e garante toque confortável. */
+@media (max-width: 400px) {
+  .auth-brand {
+    padding-right: 4px;     /* micro-ajuste para “caber tudo” */
   }
 }

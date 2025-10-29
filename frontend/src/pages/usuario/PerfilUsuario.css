@@ -451,3 +451,68 @@
   border-color: var(--secondary);
   box-shadow: 0 0 0 3px rgba(57,255,20,.12);
 }
+
+/* ====================== Responsividade do filtro e botão ====================== */
+@media (max-width: 640px) {
+  /* container do filtro e botão */
+  .perfil-filter-area {
+    flex-direction: column;         /* empilha no mobile */
+    align-items: stretch;           /* ambos ocupam largura total */
+    gap: 8px;                       /* espaçamento vertical */
+  }
+
+  /* select ocupa 100% da largura */
+  .perfil-select {
+    width: 100%;
+    font-size: 15px;                /* ligeiramente maior para toque */
+  }
+
+  /* botão ocupa 100% da largura */
+  .perfil-filter-area .btn {
+    width: 100%;
+    justify-content: center;        /* centraliza o texto */
+    font-weight: 700;
+  }
+}
+
+/* ====================== Correção: scroll dentro das modais ====================== */
+.perfil-modal__card {
+  display: flex;
+  flex-direction: column;
+  max-height: 92vh;               /* limite vertical seguro */
+  overflow: hidden;               /* evita que o scroll vá no body */
+}
+
+.perfil-modal__scroll,            /* corpo rolável genérico */
+.perfil-upgrade-grid {            /* grid dos planos */
+  overflow-y: auto;
+  max-height: calc(92vh - 180px); /* espaço para header/footer */
+  padding-right: 6px;
+  scrollbar-gutter: stable;
+}
+
+.perfil-modal__scroll::-webkit-scrollbar,
+.perfil-upgrade-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.perfil-modal__scroll::-webkit-scrollbar-thumb,
+.perfil-upgrade-grid::-webkit-scrollbar-thumb {
+  background: #26313D;
+  border-radius: 999px;
+}
+
+.perfil-modal__scroll::-webkit-scrollbar-track,
+.perfil-upgrade-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* No mobile: garante que o conteúdo role e não estoure a tela */
+@media (max-width: 640px) {
+  .perfil-upgrade-grid {
+    grid-template-columns: 1fr;
+    max-height: calc(88vh - 160px);
+    overflow-y: auto;
+  }
+}
+
