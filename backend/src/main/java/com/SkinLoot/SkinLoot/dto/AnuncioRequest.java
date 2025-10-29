@@ -1,5 +1,8 @@
 package com.SkinLoot.SkinLoot.dto;
 
+import com.SkinLoot.SkinLoot.dto.CsgoDto.Csgo2Request;
+import com.SkinLoot.SkinLoot.dto.riotDto.LolRequest;
+import com.SkinLoot.SkinLoot.model.Jogo;
 import com.SkinLoot.SkinLoot.model.enums.Status;
 import com.fasterxml.jackson.annotation.JsonAlias;
 
@@ -17,11 +20,13 @@ public class AnuncioRequest {
     private String titulo;
     private String descricao;
     private BigDecimal preco;
-    private Map<String, Object> detalhesEspecificos; // jsonb
     private Status status;
-
     // Vínculo opcional ao catálogo (quando existir)
     private UUID skinId;
+
+    private Jogo jogo;
+    private Csgo2Request detalhesCsgo;
+    private LolRequest detalhesLol;
 
     // Nome livre digitado pelo usuário (modo não-vinculado ao catálogo)
     @JsonAlias({ "skin_name", "skinName" })
@@ -71,14 +76,6 @@ public class AnuncioRequest {
         this.preco = preco;
     }
 
-    public Map<String, Object> getDetalhesEspecificos() {
-        return detalhesEspecificos;
-    }
-
-    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {
-        this.detalhesEspecificos = detalhesEspecificos;
-    }
-
     public Status getStatus() {
         return status;
     }
@@ -95,10 +92,13 @@ public class AnuncioRequest {
         this.skinId = skinId;
     }
 
+    public Jogo getJogo() { return jogo; }
+
+    public void setJogo(Jogo jogo) { this.jogo = jogo; }
+
     public String getSkinName() {
         return skinName;
     }
-
     public void setSkinName(String skinName) {
         this.skinName = skinName;
     }

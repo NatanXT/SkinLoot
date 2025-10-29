@@ -28,7 +28,9 @@ public class Anuncio {
 
     // ===================== Dados principais =====================
     private String titulo;
+
     private String descricao;
+
     private BigDecimal preco;
 
     @Enumerated(EnumType.STRING)
@@ -71,9 +73,11 @@ public class Anuncio {
     @Formula("(select count(*) from anuncio_like al where al.anuncio_id = id)")
     private int likesCount;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private Map<String, Object> detalhesEspecificos;
+    @OneToOne(mappedBy = "anuncio", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true, orphanRemoval = true)
+    private AnuncioDetalhesCsgo detalhesCsgo;
+
+    @OneToOne(mappedBy = "anuncio", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true, orphanRemoval = true)
+    private AnuncioDetalhesLol detalhesLol;
 
     // ===================== Construtores =====================
     public Anuncio() {
@@ -93,7 +97,9 @@ public class Anuncio {
             Long steamItemId, // (mantido conforme sua assinatura anterior)
             Set<AnuncioLike> likes,
             int likesCount,
-            Map<String, Object> detalhesEspecificos) {
+            AnuncioDetalhesCsgo detalhesCsgo,
+            AnuncioDetalhesLol detalhesLol
+            ) {
         this.id = id;
         this.titulo = titulo;
         this.descricao = descricao;
@@ -106,7 +112,8 @@ public class Anuncio {
         this.dataCriacao = dataCriacao;
         this.likes = likes;
         this.likesCount = likesCount;
-        this.detalhesEspecificos = detalhesEspecificos;
+        this.detalhesCsgo = detalhesCsgo;
+        this.detalhesLol = detalhesLol;
     }
 
     /** Construtor auxiliar usado em relações (precisa setar o id!). */
@@ -250,11 +257,19 @@ public class Anuncio {
         this.likesCount = likesCount;
     }
 
-    public Map<String, Object> getDetalhesEspecificos() {
-        return detalhesEspecificos;
+    public AnuncioDetalhesCsgo getDetalhesCsgo() {
+        return detalhesCsgo;
     }
 
-    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {
-        this.detalhesEspecificos = detalhesEspecificos;
+    public void setDetalhesCsgo(AnuncioDetalhesCsgo detalhesCsgo) {
+        this.detalhesCsgo = detalhesCsgo;
+    }
+
+    public AnuncioDetalhesLol getDetalhesLol() {
+        return detalhesLol;
+    }
+
+    public void setDetalhesLol(AnuncioDetalhesLol detalhesLol) {
+        this.detalhesLol = detalhesLol;
     }
 }

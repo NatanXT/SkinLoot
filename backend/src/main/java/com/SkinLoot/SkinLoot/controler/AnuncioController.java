@@ -178,10 +178,6 @@ public class AnuncioController {
 
         // Campos calculados
         dto.setLikesCount(a.getLikesCount());
-
-        // Detalhes específicos do anúncio (float, pattern, etc.)
-        dto.setDetalhesEspecificos(a.getDetalhesEspecificos());
-
         return dto;
     }
 

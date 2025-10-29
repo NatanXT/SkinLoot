@@ -4,10 +4,7 @@ import com.SkinLoot.SkinLoot.dto.AnuncioRequest;
 import com.SkinLoot.SkinLoot.dto.AnuncioResponse;
 import com.SkinLoot.SkinLoot.exceptions.AcessoNegadoException;
 import com.SkinLoot.SkinLoot.exceptions.LimiteExcedidoException;
-import com.SkinLoot.SkinLoot.model.Anuncio;
-import com.SkinLoot.SkinLoot.model.AnuncioLike;
-import com.SkinLoot.SkinLoot.model.Skin;
-import com.SkinLoot.SkinLoot.model.Usuario;
+import com.SkinLoot.SkinLoot.model.*;
 import com.SkinLoot.SkinLoot.model.enums.Status;
 import com.SkinLoot.SkinLoot.model.enums.StatusAssinatura;
 import com.SkinLoot.SkinLoot.repository.AnuncioLikeRepository;
@@ -74,7 +71,6 @@ public class AnuncioService {
         novoAnuncio.setTitulo(request.getTitulo());
         novoAnuncio.setDescricao(request.getDescricao());
         novoAnuncio.setPreco(request.getPreco());
-        novoAnuncio.setDetalhesEspecificos(request.getDetalhesEspecificos());
         novoAnuncio.setStatus(request.getStatus() != null ? request.getStatus() : Status.ATIVO);
         novoAnuncio.setDataCriacao(LocalDateTime.now());
 
@@ -110,6 +106,7 @@ public class AnuncioService {
                 limparBase64(novoAnuncio);
             }
         }
+        processarDetalhes(novoAnuncio, request);
 
         return anuncioRepository.save(novoAnuncio);
     }
@@ -137,9 +134,6 @@ public class AnuncioService {
             a.setPreco(request.getPreco());
         if (request.getStatus() != null)
             a.setStatus(request.getStatus());
-        if (request.getDetalhesEspecificos() != null)
-            a.setDetalhesEspecificos(request.getDetalhesEspecificos());
-
         // Lógica de imagem: se chegou Base64, prioriza; se chegou URL (e não veio
         // base64), atualiza URL
         if (temBase64(request)) {
@@ -165,6 +159,8 @@ public class AnuncioService {
             a.setSkin(null);
             a.setSkinName(request.getSkinName());
         }
+        limparDetalhesAntigosSeNecessario(a, request);
+        processarDetalhes(a, request);
 
         return anuncioRepository.save(a);
     }
@@ -259,5 +255,21 @@ public class AnuncioService {
     private void limparBase64(Anuncio a) {
         a.setSkinImageBase64(null);
         a.setSkinImageMime(null);
+    }
+    private void processarDetalhes(Anuncio anuncio, AnuncioRequest request) {
+        Jogo jogo = request.getJogo(); // Pega o enum
+
+        if (jogo == Jogo. && request.getDetalhesCsgo() != null) { // <-- Comparação com Enum
+            // ... (lógica CSGO sem alterações internas)
+            anuncio.setDetalhesLol(null);
+        }
+        else if (jogo == Jogo.LOL && request.getDetalhesLol() != null) { // <-- Comparação com Enum
+            // ... (lógica LoL sem alterações internas)
+            anuncio.setDetalhesCsgo(null);
+        }
+        // else { // Opcional: Lidar com jogo nulo ou não suportado
+        //    anuncio.setDetalhesCsgo(null);
+        //    anuncio.setDetalhesLol(null);
+        // }
     }
 }

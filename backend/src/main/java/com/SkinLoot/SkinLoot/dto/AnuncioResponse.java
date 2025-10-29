@@ -29,7 +29,6 @@ public class AnuncioResponse {
     private String usuarioNome;
     private UUID usuarioId; // <-- ADICIONE ESTE CAMPO
     private int likesCount;
-    private Map<String, Object> detalhesEspecificos;
     // private String qualidade;
 
     public AnuncioResponse() {
@@ -53,7 +52,6 @@ public class AnuncioResponse {
         this.skinIcon = anuncio.getSkinImageDataUrl();
 
         this.likesCount = anuncio.getLikesCount();
-        this.detalhesEspecificos = anuncio.getDetalhesEspecificos();
 
         if (anuncio.getUsuario() != null) {
             this.usuarioNome = anuncio.getUsuario().getNome();
@@ -171,14 +169,6 @@ public class AnuncioResponse {
 
     public void setLikesCount(int likesCount) {
         this.likesCount = likesCount;
-    }
-
-    public Map<String, Object> getDetalhesEspecificos() {
-        return detalhesEspecificos;
-    }
-
-    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {
-        this.detalhesEspecificos = detalhesEspecificos;
     }
 
     // public String getQualidade() {
