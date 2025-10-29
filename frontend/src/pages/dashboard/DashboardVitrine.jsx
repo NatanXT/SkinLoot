@@ -1,5 +1,18 @@
 // ======================================================
 // DashboardVitrine.jsx
+// Caminho: frontend/src/pages/DashboardVitrine.jsx
+// ------------------------------------------------------
+// Página principal do marketplace de skins.
+// Inclui:
+//  - Filtros de pesquisa
+//  - Listagem de anúncios (componente <SkinCard />)
+//  - Sessão de planos
+//  - Menu de perfil e chat flutuante
+// ------------------------------------------------------
+// Observações:
+//  - Lógica de ranking, filtragem e ordenação das skins
+//  - Sincronização de filtros com URL
+//  - Integração com AuthContext e AnuncioService
 // ======================================================
 
 import { useEffect, useMemo, useState, useRef } from 'react';
@@ -9,15 +22,20 @@ import './DashboardVitrine.css';
 import AuthBrand from '../../components/logo/AuthBrand.jsx';
 import ChatFlutuante from '../../components/chat/ChatFlutuante';
 import anuncioService from '../../services/anuncioService.js';
+import SkinCard from '../../components/skin/SkinCard.jsx';
 
-/* ---------- Metadados dos planos ---------- */
+/* ======================================================
+   Metadados dos planos
+====================================================== */
 const plansMeta = {
   gratuito: { label: 'Gratuito', weight: 1.0, color: '#454B54' },
   intermediario: { label: 'Intermediário', weight: 1.6, color: '#00C896' },
   plus: { label: '+ Plus', weight: 2.2, color: '#39FF14' },
 };
 
-/* ---------- Defaults / URL helpers ---------- */
+/* ======================================================
+   Constantes de filtros e ordenação
+====================================================== */
 const DEFAULT_FILTERS = Object.freeze({
   search: '',
   game: 'todos',
@@ -33,6 +51,9 @@ const ALLOWED_SORT = new Set([
   'preco_desc',
 ]);
 
+/* ======================================================
+   Utilitários de formatação e URL
+====================================================== */
 const onlyDigits = (s) => (s || '').replace(/\D/g, '');
 const brlPlain = (n) =>
   Number.isFinite(n)
@@ -67,38 +88,24 @@ function writeStateToURL(filters, sort, replace = true) {
   if (filters.min !== DEFAULT_FILTERS.min) p.set('min', String(filters.min));
   if (filters.max !== DEFAULT_FILTERS.max) p.set('max', String(filters.max));
   if (sort !== DEFAULT_SORT) p.set('sort', sort);
+
   const qs = p.toString();
   const newUrl = qs ? `?${qs}` : window.location.pathname;
   const method = replace ? 'replaceState' : 'pushState';
   window.history[method]({}, '', newUrl);
 }
 
-/* ---------- Mock enrichment ---------- */
-function enrichFromMock(list) {
-  const plans = ['gratuito', 'intermediario', 'plus'];
-  return list.map((s, i) => ({
-    id: `mock-${i + 1}`,
-    title: s.nome,
-    image: s.imagemUrl,
-    game: 'CS2',
-    price:
-      Math.round((200 + ((i * 137) % 5400) + (i % 3 === 2 ? 800 : 0)) * 10) /
-      10,
-    currency: 'BRL',
-    seller: { name: `@seller_${i + 1}`, contactUrl: '#' },
-    plan: plans[i % plans.length],
-    likes: 20 + ((i * 73) % 900),
-    listedAt: Date.now() - (i + 1) * 1000 * 60 * 60 * (3 + (i % 6)),
-  }));
-}
-
-/* ---------- Helpers de normalização ---------- */
+/* ======================================================
+   Conversões e normalizações
+====================================================== */
 const toMs = (v) => {
   const t = typeof v === 'string' ? Date.parse(v) : Number(v);
   return Number.isFinite(t) ? t : Date.now();
 };
 
-/* ---------- Ranking (agora coalescendo campos) ---------- */
+/* ======================================================
+   Hook de ranking e filtragem das skins
+====================================================== */
 function useRankedSkins(list, sortBy, filters) {
   return useMemo(() => {
     const now = Date.now();
@@ -106,7 +113,6 @@ function useRankedSkins(list, sortBy, filters) {
 
     const filtrados = list.filter((s) => {
       if (s.ativo === false) return false;
-
       const planOk = filters.plan === 'todos' || s.plan === filters.plan;
       const gameOk = filters.game === 'todos' || s.game === filters.game;
 
@@ -136,40 +142,19 @@ function useRankedSkins(list, sortBy, filters) {
     if (sortBy === 'relevancia')
       return pontuados.sort((a, b) => b.score - a.score);
     if (sortBy === 'preco_asc')
-      return pontuados.sort(
-        (a, b) => (a.price ?? a.preco) - (b.price ?? b.preco),
-      );
+      return pontuados.sort((a, b) => a.price - b.price);
     if (sortBy === 'preco_desc')
-      return pontuados.sort(
-        (a, b) => (b.price ?? b.preco) - (a.price ?? a.preco),
-      );
+      return pontuados.sort((a, b) => b.price - a.price);
     if (sortBy === 'recentes')
-      return pontuados.sort((a, b) => (b.listedAt ?? 0) - (a.listedAt ?? 0));
+      return pontuados.sort((a, b) => b.listedAt - a.listedAt);
+
     return pontuados;
   }, [list, sortBy, filters]);
 }
 
-/* ========= smooth scroll util ========= */
-function smoothScrollToY(toY, duration = 500) {
-  const startY = window.scrollY || window.pageYOffset || 0;
-  const distance = toY - startY;
-  const startTime = performance.now();
-  const easeInOutCubic = (t) =>
-    t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  function step(now) {
-    const elapsed = now - startTime;
-    const t = Math.min(1, elapsed / duration);
-    const eased = easeInOutCubic(t);
-    window.scrollTo(0, startY + distance * eased);
-    if (t < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-
-/* ====================================================== */
-/*                      COMPONENTE                        */
-/* ====================================================== */
-
+/* ======================================================
+   Componente Principal
+====================================================== */
 export default function DashboardVitrine() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -177,7 +162,11 @@ export default function DashboardVitrine() {
 
   const initial = readStateFromURL();
 
-  // const [skinsMock] = useState(() => enrichFromMock(MockSkins));
+  // Estado do menu de perfil
+  const [menuAberto, setMenuAberto] = useState(false);
+  const toggleMenu = () => setMenuAberto((prev) => !prev);
+
+  // Estados principais
   const [minhasSkins, setMinhasSkins] = useState([]);
   const [feedApi, setFeedApi] = useState([]);
   const [carregandoMinhas, setCarregandoMinhas] = useState(false);
@@ -186,18 +175,21 @@ export default function DashboardVitrine() {
   const [likes, setLikes] = useState(() => new Set());
   const [sortBy, setSortBy] = useState(initial.sort);
   const [filters, setFilters] = useState(initial.filters);
+  const [priceUI, setPriceUI] = useState({
+    min: brlPlain(initial.filters.min),
+    max: brlPlain(initial.filters.max),
+  });
 
-  const [chatAberto, setChatAberto] = useState(null); // { id, nome }
+  const [chatAberto, setChatAberto] = useState(null);
   const [unreads, setUnreads] = useState(0);
 
+  /* ======================================================
+     Autenticação e navegação
+  ====================================================== */
   function exigirLogin(acao, payload) {
     if (!user) {
       navigate('/login', {
-        state: {
-          returnTo: location.pathname + location.search,
-          acao,
-          payload,
-        },
+        state: { returnTo: location.pathname + location.search, acao, payload },
         replace: true,
       });
       return true;
@@ -213,7 +205,7 @@ export default function DashboardVitrine() {
       anuncio?.vendedorNome ??
       'Usuário';
     const id =
-      anuncio?.usuarioId ?? // <-- Agora este campo existirá
+      anuncio?.usuarioId ??
       anuncio?.seller?.id ??
       anuncio?.vendedorId ??
       `temp-${anuncio?.id || anuncio?._id}`;
@@ -233,12 +225,10 @@ export default function DashboardVitrine() {
     else abrirChatPara(anuncio);
   }
 
-  const [priceUI, setPriceUI] = useState({
-    min: brlPlain(initial.filters.min),
-    max: brlPlain(initial.filters.max),
-  });
+  /* ======================================================
+     Efeitos e sincronização
+  ====================================================== */
 
-  // Minhas skins quando loga/troca usuário + ouvir 'skins:changed'
   useEffect(() => {
     let ativo = true;
     async function carregarMinhas() {
@@ -253,37 +243,35 @@ export default function DashboardVitrine() {
         const planKey = String(
           user?.plano || user?.plan || 'gratuito',
         ).toLowerCase();
+
         const normalizada = (Array.isArray(lista) ? lista : []).map((a) => ({
           ...a,
-          plan: planKey, // força badge e ranking do usuário
+          plan: planKey,
           listedAt: toMs(a?.listedAt ?? a?.createdAt),
           isMine: true,
         }));
-        if (!ativo) return;
-        setMinhasSkins(normalizada);
+
+        if (ativo) setMinhasSkins(normalizada);
       } catch (e) {
         console.error('Falha ao buscar minhas skins:', e);
-        if (!ativo) return;
-        setErroMinhas('Não foi possível carregar suas skins.');
-        setMinhasSkins([]);
+        if (ativo) {
+          setErroMinhas('Não foi possível carregar suas skins.');
+          setMinhasSkins([]);
+        }
       } finally {
         if (ativo) setCarregandoMinhas(false);
       }
     }
+
     carregarMinhas();
-
-    function onChanged() {
-      carregarMinhas();
-    }
+    const onChanged = () => carregarMinhas();
     window.addEventListener('skins:changed', onChanged);
-
     return () => {
       ativo = false;
       window.removeEventListener('skins:changed', onChanged);
     };
   }, [user]);
 
-  // quando o plano do usuário muda, reflete nas minhas skins já em memória
   useEffect(() => {
     const planKey = String(
       user?.plano || user?.plan || 'gratuito',
@@ -295,83 +283,48 @@ export default function DashboardVitrine() {
     );
   }, [user?.plano, user?.plan]);
 
-  // FEED geral
   useEffect(() => {
-    let vivo = true;
+    let ativo = true;
     (async () => {
       try {
         const data = await anuncioService.listarFeedNormalizado();
-        if (vivo) {
+        if (ativo) {
           const normalized = (Array.isArray(data) ? data : []).map((a) => ({
             ...a,
             listedAt: toMs(a?.listedAt ?? a?.createdAt),
           }));
           setFeedApi(normalized);
         }
-      } catch (e) {
-        if (vivo) setFeedApi([]);
+      } catch {
+        if (ativo) setFeedApi([]);
       }
     })();
     return () => {
-      vivo = false;
+      ativo = false;
     };
   }, []);
 
-  // Polling leve do feed a cada 5s
   useEffect(() => {
-    let alive = true;
-    const tick = async () => {
+    const id = setInterval(async () => {
       try {
         const data = await anuncioService.listarFeedNormalizado();
-        if (alive) {
-          const normalized = (Array.isArray(data) ? data : []).map((a) => ({
-            ...a,
-            listedAt: toMs(a?.listedAt ?? a?.createdAt),
-          }));
-          setFeedApi(normalized);
-        }
+        const normalized = (Array.isArray(data) ? data : []).map((a) => ({
+          ...a,
+          listedAt: toMs(a?.listedAt ?? a?.createdAt),
+        }));
+        setFeedApi(normalized);
       } catch {}
-    };
-    const id = setInterval(tick, 5000);
-    return () => {
-      alive = false;
-      clearInterval(id);
-    };
+    }, 5000);
+    return () => clearInterval(id);
   }, []);
 
-  // Sincroniza filtros/sort com a URL (replaceState para não poluir histórico)
   useEffect(() => {
     writeStateToURL(filters, sortBy, true);
   }, [filters, sortBy]);
 
-  function uniqById(list) {
-    const seen = new Set();
-    const out = [];
-    for (const it of list) {
-      const k = String(it.id ?? it._id ?? '');
-      if (!k || seen.has(k)) continue;
-      seen.add(k);
-      out.push(it);
-    }
-    return out;
-  }
-
-  function mixByPlanRatio(mine, others, ratio) {
-    const res = [];
-    let i = 0,
-      j = 0;
-    let acc = 0;
-    while (i < mine.length || j < others.length) {
-      acc += ratio;
-      while (acc >= 1 && i < mine.length) {
-        res.push(mine[i++]);
-        acc -= 1;
-      }
-      if (j < others.length) res.push(others[j++]);
-    }
-    return res;
-  }
-
+  /* ======================================================
+     Lógica de ranking
+  ====================================================== */
   const listaCombinada = useMemo(() => {
     const minhasIds = new Set(
       (minhasSkins || []).map((m) => String(m.id ?? m._id)),
@@ -379,56 +332,53 @@ export default function DashboardVitrine() {
     const others = (feedApi || []).filter(
       (a) => !minhasIds.has(String(a.id ?? a._id)),
     );
-
     const planKey = String(
       user?.plano || user?.plan || 'gratuito',
     ).toLowerCase();
     const ratio = plansMeta[planKey]?.weight ?? 1.0;
-
-    let base = mixByPlanRatio(minhasSkins || [], others, ratio);
-    base = uniqById([...base]);
-    return base;
+    const mixByPlanRatio = (mine, others, ratio) => {
+      const res = [];
+      let i = 0,
+        j = 0,
+        acc = 0;
+      while (i < mine.length || j < others.length) {
+        acc += ratio;
+        while (acc >= 1 && i < mine.length) {
+          res.push(mine[i++]);
+          acc -= 1;
+        }
+        if (j < others.length) res.push(others[j++]);
+      }
+      return res;
+    };
+    return mixByPlanRatio(minhasSkins || [], others, ratio);
   }, [feedApi, minhasSkins, user]);
 
   const ranked = useRankedSkins(listaCombinada, sortBy, filters);
 
+  /* ======================================================
+     Handlers
+  ====================================================== */
   const handleLikeToggle = (keyId) => {
-    const isCurrentlyLiked = likes.has(keyId);
-    const newLikes = new Set(likes);
-    if (isCurrentlyLiked) newLikes.delete(keyId);
-    else newLikes.add(keyId);
-    setLikes(newLikes);
+    setLikes((prev) => {
+      const newLikes = new Set(prev);
+      newLikes.has(keyId) ? newLikes.delete(keyId) : newLikes.add(keyId);
+      return newLikes;
+    });
   };
 
-  function allowOnlyDigitsKeyDown(e) {
-    const allowed = [
-      'Backspace',
-      'Delete',
-      'ArrowLeft',
-      'ArrowRight',
-      'Home',
-      'End',
-      'Tab',
-      'Enter',
-    ];
-    const isCmd = e.ctrlKey || e.metaKey;
-    const isShortcut =
-      isCmd && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase());
-    const isDigit = e.key >= '0' && e.key <= '9';
-    const isNumpadDigit = e.code && /^Numpad[0-9]$/.test(e.code);
-    if (allowed.includes(e.key) || isShortcut || isDigit || isNumpadDigit)
-      return;
-    e.preventDefault();
-  }
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Falha ao fazer logout:', error);
+    }
+  };
 
-  function handlePasteDigits(e, which) {
-    const text = (e.clipboardData || window.clipboardData).getData('text');
-    const cleaned = onlyDigits(text);
-    e.preventDefault();
-    setPriceUI((p) => ({ ...p, [which]: cleaned }));
-    setFilters((f) => ({ ...f, [which]: cleaned ? parseInt(cleaned, 10) : 0 }));
-  }
-
+  /* ======================================================
+     Handlers e Refs dos campos de preço
+  ====================================================== */
   const minRef = useRef(null);
   const handleMinChange = (e) => {
     const cleaned = onlyDigits(e.target.value);
@@ -461,13 +411,36 @@ export default function DashboardVitrine() {
     setPriceUI((p) => ({ ...p, max: brlPlain(filters.max) }));
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/');
-    } catch (error) {
-      console.error('Falha ao fazer logout:', error);
-    }
+  const allowOnlyDigitsKeyDown = (e) => {
+    const allowed = [
+      'Backspace',
+      'Delete',
+      'ArrowLeft',
+      'ArrowRight',
+      'Home',
+      'End',
+      'Tab',
+      'Enter',
+    ];
+    const isCmd = e.ctrlKey || e.metaKey;
+    const isShortcut =
+      isCmd && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase());
+    const isDigit = e.key >= '0' && e.key <= '9';
+    const isNumpadDigit = e.code && /^Numpad[0-9]$/.test(e.code);
+    if (allowed.includes(e.key) || isShortcut || isDigit || isNumpadDigit)
+      return;
+    e.preventDefault();
+  };
+
+  const handlePasteDigits = (e, which) => {
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    const cleaned = onlyDigits(text);
+    e.preventDefault();
+    setPriceUI((p) => ({ ...p, [which]: cleaned }));
+    setFilters((f) => ({
+      ...f,
+      [which]: cleaned ? parseInt(cleaned, 10) : 0,
+    }));
   };
 
   const handleClearFilters = () => {
@@ -480,64 +453,7 @@ export default function DashboardVitrine() {
     writeStateToURL(DEFAULT_FILTERS, DEFAULT_SORT, false);
   };
 
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [menuPinned, setMenuPinned] = useState(false);
-  const menuRef = useRef(null);
-  const hideTimerRef = useRef(null);
-
-  const openMenu = () => {
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    setMenuOpen(true);
-  };
-  const scheduleClose = () => {
-    if (menuPinned) return;
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    hideTimerRef.current = setTimeout(() => setMenuOpen(false), 500);
-  };
-  const togglePinned = () => {
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    setMenuPinned((v) => !v);
-    setMenuOpen(true);
-  };
-
-  useEffect(() => {
-    const onDocClick = (e) => {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target)) {
-        setMenuPinned(false);
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener('click', onDocClick);
-    return () => document.removeEventListener('click', onDocClick);
-  }, []);
-
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === 'Escape') {
-        setMenuPinned(false);
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    };
-  }, []);
-
-  const initials = (user?.nome || user?.email || '?')
-    .split(' ')
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-
-  // ✅ handler pra abrir perfil já com modal de upgrade
-  function irParaUpgrade(planoDesejado) {
+  const irParaUpgrade = (planoDesejado) => {
     if (!user) {
       navigate('/login', {
         state: {
@@ -549,74 +465,76 @@ export default function DashboardVitrine() {
       return;
     }
     navigate('/perfil', {
-      state: {
-        openPlanoPanel: 'upgrade',
-        preselectPlan: planoDesejado,
-      },
+      state: { openPlanoPanel: 'upgrade', preselectPlan: planoDesejado },
     });
-  }
+  };
 
+  const initials = (user?.nome || user?.email || '?')
+    .split(' ')
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
+  /* ======================================================
+     Renderização
+  ====================================================== */
   return (
     <div className="dash-root">
       <div className="backdrop" aria-hidden />
 
-      {/* Topbar */}
-      <div className="topbar">
-        <AuthBrand />
-        <nav>
-          <a href="#grid">Explorar</a>
-          <a href="#planos">Planos</a>
-          <a href="#planos">Anunciar</a>
-        </nav>
+      {/* ---------- Topbar (logado) ---------- */}
+      {user ? (
+        <div className="topbar logged">
+          <AuthBrand />
 
-        <div className="actions">
-          {user ? (
-            <div
-              className={`profile-menu ${menuOpen ? 'is-open' : ''}`}
-              ref={menuRef}
-              onMouseEnter={openMenu}
-              onMouseLeave={scheduleClose}
-            >
-              <button
-                className="avatar neon"
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                onClick={togglePinned}
-                type="button"
-              >
-                {initials}
-              </button>
+          <nav className="nav-links">
+            <a href="#grid">Explorar</a>
+            <a href="#planos">Planos</a>
+            <a href="#planos">Anunciar</a>
+          </nav>
 
-              {menuOpen && (
-                <div className="menu" role="menu">
-                  <button onClick={() => navigate('/perfil')} role="menuitem">
-                    Meu perfil
-                  </button>
-                  <button onClick={handleLogout} role="menuitem">
-                    Sair
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <>
-              <Link to="/login" className="btn btn--ghost sm">
-                Entrar
-              </Link>
-              <Link to="/cadastro" className="btn btn--primary sm">
-                Criar conta
-              </Link>
-            </>
-          )}
+          {/* Avatar direto na topbar (fora do .actions) */}
+          <div className="profile-menu">
+            <button className="avatar neon" onClick={toggleMenu}>
+              {initials}
+            </button>
+
+            {menuAberto && (
+              <div className="menu">
+                <button onClick={() => navigate('/perfil')}>Meu Perfil</button>
+                <button onClick={handleLogout}>Sair</button>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        /* ---------- Topbar (deslogado) ---------- */
+        <div className="topbar guest">
+          <AuthBrand />
+          <nav>
+            <a href="#grid">Explorar</a>
+            <a href="#planos">Planos</a>
+            <a href="#planos">Anunciar</a>
+          </nav>
 
-      {/* Hero */}
+          <div className="actions">
+            <Link to="/login" className="btn btn--ghost sm">
+              Entrar
+            </Link>
+            <Link to="/cadastro" className="btn btn--primary sm">
+              Criar conta
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* ---------- Hero ---------- */}
       <header className="hero">
         <div className="hero__copy">
           <h1>SkinLoot</h1>
           <p>
-            Anuncie, favorite, converse com outros usuarios e ao comprar,
+            Anuncie, favorite, converse com outros usuários e ao comprar,
             redirecionamos para o vendedor.
           </p>
           <div className="hero__cta">
@@ -630,7 +548,7 @@ export default function DashboardVitrine() {
         </div>
       </header>
 
-      {/* Filtros */}
+      {/* ---------- Filtros ---------- */}
       <section className="filters" id="grid">
         <div className="filters__row">
           <div className="field field--search">
@@ -739,33 +657,21 @@ export default function DashboardVitrine() {
         </div>
       </section>
 
-      {/* Grid de Cards */}
+      {/* ---------- Grid ---------- */}
       <section className="grid">
-        {user && carregandoMinhas && (
-          <p style={{ gridColumn: '1 / -1', color: '#7B8694' }}>
-            Carregando suas skins…
-          </p>
-        )}
-        {user && !carregandoMinhas && erroMinhas && (
-          <p style={{ gridColumn: '1 / -1', color: '#ff9c9c' }}>{erroMinhas}</p>
-        )}
-
-        {ranked.map((anuncio) => {
-          const k = anuncio.id || anuncio._id;
-          return (
-            <SkinCard
-              key={k}
-              data={anuncio}
-              liked={likes.has(k)}
-              onLike={() => handleLikeToggle(k)}
-              onContato={() => abrirChatPara(anuncio)}
-              onComprarFora={() => comprarFora(anuncio)}
-            />
-          );
-        })}
+        {ranked.map((anuncio) => (
+          <SkinCard
+            key={anuncio.id || anuncio._id}
+            data={anuncio}
+            liked={likes.has(anuncio.id || anuncio._id)}
+            onLike={() => handleLikeToggle(anuncio.id || anuncio._id)}
+            onContato={() => abrirChatPara(anuncio)}
+            onComprarFora={() => comprarFora(anuncio)}
+          />
+        ))}
       </section>
 
-      {/* Planos */}
+      {/* ---------- Planos ---------- */}
       <section id="planos" className="plans">
         <h2>Planos de Destaque</h2>
         <div className="plans__grid">
@@ -785,7 +691,6 @@ export default function DashboardVitrine() {
                 {key !== 'gratuito' && <li>Relatórios de visualização</li>}
                 {key === 'plus' && <li>Spotlight na página inicial</li>}
               </ul>
-              {/* ✅ agora chama o handler */}
               <button
                 className="btn btn--primary"
                 onClick={() => irParaUpgrade(key)}
@@ -797,7 +702,7 @@ export default function DashboardVitrine() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* ---------- Footer ---------- */}
       <footer className="foot">
         <p>
           © {new Date().getFullYear()} SkinLoot — Nós apenas conectamos vendedor
@@ -805,14 +710,12 @@ export default function DashboardVitrine() {
         </p>
       </footer>
 
-      {/* Chat flutuante só aparece quando LOGADO */}
+      {/* ---------- Chat Flutuante ---------- */}
       {user &&
         (chatAberto ? (
           <ChatFlutuante
             usuarioAlvo={chatAberto}
-            onFechar={() => {
-              setChatAberto(null);
-            }}
+            onFechar={() => setChatAberto(null)}
           />
         ) : (
           <button
@@ -828,88 +731,5 @@ export default function DashboardVitrine() {
           </button>
         ))}
     </div>
-  );
-}
-
-/* ---------- Card (componente) ---------- */
-function SkinCard({ data, liked, onLike, onContato, onComprarFora }) {
-  const navigate = useNavigate();
-  const title = data?.skinNome ?? data?.title ?? data?.nome ?? 'Skin';
-  const image = data?.image ?? data?.imagemUrl ?? data?.imagem ?? '';
-  const vendedor =
-    data?.usuarioNome ?? data?.seller?.name ?? data?.vendedorNome ?? '—';
-
-  const precoNumber = Number(data?.price ?? data?.preco ?? NaN);
-  const precoFmt = Number.isFinite(precoNumber)
-    ? precoNumber.toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-    : '—';
-
-  const planKeyRaw = data?.planoNome ?? data?.plan ?? data?.plano ?? 'gratuito';
-  const planKey = String(planKeyRaw).toLowerCase();
-  const planMeta = plansMeta[planKey] || { label: '—', color: '#999' };
-
-  return (
-    <article className="card">
-      <div className="card__media">
-        <img
-          src={image}
-          alt={title}
-          loading="lazy"
-          onError={(e) => {
-            e.currentTarget.src = '/img/placeholder.png';
-          }}
-        />
-        <span className="badge" style={{ background: planMeta.color }}>
-          {planMeta.label}
-        </span>
-
-        <button
-          className={`like ${liked ? 'is-liked' : ''}`}
-          onClick={onLike}
-          aria-label="Favoritar"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24">
-            <path
-              fill="currentColor"
-              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.22 2.53C11.09 5.01 12.76 4 14.5 4 17 4 19 6 19 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-            />
-          </svg>
-        </button>
-      </div>
-
-      <div className="card__body">
-        <h3>{title}</h3>
-        <div className="meta">
-          <span className="price">R$ {precoFmt}</span>
-        </div>
-
-        {/* Nova estrutura dentro do card */}
-        <div className="seller">
-          <span>Vendedor: {vendedor}</span>
-
-          <div className="cta">
-            <button className="btn btn--ghost" onClick={onContato}>
-              Contato
-            </button>
-            <button
-              className="btn btn--ghost"
-              onClick={() => navigate(`/anuncio/${data.id || data._id}`)}
-            >
-              Ver detalhes
-            </button>
-          </div>
-        </div>
-
-        {/* Fora da seller, o botão de compra ocupa 100% */}
-        <div className="cta cta--bottom">
-          <button className="btn btn--primary full" onClick={onComprarFora}>
-            Comprar
-          </button>
-        </div>
-      </div>
-    </article>
   );
 }
