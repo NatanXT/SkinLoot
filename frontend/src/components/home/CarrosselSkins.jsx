@@ -1,27 +1,35 @@
+// ==========================================================
 // CarrosselSkins.jsx
+// ----------------------------------------------------------
+// Componente que renderiza um carrossel automático de skins
+// (com agrupamento dinâmico e autoplay pausável).
+// Utiliza Swiper.js com módulos de Autoplay, Pagination e Fade.
+// ==========================================================
+
 import React, { useRef } from 'react';
 import '../home/CarrosselSkins.css';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
-// Estilos do Swiper
+// Estilos e módulos do Swiper
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
 import 'swiper/css/effect-fade';
-
-// Módulos do Swiper
 import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
 
 /**
- * Componente que renderiza um carrossel automático de skins em grupos de 4.
- * Pausa o autoplay ao passar o mouse e reinicia ao sair.
+ * Renderiza um carrossel com skins organizadas em grupos de 4.
+ * O autoplay pausa quando o usuário passa o mouse sobre o carrossel.
  *
- * @param {Array} skins - Lista de objetos de skin com `nome` e `imagemUrl`.
+ * @param {Array} skins - Lista de objetos contendo { nome, imagemUrl }.
  */
 export default function CarrosselSkins({ skins }) {
   const swiperRef = useRef(null);
 
-  // Agrupa as skins em subarrays de tamanho `size`
+  /**
+   * Agrupa uma lista em subarrays de tamanho fixo.
+   * Ex: groupSkins([1,2,3,4,5], 2) -> [[1,2],[3,4],[5]]
+   */
   const groupSkins = (list, size) => {
     const grouped = [];
     for (let i = 0; i < list.length; i += size) {
@@ -38,16 +46,14 @@ export default function CarrosselSkins({ skins }) {
 
       <Swiper
         modules={[Pagination, Autoplay, EffectFade]}
-        spaceBetween={20}
         slidesPerView={1}
+        spaceBetween={20}
+        loop
         effect="fade"
         fadeEffect={{ crossFade: true }}
         pagination={{ clickable: true, el: '.swiper-pagination-container' }}
         autoplay={{ delay: 3000, disableOnInteraction: false }}
-        loop={true}
-        onSwiper={(swiper) => {
-          swiperRef.current = swiper;
-        }}
+        onSwiper={(swiper) => (swiperRef.current = swiper)}
       >
         {groupedSkins.map((group, index) => (
           <SwiperSlide
@@ -73,6 +79,7 @@ export default function CarrosselSkins({ skins }) {
         ))}
       </Swiper>
 
+      {/* Container de paginação do Swiper */}
       <div className="swiper-pagination-container"></div>
     </section>
   );

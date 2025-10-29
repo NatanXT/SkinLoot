@@ -1,3 +1,20 @@
+/* ==========================================================
+   ChatFlutuante.css
+   Caminho: frontend/src/components/chat/ChatFlutuante.css
+   ----------------------------------------------------------
+   Estrutura visual do chat flutuante:
+   - Ícone/botão "pill" minimizado
+   - Janela expandida com contatos e mensagens
+   - Campos e botões
+   ----------------------------------------------------------
+   Paleta baseada em variáveis globais:
+   --bg, --panel, --text, --muted, --primary, --secondary
+========================================================== */
+
+
+/* ==========================================================
+   POSICIONAMENTO BASE
+========================================================== */
 .chat-flutuante {
   position: fixed;
   bottom: 20px;
@@ -6,7 +23,11 @@
   font-family: inherit;
 }
 
-/* =============== PILL MINIMIZADO (como no print) =============== */
+
+/* ==========================================================
+   BOTÃO PILL MINIMIZADO
+   (Versão compacta exibida quando o chat está fechado)
+========================================================== */
 .chat-icone {
   position: relative;
   display: inline-flex;
@@ -21,21 +42,27 @@
   padding: 10px 16px;
   min-width: 220px;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.40);
-  transition: transform .15s ease, background .2s ease, box-shadow .2s ease;
-}
-.chat-icone:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(0,0,0,0.45);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.40);
+  transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Variante super arredondada */
+.chat-icone:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+}
+
+/* Variante mais arredondada */
 .chat-icone--pill {
   border-radius: 999px;
   padding: 8px 14px;
 }
 
-/* Área esquerda: "bolinha" com ícone + badge por cima */
+
+/* ----------------------------------------------------------
+   Estrutura interna do botão (ícone, label e avatar)
+---------------------------------------------------------- */
+
+/* Ícone à esquerda (com badge) */
 .chat-icone__left {
   position: relative;
   width: 28px;
@@ -47,7 +74,13 @@
   border: 1px solid #2A323C;
   flex: 0 0 auto;
 }
-.chat-icone__emoji { font-size: 16px; line-height: 1; }
+
+.chat-icone__emoji {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Badge de notificações */
 .chat-icone__badge {
   position: absolute;
   top: -6px;
@@ -63,7 +96,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 0 2px rgba(0,0,0,.15);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
 }
 
 /* Label central */
@@ -71,15 +104,16 @@
   flex: 1;
   text-align: left;
   font-weight: 700;
-  letter-spacing: .1px;
+  letter-spacing: 0.1px;
 }
 
-/* Avatar à direita (vendedor) */
+/* Avatar do contato à direita */
 .chat-icone__right {
   display: grid;
   place-items: center;
   flex: 0 0 auto;
 }
+
 .chat-icone__avatar {
   width: 28px;
   height: 28px;
@@ -88,6 +122,8 @@
   object-fit: cover;
   background: #0E1217;
 }
+
+/* Placeholder de avatar (quando não há imagem) */
 .chat-icone__avatar--placeholder {
   width: 28px;
   height: 28px;
@@ -96,7 +132,10 @@
   background: #0E1217;
 }
 
-/* =================== JANELA ABERTA =================== */
+
+/* ==========================================================
+   JANELA EXPANDIDA DO CHAT
+========================================================== */
 .chat-janela {
   width: 340px;
   height: 420px;
@@ -105,33 +144,43 @@
   border-radius: 16px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
   color: var(--text);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
   overflow: hidden;
 }
-.chat-janela--rounded { border-radius: 20px; }
 
-/* Topo */
+.chat-janela--rounded {
+  border-radius: 20px;
+}
+
+
+/* ==========================================================
+   CABEÇALHO (TOPO DA JANELA)
+========================================================== */
 .chat-topo {
   position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 14px;
-  border-bottom: 1px solid #1A2129;
   background: #0F141A;
+  border-bottom: 1px solid #1A2129;
 }
+
+/* Info do usuário (foto + nome) */
 .chat-topo .user {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 .chat-topo .user img {
   width: 36px;
   height: 36px;
   border-radius: 999px;
   border: 1px solid #253140;
 }
+
 .chat-topo-label {
   flex: 1;
   font-weight: 700;
@@ -139,40 +188,66 @@
 }
 
 /* Botões do topo */
-.chat-topo-actions { display: flex; gap: 8px; }
-.btn-voltar, .btn-fechar {
-  background: #1C2430;
-  color: var(--text);
+.chat-topo-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-voltar,
+.btn-fechar {
+  width: 30px;
+  height: 30px;
+  font-size: 14px;
   border: none;
   border-radius: 10px;
-  width: 30px; height: 30px;
-  font-size: 14px;
+  background: #1C2430;
+  color: var(--text);
   cursor: pointer;
-  transition: background .2s ease, transform .1s ease;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
-.btn-voltar:hover, .btn-fechar:hover { background: var(--secondary); color: #0B0D10; }
-.btn-voltar:active, .btn-fechar:active { transform: scale(0.98); }
 
-/* IMPORTANTÍSSIMO p/ flex não “empilhar” conteúdo */
-.chat-lista, .chat-mensagens { min-height: 0; }
+.btn-voltar:hover,
+.btn-fechar:hover {
+  background: var(--secondary);
+  color: #0B0D10;
+}
 
-/* Lista de contatos */
+.btn-voltar:active,
+.btn-fechar:active {
+  transform: scale(0.98);
+}
+
+
+/* ==========================================================
+   LISTA DE CONTATOS
+========================================================== */
 .chat-contatos {
   flex: 1;
   overflow-y: auto;
   background: #10161D;
 }
+
 .chat-contato {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
   cursor: pointer;
-  transition: background .15s ease;
+  transition: background 0.15s ease;
 }
-.chat-contato:hover { background: #1C2430; }
-.chat-contato.is-active { background: #1A2330; }
-.chat-contato + .chat-contato { border-top: 1px solid #151C24; }
+
+.chat-contato:hover {
+  background: #1C2430;
+}
+
+.chat-contato.is-active {
+  background: #1A2330;
+}
+
+.chat-contato + .chat-contato {
+  border-top: 1px solid #151C24;
+}
+
 .chat-contato img {
   width: 40px;
   height: 40px;
@@ -180,9 +255,25 @@
   border: 1px solid #273240;
   object-fit: cover;
 }
-.chat-contato .info { flex: 1; display: flex; flex-direction: column; }
-.chat-contato .info strong { font-size: 14px; line-height: 1.1; }
-.chat-contato .info span { font-size: 12px; color: var(--muted); }
+
+/* Informações do contato */
+.chat-contato .info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-contato .info strong {
+  font-size: 14px;
+  line-height: 1.1;
+}
+
+.chat-contato .info span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Badge de mensagens não lidas */
 .chat-contato .badge {
   background: #FF3B30;
   color: #fff;
@@ -192,16 +283,21 @@
   padding: 2px 6px;
 }
 
-/* Mensagens */
+
+/* ==========================================================
+   MENSAGENS DO CHAT
+========================================================== */
 .chat-mensagens {
   flex: 1;
-  padding: 12px;
-  overflow-y: auto;
-  background: #0E1217;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding: 12px;
+  background: #0E1217;
+  overflow-y: auto;
 }
+
+/* Bolhas de mensagem */
 .chat-msg {
   margin: 0;
   padding: 10px 14px;
@@ -209,52 +305,69 @@
   max-width: 78%;
   font-size: 14px;
   line-height: 1.35;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
 }
+
+/* Mensagem enviada pelo usuário */
 .chat-eu {
+  margin-left: auto;
   background: #2ed117;
   color: #07280a;
-  margin-left: auto;
   border-top-right-radius: 6px;
 }
+
+/* Mensagem recebida */
 .chat-ele {
+  margin-right: auto;
   background: #1C2430;
   color: var(--text);
-  margin-right: auto;
   border-top-left-radius: 6px;
 }
 
-/* Form */
+
+/* ==========================================================
+   FORMULÁRIO DE ENVIO DE MENSAGEM
+========================================================== */
 .chat-form {
   display: flex;
-  padding: 10px;
   gap: 8px;
-  border-top: 1px solid #1A2129;
+  padding: 10px;
   background: #0F141A;
+  border-top: 1px solid #1A2129;
 }
+
 .chat-form input {
   flex: 1;
   padding: 10px 12px;
-  border-radius: 12px;
   border: 1px solid #2A323C;
+  border-radius: 12px;
   background: #0E1217;
   color: var(--text);
   outline: none;
-  transition: border-color .2s ease, box-shadow .2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+
 .chat-form input:focus {
   border-color: var(--secondary);
-  box-shadow: 0 0 0 2px rgba(0,200,150,.12);
+  box-shadow: 0 0 0 2px rgba(0, 200, 150, 0.12);
 }
+
+/* Botão de envio */
 .chat-form button {
   padding: 10px 14px;
-  border: none;
-  background: linear-gradient(180deg, var(--primary), var(--secondary));
-  color: #0B0D10;
-  border-radius: 12px;
   font-weight: 800;
+  border: none;
+  border-radius: 12px;
+  color: #0B0D10;
   cursor: pointer;
-  transition: filter .15s ease, transform .1s ease;
+  background: linear-gradient(180deg, var(--primary), var(--secondary));
+  transition: filter 0.15s ease, transform 0.1s ease;
 }
-.chat-form button:hover { filter: brightness(.96); }
-.chat-form button:active { transform: translateY(1px); }
+
+.chat-form button:hover {
+  filter: brightness(0.96);
+}
+
+.chat-form button:active {
+  transform: translateY(1px);
+}
