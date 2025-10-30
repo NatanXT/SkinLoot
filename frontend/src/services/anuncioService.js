@@ -213,20 +213,25 @@ export async function criarAnuncio(payload) {
 
   // PROD: envie campos compatíveis com Base64
   const body = {
+    // Campos que já existiam
     titulo: payload.titulo,
     descricao: payload.descricao ?? '',
     preco: payload.preco,
-    skin_name: payload.skinName ?? payload.skin_name,
+    status: payload.status,
+    skinId: payload.skinId ?? null,
     skinName: payload.skinName,
 
-    // Preferência por Base64:
-    skinImageBase64: payload.skinImageBase64 ?? null,
-    skinImageMime: payload.skinImageMime ?? null,
+    // --- CAMPOS ATUALIZADOS ---
+    // REMOVIDO: detalhesEspecificos: payload.detalhesEspecificos,
+    jogoId: payload.jogoId, // NOVO
+    detalhesCsgo: payload.detalhesCsgo, // NOVO
+    detalhesLol: payload.detalhesLol, // NOVO
+    // --- FIM DAS ATUALIZAÇÕES ---
 
-    // Fallback opcional: se quiser manter compat com uma API antiga (URL)
-    skinImageUrl: payload.skinImageUrl ?? null,
-
-    detalhesEspecificos: payload.detalhesEspecificos ?? {}, // Envia um objeto JSON
+    // Campos de imagem (sem alteração)
+    skinImageUrl: payload.skinImageUrl,
+    skinImageBase64: payload.skinImageBase64,
+    skinImageMime: payload.skinImageMime,
   };
   const { data } = await api.post('/anuncios/save', body);
   return normalizarDoBackend(data);
@@ -267,20 +272,25 @@ export async function editarAnuncio(id, payload) {
 
   // PROD: atualizar com Base64 preferencialmente
   const body = {
+    // Campos que já existiam
     titulo: payload.titulo,
     descricao: payload.descricao ?? '',
     preco: payload.preco,
-    skin_name: payload.skinName ?? payload.skin_name,
+    status: payload.status,
+    skinId: payload.skinId ?? null,
     skinName: payload.skinName,
 
-    // Preferência por Base64:
-    skinImageBase64: payload.skinImageBase64 ?? null,
-    skinImageMime: payload.skinImageMime ?? null,
+    // --- CAMPOS ATUALIZADOS ---
+    // REMOVIDO: detalhesEspecificos: payload.detalhesEspecificos,
+    jogoId: payload.jogoId, // NOVO
+    detalhesCsgo: payload.detalhesCsgo, // NOVO
+    detalhesLol: payload.detalhesLol, // NOVO
+    // --- FIM DAS ATUALIZAÇÕES ---
 
-    // Fallback opcional (URL):
-    skinImageUrl: payload.skinImageUrl ?? null,
-
-    detalhesEspecificos: payload.detalhesEspecificos ?? {},
+    // Campos de imagem (sem alteração)
+    skinImageUrl: payload.skinImageUrl,
+    skinImageBase64: payload.skinImageBase64,
+    skinImageMime: payload.skinImageMime,
   };
   const { data } = await api.put(`/anuncios/${id}`, body);
   return normalizarDoBackend(data);

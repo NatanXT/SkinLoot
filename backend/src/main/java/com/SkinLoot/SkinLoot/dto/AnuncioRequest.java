@@ -24,7 +24,7 @@ public class AnuncioRequest {
     // Vínculo opcional ao catálogo (quando existir)
     private UUID skinId;
 
-    private Jogo jogo;
+    private UUID jogoId;
     private Csgo2Request detalhesCsgo;
     private LolRequest detalhesLol;
 
@@ -92,9 +92,13 @@ public class AnuncioRequest {
         this.skinId = skinId;
     }
 
-    public Jogo getJogo() { return jogo; }
+    public UUID getJogoId() {
+        return jogoId;
+    }
 
-    public void setJogo(Jogo jogo) { this.jogo = jogo; }
+    public void setJogoId(UUID jogoId) {
+        this.jogoId = jogoId;
+    }
 
     public String getSkinName() {
         return skinName;
@@ -127,10 +131,19 @@ public class AnuncioRequest {
         this.skinImageMime = skinImageMime;
     }
 
-    // public Double getDesgasteFloat() { return desgasteFloat; }
-    // public void setDesgasteFloat(Double desgasteFloat) { this.desgasteFloat =
-    // desgasteFloat; }
+    public Csgo2Request getDetalhesCsgo() {
+        return detalhesCsgo;
+    }
 
-    // public String getQualidade() { return qualidade; }
-    // public void setQualidade(String qualidade) { this.qualidade = qualidade; }
+    public void setDetalhesCsgo(Csgo2Request detalhesCsgo) {
+        this.detalhesCsgo = detalhesCsgo;
+    }
+
+    public LolRequest getDetalhesLol() {
+        return detalhesLol;
+    }
+
+    public void setDetalhesLol(LolRequest detalhesLol) {
+        this.detalhesLol = detalhesLol;
+    }
 }

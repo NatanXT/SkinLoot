@@ -24,11 +24,13 @@ ALTER TABLE jogo_categorias ADD CONSTRAINT jogo_categorias_categoria_check
 
 -- Insere as categorias passo2
 -- Insere os jogos na tabela principal
-INSERT INTO jogo (nome) VALUES ('CS:GO') ON CONFLICT (nome) DO NOTHING;
-INSERT INTO jogo (nome) VALUES ('Valorant') ON CONFLICT (nome) DO NOTHING;
-INSERT INTO jogo (nome) VALUES ('Dota 2') ON CONFLICT (nome) DO NOTHING;
-INSERT INTO jogo (nome) VALUES ('League of Legends') ON CONFLICT (nome) DO NOTHING;
-INSERT INTO jogo (nome) VALUES ('Rust') ON CONFLICT (nome) DO NOTHING;
+INSERT INTO jogo (id, nome) VALUES
+                                (gen_random_uuid(), 'CS:GO'),
+                                (gen_random_uuid(), 'Valorant'),
+                                (gen_random_uuid(), 'League of Legends'),
+                                (gen_random_uuid(), 'Rust'),
+                                (gen_random_uuid(), 'Dota 2')
+ON CONFLICT (nome) DO NOTHING;
 
 --passo 3 Associa categorias ao CS:GO
 INSERT INTO jogo_categorias (jogo_nome, categoria) VALUES ('CS:GO', 'FPS') ON CONFLICT DO NOTHING;

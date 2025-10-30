@@ -2,6 +2,9 @@ package com.SkinLoot.SkinLoot.controler;
 
 import com.SkinLoot.SkinLoot.dto.AnuncioRequest;
 import com.SkinLoot.SkinLoot.dto.AnuncioResponse;
+import com.SkinLoot.SkinLoot.dto.CsgoDto.Csgo2Response;
+import com.SkinLoot.SkinLoot.dto.JogoDto.JogoResponseDto;
+import com.SkinLoot.SkinLoot.dto.riotDto.LolResponse;
 import com.SkinLoot.SkinLoot.model.Anuncio;
 import com.SkinLoot.SkinLoot.model.Usuario;
 import com.SkinLoot.SkinLoot.model.enums.Status;
@@ -178,6 +181,14 @@ public class AnuncioController {
 
         // Campos calculados
         dto.setLikesCount(a.getLikesCount());
+        if (a.getJogo() != null) {
+            dto.setJogo(new JogoResponseDto(a.getJogo()));
+        }
+        if (a.getDetalhesCsgo() != null) {
+            dto.setCs2(new Csgo2Response(a.getDetalhesCsgo()));
+        } else if (a.getDetalhesLol() != null) {
+            dto.setLol(new LolResponse(a.getDetalhesLol()));
+        }
         return dto;
     }
 

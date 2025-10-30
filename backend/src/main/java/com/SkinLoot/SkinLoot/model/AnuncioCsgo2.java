@@ -6,7 +6,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "anuncio_detalhes_csgo")
-public class AnuncioDetalhesCsgo {
+public class AnuncioCsgo2 {
 
     @Id
     @Column(name = "anuncio_id") // Nome da coluna que será a PK e FK
@@ -29,7 +29,7 @@ public class AnuncioDetalhesCsgo {
     @Column(name = "exterior", length = 50)
     private String exterior; // Ex: "Factory New", "Minimal Wear", etc. (Poderia ser um Enum também)
 
-    public AnuncioDetalhesCsgo() {
+    public AnuncioCsgo2() {
     }
 
     public UUID getId() {

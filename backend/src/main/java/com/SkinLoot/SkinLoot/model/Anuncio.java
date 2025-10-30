@@ -3,12 +3,9 @@ package com.SkinLoot.SkinLoot.model;
 import com.SkinLoot.SkinLoot.model.enums.Status;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Formula;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -65,6 +62,10 @@ public class Anuncio {
     @JoinColumn(name = "skin_id", nullable = true) // a relação é opcional
     private Skin skin;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "jogo_id")
+    private Jogo jogo;
+
     private LocalDateTime dataCriacao;
 
     @OneToMany(mappedBy = "anuncio", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -74,10 +75,10 @@ public class Anuncio {
     private int likesCount;
 
     @OneToOne(mappedBy = "anuncio", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true, orphanRemoval = true)
-    private AnuncioDetalhesCsgo detalhesCsgo;
+    private AnuncioCsgo2 detalhesCsgo;
 
     @OneToOne(mappedBy = "anuncio", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true, orphanRemoval = true)
-    private AnuncioDetalhesLol detalhesLol;
+    private AnuncioLol detalhesLol;
 
     // ===================== Construtores =====================
     public Anuncio() {
@@ -93,12 +94,13 @@ public class Anuncio {
             String skinImageUrl,
             Usuario usuario,
             Skin skin,
+            Jogo jogo,
             LocalDateTime dataCriacao,
             Long steamItemId, // (mantido conforme sua assinatura anterior)
             Set<AnuncioLike> likes,
             int likesCount,
-            AnuncioDetalhesCsgo detalhesCsgo,
-            AnuncioDetalhesLol detalhesLol
+            AnuncioCsgo2 detalhesCsgo,
+            AnuncioLol detalhesLol
             ) {
         this.id = id;
         this.titulo = titulo;
@@ -109,6 +111,7 @@ public class Anuncio {
         this.skinImageUrl = skinImageUrl;
         this.usuario = usuario;
         this.skin = skin;
+        this.jogo = jogo;
         this.dataCriacao = dataCriacao;
         this.likes = likes;
         this.likesCount = likesCount;
@@ -233,6 +236,14 @@ public class Anuncio {
         this.skin = skin;
     }
 
+    public Jogo getJogo() {
+        return jogo;
+    }
+
+    public void setJogo(Jogo jogo) {
+        this.jogo = jogo;
+    }
+
     public LocalDateTime getDataCriacao() {
         return dataCriacao;
     }
@@ -257,19 +268,19 @@ public class Anuncio {
         this.likesCount = likesCount;
     }
 
-    public AnuncioDetalhesCsgo getDetalhesCsgo() {
+    public AnuncioCsgo2 getDetalhesCsgo() {
         return detalhesCsgo;
     }
 
-    public void setDetalhesCsgo(AnuncioDetalhesCsgo detalhesCsgo) {
+    public void setDetalhesCsgo(AnuncioCsgo2 detalhesCsgo) {
         this.detalhesCsgo = detalhesCsgo;
     }
 
-    public AnuncioDetalhesLol getDetalhesLol() {
+    public AnuncioLol getDetalhesLol() {
         return detalhesLol;
     }
 
-    public void setDetalhesLol(AnuncioDetalhesLol detalhesLol) {
+    public void setDetalhesLol(AnuncioLol detalhesLol) {
         this.detalhesLol = detalhesLol;
     }
 }

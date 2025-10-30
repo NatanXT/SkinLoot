@@ -1,16 +1,14 @@
 package com.SkinLoot.SkinLoot.service;
 
 import com.SkinLoot.SkinLoot.dto.AnuncioRequest;
-import com.SkinLoot.SkinLoot.dto.AnuncioResponse;
+import com.SkinLoot.SkinLoot.dto.CsgoDto.Csgo2Request;
+import com.SkinLoot.SkinLoot.dto.riotDto.LolRequest;
 import com.SkinLoot.SkinLoot.exceptions.AcessoNegadoException;
 import com.SkinLoot.SkinLoot.exceptions.LimiteExcedidoException;
 import com.SkinLoot.SkinLoot.model.*;
 import com.SkinLoot.SkinLoot.model.enums.Status;
 import com.SkinLoot.SkinLoot.model.enums.StatusAssinatura;
-import com.SkinLoot.SkinLoot.repository.AnuncioLikeRepository;
-import com.SkinLoot.SkinLoot.repository.AnuncioRepository;
-import com.SkinLoot.SkinLoot.repository.SkinRepository;
-import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
+import com.SkinLoot.SkinLoot.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Serviço responsável por gerenciar anúncios (CRUD, likes e regras de
@@ -33,16 +30,19 @@ public class AnuncioService {
     private final UsuarioRepository usuarioRepository;
     private final AnuncioLikeRepository anuncioLikeRepository;
     private final SkinRepository skinRepository;
+    private final JogoRepository jogoRepository;
 
     public AnuncioService(
             SkinRepository skinRepository,
             AnuncioLikeRepository anuncioLikeRepository,
             UsuarioRepository usuarioRepository,
-            AnuncioRepository anuncioRepository) {
+            AnuncioRepository anuncioRepository,
+            JogoRepository jogoRepository) {
         this.skinRepository = skinRepository;
         this.anuncioLikeRepository = anuncioLikeRepository;
         this.usuarioRepository = usuarioRepository;
         this.anuncioRepository = anuncioRepository;
+        this.jogoRepository = jogoRepository;
     }
 
     /**
@@ -73,6 +73,14 @@ public class AnuncioService {
         novoAnuncio.setPreco(request.getPreco());
         novoAnuncio.setStatus(request.getStatus() != null ? request.getStatus() : Status.ATIVO);
         novoAnuncio.setDataCriacao(LocalDateTime.now());
+
+        if (request.getJogoId() == null) {
+            throw new IllegalArgumentException("A seleção do jogo é obrigatória.");
+        }
+
+        Jogo jogo = jogoRepository.findById(request.getJogoId())
+                .orElseThrow(() -> new RuntimeException("Jogo não encontrado."));
+        novoAnuncio.setJogo(jogo); // <-- SALVA O RELACIONAMENTO
 
         // 3) Lógica híbrida (catálogo vs. livre)
         if (request.getSkinId() != null) {
@@ -106,7 +114,7 @@ public class AnuncioService {
                 limparBase64(novoAnuncio);
             }
         }
-        processarDetalhes(novoAnuncio, request);
+        processarDetalhes(novoAnuncio, request, jogo);
 
         return anuncioRepository.save(novoAnuncio);
     }
@@ -119,6 +127,8 @@ public class AnuncioService {
     public Anuncio atualizar(UUID id, AnuncioRequest request, Usuario usuario) {
         Anuncio a = anuncioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Anúncio não encontrado."));
+
+        Jogo jogo;
 
         // Segurança: só o dono pode editar
         if (a.getUsuario() == null || !a.getUsuario().getId().equals(usuario.getId())) {
@@ -159,12 +169,56 @@ public class AnuncioService {
             a.setSkin(null);
             a.setSkinName(request.getSkinName());
         }
-        limparDetalhesAntigosSeNecessario(a, request);
-        processarDetalhes(a, request);
+        if(request.getJogoId() != null){
+            jogo = jogoRepository.findById(request.getJogoId()).orElseThrow(() -> new RuntimeException("Jogo nao encontrado"));
+            a.setJogo(jogo);
+        }else{
+            jogo = a.getJogo();
+            if(jogo == null){
+                throw new IllegalStateException("o anúncio não tem um jogo associado");
+            }
+        }
+        limparDetalhesAntigosSeNecessario(a, jogo);
+        processarDetalhes(a, request, jogo);
 
         return anuncioRepository.save(a);
     }
 
+    private void processarDetalhes(Anuncio anuncio, AnuncioRequest request, Jogo jogo) {
+        if(jogo.getNome().equals("CS:GO") && request.getDetalhesCsgo() != null){
+            Csgo2Request cs2 = request.getDetalhesCsgo();
+            AnuncioCsgo2 detalhes = anuncio.getDetalhesCsgo() != null ? anuncio.getDetalhesCsgo() : new AnuncioCsgo2();
+
+            detalhes.setDesgasteFloat(cs2.getDesgasteFloat());
+            detalhes.setPatternIndex(cs2.getPatternIndex());
+            detalhes.setStatTrak(cs2.getStatTrak());
+            detalhes.setExterior(cs2.getExterior());
+            detalhes.setAnuncio(anuncio);
+            anuncio.setDetalhesCsgo(detalhes);
+            anuncio.setDetalhesLol(null);
+        }
+        else if(jogo.getNome().equals("League of Legends") && request.getDetalhesLol() != null) {
+            LolRequest lol = request.getDetalhesLol();
+            AnuncioLol detalhesLol = anuncio.getDetalhesLol() != null
+                    ? anuncio.getDetalhesLol()
+                    : new AnuncioLol();
+
+            detalhesLol.setChroma(lol.getChroma());
+            detalhesLol.setTipoSkin(lol.getTipoSkin());
+            detalhesLol.setAnuncio(anuncio);
+            anuncio.setDetalhesLol(detalhesLol);
+            anuncio.setDetalhesCsgo(null);
+        }
+    }
+
+    private void limparDetalhesAntigosSeNecessario(Anuncio anuncio, Jogo novoJogo) {
+        if (anuncio.getDetalhesCsgo() != null && (novoJogo == null || !novoJogo.getNome().equals("CS:GO"))) {
+            anuncio.setDetalhesCsgo(null); // orphanRemoval=true deletará
+        }
+        if (anuncio.getDetalhesLol() != null && (novoJogo == null || !novoJogo.getNome().equals("League of Legends"))) {
+            anuncio.setDetalhesLol(null); // orphanRemoval=true deletará
+        }
+    }
     /**
      * Altera o status de um anúncio (ex: ativo, pausado, vendido)
      */
@@ -255,21 +309,5 @@ public class AnuncioService {
     private void limparBase64(Anuncio a) {
         a.setSkinImageBase64(null);
         a.setSkinImageMime(null);
-    }
-    private void processarDetalhes(Anuncio anuncio, AnuncioRequest request) {
-        Jogo jogo = request.getJogo(); // Pega o enum
-
-        if (jogo == Jogo. && request.getDetalhesCsgo() != null) { // <-- Comparação com Enum
-            // ... (lógica CSGO sem alterações internas)
-            anuncio.setDetalhesLol(null);
-        }
-        else if (jogo == Jogo.LOL && request.getDetalhesLol() != null) { // <-- Comparação com Enum
-            // ... (lógica LoL sem alterações internas)
-            anuncio.setDetalhesCsgo(null);
-        }
-        // else { // Opcional: Lidar com jogo nulo ou não suportado
-        //    anuncio.setDetalhesCsgo(null);
-        //    anuncio.setDetalhesLol(null);
-        // }
     }
 }
