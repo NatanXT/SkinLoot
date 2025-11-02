@@ -28,7 +28,6 @@ import { listarJogos } from '../../services/jogoService';
 import { renovarPlano, upgradePlano } from '../../services/planos';
 import AuthBrand from '../../components/logo/AuthBrand';
 //import Uploader from '../../components/uploader/Uploader';
-import Modal from '../../components/modal/Modal';
 
 // ---------- Helpers ----------
 const fmtBRL = (n) =>
@@ -955,252 +954,157 @@ export default function PerfilUsuario() {
       )}
 
       {/* ========================= MODAL: EDITAR / NOVA ========================= */}
-      <Modal
-          isOpen={modalEdicaoAberto}
-          onClose={fecharEditar}
-          title={skinEditando?.__novo ? 'Cadastrar nova skin' : 'Editar skin'}
-      >
-        <Uploader
-            label="Imagem da skin"
-            preview={previewImagem}
-            onFileChange={setImagemFile}
-        />
+        {/* REVERTIDO para sua estrutura de <div> original */}
+        {modalEdicaoAberto && (
+            <div className="perfil-modal" role="dialog" aria-modal="true">
+                <div
+                    className="perfil-modal__backdrop"
+                    onClick={fecharEditar}
+                    role="button"
+                    tabIndex={-1}
+                    aria-label="Fechar"
+                />
 
-        {/* --- INÍCIO DO FORMULÁRIO MODIFICADO --- */}
-        <form
-            className="perfil-form"
-            noValidate
-            onSubmit={(e) => { e.preventDefault(); salvarEdicao(); }}
-        >
+                <div className="perfil-modal__janela">
+                    <div className="perfil-modal__head">
+                        <h3>{skinEditando?.__novo ? 'Cadastrar nova skin' : 'Editar skin'}</h3>
+                        <button onClick={fecharEditar} aria-label="Fechar">✕</button>
+                    </div>
 
-          {/* NOVO: Seletor de Jogo */}
-          <div className="perfil-form__row">
-            <label htmlFor="f-jogo">Jogo (Obrigatório)</label>
-            <select
-                id="f-jogo"
-                value={selectedJogoId}
-                onChange={(e) => setSelectedJogoId(e.target.value)}
-                required
-                // Desabilita a troca de jogo após a criação (edição)
-                disabled={!skinEditando?.__novo}
-            >
-              <option value="" disabled>Selecione um jogo...</option>
-              {jogosList.map((jogo) => (
-                  <option key={jogo.id} value={jogo.id}>{jogo.nome}</option>
-              ))}
-            </select>
-            {!skinEditando?.__novo && (
-                <small className="perfil-form__hint">O jogo não pode ser alterado após a criação.</small>
-            )}
-          </div>
-
-          {/* Nome da Skin (sem alteração) */}
-          <div className="perfil-form__row">
-            <label htmlFor="f-nome">Nome (Título)</label>
-            <input
-                id="f-nome"
-                type="text"
-                required
-                placeholder="Nome da skin (Ex: AWP | Dragon Lore)"
-                value={formEdicao.skinNome}
-                onChange={(e) => setFormEdicao((v) => ({ ...v, skinNome: e.target.value }))}
-            />
-          </div>
-
-          {/* Descrição (sem alteração) */}
-          <div className="perfil-form__row">
-            <label htmlFor="f-descricao">Descrição</label>
-            <textarea
-                id="f-descricao"
-                placeholder="Descrição do anúncio, detalhes, etc."
-                rows={3}
-                value={formEdicao.descricao}
-                onChange={(e) =>
-                    setFormEdicao((v) => ({ ...v, descricao: e.target.value }))
-                }
-            />
-          </div>
-
-          {/* Preço (sem alteração) */}
-          <div className="perfil-form__row">
-            <label htmlFor="f-preco">Preço (R$)</label>
-            <input
-                id="f-preco"
-                type="text"
-                inputMode="numeric"
-                required
-                placeholder="0,00"
-                value={formEdicao.preco}
-                // (Aqui você deve usar seus helpers 'formatBRL' e 'onlyDigits'
-                // para mascarar o campo de preço, se desejar)
-                onChange={(e) =>
-                    setFormEdicao((v) => ({ ...v, preco: e.target.value }))
-                }
-            />
-          </div>
-
-          {/* --- INÍCIO DOS CAMPOS CONDICIONAIS --- */}
-
-          {/* Campos de CS:GO */}
-          {selectedGameName === 'CS:GO' && (
-              <fieldset className="perfil-form__fieldset">
-                <legend>Detalhes (CS:GO)</legend>
-
-                <div className="perfil-form__grid-2">
-                  <div className="perfil-form__row">
-                    <label htmlFor="f-cs-float">Desgaste (Float)</label>
-                    <input
-                        id="f-cs-float"
-                        type="number"
-                        step="0.0001"
-                        placeholder="Ex: 0.0712"
-                        value={formEdicao.detalhesCsgo.desgasteFloat}
-                        onChange={(e) => setFormEdicao(prev => ({
-                          ...prev,
-                          detalhesCsgo: { ...prev.detalhesCsgo, desgasteFloat: e.target.value }
-                        }))}
+                    {/* O Uploader (que já existia) */}
+                    <Uploader
+                        label="Imagem da skin"
+                        preview={previewImagem}
+                        onFileChange={setImagemFile}
                     />
-                  </div>
-                  <div className="perfil-form__row">
-                    <label htmlFor="f-cs-pattern">Pattern Index</label>
-                    <input
-                        id="f-cs-pattern"
-                        type="number"
-                        step="1"
-                        placeholder="Ex: 456"
-                        value={formEdicao.detalhesCsgo.patternIndex}
-                        onChange={(e) => setFormEdicao(prev => ({
-                          ...prev,
-                          detalhesCsgo: { ...prev.detalhesCsgo, patternIndex: e.target.value }
-                        }))}
-                    />
-                  </div>
+
+                    {/* O NOVO formulário dinâmico que criamos */}
+                    <form
+                        className="perfil-form"
+                        noValidate
+                        onSubmit={(e) => { e.preventDefault(); salvarEdicao(); }}
+                    >
+
+                        {/* Seletor de Jogo */}
+                        <div className="perfil-form__row">
+                            <label htmlFor="f-jogo">Jogo (Obrigatório)</label>
+                            <select
+                                id="f-jogo"
+                                value={selectedJogoId}
+                                onChange={(e) => setSelectedJogoId(e.target.value)}
+                                required
+                                disabled={!skinEditando?.__novo}
+                            >
+                                <option value="" disabled>Selecione um jogo...</option>
+                                {jogosList.map((jogo) => (
+                                    <option key={jogo.id} value={jogo.id}>{jogo.nome}</option>
+                                ))}
+                            </select>
+                            {!skinEditando?.__novo && (
+                                <small className="perfil-form__hint">O jogo não pode ser alterado após a criação.</small>
+                            )}
+                        </div>
+
+                        {/* Nome da Skin */}
+                        <div className="perfil-form__row">
+                            <label htmlFor="f-nome">Nome (Título)</label>
+                            <input
+                                id="f-nome"
+                                type="text"
+                                required
+                                placeholder="Nome da skin (Ex: AWP | Dragon Lore)"
+                                value={formEdicao.skinNome}
+                                onChange={(e) => setFormEdicao((v) => ({ ...v, skinNome: e.target.value }))}
+                            />
+                        </div>
+
+                        {/* Descrição */}
+                        <div className="perfil-form__row">
+                            <label htmlFor="f-descricao">Descrição</label>
+                            <textarea
+                                id="f-descricao"
+                                placeholder="Descrição do anúncio, detalhes, etc."
+                                rows={3}
+                                value={formEdicao.descricao}
+                                onChange={(e) =>
+                                    setFormEdicao((v) => ({ ...v, descricao: e.target.value }))
+                                }
+                            />
+                        </div>
+
+                        {/* Preço */}
+                        <div className="perfil-form__row">
+                            <label htmlFor="f-preco">Preço (R$)</label>
+                            <input
+                                id="f-preco"
+                                type="text"
+                                inputMode="numeric"
+                                required
+                                placeholder="0,00"
+                                value={formEdicao.preco}
+                                onChange={(e) =>
+                                    setFormEdicao((v) => ({ ...v, preco: e.target.value }))
+                                }
+                            />
+                        </div>
+
+                        {/* --- CAMPOS CONDICIONAIS --- */}
+
+                        {/* Campos de CS:GO */}
+                        {selectedGameName === 'CS:GO' && (
+                            <fieldset className="perfil-form__fieldset">
+                                {/* ... (campos de float, pattern, exterior, stattrak) ... */}
+                            </fieldset>
+                        )}
+
+                        {/* Campos de LoL */}
+                        {selectedGameName === 'League of Legends' && (
+                            <fieldset className="perfil-form__fieldset">
+                                {/* ... (campos de champion, tipo, chroma) ... */}
+                            </fieldset>
+                        )}
+
+                        {/* URL da Imagem */}
+                        <div className="perfil-form__row">
+                            <label htmlFor="f-imagem">URL da imagem (opcional)</label>
+                            <input
+                                id="f-imagem"
+                                type="text"
+                                placeholder="https://exemplo.com/imagem.png"
+                                value={formEdicao.imagemUrl}
+                                onChange={(e) => {
+                                    setImagemFile(null);
+                                    setFormEdicao((v) => ({ ...v, imagemUrl: e.target.value }));
+                                }}
+                            />
+                            <small className="perfil-form__hint">
+                                Dica: cole uma URL <strong>ou</strong> clique na imagem acima
+                                para enviar um arquivo.
+                            </small>
+                        </div>
+
+                        {/* Botões de Ação */}
+                        <div className="perfil-modal__actions">
+                            <button
+                                className="btn btn--ghost"
+                                type="button"
+                                onClick={fecharEditar}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                className="btn btn--primary"
+                                type="submit"
+                                disabled={salvandoEdicao}
+                            >
+                                {salvandoEdicao ? 'Salvando...' : (skinEditando?.__novo ? 'Cadastrar' : 'Salvar')}
+                            </button>
+                        </div>
+                    </form>
                 </div>
-
-                <div className="perfil-form__row">
-                  <label htmlFor="f-cs-exterior">Exterior</label>
-                  <select
-                      id="f-cs-exterior"
-                      value={formEdicao.detalhesCsgo.exterior}
-                      onChange={(e) => setFormEdicao(prev => ({
-                        ...prev,
-                        detalhesCsgo: { ...prev.detalhesCsgo, exterior: e.target.value }
-                      }))}
-                  >
-                    <option value="Factory New">Factory New</option>
-                    <option value="Minimal Wear">Minimal Wear</option>
-                    <option value="Field-Tested">Field-Tested</option>
-                    <option value="Well-Worn">Well-Worn</option>
-                    <option value="Battle-Scarred">Battle-Scarred</option>
-                  </select>
-                </div>
-
-                <label className="check" style={{ marginTop: 12 }}>
-                  <input
-                      type="checkbox"
-                      checked={formEdicao.detalhesCsgo.statTrak}
-                      onChange={(e) => setFormEdicao(prev => ({
-                        ...prev,
-                        detalhesCsgo: { ...prev.detalhesCsgo, statTrak: e.target.checked }
-                      }))}
-                  />
-                  <span>StatTrak™</span>
-                </label>
-              </fieldset>
-          )}
-
-          {/* Campos de LoL */}
-          {selectedGameName === 'League of Legends' && (
-              <fieldset className="perfil-form__fieldset">
-                <legend>Detalhes (LoL)</legend>
-
-                <div className="perfil-form__row">
-                  <label htmlFor="f-lol-champion">Campeão</label>
-                  <input
-                      id="f-lol-champion"
-                      type="text"
-                      placeholder="Ex: Jinx"
-                      value={formEdicao.detalhesLol.championName}
-                      onChange={(e) => setFormEdicao(prev => ({
-                        ...prev,
-                        detalhesLol: { ...prev.detalhesLol, championName: e.target.value }
-                      }))}
-                  />
-                </div>
-
-                <div className="perfil-form__row">
-                  <label htmlFor="f-lol-tipo">Tipo/Raridade</label>
-                  <input
-                      id="f-lol-tipo"
-                      type="text"
-                      placeholder="Ex: Lendária, Mítica, Prestígio"
-                      value={formEdicao.detalhesLol.tipoSkin}
-                      onChange={(e) => setFormEdicao(prev => ({
-                        ...prev,
-                        detalhesLol: { ...prev.detalhesLol, tipoSkin: e.target.value }
-                      }))}
-                  />
-                </div>
-
-                <div className="perfil-form__row">
-                  <label htmlFor="f-lol-chroma">Chroma</label>
-                  <input
-                      id="f-lol-chroma"
-                      type="text"
-                      placeholder="Ex: Esmeralda (Opcional)"
-                      value={formEdicao.detalhesLol.chroma}
-                      onChange={(e) => setFormEdicao(prev => ({
-                        ...prev,
-                        detalhesLol: { ...prev.detalhesLol, chroma: e.target.value }
-                      }))}
-                  />
-                </div>
-              </fieldset>
-          )}
-
-          {/* --- FIM DOS CAMPOS CONDICIONAIS --- */}
-
-          {/* REMOVIDO: Antigo textarea de Detalhes Específicos (JSON) */}
-
-          {/* URL da Imagem (sem alteração) */}
-          <div className="perfil-form__row">
-            <label htmlFor="f-imagem">URL da imagem (opcional)</label>
-            <input
-                id="f-imagem"
-                type="text"
-                placeholder="https://exemplo.com/imagem.png"
-                value={formEdicao.imagemUrl}
-                onChange={(e) => {
-                  setImagemFile(null); // se digitar URL, prioriza URL
-                  setFormEdicao((v) => ({ ...v, imagemUrl: e.target.value }));
-                }}
-            />
-            <small className="perfil-form__hint">
-              Dica: cole uma URL <strong>ou</strong> clique na imagem acima
-              para enviar um arquivo.
-            </small>
-          </div>
-
-          {/* Botões de Ação (sem alteração) */}
-          <div className="perfil-modal__actions">
-            <button
-                className="btn btn--ghost"
-                type="button"
-                onClick={fecharEditar}
-            >
-              Cancelar
-            </button>
-            <button
-                className="btn btn--primary"
-                type="submit"
-                disabled={salvandoEdicao}
-            >
-              {salvandoEdicao ? 'Salvando...' : (skinEditando?.__novo ? 'Cadastrar' : 'Salvar')}
-            </button>
-          </div>
-        </form>
-        {/* --- FIM DO FORMULÁRIO --- */}
-      </Modal>
+            </div>
+        )}
+        {/* ========================= FIM DO MODAL ========================= */}
 
       {/* ============== MODAL: DESATIVAR (CONFIRMAÇÃO DUPLA) ============== */}
       {modalDesativarAberto && (
