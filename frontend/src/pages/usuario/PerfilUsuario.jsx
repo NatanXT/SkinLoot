@@ -10,7 +10,7 @@
 // - Reativar Skin: abre editor e só ativa após salvar, respeitando limite
 // ============================================================================
 
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useContext,useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './PerfilUsuario.css';
 import { useAuth } from '../../services/AuthContext';
@@ -24,6 +24,7 @@ import {
     desativarAnuncio as desativarSkin,
     reativarAnuncio as reativarSkin,
 } from '../../services/anuncioService';
+import { listarJogos } from '../../services/jogoService';
 import { renovarPlano, upgradePlano } from '../../services/planos';
 import AuthBrand from '../../components/logo/AuthBrand';
 
@@ -40,6 +41,28 @@ const plansMeta = {
     gratuito: { label: 'Gratuito', color: '#454B54' },
     intermediario: { label: 'Intermediário', color: '#00C896' },
     plus: { label: '+ Plus', color: '#39FF14' },
+};
+
+const DEFAULT_CSGO_DETAILS = {
+    desgasteFloat: '',
+    patternIndex: '',
+    statTrak: false,
+    exterior: 'Factory New',
+};
+const DEFAULT_LOL_DETAILS = {
+    chroma: '',
+    tipoSkin: '',
+    championName: '',
+};
+const DEFAULT_FORM_EDICAO = {
+    skinNome: '',
+    preco: '',
+    imagemUrl: '',
+    descricao: '',
+    // REMOVIDO: O campo 'detalhes'
+    // ADICIONADOS:
+    detalhesCsgo: DEFAULT_CSGO_DETAILS,
+    detalhesLol: DEFAULT_LOL_DETAILS,
 };
 
 // Placeholder final (fallback)
@@ -97,17 +120,21 @@ export default function PerfilUsuario() {
     // -------------------- Estado do modal de edição --------------------
     const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
     const [skinEditando, setSkinEditando] = useState(null);
-    const [formEdicao, setFormEdicao] = useState({
-        skinNome: '',
-        preco: '',
-        imagemUrl: '', // pode receber URL ou dataURL colada manualmente
-        descricao: '',
-        detalhes: '', // JSON em string
-    });
+    // const [formEdicao, setFormEdicao] = useState({
+    //     skinNome: '',
+    //     preco: '',
+    //     imagemUrl: '', // pode receber URL ou dataURL colada manualmente
+    //     descricao: '',
+    //     detalhes: '', // JSON em string
+    // });
+    const [formEdicao, setFormEdicao] = useState(DEFAULT_FORM_EDICAO);
     const [imagemFile, setImagemFile] = useState(null); // arquivo selecionado
     const [previewImagem, setPreviewImagem] = useState(''); // preview (arquivo ou URL/dataURL)
     const [salvandoEdicao, setSalvandoEdicao] = useState(false);
     const inputFileRef = useRef(null);
+
+    const [jogosList, setJogosList] = useState([]);
+    const [selectedJogoId, setSelectedJogoId] = useState('');
 
     // flag: reativar após salvar (fluxo de reativação abre editor primeiro)
     const [reativarDepoisDeSalvar, setReativarDepoisDeSalvar] = useState(false);
@@ -119,11 +146,28 @@ export default function PerfilUsuario() {
     const [confirmTexto, setConfirmTexto] = useState(''); // palavra "Confirmo"
     const [confirmCheck, setConfirmCheck] = useState(false);
     const [desativando, setDesativando] = useState(false);
+    const selectedGameName = useMemo(() => {
+        return jogosList.find((j) => j.id === selectedJogoId)?.nome || null;
+    }, [jogosList, selectedJogoId]);
 
     // 🔔 dispara para a vitrine recarregar quando suas skins mudarem
     function notifySkinsChanged() {
         window.dispatchEvent(new CustomEvent('skins:changed'));
     }
+    // Efeito para buscar a lista de jogos da API
+    useEffect(() => {
+        const fetchJogos = async () => {
+            try {
+                const jogos = await listarJogos(); // <-- Chama a API real
+                setJogosList(jogos); // <-- Salva a lista no estado
+            } catch (error) {
+                console.error("Falha ao carregar lista de jogos:", error);
+                addToast("Não foi possível carregar os jogos.", "error");
+                setJogosList([]); // Define como vazio em caso de erro
+            }
+        };
+        fetchJogos();
+    }, [addToast]);
 
     // Carregamento inicial (perfil + skins do mock)
     useEffect(() => {
@@ -201,14 +245,8 @@ export default function PerfilUsuario() {
 
     function handleNovaSkin() {
         if (atingiuLimite) return;
-        setSkinEditando({ __novo: true });
-        setFormEdicao({
-            skinNome: '',
-            preco: '',
-            imagemUrl: '',
-            descricao: '',
-            detalhes: '{\n  "pattern": 0,\n  "stat_trak": false\n}',
-        });
+        setFormEdicao(DEFAULT_FORM_EDICAO);
+        setSelectedJogoId(''); // Reseta a seleção de jogo
         setImagemFile(null);
         setPreviewImagem('');
         setModalEdicaoAberto(true);
@@ -287,16 +325,32 @@ export default function PerfilUsuario() {
     function abrirEditar(skin) {
         setSkinEditando(skin);
         const urlAtual = skin?.imagemUrl || skin?.image || skin?.imagem || '';
-        const raw = skin?._raw || {};
+
+        const raw = skin?._raw || {}; // Pega os dados brutos da API
+
+        // NOVO: Define o jogo selecionado
+        const jogoId = raw.jogo?.id || '';
+        setSelectedJogoId(jogoId);
+
+        const gameName = raw.jogo?.nome || null;
+
+        // MODIFICADO: Preenche o formulário com dados existentes
         setFormEdicao({
             skinNome: skin?.skinNome || skin?.title || skin?.nome || '',
             preco: skin?.preco ?? skin?.price ?? '',
             imagemUrl: urlAtual,
             descricao: raw.descricao ?? '',
-            detalhes: raw.detalhesEspecificos
-                ? JSON.stringify(raw.detalhesEspecificos, null, 2)
-                : '',
+
+            // Preenche os detalhes corretos, ou usa o padrão
+            detalhesCsgo: gameName === 'CS:GO' && raw.detalhesCsgo
+                ? raw.detalhesCsgo
+                : DEFAULT_CSGO_DETAILS,
+
+            detalhesLol: gameName === 'League of Legends' && raw.detalhesLol
+                ? raw.detalhesLol
+                : DEFAULT_LOL_DETAILS,
         });
+
         setImagemFile(null);
         setPreviewImagem(urlAtual || '');
         setModalEdicaoAberto(true);
@@ -311,6 +365,11 @@ export default function PerfilUsuario() {
         setPreviewImagem('');
         setReativarDepoisDeSalvar(false);
     }
+    // function fecharEditar() {
+    //     setModalEdicaoAberto(false);
+    //     setSalvandoEdicao(false);
+    //     setSkinEditando(null);
+    // }
 
     // Atualiza preview quando digita URL (se não houver arquivo)
     useEffect(() => {
@@ -354,17 +413,9 @@ export default function PerfilUsuario() {
                 return;
             }
 
-            // Validar JSON (detalhes)
-            let detalhesJson = {};
-            try {
-                if (formEdicao.detalhes && formEdicao.detalhes.trim()) {
-                    detalhesJson = JSON.parse(formEdicao.detalhes);
-                }
-            } catch {
-                addToast(
-                    'O campo "Detalhes Específicos" não é um JSON válido.',
-                    'error',
-                );
+            // NOVO: Validação de Jogo
+            if (!selectedJogoId) {
+                addToast('Você precisa selecionar um jogo.', 'error');
                 setSalvandoEdicao(false);
                 return;
             }
@@ -388,19 +439,22 @@ export default function PerfilUsuario() {
             // Payload híbrido — preferir base64, senão URL como fallback
             const payload = {
                 titulo: formEdicao.skinNome,
-                descricao: formEdicao.descricao ?? '',
+                descricao: formEdicao.descricao,
                 preco: precoNum,
                 skinId: null,
                 skinName: formEdicao.skinNome,
-                detalhesEspecificos: detalhesJson,
-                skinImageBase64: skinImageBase64 || undefined,
-                skinImageMime: skinImageMime || undefined,
-                skinImageUrl:
-                    !skinImageBase64 &&
-                    formEdicao.imagemUrl &&
-                    !formEdicao.imagemUrl.startsWith('data:')
-                        ? formEdicao.imagemUrl
-                        : undefined,
+                status: reativarDepoisDeSalvar ? 'ATIVO' : (skinEditando?.status || 'ATIVO'),
+
+                // --- NOVA ESTRUTURA DE DADOS ---
+                jogoId: selectedJogoId,
+                detalhesCsgo: selectedGameName === 'CS:GO' ? formEdicao.detalhesCsgo : null,
+                detalhesLol: selectedGameName === 'League of Legends' ? formEdicao.detalhesLol : null,
+                // --- FIM DA NOVA ESTRUTURA ---
+
+                // Campos de imagem (baseado no seu original)
+                skinImageUrl: imagemFile ? null : formEdicao.imagemUrl,
+                skinImageBase64: imagemFile?.base64 || null,
+                skinImageMime: imagemFile?.mime || null,
             };
 
             if (id) {
@@ -979,6 +1033,27 @@ export default function PerfilUsuario() {
                                     salvarEdicao();
                                 }}
                             >
+
+                                {/* NOVO: Seletor de Jogo */}
+                                <div className="perfil-form__row">
+                                    <label htmlFor="f-jogo">Jogo (Obrigatório)</label>
+                                    <select
+                                        id="f-jogo"
+                                        value={selectedJogoId}
+                                        onChange={(e) => setSelectedJogoId(e.target.value)}
+                                        required
+                                        // Desabilita a troca de jogo após a criação (edição)
+                                        disabled={!!(skinEditando?.id || skinEditando?._id)}
+                                    >
+                                        <option value="" disabled>Selecione um jogo...</option>
+                                        {jogosList.map((jogo) => (
+                                            <option key={jogo.id} value={jogo.id}>{jogo.nome}</option>
+                                        ))}
+                                    </select>
+                                    {!skinEditando?.__novo && (
+                                        <small className="perfil-form__hint">O jogo não pode ser alterado após a criação.</small>
+                                    )}
+                                </div>
                                 <div className="perfil-form__row">
                                     <label htmlFor="f-nome">Nome</label>
                                     <input
@@ -1027,6 +1102,123 @@ export default function PerfilUsuario() {
                                     />
                                 </div>
 
+                                {/* Campos de CS:GO */}
+                                {selectedGameName === 'CS:GO' && (
+                                    <fieldset className="perfil-form__fieldset">
+                                        <legend>Detalhes (CS:GO)</legend>
+
+                                        <div className="perfil-form__grid-2">
+                                            <div className="perfil-form__row">
+                                                <label htmlFor="f-cs-float">Desgaste (Float)</label>
+                                                <input
+                                                    id="f-cs-float"
+                                                    type="number"
+                                                    step="0.0001"
+                                                    placeholder="Ex: 0.0712"
+                                                    value={formEdicao.detalhesCsgo.desgasteFloat}
+                                                    onChange={(e) => setFormEdicao(prev => ({
+                                                        ...prev,
+                                                        detalhesCsgo: { ...prev.detalhesCsgo, desgasteFloat: e.target.value }
+                                                    }))}
+                                                />
+                                            </div>
+                                            <div className="perfil-form__row">
+                                                <label htmlFor="f-cs-pattern">Pattern Index</label>
+                                                <input
+                                                    id="f-cs-pattern"
+                                                    type="number"
+                                                    step="1"
+                                                    placeholder="Ex: 456"
+                                                    value={formEdicao.detalhesCsgo.patternIndex}
+                                                    onChange={(e) => setFormEdicao(prev => ({
+                                                        ...prev,
+                                                        detalhesCsgo: { ...prev.detalhesCsgo, patternIndex: e.target.value }
+                                                    }))}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="perfil-form__row">
+                                            <label htmlFor="f-cs-exterior">Exterior</label>
+                                            <select
+                                                id="f-cs-exterior"
+                                                value={formEdicao.detalhesCsgo.exterior}
+                                                onChange={(e) => setFormEdicao(prev => ({
+                                                    ...prev,
+                                                    detalhesCsgo: { ...prev.detalhesCsgo, exterior: e.target.value }
+                                                }))}
+                                            >
+                                                <option value="Factory New">Factory New</option>
+                                                <option value="Minimal Wear">Minimal Wear</option>
+                                                <option value="Field-Tested">Field-Tested</option>
+                                                <option value="Well-Worn">Well-Worn</option>
+                                                <option value="Battle-Scarred">Battle-Scarred</option>
+                                            </select>
+                                        </div>
+
+                                        <label className="check" style={{ marginTop: 12 }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={formEdicao.detalhesCsgo.statTrak}
+                                                onChange={(e) => setFormEdicao(prev => ({
+                                                    ...prev,
+                                                    detalhesCsgo: { ...prev.detalhesCsgo, statTrak: e.target.checked }
+                                                }))}
+                                            />
+                                            <span>StatTrak™</span>
+                                        </label>
+                                    </fieldset>
+                                )}
+
+                                {/* Campos de LoL */}
+                                {selectedGameName === 'League of Legends' && (
+                                    <fieldset className="perfil-form__fieldset">
+                                        <legend>Detalhes (LoL)</legend>
+
+                                        <div className="perfil-form__row">
+                                            <label htmlFor="f-lol-champion">Campeão</label>
+                                            <input
+                                                id="f-lol-champion"
+                                                type="text"
+                                                placeholder="Ex: Jinx"
+                                                value={formEdicao.detalhesLol.championName}
+                                                onChange={(e) => setFormEdicao(prev => ({
+                                                    ...prev,
+                                                    detalhesLol: { ...prev.detalhesLol, championName: e.target.value }
+                                                }))}
+                                            />
+                                        </div>
+
+                                        <div className="perfil-form__row">
+                                            <label htmlFor="f-lol-tipo">Tipo/Raridade</label>
+                                            <input
+                                                id="f-lol-tipo"
+                                                type="text"
+                                                placeholder="Ex: Lendária, Mítica, Prestígio"
+                                                value={formEdicao.detalhesLol.tipoSkin}
+                                                onChange={(e) => setFormEdicao(prev => ({
+                                                    ...prev,
+                                                    detalhesLol: { ...prev.detalhesLol, tipoSkin: e.target.value }
+                                                }))}
+                                            />
+                                        </div>
+
+                                        <div className="perfil-form__row">
+                                            <label htmlFor="f-lol-chroma">Chroma</label>
+                                            <input
+                                                id="f-lol-chroma"
+                                                type="text"
+                                                placeholder="Ex: Esmeralda (Opcional)"
+                                                value={formEdicao.detalhesLol.chroma}
+                                                onChange={(e) => setFormEdicao(prev => ({
+                                                    ...prev,
+                                                    detalhesLol: { ...prev.detalhesLol, chroma: e.target.value }
+                                                }))}
+                                            />
+                                        </div>
+                                    </fieldset>
+                                )}
+
                                 <div className="perfil-form__row">
                                     <label htmlFor="f-imagem">URL da imagem (opcional)</label>
                                     <input
@@ -1049,25 +1241,6 @@ export default function PerfilUsuario() {
                                     </small>
                                 </div>
 
-                                {/* --- Detalhes Específicos (JSON) --- */}
-                                <div className="perfil-form__row">
-                                    <label htmlFor="f-detalhes">
-                                        Detalhes Específicos (JSON)
-                                    </label>
-                                    <textarea
-                                        id="f-detalhes"
-                                        className="textarea textarea--code"
-                                        placeholder='{ "pattern": 123, "stat_trak": true }'
-                                        rows={6}
-                                        value={formEdicao.detalhes}
-                                        onChange={(e) =>
-                                            setFormEdicao((v) => ({ ...v, detalhes: e.target.value }))
-                                        }
-                                    />
-                                    <small className="perfil-form__hint">
-                                        Envie dados extras como um JSON.
-                                    </small>
-                                </div>
 
                                 {/* Rodapé sempre visível dentro da área rolável */}
                                 <div className="perfil-modal__actions">

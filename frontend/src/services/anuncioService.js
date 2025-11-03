@@ -250,24 +250,30 @@ export async function editarAnuncio(id, payload) {
     }
 
     // PROD: atualizar com Base64 preferencialmente
-    const body = {
-        titulo: payload.titulo,
-        descricao: payload.descricao ?? '',
-        preco: payload.preco,
-        skin_name: payload.skinName ?? payload.skin_name,
-        skinName: payload.skinName,
+  const body = {
+    // Campos que permanecem
+    titulo: payload.titulo,
+    descricao: payload.descricao ?? '',
+    preco: payload.preco,
+    status: payload.status,
+    skinId: payload.skinId ?? null,
+    skinName: payload.skinName,
 
-        // Preferência por Base64:
-        skinImageBase64: payload.skinImageBase64 ?? null,
-        skinImageMime: payload.skinImageMime ?? null,
+    // --- CAMPOS ATUALIZADOS ---
+    // REMOVIDO: detalhesEspecificos: payload.detalhesEspecificos,
+    jogoId: payload.jogoId,                 // NOVO
+    detalhesCsgo: payload.detalhesCsgo,     // NOVO
+    detalhesLol: payload.detalhesLol,       // NOVO
+    // --- FIM DAS ATUALIZAÇÕES ---
 
-        // Fallback opcional (URL):
-        skinImageUrl: payload.skinImageUrl ?? null,
+    // Campos de imagem (sem alteração)
+    skinImageUrl: payload.skinImageUrl,
+    skinImageBase64: payload.skinImageBase64,
+    skinImageMime: payload.skinImageMime,
+  };
 
-        detalhesEspecificos: payload.detalhesEspecificos ?? {},
-    };
-    const { data } = await api.put(`/anuncios/${id}`, body);
-    return normalizarDoBackend(data);
+  const { data } = await api.put(`/anuncios/${id}`, body);
+  return normalizarDoBackend(data);
 }
 
 export async function desativarAnuncio(id) {
