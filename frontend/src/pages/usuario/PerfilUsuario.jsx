@@ -145,8 +145,14 @@ export default function PerfilUsuario() {
   const [confirmTexto, setConfirmTexto] = useState(''); // palavra "Confirmo"
   const [confirmCheck, setConfirmCheck] = useState(false);
   const [desativando, setDesativando] = useState(false);
+  // Mantém se o anúncio entrou no editor sem jogo (true = pode escolher)
+  const jogoInicialVazioRef = useRef(true);
+
   const selectedGameName = useMemo(() => {
-    return jogosList.find((j) => j.id === selectedJogoId)?.nome || null;
+    return (
+      jogosList.find((j) => String(j.id) === String(selectedJogoId))?.nome ||
+      null
+    );
   }, [jogosList, selectedJogoId]);
 
   // 🔔 dispara para a vitrine recarregar quando suas skins mudarem
@@ -323,15 +329,19 @@ export default function PerfilUsuario() {
   // ========================== EDITAR / CRIAR SKIN ============================
   function abrirEditar(skin) {
     setSkinEditando(skin);
-    const urlAtual = skin?.imagemUrl || skin?.image || skin?.imagem || '';
 
+    const urlAtual = skin?.imagemUrl || skin?.image || skin?.imagem || '';
     const raw = skin?._raw || {}; // Pega os dados brutos da API
 
     // NOVO: Define o jogo selecionado
-    const jogoId = raw.jogo?.id || '';
+    const jogoId = raw.jogo?.id || skin?.jogo?.id || '';
+
+    // Se já havia jogo, travamos o select; se não havia, deixamos editar.
+    jogoInicialVazioRef.current = !jogoId;
+
     setSelectedJogoId(jogoId);
 
-    const gameName = raw.jogo?.nome || null;
+    const gameName = raw.jogo?.nome || skin?.jogo?.nome || skin?.game || null;
 
     // MODIFICADO: Preenche o formulário com dados existentes
     setFormEdicao({
@@ -339,17 +349,11 @@ export default function PerfilUsuario() {
       preco: skin?.preco ?? skin?.price ?? '',
       imagemUrl: urlAtual,
       descricao: raw.descricao ?? '',
-
       // Preenche os detalhes corretos, ou usa o padrão
       detalhesCsgo:
-        gameName === 'CS:GO' && raw.detalhesCsgo
-          ? raw.detalhesCsgo
-          : DEFAULT_CSGO_DETAILS,
-
+        raw.detalhesCsgo || skin?._raw?.detalhesCsgo || DEFAULT_CSGO_DETAILS,
       detalhesLol:
-        gameName === 'League of Legends' && raw.detalhesLol
-          ? raw.detalhesLol
-          : DEFAULT_LOL_DETAILS,
+        raw.detalhesLol || skin?._raw?.detalhesLol || DEFAULT_LOL_DETAILS,
     });
 
     setImagemFile(null);
@@ -1093,8 +1097,13 @@ export default function PerfilUsuario() {
                     value={selectedJogoId}
                     onChange={(e) => setSelectedJogoId(e.target.value)}
                     required
-                    // Desabilita a troca de jogo após a criação (edição)
-                    disabled={!!(skinEditando?.id || skinEditando?._id)}
+                    // 🔒 Desabilita se o anúncio JÁ tinha jogo ao abrir o editor
+                    disabled={!jogoInicialVazioRef.current}
+                    title={
+                      !jogoInicialVazioRef.current
+                        ? 'O jogo deste anúncio não pode ser alterado.'
+                        : 'Selecione o jogo para este anúncio'
+                    }
                   >
                     <option value="" disabled>
                       Selecione um jogo...
@@ -1105,12 +1114,16 @@ export default function PerfilUsuario() {
                       </option>
                     ))}
                   </select>
-                  {!skinEditando?.__novo && (
+
+                  {/* Mostra a dica somente quando o campo está travado */}
+                  {!jogoInicialVazioRef.current && (
                     <small className="perfil-form__hint">
-                      O jogo não pode ser alterado após a criação.
+                      O jogo deste anúncio já foi definido e não pode ser
+                      alterado. Para mudar, crie um novo anúncio.
                     </small>
                   )}
                 </div>
+
                 <div className="perfil-form__row">
                   <label htmlFor="f-nome">Nome</label>
                   <input

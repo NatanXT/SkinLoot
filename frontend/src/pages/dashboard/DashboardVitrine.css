@@ -127,8 +127,8 @@ nav a:hover { color: var(--text); }
   border-radius: 10px;
   padding: 10px;
 }
-.field--search { flex-direction: row; align-items: center; gap: 8px; }
-.field--search input { border: none; background: transparent; }
+.field--search { flex-direction: row; align-items: center; gap: 8px;  }
+.field--search input { border: none; background: transparent; border: 1px solid #1A2129;}
 .field--search svg { color: var(--muted); }
 
 /* Campo de preço */

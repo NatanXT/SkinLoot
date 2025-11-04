@@ -522,7 +522,7 @@ export default function DashboardVitrine() {
             <Link to="/login" className="btn btn--ghost sm">
               Entrar
             </Link>
-            <Link to="/cadastro" className="btn btn--primary sm">
+            <Link to="/cadastro" cFpreçolassName="btn btn--primary sm">
               Criar conta
             </Link>
           </div>
