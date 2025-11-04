@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/src/main/resources/dataJogos.sql" value="81bd6914-b18c-4e2c-a024-ad4f03d16d82" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/dataPlano.sql" value="81bd6914-b18c-4e2c-a024-ad4f03d16d82" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/tableutilscript.sql" value="81bd6914-b18c-4e2c-a024-ad4f03d16d82" />
+  </component>
+</project>

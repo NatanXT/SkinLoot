@@ -1,0 +1,67 @@
+Skins
+
+Base
+http://localhost:8080/api/skins
+
+Criar Skin – POST
+http://localhost:8080/api/skins
+(Requer Bearer JWT)
+
+{
+  "nome": "AK-47 | Redline",
+  "descricao": "Field-Tested, adesivo Vox",
+  "icon": "https://cdn.exemplo/ak-redline.png",
+  "raridade": "Classified",
+  "assetId": "CS2-AK-RED-123",
+  "jogoId": "8bb6f6a1-7f25-4b47-a0a4-9d4c9b8f9c10"
+}
+
+
+Ler Skin (do dono) – GET
+http://localhost:8080/api/skins/{id}
+(Requer Bearer JWT; retorna 404 se a skin não pertencer ao usuário)
+
+Exemplos de IDs:
+f1a5a8b1-12d3-4b6b-9e87-ccf3f9b56b1e (correto)
+00000000-0000-0000-0000-000000000000 (inválido)
+
+Listar Skins (vitrine pública) – GET
+http://localhost:8080/api/skins
+
+Listar Skins por Jogo – GET
+http://localhost:8080/api/skins/jogo/{jogoId}
+
+Exemplo:
+http://localhost:8080/api/skins/jogo/8bb6f6a1-7f25-4b47-a0a4-9d4c9b8f9c10
+
+Listar Minhas Skins – GET
+http://localhost:8080/api/skins/me
+(Requer Bearer JWT)
+
+Atualizar Skin – PUT
+http://localhost:8080/api/skins/{id}
+(Requer Bearer JWT; apenas o dono pode atualizar)
+
+{
+  "titulo": "AK-47 | Redline (atualizada)",
+  "imagemUrl": "https://cdn.exemplo/ak-redline-v2.png",
+  "precoInformativo": 199.99,
+  "linkExterno": "https://steamcommunity.com/market/listings/ak-redline"
+}
+
+
+Remover Skin – DELETE
+http://localhost:8080/api/skins/{id}
+(Requer Bearer JWT; apenas o dono pode remover)
+
+Stream (tempo real, opcional) – GET (SSE)
+http://localhost:8080/api/skins/stream
+Retorna eventos created, updated, deleted (formato text/event-stream)
+
+Observações
+
+Todas as rotas que usam contexto do usuário exigem Authorization: Bearer <TOKEN>.
+
+CORS no dev: liberar http://localhost:5173.
+
+Respostas de erro seguem padrão Spring (status, error, message, path).
