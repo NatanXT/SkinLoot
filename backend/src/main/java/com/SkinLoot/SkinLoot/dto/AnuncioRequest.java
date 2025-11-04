@@ -1,5 +1,8 @@
 package com.SkinLoot.SkinLoot.dto;
 
+import com.SkinLoot.SkinLoot.dto.CsgoDto.Csgo2Request;
+import com.SkinLoot.SkinLoot.dto.riotDto.LolRequest;
+import com.SkinLoot.SkinLoot.model.Jogo;
 import com.SkinLoot.SkinLoot.model.enums.Status;
 import com.fasterxml.jackson.annotation.JsonAlias;
 
@@ -17,11 +20,13 @@ public class AnuncioRequest {
     private String titulo;
     private String descricao;
     private BigDecimal preco;
-    private Map<String, Object> detalhesEspecificos; // jsonb
     private Status status;
-
     // Vínculo opcional ao catálogo (quando existir)
     private UUID skinId;
+
+    private UUID jogoId;
+    private Csgo2Request detalhesCsgo;
+    private LolRequest detalhesLol;
 
     // Nome livre digitado pelo usuário (modo não-vinculado ao catálogo)
     @JsonAlias({ "skin_name", "skinName" })
@@ -71,14 +76,6 @@ public class AnuncioRequest {
         this.preco = preco;
     }
 
-    public Map<String, Object> getDetalhesEspecificos() {
-        return detalhesEspecificos;
-    }
-
-    public void setDetalhesEspecificos(Map<String, Object> detalhesEspecificos) {
-        this.detalhesEspecificos = detalhesEspecificos;
-    }
-
     public Status getStatus() {
         return status;
     }
@@ -95,10 +92,17 @@ public class AnuncioRequest {
         this.skinId = skinId;
     }
 
+    public UUID getJogoId() {
+        return jogoId;
+    }
+
+    public void setJogoId(UUID jogoId) {
+        this.jogoId = jogoId;
+    }
+
     public String getSkinName() {
         return skinName;
     }
-
     public void setSkinName(String skinName) {
         this.skinName = skinName;
     }
@@ -127,10 +131,19 @@ public class AnuncioRequest {
         this.skinImageMime = skinImageMime;
     }
 
-    // public Double getDesgasteFloat() { return desgasteFloat; }
-    // public void setDesgasteFloat(Double desgasteFloat) { this.desgasteFloat =
-    // desgasteFloat; }
+    public Csgo2Request getDetalhesCsgo() {
+        return detalhesCsgo;
+    }
 
-    // public String getQualidade() { return qualidade; }
-    // public void setQualidade(String qualidade) { this.qualidade = qualidade; }
+    public void setDetalhesCsgo(Csgo2Request detalhesCsgo) {
+        this.detalhesCsgo = detalhesCsgo;
+    }
+
+    public LolRequest getDetalhesLol() {
+        return detalhesLol;
+    }
+
+    public void setDetalhesLol(LolRequest detalhesLol) {
+        this.detalhesLol = detalhesLol;
+    }
 }

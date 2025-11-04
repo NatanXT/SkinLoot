@@ -28,6 +28,7 @@ public class JogoService {
     public Optional<Jogo> buscarPorId(UUID id) {
         return jogoRepository.findById(id);
     }
+
     // Listar todos os jogos
     public List<Jogo> listarJogos() {
         return jogoRepository.findAll();
