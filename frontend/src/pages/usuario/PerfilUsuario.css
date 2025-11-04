@@ -451,3 +451,85 @@
   border-color: var(--secondary);
   box-shadow: 0 0 0 3px rgba(57,255,20,.12);
 }
+
+/* ======================================================
+   Ajustes visuais dos campos de jogo e detalhes
+   ====================================================== */
+
+/* Campo de seleção de jogo (igual aos outros inputs) */
+.perfil-form__row select {
+  background: #0E1217;
+  border: 1px solid #1C2430;
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  appearance: none; /* remove setas nativas para manter consistência */
+}
+
+.perfil-form__row select:hover {
+  border-color: #314151;
+  box-shadow: 0 0 0 4px rgba(57,255,20,.07);
+}
+
+.perfil-form__row select:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 4px rgba(57,255,20,.12);
+}
+
+/* Fieldset de detalhes do jogo */
+.perfil-form__fieldset {
+  border: 1px solid #1C2430;
+  border-radius: 12px;
+  padding: 14px 16px 16px;
+  margin-top: 16px;
+  background: linear-gradient(180deg, #0E1217, #0B0D10);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.perfil-form__fieldset:hover {
+  border-color: #314151;
+  box-shadow: 0 0 0 4px rgba(57,255,20,.07);
+}
+
+.perfil-form__fieldset:focus-within {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 4px rgba(57,255,20,.12);
+}
+
+.perfil-form__fieldset legend {
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--secondary);
+  text-shadow: 0 0 8px rgba(57,255,20,.35);
+}
+
+/* Grid interno dos detalhes (float e pattern lado a lado) */
+.perfil-form__grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 600px) {
+  .perfil-form__grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Checkbox (StatTrak) refinado */
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.check input[type="checkbox"] {
+  accent-color: var(--secondary);
+  transform: scale(1.1);
+}

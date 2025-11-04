@@ -6,16 +6,16 @@ import com.SkinLoot.SkinLoot.model.ChatMessage;
 import com.SkinLoot.SkinLoot.model.Usuario;
 import com.SkinLoot.SkinLoot.repository.ChatMessageRepository;
 import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
-import com.SkinLoot.SkinLoot.util.JwtTokenUtil;
+//import com.SkinLoot.SkinLoot.util.JwtTokenUtil;
 
-import jakarta.servlet.http.HttpServletRequest;
+//import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+//import org.springframework.http.ResponseEntity;
 // IMPORTAÇÕES NOVAS
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.Authentication;
+//import org.springframework.security.core.Authentication;
 // FIM IMPORTAÇÕES NOVAS
 import org.springframework.stereotype.Controller; // MUDADO DE @RestController
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +39,7 @@ public class ChatController {
 
     // (O JwtTokenUtil não é mais necessário para o @MessageMapping,
     // mas ainda é usado pelo @GetMapping, então o mantemos)
-    private final JwtTokenUtil jwtTokenUtil;
+    //private final JwtTokenUtil jwtTokenUtil;
 
     /**
      * ✅ MUDANÇA 3: Endpoint de WebSocket (STOMP) para ENVIAR mensagens.
@@ -96,31 +96,31 @@ public class ChatController {
         );
     }
 
-    @GetMapping("/minhas-conversas")
-    @ResponseBody // Necessário porque a classe é @Controller, não @RestController
-    public List<ChatMessageResponse> buscarMinhasConversas(HttpServletRequest servletRequest) {
+//     @GetMapping("/minhas-conversas")
+//     @ResponseBody // Necessário porque a classe é @Controller, não @RestController
+//     public List<ChatMessageResponse> buscarMinhasConversas(HttpServletRequest servletRequest) {
 
         // 1. Autentica o usuário (mesma lógica do seu outro endpoint GET)
-        String token = jwtTokenUtil.resolveToken(servletRequest);
-        String username = jwtTokenUtil.getUsernameFromToken(token);
-        Usuario usuarioLogado = usuarioRepository.findByEmail(username)
-                .orElseThrow(() -> new RuntimeException("Usuário remetente não encontrado."));
+        // String token = jwtTokenUtil.resolveToken(servletRequest);
+        // String username = jwtTokenUtil.getUsernameFromToken(token);
+        // Usuario usuarioLogado = usuarioRepository.findByEmail(username)
+        //         .orElseThrow(() -> new RuntimeException("Usuário remetente não encontrado."));
 
         // 2. Chama o novo método do repositório
-        List<ChatMessage> ultimasMensagens = chatRepository.findLatestMessagePerConversation(usuarioLogado.getId());
+        // List<ChatMessage> ultimasMensagens = chatRepository.findLatestMessagePerConversation(usuarioLogado.getId());
 
         // 3. Mapeia as entidades para DTOs (mesma lógica do seu outro endpoint GET)
-        return ultimasMensagens.stream()
-                .map(m -> new ChatMessageResponse(
-                        m.getId(),
-                        m.getConteudo(),
-                        m.getTimestamp(),
-                        m.getRemetente().getNome(),
-                        m.getDestinatario().getNome(),
-                        m.getRemetente().getId(),
-                        m.getDestinatario().getId()
-                )).collect(Collectors.toList());
-    }
+        // return ultimasMensagens.stream()
+        //         .map(m -> new ChatMessageResponse(
+        //                 m.getId(),
+        //                 m.getConteudo(),
+        //                 m.getTimestamp(),
+        //                 m.getRemetente().getNome(),
+        //                 m.getDestinatario().getNome(),
+        //                 m.getRemetente().getId(),
+        //                 m.getDestinatario().getId()
+        //         )).collect(Collectors.toList());
+//     }
 
     /**
      * ✅ MANTIDO: Endpoint REST para carregar o HISTÓRICO da conversa.

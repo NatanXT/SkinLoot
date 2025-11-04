@@ -1,7 +1,8 @@
-/* src/pages/DetalheAnuncio.css
+/* frontend/src/pages/DetalheAnuncio.css
    ============================================================
-   - Layout simples e consistente com o resto do tema
-   - Reaproveita variáveis da vitrine
+   - Layout do detalhe do anúncio
+   - NOVO: caixas "Informações do jogo" e "Detalhes do jogo"
+   - Visual consistente com inputs/fieldset do projeto (neon/escuro)
    ============================================================ */
 
 :root {
@@ -11,6 +12,7 @@
   --text: #E8F1F2;
   --primary: #39FF14;
   --secondary: #00C896;
+  --ring: rgba(57,255,20,.45);
 }
 
 .detalhe-root {
@@ -30,32 +32,56 @@
   backdrop-filter: blur(8px);
 }
 
+/* Card principal */
 .detalhe-card {
   max-width: 1200px;
   margin: 40px auto;
   display: flex;
   gap: 24px;
   padding: 20px;
-  background: var(--panel);
+  background: linear-gradient(180deg, #12171E, #0F1319);
   border-radius: 18px;
   border: 1px solid #1a2129;
   box-shadow: 0 12px 40px rgba(0,0,0,.45);
 }
 
+/* Área da imagem */
 .detalhe-imagem {
+  position: relative;
   flex: 1 1 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #0E1217;
+  border-radius: 14px;
+  border: 1px solid #1a2129;
+  padding: 16px;
 }
 
 .detalhe-imagem img {
   max-width: 100%;
-  max-height: 500px;
-  border-radius: 14px;
+  max-height: 520px;
   object-fit: contain;
+  filter: saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.55));
 }
 
+/* Badge com o nome do jogo sobre a imagem */
+.badge-jogo {
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  z-index: 2;
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: #0B0D10;
+  font-weight: 800;
+  font-size: 12px;
+  line-height: 1;
+  background: var(--primary);
+  box-shadow: 0 0 24px rgba(57,255,20,.35);
+}
+
+/* Coluna de informações */
 .detalhe-info {
   flex: 1 1 50%;
   display: flex;
@@ -74,19 +100,58 @@
   color: var(--primary);
 }
 
-.detalhes-json {
-  background: #0E1217;
-  border: 1px solid #1C2430;
-  border-radius: 12px;
-  padding: 10px;
-  font-family: monospace;
-  color: #CFE5D6;
-  white-space: pre-wrap;
-  font-size: 14px;
+/* Pares chave/valor */
+.kv {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 8px;
+  align-items: baseline;
+}
+.kv + .kv { margin-top: 6px; }
+.kv .k { color: var(--muted); font-size: 14px; }
+.kv .v { color: #E9FFF1; }
+
+/* Grid 2 colunas p/ floats/pattern */
+.kv-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+@media (max-width: 680px) {
+  .kv-grid { grid-template-columns: 1fr; }
 }
 
+/* Caixas de informação (fieldset-look) */
+.box {
+  border: 1px solid #1C2430;
+  border-radius: 12px;
+  padding: 14px 16px 16px;
+  background: linear-gradient(180deg, #0E1217, #0B0D10);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.box:hover {
+  border-color: #314151;
+  box-shadow: 0 0 0 4px rgba(57,255,20,.07);
+}
+.box:focus-within {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 4px rgba(57,255,20,.12);
+}
+.box legend {
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--secondary);
+  text-shadow: 0 0 8px rgba(57,255,20,.35);
+}
+
+.box--info { margin-top: 8px; }
+.box--detalhes { margin-top: 6px; }
+
+/* Ações */
 .detalhe-acoes {
-  margin-top: 20px;
+  margin-top: 16px;
   display: flex;
   gap: 12px;
 }
@@ -114,4 +179,23 @@
 .btn-like:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Botões padrão (mantém coerência com o resto do projeto) */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  border:1px solid #1C2430; background:transparent; color:var(--text);
+  text-decoration:none; cursor:pointer; border-radius:12px; padding:12px 16px;
+}
+.btn.sm{ padding:8px 12px; border-radius:10px }
+.btn--primary{ background:linear-gradient(180deg, var(--primary), var(--secondary)); color:#0B0D10; font-weight:800 }
+.btn--primary:hover{ filter:brightness(.95) }
+.btn--ghost{ border-color:#2A323C; color:#D3D8DF }
+.btn--ghost:hover{ border-color:#3A4451 }
+
+/* Responsividade */
+@media (max-width: 980px) {
+  .detalhe-card {
+    flex-direction: column;
+  }
 }
