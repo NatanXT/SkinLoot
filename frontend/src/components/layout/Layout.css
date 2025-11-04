@@ -1,23 +1,34 @@
+/* ==========================================================
+   Layout.css
+   ----------------------------------------------------------
+   Define o esqueleto da aplicação:
+   - Sidebar fixa
+   - Área principal (Header + Content)
+   - Comportamento flexível e responsivo
+========================================================== */
+
+/* ---------- Container principal ---------- */
 .layout-container {
-    display: flex;
-    min-height: 100vh;
-  }
-  
-  .main-section {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    background-color: #f4f4f4;
-    min-height: 100vh;
-  }
-  
-  .content {
-    flex-grow: 1;
-    padding: 20px 30px;
-    box-sizing: border-box;
-    background: white;
-    margin: 15px;
-    border-radius: 10px;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
-  }
-  
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ---------- Coluna principal (conteúdo) ---------- */
+.main-section {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  background-color: #f4f4f4;
+  min-height: 100vh;
+}
+
+/* ---------- Bloco de conteúdo ---------- */
+.content {
+  flex-grow: 1;
+  padding: 20px 30px;
+  margin: 15px;
+  background: white;
+  border-radius: 10px;
+  box-sizing: border-box;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+}

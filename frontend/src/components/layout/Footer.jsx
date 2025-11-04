@@ -1,3 +1,9 @@
+// ==========================================================
+// Footer.jsx
+// ----------------------------------------------------------
+// Componente de rodapé fixo, exibindo a marca e direitos autorais.
+// ==========================================================
+
 import React from 'react';
 import './Footer.css';
 

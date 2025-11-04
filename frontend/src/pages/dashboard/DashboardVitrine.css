@@ -1,18 +1,12 @@
 /* ======================================================
    DashboardVitrine.css
    Caminho: frontend/src/pages/DashboardVitrine.css
-   - Tokens (cores, espaçamentos, tamanhos)
-   - Base e layout
-   - Topbar / Hero
-   - Filtros (+ Preço com máscara visual)
-   - Grid e Cards
-   - Botões, Planos e Footer
-   - Responsivo
-   - Scroll suave (âncoras) com compensação da topbar
-   - Avatar com menu (neon e dropdown)
+   Escopo: layout geral da página (tokens, base, topbar,
+   hero, filtros, grid, planos, footer, avatar/menu,
+   chat bubble e responsividade global)
 ====================================================== */
 
-/* ---------- Tokens / Variáveis ---------- */
+/* ---------- Tokens / Variáveis (globais) ---------- */
 :root {
   --bg: #0B0D10;
   --panel: #11151A;
@@ -78,14 +72,19 @@ body {
   backdrop-filter: saturate(140%) blur(8px);
   border-bottom: 1px solid #131920;
 }
+
+/* Bloco de ações (login/perfil) */
+.actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+/* Opcional: texto de boas-vindas */
 .topbar .actions .welcome-user {
   color: #fff;
   margin-right: 1rem;
   font-size: 0.9rem;
 }
+
 nav a { margin: 0 10px; color: var(--muted); text-decoration: none; }
 nav a:hover { color: var(--text); }
-.actions { display: flex; gap: 8px; }
 
 /* ---------- Hero ---------- */
 .hero {
@@ -199,7 +198,7 @@ nav a:hover { color: var(--text); }
   gap: 8px;
 }
 
-/* ---------- Grid (cards) ---------- */
+/* ---------- Grid (apenas o container) ---------- */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--card-min-col), 1fr));
@@ -212,98 +211,7 @@ nav a:hover { color: var(--text); }
   .grid { grid-template-columns: repeat(3, minmax(var(--card-min-col), 1fr)); }
 }
 
-/* ---------- Card ---------- */
-.card {
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(180deg,#12171E, #0F1319);
-  border: 1px solid #1A2129;
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  position: relative;
-  transition: transform .25s ease, box-shadow .25s ease;
-}
-.card:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,.5); }
-
-.card__media {
-  position: relative;
-  background: #0E1217;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: auto;
-  aspect-ratio: var(--media-ratio);
-  min-height: var(--media-min-h);
-  padding: var(--media-pad-top) var(--media-pad) var(--media-pad);
-  border-bottom: 1px solid #1A2129;
-}
-.card__media img {
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  display: block;
-  image-rendering: -webkit-optimize-contrast;
-  filter: saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.55));
-}
-.card__media::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  background:
-    radial-gradient(420px 180px at 85% 30%, rgba(0,200,150,.10), transparent 60%),
-    radial-gradient(400px 160px at 20% 15%, rgba(57,255,20,.08), transparent 55%);
-}
-
-.badge {
-  position: absolute;
-  left: 16px;
-  top: 14px;
-  z-index: 3;
-  padding: 6px 12px;
-  border-radius: 999px;
-  white-space: nowrap;
-  color: #0B0D10;
-  font-weight: 800;
-  font-size: 12px;
-  line-height: 1;
-  box-shadow: 0 0 24px var(--ring);
-}
-
-.like {
-  position: absolute;
-  right: 12px;
-  top: 12px;
-  z-index: 3;
-  background: rgba(255,255,255,.06);
-  border: 1px solid #2A323C;
-  border-radius: 999px;
-  padding: 8px;
-  display: grid;
-  place-items: center;
-  color: #D3D8DF;
-  cursor: pointer;
-}
-.like.is-liked {
-  color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(57,255,20,.15) inset;
-}
-
-.card__body {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 14px;
-}
-.card h3 { margin: 0; font-size: 18px; }
-.meta { display: flex; justify-content: space-between; align-items: center; color: var(--muted); }
-.price { color: #E9FFF1; font-weight: 800; letter-spacing: .3px; }
-
-/* ---------- Botões ---------- */
+/* ---------- Botões (globais) ---------- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -311,7 +219,7 @@ nav a:hover { color: var(--text); }
   gap: 8px;
   border: 1px solid #1C2430;
   background: transparent;
-  color: var(--text);
+  color: #fff;
   text-decoration: none;
   cursor: pointer;
   border-radius: 12px;
@@ -364,14 +272,20 @@ nav a:hover { color: var(--text); }
   text-align: center;
 }
 
-/* ---------- Responsivo ---------- */
+/* ---------- Responsivo (global) ---------- */
 @media (max-width: 960px) {
   .filters__row { grid-template-columns: 1fr 1fr 1fr; }
   .hero h1 { font-size: 36px; }
 }
+
 @media (max-width: 640px) {
   .filters__row { grid-template-columns: 1fr; }
   :root { --card-min-col: 310px; --media-min-h: 300px; --btn-h: 44px; }
+
+  /* Topbar mais compacta no mobile */
+  .topbar { padding: 10px 14px; }
+  nav a { margin: 0 6px; font-size: 0.95rem; }
+  .actions { gap: 6px; }
 }
 
 /* ---------- Avatar / Profile Menu ---------- */
@@ -458,91 +372,190 @@ nav a:hover { color: var(--text); }
   box-shadow: 0 0 8px rgba(0,0,0,.5);
 }
 
-/* ---------- Efeitos Neon ---------- */
-.card {
-  --neon1: var(--primary);
-  --neon2: var(--secondary);
-  transition: transform .25s ease, box-shadow .25s ease, border-color .2s ease;
-}
-.card:hover {
-  transform: translateY(-3px);
-  border-color: #2a3340;
-  box-shadow:
-    0 16px 40px rgba(0,0,0,.60),
-    0 0 0 2px color-mix(in oklab, var(--neon1) 70%, transparent),
-    0 0 24px color-mix(in oklab, var(--neon1) 35%, transparent),
-    0 0 64px color-mix(in oklab, var(--neon2) 26%, transparent);
-}
-.card:hover .card__media::after { opacity: .9; transition: opacity .2s ease; }
-
-/* ---------- Variações de Card ---------- */
-.card--intermediario:hover, .card--intermediario:focus-within {
-  box-shadow:
-    0 16px 40px rgba(0,0,0,.60),
-    0 0 0 2px color-mix(in oklab, var(--secondary) 75%, transparent),
-    0 0 24px color-mix(in oklab, var(--secondary) 38%, transparent),
-    0 0 64px color-mix(in oklab, var(--primary) 24%, transparent);
-}
-.card--plus:hover, .card--plus:focus-within {
-  box-shadow:
-    0 16px 40px rgba(0,0,0,.60),
-    0 0 0 2px color-mix(in oklab, var(--primary) 85%, transparent),
-    0 0 26px color-mix(in oklab, var(--primary) 42%, transparent),
-    0 0 72px color-mix(in oklab, var(--secondary) 30%, transparent);
-}
-
-/* ---------- Animação ---------- */
+/* ---------- Animação do menu ---------- */
 @keyframes pmenu-in {
   from { transform: translateY(-6px); opacity: 0; }
   to   { transform: translateY(0);   opacity: 1; }
 }
 
-/* ===================================================== */
-/*   Correção final: tamanhos e alinhamento dos botões    */
-/* ===================================================== */
-.seller {
-  margin-top: auto;
+/* ====================== Responsividade: botões Entrar / Criar Conta ====================== */
+@media (max-width: 640px) {
+  .topbar {
+    padding: 10px 14px;
+    flex-wrap: wrap;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 6px;
+  }
+
+  .actions .btn {
+    flex: 1 1 45%;
+    justify-content: center;
+    min-width: 120px;
+  }
+}
+
+/* ====================== Centralização da navbar no mobile ====================== */
+@media (max-width: 640px) {
+  nav {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  nav a {
+    margin: 4px 10px;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .actions {
+    justify-content: center;
+  }
+}
+
+/* ====================== Navbar compacta (logo + links na mesma linha) ====================== */
+@media (max-width: 640px) {
+  .topbar .brand-text,
+  .topbar .brand-name {
+    display: none !important;
+  }
+
+  .topbar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 10px 12px;
+  }
+
+  .topbar .logo,
+  .topbar img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: nowrap;
+    margin: 0;
+    width: auto;
+  }
+
+  nav a {
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  nav a:hover { color: var(--primary); }
+
+  .actions {
+    width: 100%;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+}
+/* ======================================================
+   Navbar logada - layout fixo e alinhamento correto
+   (logo esquerda, links centro, avatar direita)
+====================================================== */
+.topbar.logged {
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* logo - nav - avatar */
+  align-items: center;
+  height: 64px;
+  padding: 0 24px;
+  background: rgba(11, 13, 16, 0.65);
+  backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid #131920;
+}
+
+/* Logo sempre à esquerda */
+.topbar.logged > .auth-brand,
+.topbar.logged > .brand-area {
+  justify-self: start;
+}
+
+/* Links centralizados */
+.topbar.logged .nav-links {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
 }
 
-.seller > span {
-  color: #CFE5D6;
-  font-size: 14px;
-  text-align: left;
-  margin-bottom: 4px;
-  width: 100%;
-}
-
-/* Primeira linha: Contato + Ver detalhes */
-.card .cta:not(.cta--bottom) {
+/* Avatar sempre à direita */
+.topbar.logged .profile-menu {
+  justify-self: end;
   display: flex;
-  justify-content: flex-start;
-  gap: 8px;
-  width: 100%;
+  align-items: center;
 }
 
-.card .cta:not(.cta--bottom) .btn {
-  flex: 1 1 50%;
-  max-width: 50%;
-  height: 46px;
-  justify-content: center;
-  border-radius: 10px;
+/* Aparência dos links */
+.topbar.logged .nav-links a {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.topbar.logged .nav-links a:hover {
+  color: var(--primary);
 }
 
-/* Segunda linha: botão largo */
-.card .cta--bottom {
-  margin-top: 6px;
-  width: 100%;
+/* ---------- Responsivo ---------- */
+@media (max-width: 640px) {
+  .topbar.logged {
+    grid-template-columns: auto 1fr auto;
+    padding: 10px 14px;
+  }
+
+  /* Esconde o texto do nome "SkinLoot" no mobile */
+  .topbar.logged .brand-text,
+  .topbar.logged .brand-name {
+    display: none !important;
+  }
+
+  .topbar.logged .nav-links {
+    gap: 12px;
+  }
+
+  .topbar.logged .profile-menu {
+    justify-self: end;
+  }
 }
-.card .cta--bottom .btn.full {
-  flex: none !important;
-  width: 100% !important;
-  height: 48px;
-  font-weight: 700;
-  border-radius: 10px;
-  justify-content: center;
-  align-self: stretch;
+
+/* ======================================================
+   Ajuste visual: botão "Entrar" mais escuro que a navbar
+====================================================== */
+
+/* Escurece o botão ghost (Entrar) e remove transparência */
+.actions .btn.btn--ghost.sm {
+  background: #0B0D10;        /* cor sólida mais escura */
+  border: 1px solid #222832;  /* borda sutil */
+  color: #E8F1F2;             /* texto claro */
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+/* Hover ainda mais escuro para realçar */
+.actions .btn.btn--ghost.sm:hover {
+  background: #090B0E;
+  border-color: #2A323C;
 }

@@ -1,0 +1,194 @@
+/* ==========================================================
+   SkinCard.css
+   Caminho: frontend/src/components/skin/SkinCard.css
+   ----------------------------------------------------------
+   Estilos do componente <SkinCard /> — responsável por exibir
+   o visual de um anúncio de skin.
+   Depende das variáveis globais declaradas em :root.
+========================================================== */
+
+/* ---------- Estrutura principal ---------- */
+.card {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #12171E, #0F1319);
+  border: 1px solid #1A2129;
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- Área da imagem ---------- */
+.card__media {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0E1217;
+  aspect-ratio: var(--media-ratio);
+  min-height: var(--media-min-h);
+  padding: var(--media-pad-top) var(--media-pad) var(--media-pad);
+  border-bottom: 1px solid #1A2129;
+}
+.card__media img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+  filter: saturate(1.05) drop-shadow(0 14px 30px rgba(0, 0, 0, 0.55));
+}
+.card__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(420px 180px at 85% 30%, rgba(0, 200, 150, 0.10), transparent 60%),
+    radial-gradient(400px 160px at 20% 15%, rgba(57, 255, 20, 0.08), transparent 55%);
+}
+
+/* ---------- Badge de plano ---------- */
+.badge {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  z-index: 3;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  color: #0B0D10;
+  white-space: nowrap;
+  box-shadow: 0 0 24px var(--ring);
+}
+
+/* ---------- Botão de favorito ---------- */
+.like {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  padding: 8px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid #2A323C;
+  border-radius: 999px;
+  color: #D3D8DF;
+  cursor: pointer;
+}
+.like.is-liked {
+  color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(57, 255, 20, 0.15) inset;
+}
+
+/* ---------- Corpo do card ---------- */
+.card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+}
+.card h3 {
+  margin: 0;
+  font-size: 18px;
+}
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+}
+.price {
+  color: #E9FFF1;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+/* ---------- Informações do vendedor ---------- */
+.seller {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: auto;
+}
+.seller > span {
+  width: 100%;
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: #CFE5D6;
+  text-align: left;
+}
+
+/* ---------- Botões (CTA) ---------- */
+.card .cta:not(.cta--bottom) {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+.card .cta:not(.cta--bottom) .btn {
+  flex: 1 1 50%;
+  max-width: 50%;
+  height: 46px;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+/* Botão inferior (full width) */
+.card .cta--bottom {
+  margin-top: 6px;
+  width: 100%;
+}
+.card .cta--bottom .btn.full {
+  width: 100% !important;
+  height: 48px;
+  font-weight: 700;
+  border-radius: 10px;
+  justify-content: center;
+}
+
+/* ---------- Efeitos neon ---------- */
+.card {
+  --neon1: var(--primary);
+  --neon2: var(--secondary);
+}
+.card:hover {
+  border-color: #2a3340;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.6),
+    0 0 0 2px color-mix(in oklab, var(--neon1) 70%, transparent),
+    0 0 24px color-mix(in oklab, var(--neon1) 35%, transparent),
+    0 0 64px color-mix(in oklab, var(--neon2) 26%, transparent);
+}
+.card:hover .card__media::after {
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+}
+
+/* ---------- Variações de plano ---------- */
+.card--intermediario:hover,
+.card--intermediario:focus-within {
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.6),
+    0 0 0 2px color-mix(in oklab, var(--secondary) 75%, transparent),
+    0 0 24px color-mix(in oklab, var(--secondary) 38%, transparent),
+    0 0 64px color-mix(in oklab, var(--primary) 24%, transparent);
+}
+.card--plus:hover,
+.card--plus:focus-within {
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.6),
+    0 0 0 2px color-mix(in oklab, var(--primary) 85%, transparent),
+    0 0 26px color-mix(in oklab, var(--primary) 42%, transparent),
+    0 0 72px color-mix(in oklab, var(--secondary) 30%, transparent);
+}

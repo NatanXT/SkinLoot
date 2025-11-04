@@ -1,6 +1,14 @@
+// ==========================================================
 // MockSkins.js
+// ----------------------------------------------------------
+// Lista mock de skins populares, utilizada para testes locais
+// antes da integração com o backend real.
+// ==========================================================
+
 /**
- * Lista mock de skins populares, usada para testes antes de conectar ao backend.
+ * Cada objeto contém:
+ *  - nome: Nome da skin
+ *  - imagemUrl: Caminho relativo à pasta pública /img/
  */
 const MockSkins = [
   { nome: 'AK-47 | Case Hardened', imagemUrl: '/img/ak47_case_hardened.png' },

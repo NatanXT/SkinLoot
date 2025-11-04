@@ -1,22 +1,26 @@
+// ==========================================================
 // Sidebar.jsx
+// ----------------------------------------------------------
+// Menu lateral da aplicação.
+// Pode ser expandido/recolhido no mobile e permanece fixo no desktop.
+// ==========================================================
+
 import React from 'react';
 import './Sidebar.css';
 
 /**
- * Menu lateral fixo que pode ser expandido ou recolhido.
+ * Sidebar de navegação lateral.
  *
- * @param {boolean} isOpen - Indica se a sidebar está aberta
- * @param {function} toggleSidebar - Função para alternar visibilidade
+ * @param {boolean} isOpen - Define se a sidebar está visível.
+ * @param {Function} toggleSidebar - Fecha a sidebar ao clicar fora ou no ícone.
  */
 export default function Sidebar({ isOpen, toggleSidebar }) {
   return (
     <>
-      {/* Overlay escuro ao fundo que fecha a sidebar ao clicar */}
-      {isOpen && (
-        <div className="sidebar-overlay" onClick={toggleSidebar}></div>
-      )}
+      {/* Overlay clicável para fechar a sidebar (apenas mobile) */}
+      {isOpen && <div className="sidebar-overlay" onClick={toggleSidebar} />}
 
-      {/* Sidebar com links de navegação */}
+      {/* Container lateral com links */}
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
         <ul>
           <li>

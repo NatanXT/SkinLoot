@@ -1,14 +1,24 @@
+// ==========================================================
 // Avaliacoes.jsx
+// ----------------------------------------------------------
+// Componente simples de depoimentos dos usuários.
+// Exibe citações estilizadas centralizadas.
+// ==========================================================
+
 import React from 'react';
 import '../home/Avaliacoes.css';
 
 /**
- * Componente que exibe depoimentos de usuários em formato de blocos de citação.
+ * Renderiza uma seção com depoimentos de usuários.
+ * Estrutura:
+ * - Título
+ * - Três citações fixas
  */
 export default function Avaliacoes() {
   return (
     <section className="avaliacoes" id="avaliacoes">
       <h2>O que dizem sobre nós</h2>
+
       <div className="avaliacoes-grid">
         <blockquote>“Melhor site de skins que já usei!” – Lucas, SP</blockquote>
         <blockquote>
