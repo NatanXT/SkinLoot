@@ -382,10 +382,48 @@ export default function PerfilUsuario() {
     async function onEscolherArquivo(e) {
         const file = e.target.files?.[0];
         if (!file) return;
-        setImagemFile(file);
-        setFormEdicao((v) => ({ ...v, imagemUrl: '' })); // evita validação de URL
-        const dataURL = await readFileAsDataURL(file);
-        setPreviewImagem(String(dataURL || ''));
+        const reader = new FileReader();
+        reader.onload = (readEvent) => {
+            let dataUrl = String(readEvent.target?.result || '');
+
+            // --- INÍCIO DA CORREÇÃO ---
+            // 1. Limpa a string de dataUrl de quebras de linha ou espaços
+            // que podem ter sido introduzidos e quebram a URL.
+            dataUrl = dataUrl.replace(/(\r\n|\n|\r)/gm, "").trim();
+
+            // 2. Valida a divisão
+            const parts = dataUrl.split(',');
+            if (parts.length !== 2 || !parts[0].startsWith('data:image') || !parts[1]) {
+                console.error("dataURL inesperada, não foi possível dividir:", dataUrl);
+                addToast('Formato de arquivo de imagem inválido ou corrompido.', 'error');
+                setPreviewImagem(''); // Limpa o preview se falhar
+                setImagemFile(null);
+                return;
+            }
+            // --- FIM DA CORREÇÃO ---
+
+            // Agora 'parts' é confiável
+            const [head, base64] = parts;
+            const mime = head.match(/:(.*?);/)?.[1] || 'image/png';
+
+            // Seta o preview APENAS com a dataUrl válida e limpa
+            setPreviewImagem(dataUrl);
+
+            setImagemFile({
+                file: file,
+                base64: base64, // 'base64' agora será uma string válida
+                mime: mime,
+            });
+            // prioriza arquivo, limpa URL
+            setFormEdicao((v) => ({ ...v, imagemUrl: '' }));
+        };
+        reader.onerror = () => {
+            addToast('Falha ao ler o arquivo de imagem.', 'error');
+            setPreviewImagem('');
+            setImagemFile(null);
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
     }
 
     // Normaliza backend para garantir campo de imagem
