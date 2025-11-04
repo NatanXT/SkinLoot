@@ -103,9 +103,11 @@ function normalizarDoBackend(anuncio = {}) {
         anuncio.plan ??      // <-- 3. Fallback
         'gratuito'           // <-- 4. Default
     ).toLowerCase();
+    const jogo = anuncio.jogo || null;
     const likes = Number(
         anuncio.likesCount ?? anuncio.likes ?? anuncio.curtidas ?? 0,
     );
+
     const dataStr =
         anuncio.dataCriacao ??
         anuncio.criadoEm ??
@@ -139,6 +141,7 @@ function normalizarDoBackend(anuncio = {}) {
         usuarioId: sellerId, // Para o DashboardVitrine ler diretamente
         usuarioNome: sellerName, // Já estava implícito, mas bom ter explícito
         planoNome: plan, // Para o DashboardVitrine ler diretamente
+        jogo: jogo,
     };
 }
 

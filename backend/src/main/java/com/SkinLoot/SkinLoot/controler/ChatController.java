@@ -96,6 +96,32 @@ public class ChatController {
         );
     }
 
+    @GetMapping("/minhas-conversas")
+    @ResponseBody // Necessário porque a classe é @Controller, não @RestController
+    public List<ChatMessageResponse> buscarMinhasConversas(HttpServletRequest servletRequest) {
+
+        // 1. Autentica o usuário (mesma lógica do seu outro endpoint GET)
+        String token = jwtTokenUtil.resolveToken(servletRequest);
+        String username = jwtTokenUtil.getUsernameFromToken(token);
+        Usuario usuarioLogado = usuarioRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("Usuário remetente não encontrado."));
+
+        // 2. Chama o novo método do repositório
+        List<ChatMessage> ultimasMensagens = chatRepository.findLatestMessagePerConversation(usuarioLogado.getId());
+
+        // 3. Mapeia as entidades para DTOs (mesma lógica do seu outro endpoint GET)
+        return ultimasMensagens.stream()
+                .map(m -> new ChatMessageResponse(
+                        m.getId(),
+                        m.getConteudo(),
+                        m.getTimestamp(),
+                        m.getRemetente().getNome(),
+                        m.getDestinatario().getNome(),
+                        m.getRemetente().getId(),
+                        m.getDestinatario().getId()
+                )).collect(Collectors.toList());
+    }
+
     /**
      * ✅ MANTIDO: Endpoint REST para carregar o HISTÓRICO da conversa.
      * O frontend chamará este endpoint UMA VEZ ao abrir a janela de chat.
@@ -126,4 +152,6 @@ public class ChatController {
                         m.getDestinatario().getId()
                 )).collect(Collectors.toList());
     }
+
+
 }
