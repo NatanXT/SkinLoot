@@ -1,0 +1,33 @@
+/* src/styles/design/tokens-dark.css *//*
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Inter:wght@400;500;700&display=swap');
+
+:root {
+  /* Paleta principal *//*
+  --sl-primary: #10C66F;
+  --sl-primary-glow: 0 0 15px rgba(16, 198, 111, 0.6);
+  --sl-bg-900: #0B0B0B;
+  --sl-bg-800: #1A1A1A;
+  --sl-bg-700: #2C2C2C;
+  --sl-text-100: #F1F1F1;
+  --sl-text-300: #C7C7C7;
+
+  /* Gradientes *//*
+  --sl-gradient-warm: linear-gradient(90deg, #FF4E00, #FF9000);
+  --sl-gradient-primary: linear-gradient(135deg, var(--sl-primary), #0EA25A);
+
+  /* Tipografia *//*
+  --sl-font-display: 'Orbitron', sans-serif;
+  --sl-font-body: 'Inter', sans-serif;
+
+  /* Bordas e sombras *//*
+  --sl-radius-md: 12px;
+  --sl-radius-full: 999px;
+  --sl-shadow-lg: 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+body {
+  background-color: var(--sl-bg-900);
+  color: var(--sl-text-100);
+  font-family: var(--sl-font-body);
+}
+*/

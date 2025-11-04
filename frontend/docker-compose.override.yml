@@ -1,0 +1,14 @@
+# docker-compose.override.yml
+version: '3.9'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev # Dockerfile separado para ambiente dev
+    ports:
+      - '5173:5173' # Vite roda direto na porta 5173
+    volumes:
+      - .:/app # monta a pasta local dentro do container
+      - /app/node_modules # evita sobrescrever node_modules do container
+    command: npm run dev # inicia o Vite em modo hot reload

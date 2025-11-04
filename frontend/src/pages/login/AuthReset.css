@@ -1,0 +1,132 @@
+/* ======================================================
+   AuthReset.css (ForgotPassword + ResetPassword)
+   - Mantém toda a estética do Auth.css
+   - Adiciona estilos específicos de mensagens e ajustes visuais
+   - Responsivo para mobile e tablet
+====================================================== */
+
+/* ---------- Mensagens de sucesso ---------- */
+.api-success-message {
+    background: #0F1E14;            /* fundo verde suave */
+    border: 1px solid #00FF7F;      /* borda neon verde */
+    color: #7CFC00;                 /* texto neon */
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    text-align: center;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  /* ---------- Card ---------- */
+  .auth-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .auth-card:hover {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.55);
+  }
+  
+  /* ---------- Títulos e subtítulos ---------- */
+  .auth-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .auth-subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+  
+  /* ---------- Campos ---------- */
+  .field input[type="email"],
+  .field input[type="password"] {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .field input:focus,
+  .field input:hover {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 2px rgba(57, 255, 20, 0.15);
+  }
+  
+  /* ---------- Botões ---------- */
+  .btn--primary {
+    transition: all 0.2s ease;
+  }
+  .btn--primary:hover {
+    filter: brightness(1.05);
+  }
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* ---------- Links / switch ---------- */
+  .switch {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .switch .link {
+    font-weight: 600;
+    color: var(--secondary);
+  }
+  .switch .link:hover {
+    text-decoration: underline;
+  }
+  
+  /* ---------- Responsividade ---------- */
+  
+  /* Mobile (até 480px) */
+  @media (max-width:480px) {
+    .auth-card {
+      padding: 18px 16px;
+    }
+    .auth-title {
+      font-size: 24px;
+    }
+    .auth-subtitle {
+      font-size: 13px;
+    }
+    .field input[type="email"],
+    .field input[type="password"] {
+      padding: 10px;
+      font-size: 14px;
+    }
+    .btn--primary {
+      padding: 10px 14px;
+      font-size: 14px;
+    }
+  }
+  
+  /* Tablet (até 768px) */
+  @media (max-width:768px) {
+    .auth-card {
+      max-width: 440px;
+      padding: 20px 18px;
+    }
+    .auth-title {
+      font-size: 26px;
+    }
+    .auth-subtitle {
+      font-size: 15px;
+    }
+    .field input[type="email"],
+    .field input[type="password"] {
+      padding: 11px;
+      font-size: 15px;
+    }
+    .btn--primary {
+      padding: 11px 15px;
+      font-size: 15px;
+    }
+  }
+  
+  /* ---------- Animação Fade-in para mensagens ---------- */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  

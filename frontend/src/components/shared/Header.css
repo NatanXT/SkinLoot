@@ -1,0 +1,88 @@
+/* ==========================================================
+   Header.css
+   ----------------------------------------------------------
+   Estilos do cabeçalho principal (navbar superior)
+   - Contém logo, barra de busca e navegação
+========================================================== */
+
+/* ---------- Container principal ---------- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: var(--gray-dark);
+}
+
+/* ---------- Logo ---------- */
+.logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--green);
+  white-space: nowrap;
+}
+
+/* ---------- Navegação ---------- */
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-links a {
+  color: var(--white);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:visited {
+  color: var(--white);
+}
+
+.nav-links a:hover {
+  color: var(--green);
+}
+
+/* ---------- Campo de busca ---------- */
+.search-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 8px;
+}
+
+.search-header input {
+  width: 100%;
+  max-width: 300px;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--gray-mid);
+  color: var(--white);
+}
+
+.search-header input::placeholder {
+  color: #aaa;
+}
+
+.search-header button {
+  background-color: var(--green);
+  border: none;
+  color: var(--black);
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* ---------- Botão de toggle da sidebar (mobile) ---------- */
+.sidebar-toggle {
+  background-color: transparent;
+  border: none;
+  font-size: 1.8rem;
+  color: var(--white);
+  cursor: pointer;
+  margin-right: 1rem;
+}

@@ -1,0 +1,561 @@
+/* ======================================================
+   DashboardVitrine.css
+   Caminho: frontend/src/pages/DashboardVitrine.css
+   Escopo: layout geral da página (tokens, base, topbar,
+   hero, filtros, grid, planos, footer, avatar/menu,
+   chat bubble e responsividade global)
+====================================================== */
+
+/* ---------- Tokens / Variáveis (globais) ---------- */
+:root {
+  --bg: #0B0D10;
+  --panel: #11151A;
+  --muted: #7B8694;
+  --text: #E8F1F2;
+  --primary: #39FF14;
+  --secondary: #00C896;
+  --ring: rgba(57,255,20,.6);
+  --shadow: 0 10px 30px rgba(0,0,0,.45);
+
+  --media-ratio: 4/3;
+  --media-min-h: 360px;
+  --media-pad: 20px;
+  --media-pad-top: 48px;
+
+  --card-min-col: 370px;
+  --card-gap: 22px;
+
+  --btn-h: 48px;
+  --radius: 18px;
+  --container-max: 1550px;
+
+  /* altura aproximada da topbar para scroll-margin */
+  --topbar-h: 64px;
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--topbar-h) + 8px);
+}
+section[id] { scroll-margin-top: calc(var(--topbar-h) + 8px); }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;
+}
+
+.dash-root { position: relative; min-height: 100vh; }
+.backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(800px 400px at 10% 0%, rgba(57,255,20,.06), transparent 60%),
+    radial-gradient(900px 500px at 100% 10%, rgba(0,200,150,.08), transparent 60%);
+}
+
+/* ---------- Topbar ---------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 24px;
+  background: rgba(11,13,16,.65);
+  backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid #131920;
+}
+
+/* Bloco de ações (login/perfil) */
+.actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+/* Opcional: texto de boas-vindas */
+.topbar .actions .welcome-user {
+  color: #fff;
+  margin-right: 1rem;
+  font-size: 0.9rem;
+}
+
+nav a { margin: 0 10px; color: var(--muted); text-decoration: none; }
+nav a:hover { color: var(--text); }
+
+/* ---------- Hero ---------- */
+.hero {
+  display: grid;
+  place-items: center;
+  padding: 64px 24px 32px;
+  background: linear-gradient(180deg, rgba(57,255,20,.06), transparent);
+}
+.hero__copy { max-width: 980px; text-align: center; }
+.hero h1 { font-size: 48px; margin: 0 0 10px; letter-spacing: .3px; }
+.hero p { color: var(--muted); margin: 0 0 20px; }
+.hero__cta { display: flex; gap: 12px; justify-content: center; }
+
+/* ---------- Filtros ---------- */
+.filters { padding: 14px clamp(16px, 4vw, 32px); }
+.filters__row {
+  display: grid;
+  grid-template-columns: 1.2fr .7fr .7fr .8fr 1fr;
+  gap: 12px;
+  max-width: var(--container-max);
+  margin: 0 auto;
+}
+
+/* Campo padrão */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--panel);
+  border: 1px solid #1A2129;
+  border-radius: 14px;
+  padding: 12px;
+}
+.field label { font-size: 12px; color: var(--muted); }
+.field select, .field input {
+  width: 100%;
+  background: #0E1217;
+  color: var(--text);
+  border: 1px solid #1C2430;
+  border-radius: 10px;
+  padding: 10px;
+}
+.field--search { flex-direction: row; align-items: center; gap: 8px;  }
+.field--search input { border: none; background: transparent; border: 1px solid #1A2129;}
+.field--search svg { color: var(--muted); }
+
+/* Campo de preço */
+.range {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid #1A2129;
+  border-radius: 14px;
+  padding: 12px;
+}
+.range__inputs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #0E1217;
+  border: 1px solid #1C2430;
+  border-radius: 12px;
+  padding: 8px;
+}
+.range__inputs span {
+  color: var(--muted);
+  opacity: .6;
+  user-select: none;
+  min-width: 16px;
+  text-align: center;
+}
+
+/* Money input com prefixo "R$" */
+.money { position: relative; flex: 1; }
+.money__prefix {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-weight: 700;
+  opacity: .8;
+  pointer-events: none;
+}
+.money__field {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px 0 36px;
+  background: #0B0F14;
+  color: var(--text);
+  border: 1px solid #1C2430;
+  border-radius: 10px;
+  font-variant-numeric: tabular-nums;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.money__field:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 2px rgba(57,255,20,.12);
+}
+.money__field::-webkit-outer-spin-button,
+.money__field::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.money__field[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+/* Ações dos filtros */
+.filters__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ---------- Grid (apenas o container) ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min-col), 1fr));
+  gap: var(--card-gap);
+  max-width: var(--container-max);
+  margin: 16px auto 64px;
+  padding: 0 clamp(16px, 4vw, 32px);
+}
+@media (min-width: 1200px) {
+  .grid { grid-template-columns: repeat(3, minmax(var(--card-min-col), 1fr)); }
+}
+
+/* ---------- Botões (globais) ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #1C2430;
+  background: transparent;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+.btn.sm { padding: 8px 12px; border-radius: 10px; }
+.btn--primary {
+  background: linear-gradient(180deg, var(--primary), var(--secondary));
+  color: #0B0D10;
+  font-weight: 800;
+}
+.btn--primary:hover { filter: brightness(.95); }
+.btn--ghost { border-color: #2A323C; color: #D3D8DF; }
+.btn--ghost:hover { border-color: #3A4451; }
+
+/* ---------- Planos ---------- */
+.plans {
+  max-width: var(--container-max);
+  margin: 0 auto 80px;
+  padding: 0 clamp(16px, 4vw, 32px);
+}
+.plans h2 { text-align: center; margin: 24px 0; }
+.plans__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+  gap: 16px;
+}
+.plan {
+  background: var(--panel);
+  border: 1px solid #1A2129;
+  border-radius: var(--radius);
+  padding: 18px 16px;
+}
+.plan h3 { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 10px; }
+.plan ul { margin: 0 0 16px 18px; color: var(--muted); }
+.plan button { width: 100%; }
+.plan--gratuito { box-shadow: 0 0 0 1px rgba(124,132,144,.25) inset; }
+.plan--intermediario { box-shadow: 0 0 0 1px rgba(0,200,150,.3) inset; }
+.plan--plus {
+  box-shadow:
+    0 0 0 2px rgba(57,255,20,.35) inset,
+    0 0 80px rgba(57,255,20,.06);
+}
+
+/* ---------- Footer ---------- */
+.foot {
+  padding: 32px clamp(16px, 4vw, 32px);
+  border-top: 1px solid #121921;
+  color: #8C98A6;
+  text-align: center;
+}
+
+/* ---------- Responsivo (global) ---------- */
+@media (max-width: 960px) {
+  .filters__row { grid-template-columns: 1fr 1fr 1fr; }
+  .hero h1 { font-size: 36px; }
+}
+
+@media (max-width: 640px) {
+  .filters__row { grid-template-columns: 1fr; }
+  :root { --card-min-col: 310px; --media-min-h: 300px; --btn-h: 44px; }
+
+  /* Topbar mais compacta no mobile */
+  .topbar { padding: 10px 14px; }
+  nav a { margin: 0 6px; font-size: 0.95rem; }
+  .actions { gap: 6px; }
+}
+
+/* ---------- Avatar / Profile Menu ---------- */
+.profile-menu { position: relative; }
+.profile-menu .avatar {
+  width: 36px; height: 36px; border-radius: 999px;
+  border: 1px solid #2A323C; background: #0E1217;
+  display: grid; place-items: center; font-weight: 900;
+  letter-spacing: .5px; cursor: pointer; user-select: none;
+}
+.avatar.neon {
+  color: var(--primary);
+  text-shadow: 0 0 4px rgba(57,255,20,.6), 0 0 10px rgba(57,255,20,.45), 0 0 18px rgba(0,200,150,.35);
+  box-shadow: 0 0 0 2px rgba(57,255,20,.08) inset, 0 4px 18px rgba(0,0,0,.35);
+}
+.avatar.neon:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 0 0 2px rgba(57,255,20,.12) inset, 0 6px 22px rgba(0,0,0,.45);
+}
+
+/* Dropdown do avatar */
+.profile-menu .menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 180px;
+  background: var(--panel);
+  border: 1px solid #1A2129;
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 20px 40px rgba(0,0,0,.45);
+  animation: pmenu-in .14s ease-out;
+  z-index: 30;
+}
+.profile-menu .menu button {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.profile-menu .menu button:hover {
+  background: #0F1319;
+  border: 1px solid #263140;
+}
+
+/* ---------- Chat Mini Bubble ---------- */
+.chat-mini-bubble {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid #2A323C;
+  border-radius: 12px;
+  padding: 10px 16px;
+  min-width: 200px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+  transition: background .2s ease, transform .2s ease;
+}
+.chat-mini-bubble:hover { background: #1A1F27; transform: translateY(-2px); }
+.chat-mini-bubble__icon { font-size: 18px; }
+.chat-mini-bubble__label { flex: 1; text-align: left; }
+.chat-mini-bubble__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: red;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 3px 7px;
+  box-shadow: 0 0 8px rgba(0,0,0,.5);
+}
+
+/* ---------- Animação do menu ---------- */
+@keyframes pmenu-in {
+  from { transform: translateY(-6px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+/* ====================== Responsividade: botões Entrar / Criar Conta ====================== */
+@media (max-width: 640px) {
+  .topbar {
+    padding: 10px 14px;
+    flex-wrap: wrap;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 6px;
+  }
+
+  .actions .btn {
+    flex: 1 1 45%;
+    justify-content: center;
+    min-width: 120px;
+  }
+}
+
+/* ====================== Centralização da navbar no mobile ====================== */
+@media (max-width: 640px) {
+  nav {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  nav a {
+    margin: 4px 10px;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .actions {
+    justify-content: center;
+  }
+}
+
+/* ====================== Navbar compacta (logo + links na mesma linha) ====================== */
+@media (max-width: 640px) {
+  .topbar .brand-text,
+  .topbar .brand-name {
+    display: none !important;
+  }
+
+  .topbar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 10px 12px;
+  }
+
+  .topbar .logo,
+  .topbar img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: nowrap;
+    margin: 0;
+    width: auto;
+  }
+
+  nav a {
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  nav a:hover { color: var(--primary); }
+
+  .actions {
+    width: 100%;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+}
+/* ======================================================
+   Navbar logada - layout fixo e alinhamento correto
+   (logo esquerda, links centro, avatar direita)
+====================================================== */
+.topbar.logged {
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* logo - nav - avatar */
+  align-items: center;
+  height: 64px;
+  padding: 0 24px;
+  background: rgba(11, 13, 16, 0.65);
+  backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid #131920;
+}
+
+/* Logo sempre à esquerda */
+.topbar.logged > .auth-brand,
+.topbar.logged > .brand-area {
+  justify-self: start;
+}
+
+/* Links centralizados */
+.topbar.logged .nav-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+}
+
+/* Avatar sempre à direita */
+.topbar.logged .profile-menu {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+}
+
+/* Aparência dos links */
+.topbar.logged .nav-links a {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.topbar.logged .nav-links a:hover {
+  color: var(--primary);
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 640px) {
+  .topbar.logged {
+    grid-template-columns: auto 1fr auto;
+    padding: 10px 14px;
+  }
+
+  /* Esconde o texto do nome "SkinLoot" no mobile */
+  .topbar.logged .brand-text,
+  .topbar.logged .brand-name {
+    display: none !important;
+  }
+
+  .topbar.logged .nav-links {
+    gap: 12px;
+  }
+
+  .topbar.logged .profile-menu {
+    justify-self: end;
+  }
+}
+
+/* ======================================================
+   Ajuste visual: botão "Entrar" mais escuro que a navbar
+====================================================== */
+
+/* Escurece o botão ghost (Entrar) e remove transparência */
+.actions .btn.btn--ghost.sm {
+  background: #0B0D10;        /* cor sólida mais escura */
+  border: 1px solid #222832;  /* borda sutil */
+  color: #E8F1F2;             /* texto claro */
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+/* Hover ainda mais escuro para realçar */
+.actions .btn.btn--ghost.sm:hover {
+  background: #090B0E;
+  border-color: #2A323C;
+}

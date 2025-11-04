@@ -1,0 +1,40 @@
+/* Look compatível com Auth.css */
+.perfil-root{
+  min-height:100dvh;
+  padding:32px 16px;
+  background:
+    radial-gradient(1000px 500px at 10% 0%, rgba(57,255,20,.06), transparent 60%),
+    radial-gradient(900px 500px at 100% 10%, rgba(0,200,150,.08), transparent 60%);
+}
+.perfil-card{
+  max-width:820px; margin:0 auto;
+  background:linear-gradient(180deg,#12171E,#0F1319);
+  border:1px solid #1A2129; border-radius:18px; padding:22px 20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.45);
+}
+.perfil-header{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px;
+}
+.perfil-header h1{ margin:0 }
+.perfil-header p{ margin:4px 0 0; color:#7B8694 }
+
+.perfil-section + .perfil-section{ margin-top:24px }
+.perfil-section h2{ margin:0 0 12px }
+
+.perfil-form{ display:grid; gap:12px }
+.field{ display:flex; flex-direction:column; gap:6px; background:#11151A; border:1px solid #1A2129; padding:12px; border-radius:14px }
+.field label{ font-size:12px; color:#7B8694 }
+.field input, .field select{ background:#0E1217; color:#E8F1F2; border:1px solid #1C2430; border-radius:10px; padding:12px }
+.field input:focus, .field select:focus{ outline:none; border-color:#00C896; box-shadow:0 0 0 2px rgba(57,255,20,.12) }
+.muted{ color:#7B8694 }
+
+.btn{ border:1px solid #1C2430; border-radius:12px; padding:12px 16px; cursor:pointer; background:transparent; color:#E8F1F2 }
+.btn--primary{ background:linear-gradient(180deg, #39FF14, #00C896); color:#0B0D10; font-weight:800 }
+.btn--ghost{ border-color:#2A323C; color:#D3D8DF }
+
+.perfil-msg{ margin-top:8px; background:#101b2a; border:1px solid #213040; padding:10px; border-radius:10px }
+
+@media (max-width:560px){
+  .perfil-card{ padding:18px 16px }
+  .perfil-header{ flex-direction:column; align-items:flex-start }
+}

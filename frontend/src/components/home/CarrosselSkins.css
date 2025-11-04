@@ -1,0 +1,177 @@
+/* ==========================================================
+   CarrosselSkins.css
+   ----------------------------------------------------------
+   Estilos da seção de carrossel de skins.
+   Estrutura:
+   - Seção principal
+   - Grid de cards
+   - Interação hover e animações
+   - Paginação do Swiper
+========================================================== */
+
+/* ---------- Seção principal ---------- */
+.cards-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  margin-bottom: 4rem;
+}
+
+/* ---------- Título ---------- */
+.cards-section h2 {
+  position: relative;
+  display: inline-block;
+  font-size: 2.4rem;
+  margin-bottom: 1.5rem;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Linha decorativa abaixo do título */
+.cards-section h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 100%;
+  height: 3px;
+  border-radius: 10px;
+  background-color: var(--green);
+}
+
+/* ---------- Grid de cards ---------- */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 100%;
+  margin-top: 2rem;
+  padding: 0 3rem;
+}
+
+/* ---------- Card individual ---------- */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding-bottom: 60px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: radial-gradient(
+    circle at center,
+    rgba(16, 198, 111, 0.12) 25%,
+    rgba(16, 198, 111, 0.04) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  box-shadow: 0 0 15px rgba(16, 198, 111, 0.2);
+  transition: transform 0.3s ease;
+}
+
+/* Efeito hover */
+.card:hover {
+  transform: translateY(-5px);
+  animation: pulse-glow 1.2s ease-in-out infinite;
+}
+
+/* Imagem dentro do card */
+.card img {
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  margin-top: 1rem;
+}
+
+/* ---------- Informações inferiores (nome e botão) ---------- */
+.card-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.8rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-info span {
+  font-size: 1rem;
+  color: var(--white);
+}
+
+/* Botão "Ver mais" */
+.card-info button {
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--green);
+  border-radius: 6px;
+  background: none;
+  color: var(--green);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.card-info button:hover {
+  background: var(--green);
+  color: var(--black);
+  transform: scale(1.05);
+}
+
+/* ---------- Swiper (carrossel) ---------- */
+.swiper {
+  width: 100%;
+  min-height: 550px;
+}
+
+.swiper-wrapper {
+  display: flex;
+  min-height: 550px;
+}
+
+.swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+/* ---------- Paginação (bolinhas) ---------- */
+.swiper-pagination-container {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.swiper-pagination-bullet {
+  background-color: #9eafc2 !important;
+  opacity: 1 !important;
+  width: 12px !important;
+  height: 12px !important;
+  margin: 0 6px !important;
+  border-radius: 50% !important;
+  display: inline-block !important;
+  transition: background-color 0.3s ease !important;
+}
+
+.swiper-pagination-bullet-active {
+  background-color: var(--green) !important;
+}
+
+/* ---------- Animação de brilho pulsante ---------- */
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 0px rgba(16, 198, 111, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(16, 198, 111, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0px rgba(16, 198, 111, 0.3);
+  }
+}
+
+/* Ajuste de espaçamento nos slides */
+.swiper-slide > .cards-grid {
+  margin-top: 2.5rem;
+}

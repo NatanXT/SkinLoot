@@ -1,0 +1,75 @@
+/* ==========================================================
+   Sidebar.css
+   ----------------------------------------------------------
+   Menu lateral fixo (navegação secundária)
+   - Recolhível no mobile
+   - Fixo e sempre visível em telas grandes
+========================================================== */
+
+/* ---------- Container principal ---------- */
+.sidebar {
+  position: fixed;
+  top: 70px;
+  left: -220px;
+  width: 220px;
+  height: 100vh;
+  background-color: var(--gray-dark);
+  padding: 2rem 1rem;
+  z-index: 1001;
+  transition: left 0.3s ease;
+}
+
+/* Estado aberto (mobile) */
+.sidebar.open {
+  left: 0;
+}
+
+/* ---------- Overlay (sombra ao fundo) ---------- */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+/* ---------- Lista de navegação ---------- */
+.sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin-bottom: 1rem;
+}
+
+.sidebar ul li a {
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.sidebar ul li a:hover {
+  color: var(--green);
+}
+
+/* ---------- Layout Desktop ---------- */
+@media (min-width: 1024px) {
+  .sidebar {
+    left: 0 !important;
+    z-index: 998;
+  }
+
+  .sidebar-toggle,
+  .sidebar-overlay {
+    display: none;
+  }
+
+  .main-content {
+    margin-left: 220px;
+  }
+}

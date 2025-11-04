@@ -1,0 +1,18 @@
+/* ==========================================================
+   Footer.css
+   ----------------------------------------------------------
+   Estilo do rodapé fixo, utilizado em toda a aplicação.
+   - Centralizado
+   - Fundo verde médio
+   - Sombra sutil
+========================================================== */
+
+.footer {
+  width: 100%;
+  padding: 15px 0;
+  text-align: center;
+  font-size: 14px;
+  color: white;
+  background-color: #10c66f; /* verde médio */
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}

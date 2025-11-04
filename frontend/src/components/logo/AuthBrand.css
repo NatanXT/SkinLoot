@@ -1,0 +1,71 @@
+/* ==========================================================
+   AuthBrand.css
+   ----------------------------------------------------------
+   Estilos do logotipo "SkinLoot" utilizado em telas de login,
+   registro e navbar. Responsivo e com animação de hover suave.
+========================================================== */
+
+/* ---------- Tokens / Variáveis ---------- */
+:root {
+  --bg: #0B0D10;           /* preto carvão */
+  --panel: #11151A;        /* cinza profundo */
+  --muted: #7B8694;
+  --text: #E8F1F2;         /* quase branco */
+  --primary: #39FF14;      /* verde neon */
+  --secondary: #00C896;    /* verde aqua */
+  --ring: rgba(57, 255, 20, .6);
+  --shadow: 0 10px 30px rgba(0, 0, 0, .45);
+  --radius: 18px;
+}
+
+/* ---------- Marca / Logo ---------- */
+.brand,
+.auth-brand {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* logo à esquerda */
+  gap: 10px;
+  color: var(--text);
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.brand svg,
+.auth-brand svg {
+  color: var(--primary);
+}
+
+/* Hover suave */
+.brand:hover,
+.auth-brand:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+/* ---------- Responsividade ---------- */
+
+/* 1) Telas pequenas: escondemos o texto "SkinLoot" e mantemos apenas o ícone */
+@media (max-width: 640px) {
+  .auth-brand span {
+    display: none;
+  }
+  .auth-brand {
+    gap: 0;
+    justify-content: flex-start;
+  }
+  .brand svg,
+  .auth-brand svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* 2) Telas muito estreitas (≤400px): microajuste no padding */
+@media (max-width: 400px) {
+  .auth-brand {
+    padding-right: 4px;
+  }
+}

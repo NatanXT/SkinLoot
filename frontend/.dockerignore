@@ -1,0 +1,14 @@
+
+#Diz ao Docker o que não enviar para o contexto de build 
+#(deixa o build mais rápido e a imagem mais enxuta).
+
+node_modules     
+# já serão instalados dentro da imagem
+dist             
+# será gerado pelo "npm run build" dentro da imagem
+.git             
+# repositório não é necessário no build
+.gitignore
+.vscode
+*.md             
+# docs/README etc. não são necessários
