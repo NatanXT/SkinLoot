@@ -1,8 +1,8 @@
 /* frontend/src/pages/DetalheAnuncio.css
    ============================================================
-   - Layout do detalhe do anúncio
-   - NOVO: caixas "Informações do jogo" e "Detalhes do jogo"
-   - Visual consistente com inputs/fieldset do projeto (neon/escuro)
+   - Layout + visual coerente com o projeto
+   - Caixas .box com hover/focus esverdeado
+   - Badge com nome do jogo na imagem
    ============================================================ */
 
 :root {
@@ -32,7 +32,6 @@
   backdrop-filter: blur(8px);
 }
 
-/* Card principal */
 .detalhe-card {
   max-width: 1200px;
   margin: 40px auto;
@@ -45,7 +44,6 @@
   box-shadow: 0 12px 40px rgba(0,0,0,.45);
 }
 
-/* Área da imagem */
 .detalhe-imagem {
   position: relative;
   flex: 1 1 50%;
@@ -65,7 +63,6 @@
   filter: saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.55));
 }
 
-/* Badge com o nome do jogo sobre a imagem */
 .badge-jogo {
   position: absolute;
   left: 16px;
@@ -81,7 +78,6 @@
   box-shadow: 0 0 24px rgba(57,255,20,.35);
 }
 
-/* Coluna de informações */
 .detalhe-info {
   flex: 1 1 50%;
   display: flex;
@@ -100,7 +96,7 @@
   color: var(--primary);
 }
 
-/* Pares chave/valor */
+/* Grid chave/valor */
 .kv {
   display: grid;
   grid-template-columns: 160px 1fr;
@@ -111,7 +107,7 @@
 .kv .k { color: var(--muted); font-size: 14px; }
 .kv .v { color: #E9FFF1; }
 
-/* Grid 2 colunas p/ floats/pattern */
+/* Grid 2 colunas para alguns grupos */
 .kv-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -122,7 +118,7 @@
   .kv-grid { grid-template-columns: 1fr; }
 }
 
-/* Caixas de informação (fieldset-look) */
+/* Caixas tipo fieldset */
 .box {
   border: 1px solid #1C2430;
   border-radius: 12px;
@@ -149,13 +145,6 @@
 .box--info { margin-top: 8px; }
 .box--detalhes { margin-top: 6px; }
 
-/* Ações */
-.detalhe-acoes {
-  margin-top: 16px;
-  display: flex;
-  gap: 12px;
-}
-
 /* Botão de favoritar */
 .btn-like {
   background: transparent;
@@ -169,19 +158,11 @@
   margin-top: 8px;
   align-self: flex-start;
 }
-.btn-like:hover {
-  background: rgba(57, 255, 20, 0.1);
-}
-.btn-like.ativo {
-  background: var(--primary);
-  color: #0b0d10;
-}
-.btn-like:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+.btn-like:hover { background: rgba(57, 255, 20, 0.1); }
+.btn-like.ativo { background: var(--primary); color: #0b0d10; }
+.btn-like:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* Botões padrão (mantém coerência com o resto do projeto) */
+/* Botões padrão */
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
   border:1px solid #1C2430; background:transparent; color:var(--text);
@@ -193,9 +174,14 @@
 .btn--ghost{ border-color:#2A323C; color:#D3D8DF }
 .btn--ghost:hover{ border-color:#3A4451 }
 
-/* Responsividade */
+/* Responsivo */
 @media (max-width: 980px) {
-  .detalhe-card {
-    flex-direction: column;
-  }
+  .detalhe-card { flex-direction: column; }
+}
+
+/* Espaçamento entre os botões de ação */
+.detalhe-acoes {
+  display: flex;
+  gap: 6px; /* distância entre os botões (pode ajustar entre 4–8px se quiser) */
+  margin-top: 8px;
 }
