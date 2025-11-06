@@ -1,58 +1,120 @@
 /* src/pages/usuario/PerfilUsuario.css
-   ==========================================================================
-   - Reaproveita tokens/estética da Vitrine
-   - Layout 2 colunas para dados/limite
-   - Grid de cards igual à vitrine
-   - HOVER/FIELD: bordas com anel/realce
-   - Modal/Overlay para Renovar/Upgrade
-   - Form do modal de edição (hover/focus iguais aos campos do perfil)
-   - Uploader clicável + preview
-   - Confirmação/desativação com lista/checkbox
-   - Textareas com o MESMO visual dos inputs (descrição/JSON)
-   - Modal de edição com área rolável + ações sticky
-   ========================================================================== */
+   — Dark por padrão + Tema claro automático/forçado
+   — Backdrop/gradiente igual ao da Dashboard no topo
+*/
 
+/* ===== TOKENS DARK ===== */
 :root{
   --bg:#0B0D10;
   --panel:#11151A;
+  --surface:#0E1217;
   --muted:#7B8694;
   --text:#E8F1F2;
+
+  --border:#1A2129;
+  --border-strong:#1C2430;
+  --shadow:0 10px 30px rgba(0,0,0,.45);
+
   --primary:#39FF14;
   --secondary:#00C896;
   --ring: rgba(57,255,20,.45);
-  --shadow:0 10px 30px rgba(0,0,0,.45);
 
   --radius: 18px;
   --container-max: 1200px;
+
+  --media-ratio: 4/3;
+  --media-min-h: 320px;
 }
 
-/* ====================== Shell / Layout ====================== */
+/* ===== THEME LIGHT (auto) ===== */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg:#F7FAFC;
+    --panel:#FFFFFF;
+    --surface:#F2F6FA;
+    --muted:#5A6573;
+    --text:#0B0D10;
+
+    --border:#E2E8F0;
+    --border-strong:#CBD5E1;
+    --shadow:0 12px 28px rgba(15,23,42,.10);
+
+    --primary:#1FEA00;
+    --secondary:#00C896;
+    --ring: rgba(31,234,0,.35);
+  }
+}
+
+/* ===== THEME LIGHT (forçado) ===== */
+:root[data-theme="light"]{
+  --bg:#F7FAFC;
+  --panel:#FFFFFF;
+  --surface:#F2F6FA;
+  --muted:#5A6573;
+  --text:#0B0D10;
+
+  --border:#E2E8F0;
+  --border-strong:#CBD5E1;
+  --shadow:0 12px 28px rgba(15,23,42,.10);
+
+  --primary:#1FEA00;
+  --secondary:#00C896;
+  --ring: rgba(31,234,0,.35);
+}
+
+/* ===== Shell ===== */
 .perfil-root{
+  position: relative;
   min-height:100vh;
   background:var(--bg);
   color:var(--text);
 }
 
+/* >>> Backdrop com o mesmo “glow” da dashboard */
+.perfil-backdrop{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(800px 400px at 10% 0%,
+      color-mix(in oklab, var(--primary) 18%, transparent),
+      transparent 60%),
+    radial-gradient(900px 500px at 100% 10%,
+      color-mix(in oklab, var(--secondary) 20%, transparent),
+      transparent 60%);
+}
+
+/* Topbar flutuando sobre o backdrop */
 .perfil-topbar{
   position:sticky; top:0; z-index:10;
   display:flex; align-items:center; justify-content:space-between; gap:12px;
   padding:14px 24px;
-  background:rgba(11,13,16,.65);
+  background: color-mix(in oklab, var(--panel) 82%, transparent);
   backdrop-filter:saturate(140%) blur(8px);
-  border-bottom:1px solid #131920;
+  border-bottom:1px solid var(--border);
 }
 .perfil-actions{ display:flex; gap:8px }
 
+/* >>> Hero com o mesmo gradiente do topo da dashboard */
 .perfil-hero{
+  position: relative;
   display:grid; place-items:center;
   padding:48px 24px 24px;
-  background:linear-gradient(180deg, rgba(57,255,20,.06), transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--primary) 10%, transparent),
+    transparent
+  );
+  z-index: 1; /* acima do backdrop */
 }
 .perfil-hero__copy{ text-align:center; max-width:900px }
 .perfil-hero h1{ margin:0 0 10px; font-size:38px }
 .perfil-hero p{ margin:0; color:var(--muted) }
 
 .perfil-container{
+  position: relative;
+  z-index: 1;
   max-width:var(--container-max);
   margin: 18px auto 64px;
   padding: 0 16px;
@@ -61,29 +123,23 @@
 .perfil-block{ margin: 16px 0 28px }
 .perfil-block h2{ margin:0 0 12px }
 
-/* ====================== Grid ====================== */
-.perfil-grid{
-  display:grid; gap:16px;
-}
-.perfil-grid--2{
-  grid-template-columns: 1fr 1fr;
-}
-@media (max-width: 960px){
-  .perfil-grid--2{ grid-template-columns: 1fr; }
-}
+/* ===== Grid ===== */
+.perfil-grid{ display:grid; gap:16px; }
+.perfil-grid--2{ grid-template-columns: 1fr 1fr; }
+@media (max-width: 960px){ .perfil-grid--2{ grid-template-columns: 1fr; } }
 
-/* ====================== Cards ====================== */
+/* ===== Cards ===== */
 .perfil-card{
-  background:linear-gradient(180deg,#12171E, #0F1319);
-  border:1px solid #1A2129;
+  background:linear-gradient(180deg, var(--panel), color-mix(in oklab, var(--panel) 70%, var(--surface)));
+  border:1px solid var(--border);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
   padding:16px;
   transition: border-color .2s ease, box-shadow .2s ease;
 }
 .perfil-card:hover{
-  border-color:#2A323C;
-  box-shadow:0 14px 36px rgba(0,0,0,.5);
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow:0 14px 36px rgba(0,0,0,.18);
 }
 
 /* Campos com hover na borda */
@@ -92,20 +148,21 @@
   display:block; font-size:12px; color:var(--muted); margin-bottom:4px;
 }
 .perfil-value{
-  background:#0E1217;
-  border:1px solid #1C2430;
+  background:var(--surface);
+  border:1px solid var(--border-strong);
   border-radius:10px;
   padding:10px 12px;
   transition: border-color .15s ease, box-shadow .15s ease;
   outline:none;
+  color:var(--text);
 }
 .perfil-value:hover{
-  border-color:#314151;
-  box-shadow:0 0 0 4px rgba(57,255,20,.07);
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 35%, transparent);
 }
 .perfil-value:focus{
   border-color:var(--secondary);
-  box-shadow:0 0 0 4px rgba(57,255,20,.12);
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 60%, transparent);
 }
 
 /* Plano / Cota */
@@ -117,13 +174,14 @@
   padding:6px 12px; border-radius:999px; white-space:nowrap;
   color:#0B0D10; font-weight:800; font-size:12px; line-height:1;
   box-shadow:0 0 24px var(--ring);
+  background:var(--primary);
 }
 .perfil-plano-title{ color:var(--muted) }
 
 .perfil-cota{ margin-top:10px }
-.perfil-cota-row{ display:flex; align-items:center; justify-content:space-between; color:#CFE5D6 }
+.perfil-cota-row{ display:flex; align-items:center; justify-content:space-between; color: color-mix(in oklab, var(--text) 85%, var(--muted)) }
 .perfil-progress{
-  margin:10px 0; height:10px; background:#0E1217; border:1px solid #1C2430; border-radius:999px;
+  margin:10px 0; height:10px; background:var(--surface); border:1px solid var(--border-strong); border-radius:999px;
   overflow:hidden;
 }
 .perfil-progress__bar{
@@ -149,51 +207,82 @@
 /* ====================== Botões ====================== */
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  border:1px solid #1C2430; background:transparent; color:var(--text);
+  border:1px solid var(--border-strong); background:transparent; color:var(--text);
   text-decoration:none; cursor:pointer; border-radius:12px; padding:12px 16px;
 }
 .btn.sm{ padding:8px 12px; border-radius:10px }
-.btn--primary{ background:linear-gradient(180deg, var(--primary), var(--secondary)); color:#0B0D10; font-weight:800 }
+.btn--primary{
+  background:linear-gradient(180deg, var(--primary), var(--secondary));
+  color:#0B0D10; font-weight:800;
+  border-color: color-mix(in oklab, var(--primary) 35%, var(--border-strong));
+}
 .btn--primary:hover{ filter:brightness(.95) }
-.btn--ghost{ border-color:#2A323C; color:#D3D8DF }
-.btn--ghost:hover{ border-color:#3A4451 }
+.btn--ghost{
+  border-color: var(--border);
+  color: color-mix(in oklab, var(--text) 88%, var(--muted));
+}
+.btn--ghost:hover{ border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border)); }
 .btn--full{ width:100% }
+
+/* ===== Overrides de contraste (tema claro) para .btn--ghost ===== */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .btn--ghost{
+    background:#EDF2F7;
+    border-color:#CBD5E1;
+    color:#0B0D10;
+  }
+  :root:not([data-theme="dark"]) .btn--ghost:hover{
+    background:#E2E8F0;
+    border-color:#94A3B8;
+  }
+}
+:root[data-theme="light"] .btn--ghost{
+  background:#EDF2F7;
+  border-color:#CBD5E1;
+  color:#0B0D10;
+}
+:root[data-theme="light"] .btn--ghost:hover{
+  background:#E2E8F0;
+  border-color:#94A3B8;
+}
 
 /* ====================== Card (igual vitrine) ====================== */
 .card{
   display:flex; flex-direction:column;
-  background:linear-gradient(180deg,#12171E, #0F1319);
-  border:1px solid #1A2129;
+  background:linear-gradient(180deg, var(--panel), color-mix(in oklab, var(--panel) 70%, var(--surface)));
+  border:1px solid var(--border);
   border-radius:18px;
   overflow:hidden;
   box-shadow:var(--shadow);
   position:relative;
   transition:transform .25s ease, box-shadow .25s ease;
 }
-.card:hover{ transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,.5) }
+.card:hover{ transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,.18) }
 
 .card__media{
-  position:relative; background:#0E1217;
+  position:relative;
   display:flex; align-items:center; justify-content:center;
-  height:auto; aspect-ratio: 4/3; min-height:320px;
+  background:var(--surface);
+  height:auto; aspect-ratio: var(--media-ratio); min-height:var(--media-min-h);
   padding:48px 20px 20px;
-  border-bottom:1px solid #1A2129;
+  border-bottom:1px solid var(--border);
 }
 .card__media img{
   width:auto; height:auto; max-width:100%; max-height:100%;
   object-fit:contain; display:block;
-  filter:saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.55));
+  filter:saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.35));
 }
 .badge{
   position:absolute; left:16px; top:14px; z-index:3;
   padding:6px 12px; border-radius:999px; white-space:nowrap;
   color:#0B0D10; font-weight:800; font-size:12px; line-height:1;
   box-shadow:0 0 24px var(--ring);
+  background:var(--primary);
 }
-.card__body{ display:flex; flex-direction:column; gap:10px; padding:14px }
-.card h3{ margin:0; font-size:18px }
+.card__body{ display:flex; flex-direction:column; gap:10px; padding:14px; background:transparent }
+.card h3{ margin:0; font-size:18px; color:var(--text) }
 .meta{ display:flex; justify-content:space-between; align-items:center; color:var(--muted) }
-.price{ color:#E9FFF1; font-weight:800; letter-spacing:.3px }
+.price{ color: color-mix(in oklab, var(--text) 92%, var(--muted)); font-weight:800; letter-spacing:.3px }
 .seller{
   margin-top:auto;
   display:flex; justify-content:space-between; align-items:end; gap:12px;
@@ -202,7 +291,7 @@
 
 /* Empty state */
 .perfil-empty{
-  background:var(--panel); border:1px solid #1A2129; border-radius:18px; padding:18px;
+  background:var(--panel); border:1px solid var(--border); border-radius:18px; padding:18px;
   display:flex; align-items:center; justify-content:space-between; gap:12px; color:var(--muted);
 }
 
@@ -216,17 +305,17 @@
 }
 .perfil-modal__backdrop{
   position:absolute; inset:0;
-  background: rgba(0,0,0,.55);
+  background: rgba(0,0,0,.45);
   backdrop-filter: blur(2px);
 }
 .perfil-modal__card{
   position:relative;
   width:min(720px, 92vw);
-  max-height:92vh;                 /* impede estourar a janela */
-  background:linear-gradient(180deg,#12171E, #0F1319);
-  border:1px solid #1A2129;
+  max-height:92vh;
+  background:linear-gradient(180deg, var(--panel), color-mix(in oklab, var(--panel) 70%, var(--surface)));
+  border:1px solid var(--border);
   border-radius:20px;
-  box-shadow: 0 24px 60px rgba(0,0,0,.6);
+  box-shadow: 0 24px 60px rgba(0,0,0,.18);
   padding:18px;
   animation: modalIn .18s ease-out both;
   display:flex; flex-direction:column;
@@ -237,14 +326,15 @@
 }
 .perfil-modal__head{
   display:flex; align-items:center; justify-content:space-between; gap:12px;
-  border-bottom:1px solid #1A2129; padding-bottom:10px; margin-bottom:12px;
+  border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:12px;
   flex: 0 0 auto;
+  color:var(--text);
 }
 .perfil-modal__close{
   all:unset; cursor:pointer; width:36px; height:36px; line-height:36px; text-align:center;
-  border-radius:10px; background:#131920; border:1px solid #212833; font-size:20px; color:#DDE3EA;
+  border-radius:10px; background:var(--surface); border:1px solid var(--border-strong); font-size:20px; color:var(--text);
 }
-.perfil-modal__close:hover{ border-color:#2A3340 }
+.perfil-modal__close:hover{ border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border)); }
 
 .perfil-modal__desc{ color:var(--muted); margin:0 0 12px }
 
@@ -255,32 +345,32 @@
   .perfil-modal__grid{ grid-template-columns: 1fr; }
 }
 .perfil-modal__item{
-  background:#0E1217; border:1px solid #1C2430; border-radius:10px; padding:12px;
+  background:var(--surface); border:1px solid var(--border-strong); border-radius:10px; padding:12px; color:var(--text);
 }
 .perfil-modal__item .k{ display:block; font-size:12px; color:var(--muted) }
 .perfil-modal__item .v{ font-weight:600 }
 
 /* ===== Scroll interno da modal de edição ===== */
 .perfil-modal__scroll{
-  overflow:auto;                    /* <- permite rolar o conteúdo grande */
+  overflow:auto;
   padding-right:4px;
   display:flex; flex-direction:column; gap:12px;
   scrollbar-gutter: stable both-edges;
 }
 .perfil-modal__scroll::-webkit-scrollbar{ width:10px; height:10px }
-.perfil-modal__scroll::-webkit-scrollbar-thumb{ background:#26313D; border-radius:999px }
+.perfil-modal__scroll::-webkit-scrollbar-thumb{ background: color-mix(in oklab, var(--text) 35%, transparent); border-radius:999px }
 .perfil-modal__scroll::-webkit-scrollbar-track{ background:transparent }
 
 /* ===== Rodapé da modal (ações) ===== */
 .perfil-modal__actions{
-  position: sticky;                 /* fica visível durante o scroll */
+  position: sticky;
   bottom: 0;
   display:flex; gap:10px; justify-content:flex-end;
   padding-top:10px;
   margin-top:12px;
-  background:linear-gradient(180deg, transparent, rgba(15,19,25,.7) 40%, rgba(15,19,25,.95));
+  background:linear-gradient(180deg, transparent, color-mix(in oklab, var(--panel) 80%, transparent) 40%, var(--panel));
   backdrop-filter: blur(2px);
-  border-top:1px solid #1A2129;
+  border-top:1px solid var(--border);
 }
 .perfil-modal__actions--inline{
   display:flex; gap:10px; justify-content:flex-end; margin-top:8px;
@@ -291,35 +381,39 @@
 .perfil-form__row{ display:grid; gap:6px; }
 .perfil-form__row label{ font-size:12px; color:var(--muted); }
 
-/* Inputs */
+/* Inputs/Selects */
 .perfil-form__row input[type="text"],
-.perfil-form__row input[type="number"]{
-  background:#0E1217;
-  border:1px solid #1C2430;
+.perfil-form__row input[type="number"],
+.perfil-form__row select{
+  background:var(--surface);
+  border:1px solid var(--border-strong);
   border-radius:10px;
   padding:10px 12px;
   color:var(--text);
   outline:none;
   transition:border-color .15s ease, box-shadow .15s ease;
+  appearance: none;
 }
-.perfil-form__row input:hover{
-  border-color:#314151;
-  box-shadow:0 0 0 4px rgba(57,255,20,.07);
+.perfil-form__row input:hover,
+.perfil-form__row select:hover{
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 35%, transparent);
 }
-.perfil-form__row input:focus{
+.perfil-form__row input:focus,
+.perfil-form__row select:focus{
   border-color:var(--secondary);
-  box-shadow:0 0 0 4px rgba(57,255,20,.12);
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 60%, transparent);
 }
 .perfil-form__hint{ display:block; font-size:12px; color:var(--muted); }
 
-/* === Textareas com o MESMO visual dos inputs === */
+/* Textareas */
 .textarea,
 .perfil-form__row textarea{
-  background:#0E1217;
-  border:1px solid #1C2430;
+  background:var(--surface);
+  border:1px solid var(--border-strong);
   border-radius:10px;
   padding:10px 12px;
-  color:#E8F1F2;
+  color:var(--text);
   outline:none;
   transition:border-color .15s ease, box-shadow .15s ease;
   min-height:120px;
@@ -328,65 +422,64 @@
 }
 .textarea:hover,
 .perfil-form__row textarea:hover{
-  border-color:#314151;
-  box-shadow:0 0 0 4px rgba(57,255,20,.07);
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 35%, transparent);
 }
 .textarea:focus,
 .perfil-form__row textarea:focus{
-  border-color:#00C896;
-  box-shadow:0 0 0 4px rgba(57,255,20,.12);
+  border-color:var(--secondary);
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 60%, transparent);
 }
 
-/* === Variante monoespaçada para JSON === */
+/* Variante monoespaçada */
 .textarea--code{
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   white-space: pre;
   tab-size: 2;
   overflow: auto;
-  caret-color: #fff;
+  caret-color: currentColor;
 }
 
-/* Placeholders consistentes */
+/* Placeholders */
 .perfil-form__row input::placeholder,
 .perfil-form__row textarea::placeholder{
-  color:#96A0AD;
-  opacity:.8;
+  color: color-mix(in oklab, var(--muted) 85%, var(--text));
+  opacity:.95;
 }
 
 /* ====================== Uploader clicável + preview ====================== */
-/* >>> ALTERADO para flex (cresce com o conteúdo) e impede sobreposição */
 .perfil-upload{
-  background:#0E1217;
-  border:1px solid #1C2430;
+  background:var(--surface);
+  border:1px solid var(--border-strong);
   border-radius:14px;
   padding:16px;
-  display:flex;                     /* antes: grid */
+  display:flex;
   align-items:center;
   justify-content:center;
   min-height:220px;
   cursor:pointer;
   transition:border-color .15s ease, box-shadow .15s ease, transform .15s ease;
   margin-bottom:12px;
-  overflow:hidden;                  /* evita que a img passe por cima dos campos */
+  overflow:hidden;
 }
 .perfil-upload:hover{
-  border-color:#314151;
-  box-shadow:0 0 0 4px rgba(57,255,20,.07);
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 35%, transparent);
   transform: translateY(-1px);
 }
 .perfil-upload:focus{
   outline:none;
   border-color:var(--secondary);
-  box-shadow:0 0 0 4px rgba(57,255,20,.12);
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 60%, transparent);
 }
 .perfil-upload img{
   display:block;
   width:auto;
   max-width:100%;
   height:auto;
-  max-height: min(48vh, 420px);  /* impede imagem gigante */
+  max-height: min(48vh, 420px);
   object-fit:contain;
-  filter:saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.55));
+  filter:saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.35));
 }
 .perfil-upload__placeholder{
   color:var(--muted);
@@ -394,14 +487,14 @@
 }
 
 /* ====================== Lista de alerta / checkbox ====================== */
-.perfil-alerta{ margin:0 0 12px 18px; color:#E9FFF1; }
+.perfil-alerta{ margin:0 0 12px 18px; color: color-mix(in oklab, var(--text) 92%, var(--muted)); }
 .perfil-check{
   display:flex; align-items:flex-start; gap:8px; margin-top:6px; color:var(--muted);
 }
-.perfil-check input{ transform: translateY(2px); }
+.perfil-check input{ transform: translateY(2px); accent-color: var(--secondary); }
 
-/* ====================== Card inativa (visual) ====================== */
-.card.card--inativa{ opacity:.7; filter:grayscale(.2); }
+/* ====================== Card inativa ====================== */
+.card.card--inativa{ opacity:.75; filter:grayscale(.15); }
 .card.card--inativa .badge{ background:#8b8f97; color:#0B0D10; }
 
 /* ====================== Upgrade cards ====================== */
@@ -412,17 +505,19 @@
   .perfil-upgrade-grid{ grid-template-columns: 1fr; }
 }
 .perfil-upgrade-card{
-  background:#0E1217; border:1px solid #1C2430; border-radius:12px; padding:12px;
+  background:var(--surface); border:1px solid var(--border-strong); border-radius:12px; padding:12px; color:var(--text);
 }
 .perfil-upgrade-badge{
   display:inline-flex; align-items:center; justify-content:center;
   padding:6px 12px; border-radius:999px; white-space:nowrap;
   color:#0B0D10; font-weight:800; font-size:12px; line-height:1;
   box-shadow:0 0 24px var(--ring); margin-bottom:10px;
+  background:var(--primary);
 }
 .perfil-upgrade-list{
-  margin:0 0 12px 0; padding-left: 18px; color:#CFE5D6;
+  margin:0 0 12px 0; padding-left: 18px; color: color-mix(in oklab, var(--text) 85%, var(--muted));
 }
+
 /* ---------- Filtro de status (ativas/inativas) ---------- */
 .perfil-filter-area {
   display: flex;
@@ -431,8 +526,8 @@
 }
 
 .perfil-select {
-  background: #0E1217;
-  border: 1px solid #1C2430;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
   border-radius: 10px;
   color: var(--text);
   padding: 10px 12px;
@@ -441,159 +536,67 @@
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
 .perfil-select:hover {
-  border-color: #314151;
-  box-shadow: 0 0 0 3px rgba(57,255,20,.07);
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 35%, transparent);
 }
-
 .perfil-select:focus {
   border-color: var(--secondary);
-  box-shadow: 0 0 0 3px rgba(57,255,20,.12);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 60%, transparent);
 }
 
-/* ====================== Responsividade do filtro e botão ====================== */
+/* ====================== Responsividade do filtro/botão ====================== */
 @media (max-width: 640px) {
-  /* container do filtro e botão */
-  .perfil-filter-area {
-    flex-direction: column;         /* empilha no mobile */
-    align-items: stretch;           /* ambos ocupam largura total */
-    gap: 8px;                       /* espaçamento vertical */
-  }
-
-  /* select ocupa 100% da largura */
-  .perfil-select {
-    width: 100%;
-    font-size: 15px;                /* ligeiramente maior para toque */
-  }
-
-  /* botão ocupa 100% da largura */
-  .perfil-filter-area .btn {
-    width: 100%;
-    justify-content: center;        /* centraliza o texto */
-    font-weight: 700;
-  }
+  .perfil-filter-area { flex-direction: column; align-items: stretch; gap: 8px; }
+  .perfil-select { width: 100%; font-size: 15px; }
+  .perfil-filter-area .btn { width: 100%; justify-content: center; font-weight: 700; }
 }
 
 /* ====================== Correção: scroll dentro das modais ====================== */
-.perfil-modal__card {
-  display: flex;
-  flex-direction: column;
-  max-height: 92vh;               /* limite vertical seguro */
-  overflow: hidden;               /* evita que o scroll vá no body */
-}
-
-.perfil-modal__scroll,            /* corpo rolável genérico */
-.perfil-upgrade-grid {            /* grid dos planos */
-  overflow-y: auto;
-  max-height: calc(92vh - 180px); /* espaço para header/footer */
-  padding-right: 6px;
-  scrollbar-gutter: stable;
-}
-
+.perfil-modal__card { display: flex; flex-direction: column; max-height: 92vh; overflow: hidden; }
+.perfil-modal__scroll, .perfil-upgrade-grid { overflow-y: auto; max-height: calc(92vh - 180px); padding-right: 6px; scrollbar-gutter: stable; }
 .perfil-modal__scroll::-webkit-scrollbar,
-.perfil-upgrade-grid::-webkit-scrollbar {
-  width: 8px;
-}
-
+.perfil-upgrade-grid::-webkit-scrollbar { width: 8px; }
 .perfil-modal__scroll::-webkit-scrollbar-thumb,
-.perfil-upgrade-grid::-webkit-scrollbar-thumb {
-  background: #26313D;
-  border-radius: 999px;
-}
-
+.perfil-upgrade-grid::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--text) 35%, transparent); border-radius: 999px; }
 .perfil-modal__scroll::-webkit-scrollbar-track,
-.perfil-upgrade-grid::-webkit-scrollbar-track {
-  background: transparent;
-}
+.perfil-upgrade-grid::-webkit-scrollbar-track { background: transparent; }
 
-/* ======================================================
-   Ajustes visuais dos campos de jogo e detalhes
-   ====================================================== */
-
-/* Campo de seleção de jogo (igual aos outros inputs) */
-.perfil-form__row select {
-  background: #0E1217;
-  border: 1px solid #1C2430;
-  border-radius: 10px;
-  padding: 10px 12px;
-  color: var(--text);
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  appearance: none; /* remove setas nativas para manter consistência */
-}
-
-.perfil-form__row select:hover {
-  border-color: #314151;
-  box-shadow: 0 0 0 4px rgba(57,255,20,.07);
-}
-
-.perfil-form__row select:focus {
-  border-color: var(--secondary);
-  box-shadow: 0 0 0 4px rgba(57,255,20,.12);
-}
-
-/* Fieldset de detalhes do jogo */
+/* ====================== Fieldset de detalhes do jogo ====================== */
 .perfil-form__fieldset {
-  border: 1px solid #1C2430;
+  border: 1px solid var(--border-strong);
   border-radius: 12px;
   padding: 14px 16px 16px;
   margin-top: 16px;
-  background: linear-gradient(180deg, #0E1217, #0B0D10);
+  background: linear-gradient(180deg, var(--surface), color-mix(in oklab, var(--surface) 85%, var(--panel)));
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  color:var(--text);
 }
-
 .perfil-form__fieldset:hover {
-  border-color: #314151;
-  box-shadow: 0 0 0 4px rgba(57,255,20,.07);
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 35%, transparent);
 }
-
 .perfil-form__fieldset:focus-within {
   border-color: var(--secondary);
-  box-shadow: 0 0 0 4px rgba(57,255,20,.12);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 60%, transparent);
 }
-
 .perfil-form__fieldset legend {
   padding: 0 8px;
   font-size: 13px;
   font-weight: 600;
   color: var(--secondary);
-  text-shadow: 0 0 8px rgba(57,255,20,.35);
+  text-shadow: 0 0 8px color-mix(in oklab, var(--secondary) 45%, transparent);
 }
 
-/* Grid interno dos detalhes (float e pattern lado a lado) */
-.perfil-form__grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-@media (max-width: 600px) {
-  .perfil-form__grid-2 {
-    grid-template-columns: 1fr;
-  }
-}
+/* Grid interno dos detalhes */
+.perfil-form__grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 600px) { .perfil-form__grid-2 { grid-template-columns: 1fr; } }
 
-/* Checkbox (StatTrak) refinado */
-.check {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  color: var(--text);
-}
+/* Checkbox refinado */
+.check { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: var(--text); }
+.check input[type="checkbox"] { accent-color: var(--secondary); transform: scale(1.1); }
 
-.check input[type="checkbox"] {
-  accent-color: var(--secondary);
-  transform: scale(1.1);
-}
-
-/* No mobile: garante que o conteúdo role e não estoure a tela */
+/* ====================== Mobile: planos roláveis ====================== */
 @media (max-width: 640px) {
-  .perfil-upgrade-grid {
-    grid-template-columns: 1fr;
-    max-height: calc(88vh - 160px);
-    overflow-y: auto;
-  }
+  .perfil-upgrade-grid { grid-template-columns: 1fr; max-height: calc(88vh - 160px); overflow-y: auto; }
 }

@@ -1,36 +1,147 @@
+/* ============================================================================
+   NotFound.css — 404 com tema escuro (padrão) e claro
+   ========================================================================== */
+
+/* ===================== TOKENS — DARK (padrão) ===================== */
+:root {
+  --bg: #0B0D10;            /* fundo da página */
+  --panel: #11151A;         /* planos/cartões */
+  --text: #E8F1F2;          /* texto principal */
+  --muted: #7B8694;         /* texto secundário */
+  --primary: #39FF14;       /* cor de destaque */
+  --secondary: #00C896;     /* cor complementar */
+
+  --border: #1A2129;
+  --shadow: 0 10px 30px rgba(0,0,0,.45);
+
+  --radius: 12px;
+}
+
+/* ===================== TEMA CLARO — AUTO ===================== */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #F7FAFC;
+    --panel: #FFFFFF;
+    --text: #0B0D10;
+    --muted: #5A6573;
+    --primary: #1FEA00;
+    --secondary: #00C896;
+
+    --border: #E2E8F0;
+    --shadow: 0 12px 28px rgba(15, 23, 42, .10);
+  }
+}
+
+/* ===================== OVERRIDES MANUAIS ===================== */
+:root[data-theme="light"] {
+  --bg: #F7FAFC;
+  --panel: #FFFFFF;
+  --text: #0B0D10;
+  --muted: #5A6573;
+  --primary: #1FEA00;
+  --secondary: #00C896;
+
+  --border: #E2E8F0;
+  --shadow: 0 12px 28px rgba(15, 23, 42, .10);
+}
+:root[data-theme="dark"] {}
+
+/* ===================== LAYOUT ===================== */
+.notfound-root {
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--primary) 8%, transparent), transparent 65%),
+    var(--bg);
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+
 .notfound-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 80vh;
-    text-align: center;
-    background-color: #f4f4f4;
+  text-align: center;
+  background: linear-gradient(180deg, var(--panel), color-mix(in oklab, var(--panel) 70%, #0E1217));
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 28px 22px;
+  width: min(640px, 100%);
+}
+
+/* ===== Card MAIS CLARO no tema claro (auto) ===== */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .notfound-container {
+    /* gradiente bem clarinho, quase branco */
+    background: linear-gradient(
+      180deg,
+      #FFFFFF 0%,
+      #FAFCFF 55%,
+      #F1F5FB 100%
+    );
+    border-color: #E5EDF6;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, .10);
   }
-  
-  .notfound-container h1 {
-    font-size: 6rem;
-    color: #10c66f;
-    margin-bottom: 10px;
-  }
-  
-  .notfound-container p {
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-    color: #555;
-  }
-  
-  .notfound-button {
-    padding: 10px 20px;
-    background: #10c66f;
-    color: white;
-    font-size: 16px;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: 0.3s;
-  }
-  
-  .notfound-button:hover {
-    background: #0da45a;
-  }
-  
+}
+
+/* ===== Card MAIS CLARO no tema claro (forçado) ===== */
+:root[data-theme="light"] .notfound-container {
+  background: linear-gradient(
+    180deg,
+    #FFFFFF 0%,
+    #FAFCFF 55%,
+    #F1F5FB 100%
+  );
+  border-color: #E5EDF6;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, .10);
+}
+
+/* ===================== TIPOGRAFIA ===================== */
+.notfound-container h1 {
+  font-size: clamp(3rem, 8vw, 6rem);
+  color: var(--primary);
+  margin: 0 0 10px;
+  line-height: 1;
+  letter-spacing: .5px;
+}
+
+.notfound-container p {
+  font-size: 1.2rem;
+  margin: 0 0 20px;
+  color: var(--muted);
+}
+
+/* ===================== BOTÃO ===================== */
+.notfound-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 12px 20px;
+  background: linear-gradient(180deg, var(--primary), var(--secondary));
+  color: #0B0D10;
+  font-size: 16px;
+  font-weight: 800;
+  text-decoration: none;
+
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in oklab, var(--primary) 35%, var(--border));
+  box-shadow: 0 8px 22px rgba(0,0,0,.25);
+
+  transition: filter .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+
+.notfound-button:hover {
+  filter: brightness(.96);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(0,0,0,.3);
+}
+
+.notfound-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 30%, transparent), 0 12px 28px rgba(0,0,0,.3);
+}
+
+/* ===================== RESP ===================== */
+@media (max-width: 480px) {
+  .notfound-container { padding: 22px 16px; }
+}
