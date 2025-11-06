@@ -473,15 +473,19 @@ export default function PerfilUsuario() {
       // Preparar imagem Base64/MIME se for arquivo ou dataURL
       let skinImageBase64 = null;
       let skinImageMime = null;
-      if (imagemFile instanceof File) {
-        const dataURL = await readFileAsDataURL(imagemFile);
-        const parts = dataUrlToParts(dataURL);
-        skinImageBase64 = parts.base64 || null;
-        skinImageMime = parts.mime || null;
-      } else if (formEdicao.imagemUrl?.startsWith('data:')) {
-        const parts = dataUrlToParts(formEdicao.imagemUrl);
-        skinImageBase64 = parts.base64 || null;
-        skinImageMime = parts.mime || null;
+      let finalImageUrl = formEdicao.imagemUrl;
+      if (imagemFile) { // 1. Se for ARQUIVO
+        // O estado 'imagemFile' já contém o base64 e o mime
+        // processados pelo 'onEscolherArquivo'
+        skinImageBase64 = imagemFile.base64 || null;
+        skinImageMime = imagemFile.mime || null;
+        finalImageUrl = null; // Limpa a URL, pois estamos usando Base64
+
+      } else if (formEdicao.imagemUrl?.startsWith('data:')) { // 2. Se for DATAURL
+        const parts = dataUrlToParts(formEdicao.imagemUrl); //
+        skinImageBase64 = parts.base64 || null; //
+        skinImageMime = parts.mime || null; //
+        finalImageUrl = null; //
       }
 
       const id = skinEditando?.id || skinEditando?._id;
@@ -508,9 +512,9 @@ export default function PerfilUsuario() {
         // --- FIM DA NOVA ESTRUTURA ---
 
         // Campos de imagem (baseado no seu original)
-        skinImageUrl: imagemFile ? null : formEdicao.imagemUrl,
-        skinImageBase64: imagemFile?.base64 || null,
-        skinImageMime: imagemFile?.mime || null,
+          skinImageUrl: finalImageUrl, // ✅ Deve ser null se for dataURL
+          skinImageBase64: skinImageBase64,
+          skinImageMime: skinImageMime,
       };
 
       if (id) {

@@ -12,4 +12,20 @@ public class JogoResponseDto{
         this.id = entidade.getId();
         this.nome = entidade.getNome();
     }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 }
