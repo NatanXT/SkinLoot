@@ -1,9 +1,16 @@
-/* frontend/src/pages/DetalheAnuncio.css
-   ============================================================
-   - Layout + visual coerente com o projeto
-   - Caixas .box com hover/focus esverdeado
-   - Badge com nome do jogo na imagem
-   ============================================================ */
+/* ============================================================================
+   DetalheAnuncio.css
+   Caminho: frontend/src/pages/DetalheAnuncio.css
+
+   ESCOPO
+   - Tokens/variáveis
+   - Estrutura do detalhe (container, imagem + info)
+   - Boxes de informação e detalhes por jogo
+   - Botões
+   - Ações (voltar/comprar)
+   - Chat (mini-bubble + flutuante)
+   - Responsividade: Desktop, Tablet (≤1024px), Mobile (≤680px)
+   ========================================================================== */
 
 :root {
   --bg: #0B0D10;
@@ -15,6 +22,9 @@
   --ring: rgba(57,255,20,.45);
 }
 
+/* ============================================================================
+   BASE DO DETALHE
+   ========================================================================== */
 .detalhe-root {
   background: var(--bg);
   color: var(--text);
@@ -55,7 +65,6 @@
   border: 1px solid #1a2129;
   padding: 16px;
 }
-
 .detalhe-imagem img {
   max-width: 100%;
   max-height: 520px;
@@ -84,19 +93,19 @@
   flex-direction: column;
   gap: 12px;
 }
-
 .detalhe-info h1 {
   margin: 0;
   font-size: 28px;
 }
-
 .detalhe-info .preco {
   font-size: 22px;
   font-weight: 700;
   color: var(--primary);
 }
 
-/* Grid chave/valor */
+/* ============================================================================
+   BOXES / KV LIST
+   ========================================================================== */
 .kv {
   display: grid;
   grid-template-columns: 160px 1fr;
@@ -107,15 +116,11 @@
 .kv .k { color: var(--muted); font-size: 14px; }
 .kv .v { color: #E9FFF1; }
 
-/* Grid 2 colunas para alguns grupos */
 .kv-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-bottom: 6px;
-}
-@media (max-width: 680px) {
-  .kv-grid { grid-template-columns: 1fr; }
 }
 
 /* Caixas tipo fieldset */
@@ -141,11 +146,24 @@
   color: var(--secondary);
   text-shadow: 0 0 8px rgba(57,255,20,.35);
 }
-
 .box--info { margin-top: 8px; }
 .box--detalhes { margin-top: 6px; }
 
-/* Botão de favoritar */
+/* ============================================================================
+   BOTÕES
+   ========================================================================== */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  border:1px solid #1C2430; background:transparent; color:var(--text);
+  text-decoration:none; cursor:pointer; border-radius:12px; padding:12px 16px;
+}
+.btn.sm{ padding:8px 12px; border-radius:10px }
+.btn--primary{ background:linear-gradient(180deg, var(--primary), var(--secondary)); color:#0B0D10; font-weight:800 }
+.btn--primary:hover{ filter:brightness(.95) }
+.btn--ghost{ border-color:#2A323C; color:#D3D8DF }
+.btn--ghost:hover{ border-color:#3A4451 }
+
+/* Favoritar */
 .btn-like {
   background: transparent;
   border: 1px solid var(--primary);
@@ -162,26 +180,103 @@
 .btn-like.ativo { background: var(--primary); color: #0b0d10; }
 .btn-like:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* Botões padrão */
-.btn{
-  display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  border:1px solid #1C2430; background:transparent; color:var(--text);
-  text-decoration:none; cursor:pointer; border-radius:12px; padding:12px 16px;
-}
-.btn.sm{ padding:8px 12px; border-radius:10px }
-.btn--primary{ background:linear-gradient(180deg, var(--primary), var(--secondary)); color:#0B0D10; font-weight:800 }
-.btn--primary:hover{ filter:brightness(.95) }
-.btn--ghost{ border-color:#2A323C; color:#D3D8DF }
-.btn--ghost:hover{ border-color:#3A4451 }
-
-/* Responsivo */
-@media (max-width: 980px) {
-  .detalhe-card { flex-direction: column; }
-}
-
-/* Espaçamento entre os botões de ação */
+/* Ações (voltar/comprar) */
 .detalhe-acoes {
   display: flex;
-  gap: 6px; /* distância entre os botões (pode ajustar entre 4–8px se quiser) */
+  gap: 6px;
   margin-top: 8px;
+}
+
+/* ============================================================================
+   CHAT (mini-bubble + flutuante)
+   ========================================================================== */
+.chat-mini-bubble {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid #2A323C;
+  border-radius: 12px;
+  padding: 10px 16px;
+  min-width: 200px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+  transition: background .2s ease, transform .2s ease;
+}
+.chat-mini-bubble:hover { background: #1A1F27; transform: translateY(-2px); }
+.chat-mini-bubble__icon { font-size: 18px; }
+.chat-mini-bubble__label { flex: 1; text-align: left; }
+.chat-mini-bubble__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: red;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 3px 7px;
+  box-shadow: 0 0 8px rgba(0,0,0,.5);
+}
+
+/* Wrapper externo do chat flutuante */
+.chat-float {
+  position: fixed;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 2140;
+  width: min(420px, 100vw - 32px);
+  max-height: min(70vh, 640px);
+}
+
+/* ============================================================================
+   RESPONSIVIDADE
+   ========================================================================== */
+
+/* -------- Tablet (≤1024px) -------- */
+@media (max-width: 1024px) {
+  .detalhe-card { gap: 18px; padding: 16px; }
+  .detalhe-info h1 { font-size: 26px; }
+  .chat-float {
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(14px, env(safe-area-inset-bottom));
+    width: min(520px, 100vw - 48px);
+  }
+}
+
+/* -------- Mobile (≤680px) -------- */
+@media (max-width: 680px) {
+  .detalhe-card { flex-direction: column; }
+  .kv-grid { grid-template-columns: 1fr; }
+
+  /* Chat ocupa faixa central e limita altura (teclado aberto) */
+  .chat-float {
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+    width: auto;
+    max-width: none;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    border-radius: 14px;
+  }
+  .chat-float .chat-body,
+  .chat-float .chat-scroll,
+  .chat-float [data-chat-scroll] {
+    max-height: 60vh;
+    overflow: auto;
+  }
+
+  .chat-mini-bubble {
+    left: auto;
+    right: 12px;
+    min-width: 0;
+    width: auto;
+    max-width: calc(100vw - 24px);
+  }
 }

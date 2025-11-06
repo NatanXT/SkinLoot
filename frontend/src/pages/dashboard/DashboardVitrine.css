@@ -1,12 +1,25 @@
-/* ======================================================
+/* ============================================================================
    DashboardVitrine.css
    Caminho: frontend/src/pages/DashboardVitrine.css
-   Escopo: layout geral da página (tokens, base, topbar,
-   hero, filtros, grid, planos, footer, avatar/menu,
-   chat bubble e responsividade global)
-====================================================== */
 
-/* ---------- Tokens / Variáveis (globais) ---------- */
+   ESCOPO
+   - Tokens/variáveis globais
+   - Base (html/body/backdrop)
+   - Topbar + ações (login/perfil) e versão logada (.topbar.logged)
+   - Hero
+   - Filtros
+   - Grid dos cards
+   - Botões globais
+   - Planos
+   - Footer
+   - Profile menu (avatar + dropdown)
+   - Chat (mini-bubble + flutuante)
+   - Responsividade: Desktop padrão, Tablet (≤1024px), Mobile (≤640px)
+   ========================================================================== */
+
+/* ============================================================================
+   1) TOKENS / VARIÁVEIS
+   ========================================================================== */
 :root {
   --bg: #0B0D10;
   --panel: #11151A;
@@ -33,7 +46,9 @@
   --topbar-h: 64px;
 }
 
-/* ---------- Base ---------- */
+/* ============================================================================
+   2) BASE
+   ========================================================================== */
 * { box-sizing: border-box; }
 html {
   scroll-behavior: smooth;
@@ -58,7 +73,9 @@ body {
     radial-gradient(900px 500px at 100% 10%, rgba(0,200,150,.08), transparent 60%);
 }
 
-/* ---------- Topbar ---------- */
+/* ============================================================================
+   3) TOPBAR + AÇÕES
+   ========================================================================== */
 .topbar {
   position: sticky;
   top: 0;
@@ -73,10 +90,7 @@ body {
   border-bottom: 1px solid #131920;
 }
 
-/* Bloco de ações (login/perfil) */
 .actions { display: flex; gap: 8px; flex-shrink: 0; }
-
-/* Opcional: texto de boas-vindas */
 .topbar .actions .welcome-user {
   color: #fff;
   margin-right: 1rem;
@@ -86,7 +100,45 @@ body {
 nav a { margin: 0 10px; color: var(--muted); text-decoration: none; }
 nav a:hover { color: var(--text); }
 
-/* ---------- Hero ---------- */
+/* --- Navbar logada: logo esquerda, links centro, avatar direita --- */
+.topbar.logged {
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* logo - nav - avatar */
+  align-items: center;
+  height: 64px;
+  padding: 0 24px;
+  background: rgba(11, 13, 16, 0.65);
+  backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid #131920;
+}
+
+.topbar.logged > .auth-brand,
+.topbar.logged > .brand-area { justify-self: start; }
+
+.topbar.logged .nav-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+}
+
+.topbar.logged .profile-menu {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+}
+
+.topbar.logged .nav-links a {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.topbar.logged .nav-links a:hover { color: var(--primary); }
+
+/* ============================================================================
+   4) HERO
+   ========================================================================== */
 .hero {
   display: grid;
   place-items: center;
@@ -98,7 +150,9 @@ nav a:hover { color: var(--text); }
 .hero p { color: var(--muted); margin: 0 0 20px; }
 .hero__cta { display: flex; gap: 12px; justify-content: center; }
 
-/* ---------- Filtros ---------- */
+/* ============================================================================
+   5) FILTROS
+   ========================================================================== */
 .filters { padding: 14px clamp(16px, 4vw, 32px); }
 .filters__row {
   display: grid;
@@ -198,7 +252,9 @@ nav a:hover { color: var(--text); }
   gap: 8px;
 }
 
-/* ---------- Grid (apenas o container) ---------- */
+/* ============================================================================
+   6) GRID DOS CARDS
+   ========================================================================== */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--card-min-col), 1fr));
@@ -211,7 +267,9 @@ nav a:hover { color: var(--text); }
   .grid { grid-template-columns: repeat(3, minmax(var(--card-min-col), 1fr)); }
 }
 
-/* ---------- Botões (globais) ---------- */
+/* ============================================================================
+   7) BOTÕES GLOBAIS
+   ========================================================================== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -235,7 +293,21 @@ nav a:hover { color: var(--text); }
 .btn--ghost { border-color: #2A323C; color: #D3D8DF; }
 .btn--ghost:hover { border-color: #3A4451; }
 
-/* ---------- Planos ---------- */
+/* Ajuste visual: botão "Entrar" mais escuro que a navbar */
+.actions .btn.btn--ghost.sm {
+  background: #0B0D10;
+  border: 1px solid #222832;
+  color: #E8F1F2;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+.actions .btn.btn--ghost.sm:hover {
+  background: #090B0E;
+  border-color: #2A323C;
+}
+
+/* ============================================================================
+   8) PLANOS
+   ========================================================================== */
 .plans {
   max-width: var(--container-max);
   margin: 0 auto 80px;
@@ -264,7 +336,9 @@ nav a:hover { color: var(--text); }
     0 0 80px rgba(57,255,20,.06);
 }
 
-/* ---------- Footer ---------- */
+/* ============================================================================
+   9) FOOTER
+   ========================================================================== */
 .foot {
   padding: 32px clamp(16px, 4vw, 32px);
   border-top: 1px solid #121921;
@@ -272,23 +346,9 @@ nav a:hover { color: var(--text); }
   text-align: center;
 }
 
-/* ---------- Responsivo (global) ---------- */
-@media (max-width: 960px) {
-  .filters__row { grid-template-columns: 1fr 1fr 1fr; }
-  .hero h1 { font-size: 36px; }
-}
-
-@media (max-width: 640px) {
-  .filters__row { grid-template-columns: 1fr; }
-  :root { --card-min-col: 310px; --media-min-h: 300px; --btn-h: 44px; }
-
-  /* Topbar mais compacta no mobile */
-  .topbar { padding: 10px 14px; }
-  nav a { margin: 0 6px; font-size: 0.95rem; }
-  .actions { gap: 6px; }
-}
-
-/* ---------- Avatar / Profile Menu ---------- */
+/* ============================================================================
+   10) PROFILE MENU (avatar + dropdown)
+   ========================================================================== */
 .profile-menu { position: relative; }
 .profile-menu .avatar {
   width: 36px; height: 36px; border-radius: 999px;
@@ -306,7 +366,6 @@ nav a:hover { color: var(--text); }
   box-shadow: 0 0 0 2px rgba(57,255,20,.12) inset, 0 6px 22px rgba(0,0,0,.45);
 }
 
-/* Dropdown do avatar */
 .profile-menu .menu {
   position: absolute;
   right: 0;
@@ -335,7 +394,16 @@ nav a:hover { color: var(--text); }
   border: 1px solid #263140;
 }
 
-/* ---------- Chat Mini Bubble ---------- */
+/* Animação do menu */
+@keyframes pmenu-in {
+  from { transform: translateY(-6px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+/* ============================================================================
+   11) CHAT
+   ========================================================================== */
+/* Mini-botão (abrir chat) */
 .chat-mini-bubble {
   position: fixed;
   bottom: 20px;
@@ -372,19 +440,64 @@ nav a:hover { color: var(--text); }
   box-shadow: 0 0 8px rgba(0,0,0,.5);
 }
 
-/* ---------- Animação do menu ---------- */
-@keyframes pmenu-in {
-  from { transform: translateY(-6px); opacity: 0; }
-  to   { transform: translateY(0);   opacity: 1; }
+/* Painel do chat flutuante (wrapper externo) */
+.chat-float {
+  position: fixed;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 2140;
+  width: min(420px, 100vw - 32px);
+  max-height: min(70vh, 640px);
 }
 
-/* ====================== Responsividade: botões Entrar / Criar Conta ====================== */
+/* ============================================================================
+   12) RESPONSIVIDADE
+   --------------------------------------------------------------------------
+   Breakpoints:
+     - Tablet: ≤1024px
+     - Mobile: ≤640px
+   ========================================================================== */
+
+/* -------- Tablet (≤1024px) -------- */
+@media (max-width: 1024px) {
+  /* Filtros em 3 colunas (busca / jogo / restante empilhado) */
+  .filters__row {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  /* Herói um pouco menor */
+  .hero h1 { font-size: 40px; }
+
+  /* Grid dos cards com colunas menores */
+  :root { --card-min-col: 330px; }
+
+  /* Topbar espaçamentos */
+  .topbar { padding: 12px 18px; }
+  .topbar.logged { padding: 0 18px; }
+
+  /* Chat um pouco mais largo quando há espaço no tablet */
+  .chat-float {
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(14px, env(safe-area-inset-bottom));
+    width: min(520px, 100vw - 48px);
+  }
+}
+
+/* -------- Mobile (≤640px) -------- */
 @media (max-width: 640px) {
+  /* Filtros em 1 coluna */
+  .filters__row { grid-template-columns: 1fr; }
+  :root { --card-min-col: 310px; --media-min-h: 300px; --btn-h: 44px; }
+
+  /* Topbar mais compacta no mobile */
   .topbar {
     padding: 10px 14px;
     flex-wrap: wrap;
   }
+  nav a { margin: 0 6px; font-size: 0.95rem; }
+  .actions { gap: 6px; }
 
+  /* Ações ocupam a largura embaixo da topbar quando precisar */
   .actions {
     display: flex;
     gap: 10px;
@@ -393,16 +506,13 @@ nav a:hover { color: var(--text); }
     width: 100%;
     margin-top: 6px;
   }
-
   .actions .btn {
     flex: 1 1 45%;
     justify-content: center;
     min-width: 120px;
   }
-}
 
-/* ====================== Centralização da navbar no mobile ====================== */
-@media (max-width: 640px) {
+  /* Centralização da navbar no mobile */
   nav {
     width: 100%;
     display: flex;
@@ -411,24 +521,16 @@ nav a:hover { color: var(--text); }
     flex-wrap: wrap;
     margin-top: 8px;
   }
-
   nav a {
     margin: 4px 10px;
     font-size: 0.95rem;
     color: var(--text);
   }
+  .actions { justify-content: center; }
 
-  .actions {
-    justify-content: center;
-  }
-}
-
-/* ====================== Navbar compacta (logo + links na mesma linha) ====================== */
-@media (max-width: 640px) {
+  /* Navbar compacta (logo + links) */
   .topbar .brand-text,
-  .topbar .brand-name {
-    display: none !important;
-  }
+  .topbar .brand-name { display: none !important; }
 
   .topbar {
     display: flex;
@@ -438,14 +540,12 @@ nav a:hover { color: var(--text); }
     gap: 18px;
     padding: 10px 12px;
   }
-
   .topbar .logo,
   .topbar img {
     width: 36px;
     height: 36px;
     object-fit: contain;
   }
-
   nav {
     display: flex;
     align-items: center;
@@ -455,16 +555,13 @@ nav a:hover { color: var(--text); }
     margin: 0;
     width: auto;
   }
-
   nav a {
     color: var(--text);
     font-size: 0.95rem;
     font-weight: 600;
     text-decoration: none;
   }
-
   nav a:hover { color: var(--primary); }
-
   .actions {
     width: 100%;
     justify-content: center;
@@ -472,90 +569,39 @@ nav a:hover { color: var(--text); }
     margin-top: 6px;
     flex-wrap: wrap;
   }
-}
-/* ======================================================
-   Navbar logada - layout fixo e alinhamento correto
-   (logo esquerda, links centro, avatar direita)
-====================================================== */
-.topbar.logged {
-  display: grid;
-  grid-template-columns: auto 1fr auto; /* logo - nav - avatar */
-  align-items: center;
-  height: 64px;
-  padding: 0 24px;
-  background: rgba(11, 13, 16, 0.65);
-  backdrop-filter: saturate(140%) blur(8px);
-  border-bottom: 1px solid #131920;
-}
 
-/* Logo sempre à esquerda */
-.topbar.logged > .auth-brand,
-.topbar.logged > .brand-area {
-  justify-self: start;
-}
-
-/* Links centralizados */
-.topbar.logged .nav-links {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 18px;
-}
-
-/* Avatar sempre à direita */
-.topbar.logged .profile-menu {
-  justify-self: end;
-  display: flex;
-  align-items: center;
-}
-
-/* Aparência dos links */
-.topbar.logged .nav-links a {
-  color: var(--text);
-  font-weight: 600;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-.topbar.logged .nav-links a:hover {
-  color: var(--primary);
-}
-
-/* ---------- Responsivo ---------- */
-@media (max-width: 640px) {
+  /* Ajustes do layout logado no mobile */
   .topbar.logged {
     grid-template-columns: auto 1fr auto;
     padding: 10px 14px;
   }
-
-  /* Esconde o texto do nome "SkinLoot" no mobile */
   .topbar.logged .brand-text,
-  .topbar.logged .brand-name {
-    display: none !important;
+  .topbar.logged .brand-name { display: none !important; }
+  .topbar.logged .nav-links { gap: 12px; }
+  .topbar.logged .profile-menu { justify-self: end; }
+
+  /* Chat flutuante: ocupa faixa central e não escapa */
+  .chat-float {
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+    width: auto;
+    max-width: none;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    border-radius: 14px;
+  }
+  .chat-float .chat-body,
+  .chat-float .chat-scroll,
+  .chat-float [data-chat-scroll] {
+    max-height: 60vh;
+    overflow: auto;
   }
 
-  .topbar.logged .nav-links {
-    gap: 12px;
+  /* Mini-botão (abrir chat) — limitar largura */
+  .chat-mini-bubble {
+    left: auto;
+    right: 12px;
+    min-width: 0;
+    width: auto;
+    max-width: calc(100vw - 24px);
   }
-
-  .topbar.logged .profile-menu {
-    justify-self: end;
-  }
-}
-
-/* ======================================================
-   Ajuste visual: botão "Entrar" mais escuro que a navbar
-====================================================== */
-
-/* Escurece o botão ghost (Entrar) e remove transparência */
-.actions .btn.btn--ghost.sm {
-  background: #0B0D10;        /* cor sólida mais escura */
-  border: 1px solid #222832;  /* borda sutil */
-  color: #E8F1F2;             /* texto claro */
-  transition: background 0.25s ease, border-color 0.25s ease;
-}
-
-/* Hover ainda mais escuro para realçar */
-.actions .btn.btn--ghost.sm:hover {
-  background: #090B0E;
-  border-color: #2A323C;
 }
