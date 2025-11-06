@@ -209,8 +209,14 @@ export default function DashboardVitrine() {
       anuncio?.seller?.id ??
       anuncio?.vendedorId ??
       `temp-${anuncio?.id || anuncio?._id}`;
-    setChatAberto({ id, nome });
-    setUnreads(0);
+
+    const nomeSkin = anuncio.title ?? anuncio.skinNome ?? 'Skin';
+    const precoSkin = anuncio.price ?? anuncio.preco ?? 0;
+
+    setChatAberto({
+      seller: { id: id, nome: nome },
+      skin: { titulo: nomeSkin, preco: precoSkin }
+    });    setUnreads(0);
   }
 
   function comprarFora(anuncio) {

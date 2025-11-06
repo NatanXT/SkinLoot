@@ -192,29 +192,32 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
   // EFEITO: Quando usuário clica em "Contato" (usuarioAlvo)
   // ======================================================
   useEffect(() => {
-    if (!usuarioAlvo) return;
-
+    if (!usuarioAlvo || !usuarioAlvo.seller) {
+      setTexto(''); // Limpa o texto se fechar
+      return;
+    }
+    const { seller, skin } = usuarioAlvo;
     setAberto(true);
 
     const setupContato = async () => {
       const novoContato = {
-        id: usuarioAlvo.id,
-        nome: usuarioAlvo.nome,
+        id: seller.id,
+        nome: seller.nome,
         foto:
-          usuarioAlvo.foto ?? `https://i.pravatar.cc/60?u=${usuarioAlvo.id}`,
+            seller.foto ?? `https://i.pravatar.cc/60?u=${seller.id}`,
         status: 'online agora',
         naoLidas: 0,
         mensagens: [],
       };
 
-      const historico = await carregarHistorico(usuarioAlvo);
+      const historico = await carregarHistorico(seller);
       novoContato.mensagens = historico;
 
       setContatos((prev) => {
-        const existe = prev.some((c) => c.id === usuarioAlvo.id);
+        const existe = prev.some((c) => c.id === seller.id);
         if (existe) {
           return prev.map((c) =>
-            c.id === usuarioAlvo.id ? { ...c, mensagens: historico } : c,
+            c.id === seller.id ? { ...c, mensagens: historico } : c,
           );
         }
         return [...prev, novoContato];
@@ -222,12 +225,15 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
 
       setContatoAtivoId(usuarioAlvo.id);
 
-      const precoFmt = usuarioAlvo.preco?.toLocaleString('pt-BR', {});
+      const precoFmt = skin.preco?.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      });
+
       setTexto(
-        `Olá, fiquei interessado na skin: ${
-          usuarioAlvo.nome || 'Dragon Lore'
-        }, valor: ${precoFmt || '—'}, podemos conversar?`,
+          `Olá, ${seller.nome}. Vi seu anúncio da skin "${skin.titulo}" por ${precoFmt}. Podemos conversar?`,
       );
+      // --- FIM DA ALTERAÇÃO ---
     };
 
     setupContato();

@@ -474,19 +474,19 @@ export default function PerfilUsuario() {
       let skinImageBase64 = null;
       let skinImageMime = null;
       let finalImageUrl = formEdicao.imagemUrl;
-        if (imagemFile) { // 1. Se for ARQUIVO
-            const dataURL = await readFileAsDataURL(imagemFile);
-            const parts = dataUrlToParts(dataURL);
-            skinImageBase64 = parts.base64 || null;
-            skinImageMime = parts.mime || null;
-            finalImageUrl = null; // ✅ Limpa a URL, pois estamos usando Base64
+      if (imagemFile) { // 1. Se for ARQUIVO
+        // O estado 'imagemFile' já contém o base64 e o mime
+        // processados pelo 'onEscolherArquivo'
+        skinImageBase64 = imagemFile.base64 || null;
+        skinImageMime = imagemFile.mime || null;
+        finalImageUrl = null; // Limpa a URL, pois estamos usando Base64
 
-        } else if (formEdicao.imagemUrl?.startsWith('data:')) { // 2. Se for DATAURL
-            const parts = dataUrlToParts(formEdicao.imagemUrl);
-            skinImageBase64 = parts.base64 || null;
-            skinImageMime = parts.mime || null;
-            finalImageUrl = null; // ✅ A CORREÇÃO ESTÁ AQUI!
-        }
+      } else if (formEdicao.imagemUrl?.startsWith('data:')) { // 2. Se for DATAURL
+        const parts = dataUrlToParts(formEdicao.imagemUrl); //
+        skinImageBase64 = parts.base64 || null; //
+        skinImageMime = parts.mime || null; //
+        finalImageUrl = null; //
+      }
 
       const id = skinEditando?.id || skinEditando?._id;
 
