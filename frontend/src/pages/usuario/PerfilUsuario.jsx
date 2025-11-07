@@ -617,10 +617,27 @@ export default function PerfilUsuario() {
     setReativarDepoisDeSalvar(true);
     setSkinEditando({ ...skin });
     const urlAtual = skin?.imagemUrl || skin?.image || skin?.imagem || '';
+    const raw = skin?._raw || {}; // Pega os dados brutos da API
+
+    // Define o jogo selecionado
+    const jogoId = raw.jogo?.id || skin?.jogo?.id || '';
+
+    // Se já havia jogo, travamos o select; se não havia, deixamos editar.
+    jogoInicialVazioRef.current = !jogoId;
+
+    setSelectedJogoId(jogoId);
+
+    // Preenche o formulário com a estrutura de DTO correta
     setFormEdicao({
       skinNome: skin?.skinNome || skin?.title || skin?.nome || '',
       preco: skin?.preco ?? skin?.price ?? '',
       imagemUrl: urlAtual,
+      descricao: raw.descricao ?? '',
+      // ✅ AQUI ESTÁ A CORREÇÃO: Preenche os detalhes
+      detalhesCsgo:
+          raw.detalhesCsgo || skin?._raw?.detalhesCsgo || DEFAULT_CSGO_DETAILS,
+      detalhesLol:
+          raw.detalhesLol || skin?._raw?.detalhesLol || DEFAULT_LOL_DETAILS,
     });
     setImagemFile(null);
     setPreviewImagem(urlAtual || '');
