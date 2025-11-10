@@ -63,6 +63,13 @@ const DEFAULT_FORM_EDICAO = {
   detalhesCsgo: DEFAULT_CSGO_DETAILS,
   detalhesLol: DEFAULT_LOL_DETAILS,
 };
+const EXTERIOR_TO_FLOAT_MAP = {
+  'Factory New': '0.03',
+  'Minimal Wear': '0.10',
+  'Field-Tested': '0.25',
+  'Well-Worn': '0.40',
+  'Battle-Scarred': '0.60',
+};
 
 // Placeholder final (fallback)
 const IMG_PLACEHOLDER = 'https://placehold.co/600x400?text=Skin';
@@ -450,6 +457,23 @@ export default function PerfilUsuario() {
       '';
     return { ...obj, imagemUrl };
   }
+
+  const handleExteriorChange = (e) => {
+    const novoExterior = e.target.value;
+
+    // Pega o float padrão do nosso map, ou deixa em branco
+    const floatPadrao = EXTERIOR_TO_FLOAT_MAP[novoExterior] || '';
+
+    // Atualiza AMBOS os campos no estado
+    setFormEdicao((prev) => ({
+      ...prev,
+      detalhesCsgo: {
+        ...prev.detalhesCsgo,
+        exterior: novoExterior,
+        desgasteFloat: floatPadrao, // <-- A MÁGICA
+      },
+    }));
+  };
 
   // Salva (cria ou edita)
   async function salvarEdicao() {
@@ -1195,106 +1219,107 @@ export default function PerfilUsuario() {
 
                 {/* Campos de CS:GO */}
                 {selectedGameName === 'CS:GO' && (
-                  <fieldset className="perfil-form__fieldset">
-                    <legend>Detalhes (CS:GO)</legend>
+                    <fieldset className="perfil-form__fieldset">
+                      <legend>Detalhes (CS:GO)</legend>
 
-                    <div className="perfil-form__grid-2">
-                      <div className="perfil-form__row">
-                        <label htmlFor="f-cs-float">Desgaste (Float)</label>
-                        <input
-                          id="f-cs-float"
-                          type="number"
-                          step="0.0001"
-                          placeholder="Ex: 0.0712"
-                          value={formEdicao.detalhesCsgo.desgasteFloat}
-                          onChange={(e) =>
-                            setFormEdicao((prev) => ({
-                              ...prev,
-                              detalhesCsgo: {
-                                ...prev.detalhesCsgo,
-                                desgasteFloat: e.target.value,
-                              },
-                            }))
-                          }
-                        />
+                      <div className="perfil-form__grid-2">
+                        <div className="perfil-form__row">
+                          <label htmlFor="f-cs-float">Desgaste (Float)</label>
+                          <input
+                              id="f-cs-float"
+                              type="number"
+                              step="0.0001"
+                              placeholder="Ex: 0.0712"
+
+                              min="0"  /* ✅ META 1 */
+                              max="1"  /* ✅ META 1 */
+
+                              value={formEdicao.detalhesCsgo.desgasteFloat}
+                              onChange={(e) =>
+                                  setFormEdicao((prev) => ({
+                                    ...prev,
+                                    detalhesCsgo: {
+                                      ...prev.detalhesCsgo,
+                                      desgasteFloat: e.target.value,
+                                    },
+                                  }))
+                              }
+                          />
+                        </div>
+                        <div className="perfil-form__row">
+                          <label htmlFor="f-cs-pattern">Pattern Index</label>
+                          <input
+                              id="f-cs-pattern"
+                              type="number"
+                              step="1"
+                              placeholder="Ex: 456"
+
+                              min="0"   /* ✅ META 2 */
+                              max="999" /* ✅ META 2 */
+
+                              value={formEdicao.detalhesCsgo.patternIndex}
+                              onChange={(e) =>
+                                  setFormEdicao((prev) => ({
+                                    ...prev,
+                                    detalhesCsgo: {
+                                      ...prev.detalhesCsgo,
+                                      patternIndex: e.target.value,
+                                    },
+                                  }))
+                              }
+                          />
+                        </div>
                       </div>
+
                       <div className="perfil-form__row">
-                        <label htmlFor="f-cs-pattern">Pattern Index</label>
-                        <input
-                          id="f-cs-pattern"
-                          type="number"
-                          step="1"
-                          placeholder="Ex: 456"
-                          value={formEdicao.detalhesCsgo.patternIndex}
-                          onChange={(e) =>
-                            setFormEdicao((prev) => ({
-                              ...prev,
-                              detalhesCsgo: {
-                                ...prev.detalhesCsgo,
-                                patternIndex: e.target.value,
-                              },
-                            }))
-                          }
-                        />
+                        <label htmlFor="f-cs-exterior">Exterior</label>
+                        <select
+                            id="f-cs-exterior"
+                            value={formEdicao.detalhesCsgo.exterior}
+
+                            onChange={handleExteriorChange} /* ✅ META 3 */
+                        >
+                          <option value="Factory New">Factory New</option>
+                          <option value="Minimal Wear">Minimal Wear</option>
+                          <option value="Field-Tested">Field-Tested</option>
+                          <option value="Well-Worn">Well-Worn</option>
+                          <option value="Battle-Scarred">Battle-Scarred</option>
+                        </select>
                       </div>
-                    </div>
 
-                    <div className="perfil-form__row">
-                      <label htmlFor="f-cs-exterior">Exterior</label>
-                      <select
-                        id="f-cs-exterior"
-                        value={formEdicao.detalhesCsgo.exterior}
-                        onChange={(e) =>
-                          setFormEdicao((prev) => ({
-                            ...prev,
-                            detalhesCsgo: {
-                              ...prev.detalhesCsgo,
-                              exterior: e.target.value,
-                            },
-                          }))
-                        }
-                      >
-                        <option value="Factory New">Factory New</option>
-                        <option value="Minimal Wear">Minimal Wear</option>
-                        <option value="Field-Tested">Field-Tested</option>
-                        <option value="Well-Worn">Well-Worn</option>
-                        <option value="Battle-Scarred">Battle-Scarred</option>
-                      </select>
-                    </div>
-
-                    <label className="check" style={{ marginTop: 12 }}>
-                      <input
-                        type="checkbox"
-                        checked={formEdicao.detalhesCsgo.statTrak}
-                        onChange={(e) =>
-                          setFormEdicao((prev) => ({
-                            ...prev,
-                            detalhesCsgo: {
-                              ...prev.detalhesCsgo,
-                              statTrak: e.target.checked,
-                            },
-                          }))
-                        }
-                      />
-                      <span>StatTrak™</span>
-                    </label>
-                  </fieldset>
+                      <label className="check" style={{marginTop: 12}}>
+                        <input
+                            type="checkbox"
+                            checked={formEdicao.detalhesCsgo.statTrak}
+                            onChange={(e) =>
+                                setFormEdicao((prev) => ({
+                                  ...prev,
+                                  detalhesCsgo: {
+                                    ...prev.detalhesCsgo,
+                                    statTrak: e.target.checked,
+                                  },
+                                }))
+                            }
+                        />
+                        <span>StatTrak™</span>
+                      </label>
+                    </fieldset>
                 )}
 
                 {/* Campos de LoL */}
                 {selectedGameName === 'League of Legends' && (
-                  <fieldset className="perfil-form__fieldset">
-                    <legend>Detalhes (LoL)</legend>
+                    <fieldset className="perfil-form__fieldset">
+                      <legend>Detalhes (LoL)</legend>
 
-                    <div className="perfil-form__row">
-                      <label htmlFor="f-lol-champion">Campeão</label>
-                      <input
-                        id="f-lol-champion"
-                        type="text"
-                        placeholder="Ex: Jinx"
-                        value={formEdicao.detalhesLol.championName}
-                        onChange={(e) =>
-                          setFormEdicao((prev) => ({
+                      <div className="perfil-form__row">
+                        <label htmlFor="f-lol-champion">Campeão</label>
+                        <input
+                            id="f-lol-champion"
+                            type="text"
+                            placeholder="Ex: Jinx"
+                            value={formEdicao.detalhesLol.championName}
+                            onChange={(e) =>
+                                setFormEdicao((prev) => ({
                             ...prev,
                             detalhesLol: {
                               ...prev.detalhesLol,
