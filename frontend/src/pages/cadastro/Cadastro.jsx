@@ -1,28 +1,38 @@
-// Cadastro.jsx
 import { useMemo, useState } from 'react';
 import { useAuth } from '../../services/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import '../../pages/login/Auth.css';
 import AuthBrand from '../../components/logo/AuthBrand';
 
-/* -------------------- Regex & Constantes -------------------- */
+/* -------------------- Ícones (abre/fecha) -------------------- */
+const Eye = (
+  <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+    <path
+      fill="currentColor"
+      d="M12 7c-5 0-9 5-9 5s4 5 9 5 9-5 9-5-4-5-9-5Zm0 8a3 3 0 1 1 .001-6.001A3 3 0 0 1 12 15Z"
+    />
+  </svg>
+);
+const EyeOff = (
+  <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+    <path
+      fill="currentColor"
+      d="M2 5.27 3.28 4 20 20.72 18.73 22l-2.09-2.09C15.42 20.58 13.77 21 12 21 7 21 3 16 3 16s1.64-2.05 4.31-3.67L2 5.27Zm8.73 8.73a3 3 0 0 1-2.73-2.73l-2-2A11.15 11.15 0 0 0 3 16s4 5 9 5c1.77 0 3.42-.42 4.64-1.09l-2-2a3 3 0 0 1-3.91-3.91Zm1.27-6c5 0 9 5 9 5s-.79 1-2.12 2.22l-1.42-1.42C19.08 12.96 20 12 20 12s-4-5-9-5c-.68 0-1.34.08-1.98.22l-1.6-1.6C8.5 4.24 10.2 4 12 4Z"
+    />
+  </svg>
+);
 
-// Nome: apenas letras (com acento), espaços e hífen
+/* -------------------- Regex & Constantes -------------------- */
 const NAME_RE = /^[A-Za-zÀ-ÖØ-öø-ÿ\s-]+$/;
 const NAME_BLOCK_RE = /[^A-Za-zÀ-ÖØ-öø-ÿ\s-]/g;
-
-// E-mail
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-
-// Senha (Unicode-aware)
 const PWD_LEN_MIN = 8;
 const PWD_LEN_MAX = 16;
-const RE_UPPER = /\p{Lu}/u; // pelo menos 1 maiúscula (qualquer idioma)
-const RE_LOWER = /\p{Ll}/u; // pelo menos 1 minúscula
-const RE_DIGIT = /\p{Nd}/u; // pelo menos 1 número
-const RE_SPECIAL = /[^\p{L}\p{Nd}\s]/u; // pelo menos 1 especial (ignora espaço)
+const RE_UPPER = /\p{Lu}/u;
+const RE_LOWER = /\p{Ll}/u;
+const RE_DIGIT = /\p{Nd}/u;
+const RE_SPECIAL = /[^\p{L}\p{Nd}\s]/u;
 
-// Força visual
 function getPasswordStrength(pwd = '') {
   let score = 0;
   if (RE_UPPER.test(pwd)) score++;
@@ -135,7 +145,6 @@ export default function Cadastro() {
   return (
     <div className="auth-root">
       <div className="auth-card">
-        {/* 🔗 Logo → "/" */}
         <AuthBrand />
         <h1 className="auth-title">Criar conta</h1>
         <p className="auth-subtitle">
@@ -221,14 +230,10 @@ export default function Cadastro() {
                 type="button"
                 className="toggle"
                 onClick={() => toggleShow('s1')}
+                aria-pressed={showPass.s1}
                 aria-label={showPass.s1 ? 'Ocultar senha' : 'Mostrar senha'}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
-                  <path
-                    fill="currentColor"
-                    d="M12 7c-5 0-9 5-9 5s4 5 9 5 9-5 9-5-4-5-9-5Zm0 8a3 3 0 1 1 .001-6.001A3 3 0 0 1 12 15Z"
-                  />
-                </svg>
+                {showPass.s1 ? EyeOff : Eye}
               </button>
             </div>
             {errors.senha && (
@@ -267,14 +272,10 @@ export default function Cadastro() {
                 type="button"
                 className="toggle"
                 onClick={() => toggleShow('s2')}
+                aria-pressed={showPass.s2}
                 aria-label={showPass.s2 ? 'Ocultar senha' : 'Mostrar senha'}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
-                  <path
-                    fill="currentColor"
-                    d="M12 7c-5 0-9 5-9 5s4 5 9 5 9-5 9-5-4-5-9-5Zm0 8a3 3 0 1 1 .001-6.001A3 3 0 0 1 12 15Z"
-                  />
-                </svg>
+                {showPass.s2 ? EyeOff : Eye}
               </button>
             </div>
             {errors.confirmarSenha && (
@@ -310,9 +311,9 @@ export default function Cadastro() {
 
           <p className="switch">
             Já tem conta?{' '}
-            <a className="link" href="/login">
+            <Link className="link" to="/login">
               Entrar
-            </a>
+            </Link>
           </p>
         </form>
       </div>

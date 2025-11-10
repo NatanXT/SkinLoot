@@ -4,13 +4,16 @@
 // - Informações do jogo (nome/ID)
 // - Detalhes por jogo (CS:GO / LoL) e genéricos
 // - Múltiplos formatos de payload vindos do backend (_raw / camelCase / snake)
+// - Chat flutuante integrado (abrir ao clicar em "Comprar")
 // ============================================================================
 
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import anuncioService from '../../services/anuncioService.js';
 import './DetalheAnuncio.css';
 import AuthBrand from '../../components/logo/AuthBrand.jsx';
+import ChatFlutuante from '../../components/chat/ChatFlutuante';
+import { useAuth } from '../../services/AuthContext.jsx';
 
 // --------- Utilitários de formatação ----------
 function fmtBRL(n) {
@@ -214,12 +217,71 @@ function DetalhesPorJogo({
 export default function DetalheAnuncio() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
 
   const [anuncio, setAnuncio] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [liked, setLiked] = useState(false);
   const [loadingLike, setLoadingLike] = useState(false);
+
+  // Estado do chat flutuante
+  const [chatAberto, setChatAberto] = useState(null);
+  const [unreads, setUnreads] = useState(0);
+
+  // --- funções de login/contato iguais às da Dashboard ---
+  function exigirLogin(acao, payload) {
+    if (!user) {
+      navigate('/login', {
+        state: {
+          returnTo: location.pathname + location.search,
+          acao,
+          payload,
+        },
+        replace: true,
+      });
+      return true;
+    }
+    return false;
+  }
+
+  function abrirChatPara(anuncioData) {
+    if (exigirLogin('contato', { anuncioId: anuncioData?.id || id })) return;
+
+    const nome =
+      anuncioData?.usuarioNome ??
+      anuncioData?.seller?.name ??
+      anuncioData?.vendedorNome ??
+      'Usuário';
+
+    const sellerId =
+      anuncioData?.usuarioId ??
+      anuncioData?.seller?.id ??
+      anuncioData?.vendedorId ??
+      `temp-${anuncioData?.id || anuncioData?._id || id}`;
+
+    const nomeSkin = anuncioData?.title ?? anuncioData?.titulo ?? 'Skin';
+    const precoSkin = anuncioData?.price ?? anuncioData?.preco ?? 0;
+
+    setChatAberto({
+      seller: { id: String(sellerId), nome },
+      skin: { titulo: nomeSkin, preco: precoSkin },
+    });
+    setUnreads(0);
+  }
+
+  // Compra: aqui abrimos o chat, mantendo a opção externa num botão secundário
+  function handleComprar() {
+    if (!anuncio) return;
+    abrirChatPara(anuncio);
+  }
+
+  // Link externo (opcional como ação secundária)
+  const raw = useMemo(() => getRaw(anuncio), [anuncio]);
+  const linkExterno = raw?.linkExterno || null;
+
+  // ----------------------------------------------------------------
 
   useEffect(() => {
     let cancel = false;
@@ -256,14 +318,11 @@ export default function DetalheAnuncio() {
     }
   }
 
-  const raw = useMemo(() => getRaw(anuncio), [anuncio]);
   const jogoInfo = useMemo(() => resolverInfoJogo(anuncio), [anuncio]);
   const { detalhesCsgo, detalhesLol, detalhesGenericos } = useMemo(
     () => resolverDetalhes(anuncio),
     [anuncio],
   );
-
-  const linkExterno = raw?.linkExterno || '#';
 
   if (carregando) {
     return (
@@ -331,7 +390,6 @@ export default function DetalheAnuncio() {
             <span className="v">{raw?.descricao || 'Sem descrição.'}</span>
           </div>
 
-          {/* Informações do jogo (aparece se houver nome, id ou quaisquer detalhes) */}
           {(jogoInfo?.nome ||
             jogoInfo?.id ||
             detalhesCsgo ||
@@ -354,7 +412,6 @@ export default function DetalheAnuncio() {
                 </div>
               )}
 
-              {/* Fallback simples caso só existam detalhes genéricos e nenhum nome */}
               {!jogoInfo?.nome &&
                 (detalhesCsgo || detalhesLol || detalhesGenericos) && (
                   <div className="kv">
@@ -367,7 +424,6 @@ export default function DetalheAnuncio() {
             </fieldset>
           )}
 
-          {/* Detalhes por jogo (dinâmico + genérico) */}
           <DetalhesPorJogo
             jogoNome={jogoInfo?.nome}
             detalhesCsgo={detalhesCsgo}
@@ -389,19 +445,54 @@ export default function DetalheAnuncio() {
             <button className="btn btn--ghost" onClick={() => navigate(-1)}>
               Voltar
             </button>
+
+            {/* Comprar abre o chat flutuante */}
             <button
               className="btn btn--primary"
-              onClick={() => window.open(linkExterno, '_blank')}
-              disabled={!raw?.linkExterno}
-              title={
-                raw?.linkExterno ? 'Ir para a compra' : 'Link indisponível'
-              }
+              onClick={handleComprar}
+              title="Abrir chat com o vendedor"
             >
               Comprar
             </button>
+
+            {/* Opcional: link externo como ação secundária */}
+            {linkExterno && (
+              <a
+                className="btn btn--ghost"
+                href={linkExterno}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Comprar no site do vendedor"
+              >
+                Comprar no site
+              </a>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Chat Flutuante (mesmo comportamento da Dashboard) */}
+      {user &&
+        (chatAberto ? (
+          <div className="chat-float">
+          <ChatFlutuante
+            usuarioAlvo={chatAberto}
+            onFechar={() => setChatAberto(null)}
+          />
+          </div>
+        ) : (
+          <button
+            className="chat-mini-bubble"
+            title="Mensagens"
+            onClick={() => setChatAberto({ id: 'ultimo', nome: 'Mensagens' })}
+          >
+            <span className="chat-mini-bubble__icon">💬</span>
+            <span className="chat-mini-bubble__label">Mensagens</span>
+            {unreads > 0 && (
+              <span className="chat-mini-bubble__badge">{unreads}</span>
+            )}
+          </button>
+        ))}
     </div>
   );
 }

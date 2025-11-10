@@ -1,24 +1,87 @@
 /* ======================================================
    Auth.css (compartilhado por Login/Cadastro)
-   - Reaproveita a paleta e o look da Dashboard
-   - Estrutura: Tokens • Base • Card • Campos • Botões
-                 OAuth/Links • Password • Strength • Responsivo
+   Tema Dark (padrão) + Tema Claro (auto/forçado)
+   - Tokens globais
+   - Base / Card
+   - Campos, botões, links
+   - Medidor de força de senha
+   - Responsivo
 ====================================================== */
 
-/* ---------- Tokens / Variáveis ---------- */
+/* ---------- TOKENS — DARK (padrão) ---------- */
 :root{
-  --bg:#0B0D10;
-  --panel:#11151A;
-  --muted:#7B8694;
-  --text:#E8F1F2;
-  --primary:#39FF14;
-  --secondary:#00C896;
-  --ring: rgba(57,255,20,.6);
-  --shadow:0 10px 30px rgba(0,0,0,.45);
-  --radius:18px;
+  /* base */
+  --bg: #0B0D10;
+  --panel: #11151A;
+  --surface: #0E1217;
+  --text: #E8F1F2;
+  --muted: #7B8694;
+
+  /* cores de marca */
+  --primary: #39FF14;
+  --secondary: #00C896;
+  --ring: rgba(57,255,20,.60);
+
+  /* bordas/sombras */
+  --border: #1A2129;
+  --border-strong: #1C2430;
+  --shadow: 0 10px 30px rgba(0,0,0,.45);
+
+  /* extras */
+  --radius: 18px;
+
+  /* gradientes utilitários */
+  --card-grad: linear-gradient(180deg, #12171E, #0F1319);
+  --root-grad1: radial-gradient(1000px 500px at 10% 0%, rgba(57,255,20,.06), transparent 60%);
+  --root-grad2: radial-gradient(900px 500px at 100% 10%, rgba(0,200,150,.08), transparent 60%);
 }
 
-/* ---------- Base ---------- */
+/* ---------- TEMA CLARO — AUTO ---------- */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #F7FAFC;
+    --panel: #FFFFFF;
+    --surface: #F2F6FA;
+    --text: #0B0D10;
+    --muted: #5A6573;
+
+    --primary: #1FEA00;
+    --secondary: #00C896;
+    --ring: rgba(31,234,0,.30);
+
+    --border: #E2E8F0;
+    --border-strong: #CBD5E1;
+    --shadow: 0 12px 28px rgba(15, 23, 42, .10);
+
+    --card-grad: linear-gradient(180deg, #FFFFFF, #F7FAFC);
+    --root-grad1: radial-gradient(1000px 500px at 10% 0%, rgba(31,234,0,.08), transparent 60%);
+    --root-grad2: radial-gradient(900px 500px at 100% 10%, rgba(0,200,150,.08), transparent 60%);
+  }
+}
+
+/* ---------- OVERRIDE MANUAL ---------- */
+:root[data-theme="light"] {
+  --bg: #F7FAFC;
+  --panel: #FFFFFF;
+  --surface: #F2F6FA;
+  --text: #0B0D10;
+  --muted: #5A6573;
+
+  --primary: #1FEA00;
+  --secondary: #00C896;
+  --ring: rgba(31,234,0,.30);
+
+  --border: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --shadow: 0 12px 28px rgba(15, 23, 42, .10);
+
+  --card-grad: linear-gradient(180deg, #FFFFFF, #F7FAFC);
+  --root-grad1: radial-gradient(1000px 500px at 10% 0%, rgba(31,234,0,.08), transparent 60%);
+  --root-grad2: radial-gradient(900px 500px at 100% 10%, rgba(0,200,150,.08), transparent 60%);
+}
+:root[data-theme="dark"] {}
+
+/* ---------- BASE ---------- */
 *{ box-sizing:border-box }
 body{ background:var(--bg); color:var(--text) }
 
@@ -27,15 +90,16 @@ body{ background:var(--bg); color:var(--text) }
   display:grid; place-items:center;
   padding:32px 16px;
   background:
-    radial-gradient(1000px 500px at 10% 0%, rgba(57,255,20,.06), transparent 60%),
-    radial-gradient(900px 500px at 100% 10%, rgba(0,200,150,.08), transparent 60%);
+    var(--root-grad1),
+    var(--root-grad2),
+    var(--bg);
 }
 
-/* ---------- Card ---------- */
+/* ---------- CARD ---------- */
 .auth-card{
   width:100%; max-width:520px;
-  background:linear-gradient(180deg,#12171E,#0F1319);
-  border:1px solid #1A2129;
+  background: var(--card-grad);
+  border:1px solid var(--border);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
   padding:22px 20px;
@@ -47,71 +111,85 @@ body{ background:var(--bg); color:var(--text) }
   background:linear-gradient(90deg, var(--secondary), var(--primary));
 }
 
-/* ---------- Títulos ---------- */
-.auth-title{ margin:6px 0 4px; font-size:28px }
+/* ---------- TÍTULOS ---------- */
+.auth-title{ margin:6px 0 4px; font-size:28px; color: var(--text) }
 .auth-subtitle{ margin:0 0 18px; color:var(--muted) }
 
 .auth-form{ display:flex; flex-direction:column; gap:12px }
 
-/* ---------- Campos ---------- */
+/* ---------- CAMPOS ---------- */
 .field{
   display:flex; flex-direction:column; gap:6px;
   background:var(--panel);
-  border:1px solid #1A2129; border-radius:14px; padding:12px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border:1px solid var(--border);
+  border-radius:14px; padding:12px;
+  transition: border-color .2s ease, box-shadow .2s ease;
 }
 .field label{ font-size:12px; color:var(--muted) }
 .field input, .field select{
   width:100%;
-  background:#0E1217; color:var(--text);
-  border:1px solid #1C2430; border-radius:10px; padding:12px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border-strong); border-radius:10px; padding:12px;
+  transition: border-color .2s ease, box-shadow .2s ease;
 }
 .field input:focus, .field select:focus,
 .field input:hover, .field select:hover {
   border-color: var(--secondary);
-  box-shadow:0 0 0 2px rgba(57,255,20,.12);
+  box-shadow:0 0 0 2px color-mix(in oklab, var(--ring) 60%, transparent);
 }
 .field__error{ color:#ff8b8b; font-size:12px; margin-top:4px }
 
+/* ---------- ERRO DA API ---------- */
 .api-error-message{
-  background:#30121a;
-  border:1px solid #5c1b2a;
-  color:#ffb4c8;
+  background: color-mix(in oklab, #ff4d6d 12%, transparent);
+  border:1px solid color-mix(in oklab, #ff4d6d 45%, var(--border-strong));
+  color: color-mix(in oklab, #ff4d6d 85%, var(--text));
   padding:10px; border-radius:12px;
 }
 
-/* ---------- Senha com toggle ---------- */
-.input-pass{ position:relative }
-.input-pass input{ padding-right:42px }
-.input-pass .toggle{
-  position:absolute; right:8px; top:50%; transform:translateY(-50%);
-  width:34px; height:34px; display:grid; place-items:center;
-  border:1px solid #2A323C; border-radius:10px;
-  background:rgba(255,255,255,.05); color:#C9D3DC;
-  cursor:pointer;
+/* ---------- SENHA COM TOGGLE (FIX) ---------- */
+.input-pass{
+  position: relative;    /* garante contexto pro botão */
 }
-.input-pass .toggle:hover{ border-color:#3A4451 }
+.input-pass input{
+  padding-right: 56px;   /* mais espaço pro botão não cortar */
+}
+.input-pass .toggle{
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  width:36px; height:36px; display:grid; place-items:center;
+  border:1px solid var(--border-strong); border-radius:10px;
+  background:color-mix(in oklab, var(--panel) 90%, transparent);
+  color:var(--muted);
+  cursor:pointer;
+  z-index: 3;            /* fica acima do input */
+}
+.input-pass .toggle svg{
+  display:block;         /* evita “apertar” o ícone */
+  pointer-events:none;   /* clique sempre no botão */
+}
+.input-pass .toggle:hover{
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+}
 
-/* ---------- Linha auxiliar (lembrar/esqueci) ---------- */
+/* ---------- LINHA AUXILIAR ---------- */
 .form-row{
   display:flex; align-items:center; justify-content:space-between;
   gap:12px; margin-top:2px;
 }
-.check{ display:inline-flex; align-items:center; gap:8px; color:#D6E3DB; font-size:14px }
+.check{ display:inline-flex; align-items:center; gap:8px; color: color-mix(in oklab, var(--text) 88%, var(--muted)); font-size:14px }
 .check input{ width:16px; height:16px }
 
-/* ---------- Links ---------- */
+/* ---------- LINKS ---------- */
 .link{ color:var(--secondary); text-decoration:none }
 .link:hover{ text-decoration:underline }
 .link:focus-visible{ outline:2px solid var(--secondary); outline-offset:2px }
 
-/* ---------- Botões ---------- */
+/* ---------- BOTÕES ---------- */
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  border:1px solid #1C2430; background:transparent; color:var(--text);
+  border:1px solid var(--border-strong); background:transparent; color:var(--text);
   text-decoration:none; cursor:pointer; border-radius:12px; padding:12px 16px;
-  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+  transition: transform .2s ease, filter .2s ease, box-shadow .2s ease;
 }
 .btn:focus-visible{ outline:2px solid var(--secondary); outline-offset:2px }
 .btn--full{ width:100% }
@@ -120,51 +198,48 @@ body{ background:var(--bg); color:var(--text) }
 .btn--primary{
   background:linear-gradient(180deg, var(--primary), var(--secondary));
   color:#0B0D10; font-weight:800;
+  border-color: color-mix(in oklab, var(--primary) 35%, var(--border-strong));
 }
 .btn--primary:hover{
-  filter:brightness(1.1);
-  transform:scale(1.05);
-  box-shadow:0 4px 12px rgba(57,255,20,0.4);
+  filter:brightness(1.06);
+  transform:translateY(-1px);
+  box-shadow:0 8px 22px rgba(0,0,0,.25);
 }
 
 /* Botão ghost / secundário */
-.btn--ghost{ border-color:#2A323C; color:#D3D8DF }
-.btn--ghost:hover{ border-color:#3A4451; transform:scale(1.03) }
+.btn--ghost{ border-color:var(--border); color: color-mix(in oklab, var(--text) 88%, var(--muted)) }
+.btn--ghost:hover{ border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border)); transform:translateY(-1px) }
 
-/* ---------- OAuth / Switch ---------- */
+/* ---------- OAUTH / SWITCH ---------- */
 .oauth{ margin-top:8px; display:flex; flex-direction:column; gap:10px }
 .switch{ text-align:center; color:var(--muted); margin-top:10px }
 
-/* ---------- Medidor de força ---------- */
+/* ---------- MEDIDOR DE FORÇA ---------- */
 .pass-strength{
   display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:8px;
 }
 .pass-strength .bar{
-  height:6px; border-radius:6px; background:#24303B; border:1px solid #2A3745;
+  height:6px; border-radius:6px; background: color-mix(in oklab, var(--surface) 60%, var(--panel));
+  border:1px solid var(--border-strong);
 }
 .pass-strength .bar.on{
   background:linear-gradient(90deg, var(--secondary), var(--primary));
   border-color:transparent;
 }
 
-/* ---------- Responsivo ---------- */
-
-/* Mobile (até 480px) */
+/* ---------- RESPONSIVO ---------- */
 @media (max-width:480px){
   .auth-card{ padding:18px 16px }
   .auth-title{ font-size:24px }
   .auth-subtitle{ font-size:14px }
   .field input, .field select{ padding:10px; font-size:14px }
   .btn{ padding:10px 14px; font-size:14px }
-  .input-pass .toggle{ width:30px; height:30px }
+  .input-pass .toggle{ width:34px; height:34px; right:8px }
 }
-
-/* Tablet (até 768px) */
 @media (max-width:768px){
   .auth-card{ max-width:440px; padding:20px 18px }
   .auth-title{ font-size:26px }
   .auth-subtitle{ font-size:15px }
   .field input, .field select{ padding:11px; font-size:15px }
   .btn{ padding:11px 15px; font-size:15px }
-  .input-pass .toggle{ width:32px; height:32px }
 }
