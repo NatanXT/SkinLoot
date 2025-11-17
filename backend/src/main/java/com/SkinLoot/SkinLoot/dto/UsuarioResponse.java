@@ -9,6 +9,8 @@ public class UsuarioResponse {
   private String nome;
   private String email;
   private String plano;
+  private Double mediaNotas;
+  private Integer totalAvaliacoes;
 
   public static UsuarioResponse of(Usuario u) {
     UsuarioResponse r = new UsuarioResponse();
@@ -19,6 +21,8 @@ public class UsuarioResponse {
     r.plano = u.getPlanoAssinatura() != null
         ? u.getPlanoAssinatura().getNome().name().toLowerCase()
         : "gratuito";
+    r.mediaNotas = u.getMediaNotas();
+    r.totalAvaliacoes = u.getTotalAvaliacoes();
     return r;
   }
 
