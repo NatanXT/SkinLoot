@@ -328,11 +328,15 @@ export default function DashboardVitrine() {
 
     const nomeSkin = anuncio.title ?? anuncio.skinNome ?? 'Skin';
     const precoSkin = anuncio.price ?? anuncio.preco ?? 0;
+    const idAnuncio = anuncio.id || anuncio._id;
 
     setChatAberto({
       seller: { id: id, nome: nome },
-      skin: { titulo: nomeSkin, preco: precoSkin },
-    });
+      skin: {
+        id: idAnuncio, // <--- IMPORTANTE
+        titulo: nomeSkin,
+        preco: precoSkin
+      },    });
     setUnreads(0);
   }
 
