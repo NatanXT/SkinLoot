@@ -27,6 +27,9 @@ import { listarJogos } from '../../services/jogoService.js';
 
 /* ======================================================
    Metadados dos planos
+   - label: nome exibido no card
+   - weight: impacto no ranking da vitrine (prioridade de exibição)
+   - color: cor usada no gradiente/borda do plano
 ====================================================== */
 const plansMeta = {
   gratuito: { label: 'Gratuito', weight: 1.0, color: '#454B54' },
@@ -833,30 +836,45 @@ export default function DashboardVitrine() {
       <section id="planos" className="plans">
         <h2>Planos de Destaque</h2>
         <div className="plans__grid">
-          {Object.entries(plansMeta).map(([key, p]) => (
-            <div
-              key={key}
-              className={`plan plan--${key}`}
-              style={{ '--plan': p.color }}
-            >
-              <h3>{p.label}</h3>
-              <ul>
-                <li>
-                  Prioridade de exibição: <strong>{p.weight}x</strong>
-                </li>
-                <li>Badge de destaque</li>
-                <li>Suporte via e-mail</li>
-                {key !== 'gratuito' && <li>Relatórios de visualização</li>}
-                {key === 'plus' && <li>Spotlight na página inicial</li>}
-              </ul>
-              <button
-                className="btn btn--primary"
-                onClick={() => irParaUpgrade(key)}
+          {Object.entries(plansMeta).map(([key, p]) => {
+            // Limite de anúncios por plano
+            const anunciosLimit =
+              key === 'gratuito' ? '5' : key === 'intermediario' ? '20' : '∞';
+
+            const hasBadge = key !== 'gratuito';
+            const hasSpotlight = key === 'plus';
+
+            return (
+              <div
+                key={key}
+                className={`plan plan--${key}`}
+                style={{ '--plan': p.color }}
               >
-                Assinar
-              </button>
-            </div>
-          ))}
+                <h3>{p.label}</h3>
+
+                <ul>
+                  <li>
+                    Prioridade de exibição:{' '}
+                    <strong>{p.weight.toFixed(1)}x</strong>
+                  </li>
+                  <li>
+                    Limite de anúncios:{' '}
+                    <strong>{anunciosLimit}</strong>
+                  </li>
+                  {hasBadge && <li>Badge de destaque</li>}
+                  <li>Suporte via e-mail</li>
+                  {hasSpotlight && <li>Spotlight na página inicial</li>}
+                </ul>
+
+                <button
+                  className="btn btn--primary"
+                  onClick={() => irParaUpgrade(key)}
+                >
+                  Assinar
+                </button>
+              </div>
+            );
+          })}
         </div>
       </section>
 

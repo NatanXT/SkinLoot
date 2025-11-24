@@ -24,6 +24,9 @@ import DetalheAnuncio from './pages/detalhes/DetalheAnuncio.jsx';
 
 import PerfilUsuario from './pages/usuario/PerfilUsuario';
 
+// Página de administração de usuários
+import AdminPainel from './pages/admin/AdminPainel.jsx';
+
 // Context/Auth
 import { useAuth } from './services/AuthContext';
 
@@ -67,6 +70,14 @@ export default function App() {
             <RequireAuth>
               <PerfilUsuario />
             </RequireAuth>
+          }
+        />
+
+        {/* Usuario/Admin (PROTEGIDA) */}
+        <Route
+          path="/admin"
+          element={
+              <AdminPainel />
           }
         />
 

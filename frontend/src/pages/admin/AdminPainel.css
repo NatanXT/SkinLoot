@@ -1,0 +1,471 @@
+/* ==========================================================
+   Caminho: frontend/src/pages/admin/AdminPainel.css
+   ----------------------------------------------------------
+   Estilos específicos da tela de painel administrativo.
+   - Usa tokens globais: --bg, --panel, --surface, --text,
+     --muted, --primary, --secondary, --border, --border-strong
+   - Não redefine :root para não brigar com outros arquivos.
+========================================================== */
+
+/* Shell/base da página admin */
+.admin-root {
+  position: relative;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Ubuntu, sans-serif;
+}
+
+/* Backdrop com glow similar à DashboardVitrine/Perfil */
+.admin-backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(
+      800px 400px at 10% 0%,
+      color-mix(in oklab, var(--primary) 18%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 500px at 100% 10%,
+      color-mix(in oklab, var(--secondary) 20%, transparent),
+      transparent 60%
+    );
+}
+
+/* ===================== Topbar ===================== */
+
+.admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  background: color-mix(in oklab, var(--panel) 82%, transparent);
+  backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-topbar__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-topbar__titulo {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.admin-topbar__subtitulo {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.admin-topbar__acoes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-topbar__botao {
+  min-width: 150px;
+}
+
+/* Ajuste extra para botões outline quando usados aqui */
+.admin-btn-outline {
+  background: transparent;
+}
+
+/* Mobile: topbar quebra em duas linhas */
+@media (max-width: 640px) {
+  .admin-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 16px;
+  }
+
+  .admin-topbar__acoes {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .admin-topbar__botao {
+    flex: 1 1 40%;
+  }
+}
+
+/* ===================== Hero ===================== */
+
+.admin-hero {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px 20px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--primary) 10%, transparent),
+    transparent
+  );
+}
+
+.admin-hero__copy {
+  max-width: 900px;
+  text-align: center;
+}
+
+.admin-hero__copy h2 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.admin-hero__copy p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* ===================== Container principal ===================== */
+
+.admin-container {
+  position: relative;
+  z-index: 1;
+  max-width: var(--container-max, 1200px);
+  margin: 18px auto 64px;
+  padding: 0 16px;
+}
+
+/* Blocos da página (seções) */
+
+.admin-bloco {
+  margin-bottom: 28px;
+}
+
+.admin-bloco__cabecalho {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.admin-bloco__cabecalho h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.admin-bloco__hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.admin-bloco__cabecalho--tabela {
+  align-items: center;
+}
+
+.admin-bloco__contador {
+  font-size: 12px;
+  color: color-mix(in oklab, var(--text) 85%, var(--muted));
+}
+
+/* ===================== Cards de resumo ===================== */
+
+.admin-resumo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 1024px) {
+  .admin-resumo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-resumo-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-card {
+  background: linear-gradient(
+    180deg,
+    var(--panel),
+    color-mix(in oklab, var(--panel) 70%, var(--surface))
+  );
+  border-radius: var(--radius, 18px);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.45));
+  padding: 14px 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.admin-card:hover {
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  transform: translateY(-2px);
+}
+
+.admin-card__rotulo {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.admin-card__valor {
+  margin: 0 0 4px;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.admin-card__descricao {
+  font-size: 12px;
+  color: color-mix(in oklab, var(--text) 85%, var(--muted));
+}
+
+/* Variações de cor sutil para os cards de resumo */
+
+.admin-card--sucesso .admin-card__valor {
+  color: #22c55e;
+}
+
+.admin-card--neutro .admin-card__valor {
+  color: color-mix(in oklab, var(--text) 90%, var(--muted));
+}
+
+.admin-card--perigo .admin-card__valor {
+  color: #ef4444;
+}
+
+/* ===================== Filtros ===================== */
+
+.admin-filtros {
+  display: grid;
+  grid-template-columns: 1.4fr 0.9fr 0.9fr 1.2fr;
+  gap: 12px;
+}
+
+@media (max-width: 960px) {
+  .admin-filtros {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-filtros {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-filtro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--panel);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  box-shadow: var(--shadow);
+}
+
+.admin-filtro--busca {
+  grid-column: span 1;
+}
+
+.admin-filtro__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.admin-filtro__input {
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  padding: 0 10px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.admin-filtro__input::placeholder {
+  color: color-mix(in oklab, var(--muted) 85%, var(--text));
+}
+
+.admin-filtro__input:hover {
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, rgba(57, 255, 20, 0.6)) 35%, transparent);
+}
+
+.admin-filtro__input:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, rgba(57, 255, 20, 0.6)) 60%, transparent);
+}
+
+/* Coluna de ações de filtro (botões) */
+
+.admin-filtro--acoes {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.admin-filtro__botao {
+  width: 100%;
+}
+
+/* Em telas menores, botões em coluna */
+@media (max-width: 960px) {
+  .admin-filtro--acoes {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-filtro--acoes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-filtro__botao {
+    width: 100%;
+  }
+}
+
+/* ===================== Tabela ===================== */
+
+.admin-tabela__wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    180deg,
+    var(--panel),
+    color-mix(in oklab, var(--panel) 70%, var(--surface))
+  );
+  box-shadow: var(--shadow);
+}
+
+/* Tabela em si */
+
+.admin-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.admin-tabela thead {
+  background: color-mix(in oklab, var(--surface) 90%, var(--panel));
+}
+
+.admin-tabela th,
+.admin-tabela td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid color-mix(
+      in oklab,
+      var(--border) 90%,
+      transparent
+    );
+  white-space: nowrap;
+}
+
+.admin-tabela th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.admin-tabela td {
+  color: var(--text);
+}
+
+.admin-tabela__nome {
+  font-weight: 600;
+}
+
+.admin-tabela__tipo,
+.admin-tabela__categoria {
+  text-transform: capitalize;
+  color: color-mix(in oklab, var(--text) 88%, var(--muted));
+}
+
+.admin-tabela__th-acoes,
+.admin-tabela__acoes {
+  text-align: right;
+}
+
+.admin-tabela__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* Linha de tabela vazia (nenhum resultado) */
+
+.admin-tabela__vazio {
+  text-align: center;
+  padding: 18px 12px;
+  color: var(--muted);
+}
+
+/* Status badge (ativo, oculto, banido) */
+
+.admin-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.admin-status-badge--ativo {
+  background: rgba(34, 197, 94, 0.16);
+  color: #22c55e;
+}
+
+.admin-status-badge--oculto {
+  background: rgba(148, 163, 184, 0.16);
+  color: #cbd5f5;
+}
+
+.admin-status-badge--banido {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fca5a5;
+}
+
+/* Responsividade da tabela: em telas bem pequenas,
+   reduzir padding para caber mais colunas. */
+
+@media (max-width: 480px) {
+  .admin-tabela th,
+  .admin-tabela td {
+    padding: 8px 8px;
+  }
+
+  .admin-tabela__acoes {
+    gap: 4px;
+  }
+}
