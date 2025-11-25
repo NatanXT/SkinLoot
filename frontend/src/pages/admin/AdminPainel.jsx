@@ -14,10 +14,12 @@
 // Depois você pode trocar por chamadas reais à API do backend.
 // ==========================================================
 
-import React, { useMemo, useState } from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import "./AdminPainel.css";
+import anuncioService from "../../services/anuncioService";
+import api from "../../services/api";
 
 /**
  * Estrutura de um item administrável no painel.
@@ -123,7 +125,67 @@ export default function AdminPainel() {
   const [termoBusca, setTermoBusca] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [filtroStatus, setFiltroStatus] = useState("todos");
+  const [listaItens, setListaItens] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    async function carregarDados() {
+      try {
+        setLoading(true);
+
+        // 1. Buscar Anúncios (Skins)
+        // Usamos o service pois ele já trata imagens, nomes de jogos e normaliza os campos
+        const skinsRaw = await anuncioService.listarFeedNormalizado();
+
+        const skinsFormatadas = skinsRaw.map((skin) => ({
+          id: skin.id,
+          nome: skin.skinNome, // O service normaliza como 'skinNome'
+          tipo: "skin",
+          categoria: skin.game || "Desconhecido", // Ex: CS2, LoL
+          // Mapeia booleano ou status string para as classes do CSS (ativo, oculto, banido)
+          status: skin.ativo ? "ativo" : "oculto",
+          preco: skin.preco,
+          criadoEm: new Date(skin.listedAt).toLocaleDateString("pt-BR"),
+          autor: skin.usuarioNome || skin.seller?.name || "Desconhecido",
+          original: skin // Mantém o objeto original caso precise para edição
+        }));
+
+        // 2. Buscar Usuários (Chamada direta à API se não houver userService pronto)
+        // Assumindo que seu endpoint é /usuarios e retorna uma lista
+        let usuariosFormatados = [];
+        try {
+          const resUsers = await api.get("/usuarios");
+          // Verifica se a resposta é array ou objeto paginado
+          const usersData = Array.isArray(resUsers.data) ? resUsers.data : (resUsers.data.content || []);
+
+          usuariosFormatados = usersData.map((u) => ({
+            id: u.id,
+            nome: u.nome,
+            tipo: "usuario",
+            autor: u.nome, // ou "Próprio" se preferir distinguir
+            categoria: "Conta", // Categoria fixa para usuários
+            // Exemplo de lógica de status baseada no objeto do usuário
+            status: u.statusAssinatura === "ATIVA" ? "ativo" : "banido",
+            preco: 0, // Usuário não tem preço
+            criadoEm: "—", // Se não tiver data de criação no DTO
+            original: u
+          }));
+        } catch (errUser) {
+          console.error("Erro ao carregar usuários (pode ser permissão de admin):", errUser);
+        }
+
+        // 3. Juntar tudo na lista principal
+        setListaItens([...skinsFormatadas, ...usuariosFormatados]);
+
+      } catch (error) {
+        console.error("Erro ao carregar painel administrativo:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    carregarDados();
+  }, []);
   /**
    * Resumo geral baseado na lista completa (sem filtros).
    */
@@ -140,7 +202,7 @@ export default function AdminPainel() {
    * Lista filtrada com base nos controles de busca/tipo/status.
    */
   const itensFiltrados = useMemo(() => {
-    return ITENS_MOCK.filter((item) => {
+    return listaItens.filter((item) => {
       const texto = `${item.nome} ${item.categoria} ${item.tipo}`
         .toLowerCase()
         .trim();
@@ -157,7 +219,7 @@ export default function AdminPainel() {
 
       return buscaOk && tipoOk && statusOk;
     });
-  }, [termoBusca, filtroTipo, filtroStatus]);
+  }, [termoBusca, filtroTipo, filtroStatus, listaItens]);
 
   /**
    * Monta a descrição textual dos filtros atuais
@@ -617,7 +679,13 @@ export default function AdminPainel() {
 
                 {itensFiltrados.map((item) => (
                   <tr key={item.id}>
-                    <td>#{item.id}</td>
+                    <td>{/* felipe: O ID (talvez você queira truncar se ficar muito grande) */}
+                      <span title={item.id}>#{item.id.substring(0, 8)}...</span>
+
+                      {/* ✅ O NOME DO USUÁRIO AQUI */}
+                      <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '2px' }}>
+                        ({item.autor})
+                      </div></td>
                     <td className="admin-tabela__nome">{item.nome}</td>
                     <td className="admin-tabela__tipo">{item.tipo}</td>
                     <td className="admin-tabela__categoria">
