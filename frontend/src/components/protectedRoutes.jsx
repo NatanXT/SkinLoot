@@ -16,19 +16,21 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
 
 const ProtectedRoute = () => {
-  const { user, loading } = useAuth();
+  // 1. MUDANÇA AQUI: Pegue 'isCheckingAuth' em vez de 'loading'
+  const { user, isCheckingAuth } = useAuth();
   const loc = useLocation();
 
-  // Enquanto não sabemos se há sessão, não decide (evita flicker)
-  if (loading) return null; // se preferir, renderize um spinner aqui
+  // 2. MUDANÇA AQUI: Use a variável correta
+  // Se estiver checando, retorna null (tela branca) para esperar
+  if (isCheckingAuth) return null;
 
-  // Se não logado, envia para /login com ?from=<rota>
+  // Se terminou de checar e não tem usuário, redireciona
   if (!user) {
     const from = encodeURIComponent(loc.pathname + loc.search);
     return <Navigate to={`/login?from=${from}`} replace />;
   }
 
-  // Logado → renderiza a rota filha
+  // Se tem usuário, mostra o conteúdo
   return <Outlet />;
 };
 

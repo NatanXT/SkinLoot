@@ -23,9 +23,13 @@ import AuthBrand from '../../components/logo/AuthBrand.jsx';
 import ChatFlutuante from '../../components/chat/ChatFlutuante';
 import anuncioService from '../../services/anuncioService.js';
 import SkinCard from '../../components/skin/SkinCard.jsx';
+import { listarJogos } from '../../services/jogoService.js';
 
 /* ======================================================
    Metadados dos planos
+   - label: nome exibido no card
+   - weight: impacto no ranking da vitrine (prioridade de exibição)
+   - color: cor usada no gradiente/borda do plano
 ====================================================== */
 const plansMeta = {
   gratuito: { label: 'Gratuito', weight: 1.0, color: '#454B54' },
@@ -103,22 +107,122 @@ const toMs = (v) => {
   return Number.isFinite(t) ? t : Date.now();
 };
 
+/**
+ * Extrai um "conjunto" de chaves de jogo possíveis do anúncio (IDs e nomes),
+ * para permitir filtrar mesmo quando algum item ainda não estiver normalizado.
+ * - Preferimos ID (string). Também incluímos o nome normalizado (minúsculo).
+ */
+function getGameKeysFromAnuncio(anuncio) {
+  const id =
+    anuncio?.jogo?.id ??
+    anuncio?._raw?.jogo?.id ??
+    anuncio?.jogoId ??
+    anuncio?.gameId ??
+    null;
+
+  const nome =
+    anuncio?.jogo?.nome ??
+    anuncio?._raw?.jogo?.nome ??
+    anuncio?.game ??
+    anuncio?.gameName ??
+    null;
+
+  const keys = new Set();
+
+  if (id !== null && id !== undefined && id !== '') {
+    keys.add(String(id));
+  }
+  if (nome) {
+    keys.add(String(nome).toLowerCase().trim());
+  }
+
+  // Alias como "CS2", "CS:GO" etc. — adiciona variante compacta
+  if (nome) {
+    const compact = String(nome).toLowerCase().replace(/[:\s]/g, '');
+    if (compact) keys.add(compact);
+  }
+
+  // Fallback se o feed usar somente uma string "game" (ex.: "CS2")
+  if (anuncio?.game) {
+    const g = String(anuncio.game).toLowerCase().trim();
+    if (g) keys.add(g);
+    const gCompact = g.replace(/[:\s]/g, '');
+    if (gCompact) keys.add(gCompact);
+  }
+
+  return keys;
+}
+
 /* ======================================================
    Hook de ranking e filtragem das skins
 ====================================================== */
-function useRankedSkins(list, sortBy, filters) {
+function useRankedSkins(list, sortBy, filters, jogosList) {
+  // Nome do game selecionado a partir do ID (quando filtros.game é um ID válido)
+  const selectedGameName = useMemo(() => {
+    if (filters.game === 'todos') return null;
+    const found = (jogosList || []).find(
+      (j) => String(j.id) === String(filters.game),
+    );
+    return found?.nome || null;
+  }, [filters.game, jogosList]);
+
+  // Nomes normalizados para comparação
+  const selectedGameNameLower = useMemo(() => {
+    if (!selectedGameName) return null;
+    return String(selectedGameName).toLowerCase().trim();
+  }, [selectedGameName]);
+
+  const selectedGameCompact = useMemo(() => {
+    if (!selectedGameNameLower) return null;
+    return selectedGameNameLower.replace(/[:\s]/g, '');
+  }, [selectedGameNameLower]);
+
+  // Fallback extra: trata o PRÓPRIO valor de filters.game como nome cru (ex.: "?game=cs2")
+  const rawGameKey = useMemo(() => {
+    if (filters.game === 'todos') return null;
+    const asText = String(filters.game).toLowerCase().trim();
+    return {
+      lower: asText,
+      compact: asText.replace(/[:\s]/g, ''),
+    };
+  }, [filters.game]);
+
+  // Ranking + filtragem
   return useMemo(() => {
     const now = Date.now();
     const rec = (t) => Math.max(0.6, 1.4 - (now - t) / (1000 * 60 * 60 * 72));
 
     const filtrados = list.filter((s) => {
       if (s.ativo === false) return false;
+
+      // -------- Plano --------
       const planOk = filters.plan === 'todos' || s.plan === filters.plan;
-      const gameOk = filters.game === 'todos' || s.game === filters.game;
 
+      // -------- Jogo --------
+      let gameOk = true;
+      if (filters.game !== 'todos') {
+        const keys = getGameKeysFromAnuncio(s);
+
+        // 1) Bate pelo ID
+        if (keys.has(String(filters.game))) {
+          gameOk = true;
+        } else {
+          // 2) Fallbacks por nome (normalizado)
+          const byName =
+            (selectedGameNameLower && keys.has(selectedGameNameLower)) ||
+            (selectedGameCompact && keys.has(selectedGameCompact)) ||
+            (rawGameKey &&
+              (keys.has(rawGameKey.lower) || keys.has(rawGameKey.compact)));
+
+          gameOk = !!byName;
+        }
+      }
+
+      // -------- Texto --------
       const nome = (s.title ?? s.skinNome ?? s.nome ?? '').toLowerCase();
-      const textoOk = nome.includes(filters.search.toLowerCase());
+      const textoOk = nome.includes(String(filters.search || '').toLowerCase());
 
+      // -------- Preço --------
       const priceVal = Number(s.price ?? s.preco ?? NaN);
       const priceOk =
         Number.isFinite(priceVal) &&
@@ -128,10 +232,11 @@ function useRankedSkins(list, sortBy, filters) {
       return planOk && gameOk && textoOk && priceOk;
     });
 
+    // Aplica a pontuação de relevância
     const pontuados = filtrados.map((s) => {
       const meta = plansMeta[s.plan] || { weight: 1.0 };
       const likes = Number(s.likes ?? 0);
-      const listedAt = toMs(s.listedAt ?? now);
+      const listedAt = toMs(s.listedAt ?? s.createdAt ?? now);
       return {
         ...s,
         listedAt,
@@ -149,7 +254,18 @@ function useRankedSkins(list, sortBy, filters) {
       return pontuados.sort((a, b) => b.listedAt - a.listedAt);
 
     return pontuados;
-  }, [list, sortBy, filters]);
+  }, [
+    list,
+    sortBy,
+    filters.plan,
+    filters.game,
+    filters.search,
+    filters.min,
+    filters.max,
+    selectedGameNameLower,
+    selectedGameCompact,
+    rawGameKey, // <- AQUI entram as dependências incluindo o fallback cru
+  ]);
 }
 
 /* ======================================================
@@ -183,6 +299,9 @@ export default function DashboardVitrine() {
   const [chatAberto, setChatAberto] = useState(null);
   const [unreads, setUnreads] = useState(0);
 
+  const [jogosList, setJogosList] = useState([]);
+  const [jogosErr, setJogosErr] = useState('');
+
   /* ======================================================
      Autenticação e navegação
   ====================================================== */
@@ -209,7 +328,14 @@ export default function DashboardVitrine() {
       anuncio?.seller?.id ??
       anuncio?.vendedorId ??
       `temp-${anuncio?.id || anuncio?._id}`;
-    setChatAberto({ id, nome });
+
+    const nomeSkin = anuncio.title ?? anuncio.skinNome ?? 'Skin';
+    const precoSkin = anuncio.price ?? anuncio.preco ?? 0;
+
+    setChatAberto({
+      seller: { id: id, nome: nome },
+      skin: { titulo: nomeSkin, preco: precoSkin },
+    });
     setUnreads(0);
   }
 
@@ -229,6 +355,28 @@ export default function DashboardVitrine() {
      Efeitos e sincronização
   ====================================================== */
 
+  // Carrega a lista de jogos para o filtro
+  useEffect(() => {
+    let ativo = true;
+    (async () => {
+      try {
+        setJogosErr('');
+        const jogos = await listarJogos();
+        if (ativo) setJogosList(Array.isArray(jogos) ? jogos : []);
+      } catch (e) {
+        console.error('Falha ao carregar a lista de jogos.', e);
+        if (ativo) {
+          setJogosErr('Não foi possível carregar os jogos.');
+          setJogosList([]);
+        }
+      }
+    })();
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  // Minhas skins
   useEffect(() => {
     let ativo = true;
     async function carregarMinhas() {
@@ -272,6 +420,7 @@ export default function DashboardVitrine() {
     };
   }, [user]);
 
+  // Atualiza peso do plano nas minhas skins quando plano do usuário muda
   useEffect(() => {
     const planKey = String(
       user?.plano || user?.plan || 'gratuito',
@@ -283,6 +432,7 @@ export default function DashboardVitrine() {
     );
   }, [user?.plano, user?.plan]);
 
+  // Feed público
   useEffect(() => {
     let ativo = true;
     (async () => {
@@ -304,6 +454,7 @@ export default function DashboardVitrine() {
     };
   }, []);
 
+  // Pequena atualização periódica do feed
   useEffect(() => {
     const id = setInterval(async () => {
       try {
@@ -318,6 +469,7 @@ export default function DashboardVitrine() {
     return () => clearInterval(id);
   }, []);
 
+  // Sincroniza filtros na URL
   useEffect(() => {
     writeStateToURL(filters, sortBy, true);
   }, [filters, sortBy]);
@@ -336,6 +488,8 @@ export default function DashboardVitrine() {
       user?.plano || user?.plan || 'gratuito',
     ).toLowerCase();
     const ratio = plansMeta[planKey]?.weight ?? 1.0;
+
+    // Mistura simples: favorece intercalar minhas skins de acordo com o peso
     const mixByPlanRatio = (mine, others, ratio) => {
       const res = [];
       let i = 0,
@@ -354,7 +508,8 @@ export default function DashboardVitrine() {
     return mixByPlanRatio(minhasSkins || [], others, ratio);
   }, [feedApi, minhasSkins, user]);
 
-  const ranked = useRankedSkins(listaCombinada, sortBy, filters);
+  // Agora o hook já trata todos os fallbacks (ID, nome e valor cru da URL)
+  const ranked = useRankedSkins(listaCombinada, sortBy, filters, jogosList);
 
   /* ======================================================
      Handlers
@@ -501,10 +656,17 @@ export default function DashboardVitrine() {
             </button>
 
             {menuAberto && (
-              <div className="menu">
-                <button onClick={() => navigate('/perfil')}>Meu Perfil</button>
-                <button onClick={handleLogout}>Sair</button>
-              </div>
+                <div className="menu">
+                  {/* ✅ Botão exclusivo para Admin */}
+                  {user?.role === 'ADMIN' && (
+                      <button onClick={() => navigate('/admin')} style={{ color: '#39FF14' }}>
+                        Painel Admin
+                      </button>
+                  )}
+
+                  <button onClick={() => navigate('/perfil')}>Meu Perfil</button>
+                  <button onClick={handleLogout}>Sair</button>
+                </div>
             )}
           </div>
         </div>
@@ -522,7 +684,7 @@ export default function DashboardVitrine() {
             <Link to="/login" className="btn btn--ghost sm">
               Entrar
             </Link>
-            <Link to="/cadastro" cFpreçolassName="btn btn--primary sm">
+            <Link to="/cadastro" className="btn btn--primary sm">
               Criar conta
             </Link>
           </div>
@@ -572,10 +734,16 @@ export default function DashboardVitrine() {
             <select
               value={filters.game}
               onChange={(e) => setFilters({ ...filters, game: e.target.value })}
+              title="Filtre por jogo (lista sincronizada.)"
             >
               <option value="todos">Todos</option>
-              <option value="CS2">CS2</option>
+              {jogosList.map((jogo) => (
+                <option key={jogo.id} value={String(jogo.id)}>
+                  {jogo.nome}
+                </option>
+              ))}
             </select>
+            {jogosErr && <small style={{ color: '#f66' }}>{jogosErr}</small>}
           </div>
 
           <div className="field">
@@ -675,30 +843,45 @@ export default function DashboardVitrine() {
       <section id="planos" className="plans">
         <h2>Planos de Destaque</h2>
         <div className="plans__grid">
-          {Object.entries(plansMeta).map(([key, p]) => (
-            <div
-              key={key}
-              className={`plan plan--${key}`}
-              style={{ '--plan': p.color }}
-            >
-              <h3>{p.label}</h3>
-              <ul>
-                <li>
-                  Prioridade de exibição: <strong>{p.weight}x</strong>
-                </li>
-                <li>Badge de destaque</li>
-                <li>Suporte via e-mail</li>
-                {key !== 'gratuito' && <li>Relatórios de visualização</li>}
-                {key === 'plus' && <li>Spotlight na página inicial</li>}
-              </ul>
-              <button
-                className="btn btn--primary"
-                onClick={() => irParaUpgrade(key)}
+          {Object.entries(plansMeta).map(([key, p]) => {
+            // Limite de anúncios por plano
+            const anunciosLimit =
+              key === 'gratuito' ? '5' : key === 'intermediario' ? '20' : '∞';
+
+            const hasBadge = key !== 'gratuito';
+            const hasSpotlight = key === 'plus';
+
+            return (
+              <div
+                key={key}
+                className={`plan plan--${key}`}
+                style={{ '--plan': p.color }}
               >
-                Assinar
-              </button>
-            </div>
-          ))}
+                <h3>{p.label}</h3>
+
+                <ul>
+                  <li>
+                    Prioridade de exibição:{' '}
+                    <strong>{p.weight.toFixed(1)}x</strong>
+                  </li>
+                  <li>
+                    Limite de anúncios:{' '}
+                    <strong>{anunciosLimit}</strong>
+                  </li>
+                  {hasBadge && <li>Badge de destaque</li>}
+                  <li>Suporte via e-mail</li>
+                  {hasSpotlight && <li>Spotlight na página inicial</li>}
+                </ul>
+
+                <button
+                  className="btn btn--primary"
+                  onClick={() => irParaUpgrade(key)}
+                >
+                  Assinar
+                </button>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -713,10 +896,12 @@ export default function DashboardVitrine() {
       {/* ---------- Chat Flutuante ---------- */}
       {user &&
         (chatAberto ? (
-          <ChatFlutuante
-            usuarioAlvo={chatAberto}
-            onFechar={() => setChatAberto(null)}
-          />
+          <div className="chat-float">
+            <ChatFlutuante
+              usuarioAlvo={chatAberto}
+              onFechar={() => setChatAberto(null)}
+            />
+          </div>
         ) : (
           <button
             className="chat-mini-bubble"

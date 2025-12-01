@@ -1,20 +1,116 @@
-/* frontend/src/pages/DetalheAnuncio.css
-   ============================================================
-   - Layout + visual coerente com o projeto
-   - Caixas .box com hover/focus esverdeado
-   - Badge com nome do jogo na imagem
-   ============================================================ */
+/* ============================================================================
+   DetalheAnuncio.css
+   Caminho: frontend/src/pages/DetalheAnuncio.css
 
+   ESCOPO GERAL
+   - Tokens/variáveis (Dark padrão + Light auto/forçado)
+   - Estrutura principal do detalhe (container, imagem e info)
+   - Boxes de informações por jogo
+   - Botões gerais e botão de favoritar (ON/OFF + animações)
+   - Chat flutuante e mini-bubble
+   - Responsividade (Desktop, Tablet, Mobile)
+   ========================================================================= */
+
+/* ============================================================================
+   1. TOKENS — Tema DARK (padrão)
+   ========================================================================= */
 :root {
+  /* === Base === */
   --bg: #0B0D10;
   --panel: #11151A;
-  --muted: #7B8694;
+  --surface: #0E1217;
   --text: #E8F1F2;
+  --muted: #7B8694;
+
+  /* === Marca === */
   --primary: #39FF14;
   --secondary: #00C896;
   --ring: rgba(57,255,20,.45);
+
+  /* === Borda e sombra === */
+  --border: #1A2129;
+  --border-strong: #1C2430;
+  --shadow: 0 12px 40px rgba(0,0,0,.45);
+
+  /* === Gradientes === */
+  --card-grad: linear-gradient(180deg, #12171E, #0F1319);
+  --panel-grad: linear-gradient(180deg, #0E1217, #0B0D10);
+
+  /* === Favoritar (estado base) === */
+  --fav-off-bg: transparent;
+  --fav-off-border: var(--primary);
+  --fav-off-text: var(--primary);
+  --fav-off-hover: color-mix(in oklab, var(--primary) 12%, transparent);
+
+  /* === Favoritar (ativo) === */
+  --fav-on-bg: var(--primary);
+  --fav-on-text: #0B0D10;
+  --fav-on-ring: color-mix(in oklab, var(--primary) 40%, transparent);
 }
 
+/* ============================================================================
+   2. TOKENS — Tema CLARO (automático)
+   ========================================================================= */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #F7FAFC;
+    --panel: #FFFFFF;
+    --surface: #F2F6FA;
+    --text: #0B0D10;
+    --muted: #5A6573;
+
+    --primary: #1FEA00;
+    --secondary: #00C896;
+    --ring: rgba(31,234,0,.30);
+
+    --border: #E2E8F0;
+    --border-strong: #CBD5E1;
+    --shadow: 0 12px 28px rgba(15, 23, 42, .10);
+
+    --card-grad: linear-gradient(180deg, #FFFFFF, #F7FAFC);
+    --panel-grad: linear-gradient(180deg, #F9FBFD, #EEF3F8);
+
+    /* Hover do botão de favoritar */
+    --fav-off-hover: color-mix(in oklab, var(--primary) 10%, #E6F6EA);
+
+    /* Estado ativo: verde cheio no tema claro */
+    --fav-on-bg: #1FEA00;
+    --fav-on-text: #0B0D10;
+    --fav-on-ring: rgba(31,234,0,.35);
+  }
+}
+
+/* ============================================================================
+   3. OVERRIDES MANUAIS — Forçar tema Light/Dark via atributo data-theme
+   ========================================================================= */
+:root[data-theme="light"] {
+  --bg: #F7FAFC;
+  --panel: #FFFFFF;
+  --surface: #F2F6FA;
+  --text: #0B0D10;
+  --muted: #5A6573;
+
+  --primary: #1FEA00;
+  --secondary: #00C896;
+  --ring: rgba(31,234,0,.30);
+
+  --border: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --shadow: 0 12px 28px rgba(15, 23, 42, .10);
+
+  --card-grad: linear-gradient(180deg, #FFFFFF, #F7FAFC);
+  --panel-grad: linear-gradient(180deg, #F9FBFD, #EEF3F8);
+
+  --fav-off-hover: color-mix(in oklab, var(--primary) 10%, #E6F6EA);
+  --fav-on-bg: #1FEA00;
+  --fav-on-text: #0B0D10;
+  --fav-on-ring: rgba(31,234,0,.35);
+}
+:root[data-theme="dark"] {}
+
+/* ============================================================================
+   4. BASE DO DETALHE
+   ========================================================================= */
 .detalhe-root {
   background: var(--bg);
   color: var(--text);
@@ -27,8 +123,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  border-bottom: 1px solid #1a2129;
-  background: rgba(11, 13, 16, 0.7);
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklab, var(--panel) 70%, transparent);
   backdrop-filter: blur(8px);
 }
 
@@ -38,21 +134,24 @@
   display: flex;
   gap: 24px;
   padding: 20px;
-  background: linear-gradient(180deg, #12171E, #0F1319);
+  background: var(--card-grad);
   border-radius: 18px;
-  border: 1px solid #1a2129;
-  box-shadow: 0 12px 40px rgba(0,0,0,.45);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
+/* ============================================================================
+   5. IMAGEM DO ANÚNCIO
+   ========================================================================= */
 .detalhe-imagem {
   position: relative;
   flex: 1 1 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0E1217;
+  background: var(--surface);
   border-radius: 14px;
-  border: 1px solid #1a2129;
+  border: 1px solid var(--border-strong);
   padding: 16px;
 }
 
@@ -60,9 +159,10 @@
   max-width: 100%;
   max-height: 520px;
   object-fit: contain;
-  filter: saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.55));
+  filter: saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.25));
 }
 
+/* Badge do nome do jogo sobreposto na imagem */
 .badge-jogo {
   position: absolute;
   left: 16px;
@@ -75,9 +175,12 @@
   font-size: 12px;
   line-height: 1;
   background: var(--primary);
-  box-shadow: 0 0 24px rgba(57,255,20,.35);
+  box-shadow: 0 0 24px color-mix(in oklab, var(--primary) 35%, transparent);
 }
 
+/* ============================================================================
+   6. INFORMAÇÕES DO ANÚNCIO
+   ========================================================================= */
 .detalhe-info {
   flex: 1 1 50%;
   display: flex;
@@ -88,6 +191,7 @@
 .detalhe-info h1 {
   margin: 0;
   font-size: 28px;
+  color: var(--text);
 }
 
 .detalhe-info .preco {
@@ -96,7 +200,9 @@
   color: var(--primary);
 }
 
-/* Grid chave/valor */
+/* ============================================================================
+   7. BOXES E LISTAS DE CHAVE-VALOR
+   ========================================================================= */
 .kv {
   display: grid;
   grid-template-columns: 160px 1fr;
@@ -104,84 +210,259 @@
   align-items: baseline;
 }
 .kv + .kv { margin-top: 6px; }
-.kv .k { color: var(--muted); font-size: 14px; }
-.kv .v { color: #E9FFF1; }
 
-/* Grid 2 colunas para alguns grupos */
+.kv .k { color: var(--muted); font-size: 14px; }
+.kv .v { color: color-mix(in oklab, var(--text) 92%, #E9FFF1); }
+
+/* Grid 2 colunas */
 .kv-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-bottom: 6px;
 }
-@media (max-width: 680px) {
-  .kv-grid { grid-template-columns: 1fr; }
-}
 
 /* Caixas tipo fieldset */
 .box {
-  border: 1px solid #1C2430;
+  border: 1px solid var(--border-strong);
   border-radius: 12px;
   padding: 14px 16px 16px;
-  background: linear-gradient(180deg, #0E1217, #0B0D10);
+  background: var(--panel-grad);
   transition: border-color .2s ease, box-shadow .2s ease;
 }
 .box:hover {
-  border-color: #314151;
-  box-shadow: 0 0 0 4px rgba(57,255,20,.07);
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 35%, transparent);
 }
 .box:focus-within {
   border-color: var(--secondary);
-  box-shadow: 0 0 0 4px rgba(57,255,20,.12);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 55%, transparent);
 }
 .box legend {
   padding: 0 8px;
   font-size: 13px;
   font-weight: 600;
   color: var(--secondary);
-  text-shadow: 0 0 8px rgba(57,255,20,.35);
+  text-shadow: 0 0 8px color-mix(in oklab, var(--secondary) 35%, transparent);
 }
 
+/* Espaçamento entre seções */
 .box--info { margin-top: 8px; }
 .box--detalhes { margin-top: 6px; }
 
-/* Botão de favoritar */
-.btn-like {
+/* ============================================================================
+   8. BOTÕES PADRÃO
+   ========================================================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
   background: transparent;
-  border: 1px solid var(--primary);
-  color: var(--primary);
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  transition: filter .2s, transform .2s, box-shadow .2s, border-color .2s;
+}
+
+.btn.sm { padding: 8px 12px; border-radius: 10px; }
+
+/* Botão principal (comprar) */
+.btn--primary {
+  background: linear-gradient(180deg, var(--primary), var(--secondary));
+  color: #0B0D10;
+  font-weight: 800;
+  border-color: color-mix(in oklab, var(--primary) 35%, var(--border-strong));
+}
+.btn--primary:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(0,0,0,.25);
+}
+
+/* Botão secundário (voltar/link) */
+.btn--ghost {
+  border-color: var(--border);
+  color: color-mix(in oklab, var(--text) 90%, var(--muted));
+}
+.btn--ghost:hover {
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  transform: translateY(-1px);
+}
+
+/* ============================================================================
+   9. BOTÃO DE FAVORITAR (ON/OFF)
+   ========================================================================= */
+
+/* Animações visuais */
+@keyframes fav-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+@keyframes fav-pulse {
+  0% { box-shadow: 0 0 0 0 var(--fav-on-ring); }
+  100% { box-shadow: 0 0 0 10px transparent; }
+}
+
+/* Estado base */
+.btn-like {
+  background: var(--fav-off-bg);
+  border: 1px solid var(--fav-off-border);
+  color: var(--fav-off-text);
   border-radius: 12px;
   padding: 10px 18px;
   font-size: 15px;
   cursor: pointer;
-  transition: all 0.2s;
   margin-top: 8px;
   align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1;
+  transition: all 0.2s;
 }
-.btn-like:hover { background: rgba(57, 255, 20, 0.1); }
-.btn-like.ativo { background: var(--primary); color: #0b0d10; }
+.btn-like:hover { background: var(--fav-off-hover); }
+.btn-like:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--fav-on-ring);
+}
+
+/* Ícones alternáveis */
+.btn-like .ico { display: inline-flex; }
+.btn-like .ico--on { display: none; }
+
+/* Estado ativo */
+.btn-like[aria-pressed="true"],
+.btn-like.ativo {
+  background: var(--fav-on-bg);
+  color: var(--fav-on-text);
+  border-color: transparent;
+  animation: fav-pop .25s ease-out;
+}
+.btn-like[aria-pressed="true"]:hover,
+.btn-like.ativo:hover { filter: brightness(0.98); }
+.btn-like[aria-pressed="true"] .ico--on,
+.btn-like.ativo .ico--on { display: inline-flex; }
+.btn-like[aria-pressed="true"] .ico--off,
+.btn-like.ativo .ico--off { display: none; }
+
+/* Efeito pulse ao favoritar */
+.btn-like.just-toggled {
+  animation: fav-pop .25s ease-out, fav-pulse .7s ease-out;
+}
+
+/* Estado desabilitado */
 .btn-like:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* Botões padrão */
-.btn{
-  display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  border:1px solid #1C2430; background:transparent; color:var(--text);
-  text-decoration:none; cursor:pointer; border-radius:12px; padding:12px 16px;
-}
-.btn.sm{ padding:8px 12px; border-radius:10px }
-.btn--primary{ background:linear-gradient(180deg, var(--primary), var(--secondary)); color:#0B0D10; font-weight:800 }
-.btn--primary:hover{ filter:brightness(.95) }
-.btn--ghost{ border-color:#2A323C; color:#D3D8DF }
-.btn--ghost:hover{ border-color:#3A4451 }
-
-/* Responsivo */
-@media (max-width: 980px) {
-  .detalhe-card { flex-direction: column; }
-}
-
-/* Espaçamento entre os botões de ação */
+/* Container dos botões (voltar/comprar) */
 .detalhe-acoes {
   display: flex;
-  gap: 6px; /* distância entre os botões (pode ajustar entre 4–8px se quiser) */
+  gap: 6px;
   margin-top: 8px;
+}
+
+/* ============================================================================
+   10. CHAT FLUTUANTE (mini bubble)
+   ========================================================================= */
+.chat-mini-bubble {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 16px;
+  min-width: 200px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  transition: background .2s, transform .2s, border-color .2s;
+}
+.chat-mini-bubble:hover {
+  background: color-mix(in oklab, var(--panel) 85%, var(--surface));
+  transform: translateY(-2px);
+}
+.chat-mini-bubble__icon { font-size: 18px; }
+.chat-mini-bubble__label { flex: 1; text-align: left; }
+
+/* Badge de mensagens não lidas */
+.chat-mini-bubble__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: red;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 3px 7px;
+  box-shadow: 0 0 8px rgba(0,0,0,.25);
+}
+
+/* Container externo do chat */
+.chat-float {
+  position: fixed;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 2140;
+  width: min(420px, 100vw - 32px);
+  max-height: min(70vh, 640px);
+}
+
+/* ============================================================================
+   11. RESPONSIVIDADE (Tablet e Mobile)
+   ========================================================================= */
+
+/* === Tablet (≤1024px) === */
+@media (max-width: 1024px) {
+  .detalhe-card { gap: 18px; padding: 16px; }
+  .detalhe-info h1 { font-size: 26px; }
+
+  .chat-float {
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(14px, env(safe-area-inset-bottom));
+    width: min(520px, 100vw - 48px);
+  }
+}
+
+/* === Mobile (≤680px) === */
+@media (max-width: 680px) {
+  .detalhe-card { flex-direction: column; }
+  .kv-grid { grid-template-columns: 1fr; }
+
+  .chat-float {
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+    width: auto;
+    max-width: none;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    border-radius: 14px;
+  }
+
+  /* Limita altura do chat quando teclado móvel abre */
+  .chat-float .chat-body,
+  .chat-float .chat-scroll,
+  .chat-float [data-chat-scroll] {
+    max-height: 60vh;
+    overflow: auto;
+  }
+
+  /* Mini bubble ajustada à largura */
+  .chat-mini-bubble {
+    left: auto;
+    right: 12px;
+    min-width: 0;
+    width: auto;
+    max-width: calc(100vw - 24px);
+  }
 }

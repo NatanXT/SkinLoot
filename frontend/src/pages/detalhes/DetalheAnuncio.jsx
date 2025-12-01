@@ -1,18 +1,30 @@
-// frontend/src/pages/DetalheAnuncio.jsx
 // ============================================================================
-// Detalhe do anúncio com suporte robusto a:
-// - Informações do jogo (nome/ID)
-// - Detalhes por jogo (CS:GO / LoL) e genéricos
-// - Múltiplos formatos de payload vindos do backend (_raw / camelCase / snake)
+// DetalheAnuncio.jsx
+// Caminho: frontend/src/pages/DetalheAnuncio.jsx
+//
+// OBJETIVO
+// - Exibir detalhes completos de um anúncio (imagens, vendedor, preço, etc.)
+// - Suportar múltiplos formatos de dados (camelCase / snake_case / raw)
+// - Exibir detalhes específicos por jogo (CS:GO, LoL, genérico)
+// - Permitir favoritar (com animação e sincronização com backend)
+// - Abrir chat flutuante para negociação (similar à Dashboard)
 // ============================================================================
 
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import anuncioService from '../../services/anuncioService.js';
 import './DetalheAnuncio.css';
 import AuthBrand from '../../components/logo/AuthBrand.jsx';
+import ChatFlutuante from '../../components/chat/ChatFlutuante';
+import { useAuth } from '../../services/AuthContext.jsx';
 
-// --------- Utilitários de formatação ----------
+// ============================================================================
+// 1. FUNÇÕES UTILITÁRIAS
+// ============================================================================
+
+/**
+ * Formata número como moeda BRL (R$)
+ */
 function fmtBRL(n) {
   const v = Number(n);
   if (!Number.isFinite(v)) return '—';
@@ -22,7 +34,9 @@ function fmtBRL(n) {
   });
 }
 
-// Retorna a melhor imagem disponível
+/**
+ * Retorna a imagem principal do anúncio (fallback em caso de ausência)
+ */
 function pegarImagem(a) {
   return (
     a?.image ||
@@ -33,21 +47,23 @@ function pegarImagem(a) {
   );
 }
 
-// Protege acesso ao _raw
+/**
+ * Obtém o campo `_raw` caso exista
+ */
 function getRaw(a) {
   return a?._raw || {};
 }
 
-// ------------ Normalizadores de jogo/detalhes ------------
+// ============================================================================
+// 2. NORMALIZADORES DE DADOS (compatibilidade entre APIs)
+// ============================================================================
+
 /**
- * Resolve nome e id do jogo a partir de várias possíveis chaves.
- * Aceita estruturas como:
- *  - _raw.jogo = { id, nome }
- *  - _raw.jogoNome / jogoNome / gameName
- *  - anuncio.jogo?.nome / game?.name
+ * Normaliza e extrai informações do jogo (nome e id)
  */
 function resolverInfoJogo(anuncio) {
   const raw = getRaw(anuncio);
+
   const candidatosNome = [
     raw?.jogo?.nome,
     raw?.jogoNome,
@@ -70,22 +86,14 @@ function resolverInfoJogo(anuncio) {
     anuncio?.gameId,
   ].filter((v) => v !== undefined && v !== null && v !== '');
 
-  return {
-    nome: candidatosNome[0] || null,
-    id: candidatosId[0] || null,
-  };
+  return { nome: candidatosNome[0] || null, id: candidatosId[0] || null };
 }
 
 /**
- * Resolve detalhes por jogo em várias chaves comuns:
- *  - _raw.detalhesCsgo / _raw.detalhesLol
- *  - _raw.detalhes = { csgo: {...}, lol: {...}, ... }
- *  - anuncio.detalhes / anuncio.details (genérico)
+ * Normaliza e extrai os detalhes específicos de cada jogo
  */
 function resolverDetalhes(anuncio) {
   const raw = getRaw(anuncio);
-
-  // Específicos CS:GO / LoL
   const detalhesCsgo =
     raw?.detalhesCsgo ||
     raw?.detalhes?.csgo ||
@@ -100,7 +108,6 @@ function resolverDetalhes(anuncio) {
     anuncio?.detalhes?.lol ||
     null;
 
-  // Genérico (qualquer outro jogo)
   const detalhesGenericos =
     raw?.detalhes ||
     anuncio?.detalhes ||
@@ -111,18 +118,23 @@ function resolverDetalhes(anuncio) {
   return { detalhesCsgo, detalhesLol, detalhesGenericos };
 }
 
-// ------------ Bloco de renderização dos detalhes por jogo ------------
+// ============================================================================
+// 3. COMPONENTE — DetalhesPorJogo
+// ============================================================================
+
+/**
+ * Renderiza o bloco de detalhes conforme o jogo (CS:GO, LoL ou genérico)
+ */
 function DetalhesPorJogo({
   jogoNome,
   detalhesCsgo,
   detalhesLol,
   detalhesGenericos,
 }) {
-  // Nada a renderizar
   if (!jogoNome && !detalhesCsgo && !detalhesLol && !detalhesGenericos)
     return null;
 
-  // CS:GO
+  // ----- Caso: CS:GO -----
   if (
     jogoNome === 'CS:GO' ||
     jogoNome === 'Counter-Strike' ||
@@ -139,7 +151,6 @@ function DetalhesPorJogo({
     return (
       <fieldset className="box box--detalhes" tabIndex={0}>
         <legend>Detalhes (CS:GO)</legend>
-
         <div className="kv-grid">
           <div className="kv">
             <span className="k">Desgaste (Float)</span>
@@ -150,7 +161,6 @@ function DetalhesPorJogo({
             <span className="v">{d.patternIndex ?? '—'}</span>
           </div>
         </div>
-
         <div className="kv">
           <span className="k">Exterior</span>
           <span className="v">{d.exterior ?? '—'}</span>
@@ -163,7 +173,7 @@ function DetalhesPorJogo({
     );
   }
 
-  // League of Legends
+  // ----- Caso: League of Legends -----
   if (jogoNome === 'League of Legends' || jogoNome === 'LoL') {
     const d = detalhesLol || {};
     const tem = d.championName || d.tipoSkin || d.chroma;
@@ -188,7 +198,7 @@ function DetalhesPorJogo({
     );
   }
 
-  // Qualquer outro jogo: tenta imprimir objeto genérico (chave:valor)
+  // ----- Caso genérico -----
   if (detalhesGenericos && typeof detalhesGenericos === 'object') {
     const entradas = Object.entries(detalhesGenericos);
     if (entradas.length === 0) return null;
@@ -211,18 +221,90 @@ function DetalhesPorJogo({
   return null;
 }
 
+// ============================================================================
+// 4. COMPONENTE PRINCIPAL — DetalheAnuncio
+// ============================================================================
+
 export default function DetalheAnuncio() {
+  // ----- Hooks de contexto e navegação -----
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
 
+  // ----- Estados principais -----
   const [anuncio, setAnuncio] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
+
+  // ----- Estado de "favoritar" -----
   const [liked, setLiked] = useState(false);
   const [loadingLike, setLoadingLike] = useState(false);
+  const [justToggled, setJustToggled] = useState(false);
 
+  // ----- Estado do chat -----
+  const [chatAberto, setChatAberto] = useState(null);
+  const [unreads, setUnreads] = useState(0);
+
+  // ==========================================================================
+  // 4.1. Funções auxiliares
+  // ==========================================================================
+
+  /**
+   * Exige login antes de uma ação (redireciona se não autenticado)
+   */
+  function exigirLogin(acao, payload) {
+    if (!user) {
+      navigate('/login', {
+        state: { returnTo: location.pathname + location.search, acao, payload },
+        replace: true,
+      });
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Abre o chat com o vendedor do anúncio
+   */
+  function abrirChatPara(anuncioData) {
+    if (exigirLogin('contato', { anuncioId: anuncioData?.id || id })) return;
+
+    const nome =
+      anuncioData?.usuarioNome ??
+      anuncioData?.seller?.name ??
+      anuncioData?.vendedorNome ??
+      'Usuário';
+
+    const sellerId =
+      anuncioData?.usuarioId ??
+      anuncioData?.seller?.id ??
+      anuncioData?.vendedorId ??
+      `temp-${anuncioData?.id || anuncioData?._id || id}`;
+
+    const nomeSkin = anuncioData?.title ?? anuncioData?.titulo ?? 'Skin';
+    const precoSkin = anuncioData?.price ?? anuncioData?.preco ?? 0;
+
+    setChatAberto({
+      seller: { id: String(sellerId), nome },
+      skin: { titulo: nomeSkin, preco: precoSkin },
+    });
+    setUnreads(0);
+  }
+
+  /**
+   * Handler de clique no botão "Comprar"
+   */
+  function handleComprar() {
+    if (anuncio) abrirChatPara(anuncio);
+  }
+
+  // ==========================================================================
+  // 4.2. Carregamento inicial do anúncio
+  // ==========================================================================
   useEffect(() => {
     let cancel = false;
+
     (async () => {
       try {
         setCarregando(true);
@@ -237,18 +319,25 @@ export default function DetalheAnuncio() {
         if (!cancel) setCarregando(false);
       }
     })();
+
     return () => {
       cancel = true;
     };
   }, [id]);
 
+  // ==========================================================================
+  // 4.3. Alternar favorito
+  // ==========================================================================
   async function alternarFavorito() {
     if (loadingLike) return;
     setLoadingLike(true);
     try {
       if (liked) await anuncioService.unlikeAnuncio(id);
       else await anuncioService.likeAnuncio(id);
+
       setLiked((v) => !v);
+      setJustToggled(true);
+      setTimeout(() => setJustToggled(false), 450);
     } catch (err) {
       console.error('Erro ao alternar favorito:', err);
     } finally {
@@ -256,15 +345,20 @@ export default function DetalheAnuncio() {
     }
   }
 
+  // ==========================================================================
+  // 4.4. Derivações e memoizações
+  // ==========================================================================
   const raw = useMemo(() => getRaw(anuncio), [anuncio]);
+  const linkExterno = raw?.linkExterno || null;
   const jogoInfo = useMemo(() => resolverInfoJogo(anuncio), [anuncio]);
   const { detalhesCsgo, detalhesLol, detalhesGenericos } = useMemo(
     () => resolverDetalhes(anuncio),
     [anuncio],
   );
 
-  const linkExterno = raw?.linkExterno || '#';
-
+  // ==========================================================================
+  // 4.5. Estados de carregamento e erro
+  // ==========================================================================
   if (carregando) {
     return (
       <div className="detalhe-root">
@@ -292,8 +386,12 @@ export default function DetalheAnuncio() {
 
   if (!anuncio) return null;
 
+  // ==========================================================================
+  // 4.6. Renderização principal
+  // ==========================================================================
   return (
     <div className="detalhe-root">
+      {/* Topbar com logo e voltar */}
       <div className="detalhe-topbar">
         <AuthBrand />
         <Link to="/" className="btn btn--ghost sm">
@@ -301,8 +399,9 @@ export default function DetalheAnuncio() {
         </Link>
       </div>
 
+      {/* Card principal */}
       <div className="detalhe-card">
-        {/* Imagem e badge do jogo */}
+        {/* Imagem do anúncio */}
         <div className="detalhe-imagem">
           <img
             src={pegarImagem(anuncio)}
@@ -315,23 +414,24 @@ export default function DetalheAnuncio() {
           )}
         </div>
 
+        {/* Informações principais */}
         <div className="detalhe-info">
           <h1>{anuncio.title || anuncio.titulo || 'Skin'}</h1>
           <p className="preco">R$ {fmtBRL(anuncio.price ?? anuncio.preco)}</p>
 
+          {/* Vendedor e descrição */}
           <div className="kv">
             <span className="k">Vendedor</span>
             <span className="v">
               {anuncio.seller?.name || anuncio.usuarioNome || '—'}
             </span>
           </div>
-
           <div className="kv">
             <span className="k">Descrição</span>
             <span className="v">{raw?.descricao || 'Sem descrição.'}</span>
           </div>
 
-          {/* Informações do jogo (aparece se houver nome, id ou quaisquer detalhes) */}
+          {/* Informações do jogo */}
           {(jogoInfo?.nome ||
             jogoInfo?.id ||
             detalhesCsgo ||
@@ -339,22 +439,18 @@ export default function DetalheAnuncio() {
             detalhesGenericos) && (
             <fieldset className="box box--info" tabIndex={0}>
               <legend>Informações do jogo</legend>
-
               {jogoInfo?.nome && (
                 <div className="kv">
                   <span className="k">Jogo</span>
                   <span className="v">{jogoInfo.nome}</span>
                 </div>
               )}
-
               {jogoInfo?.id && (
                 <div className="kv">
                   <span className="k">ID do jogo</span>
                   <span className="v">{jogoInfo.id}</span>
                 </div>
               )}
-
-              {/* Fallback simples caso só existam detalhes genéricos e nenhum nome */}
               {!jogoInfo?.nome &&
                 (detalhesCsgo || detalhesLol || detalhesGenericos) && (
                   <div className="kv">
@@ -367,7 +463,7 @@ export default function DetalheAnuncio() {
             </fieldset>
           )}
 
-          {/* Detalhes por jogo (dinâmico + genérico) */}
+          {/* Detalhes específicos por jogo */}
           <DetalhesPorJogo
             jogoNome={jogoInfo?.nome}
             detalhesCsgo={detalhesCsgo}
@@ -375,33 +471,88 @@ export default function DetalheAnuncio() {
             detalhesGenericos={detalhesGenericos}
           />
 
-          {/* Favoritar */}
+          {/* Botão de favoritar */}
           <button
-            className={`btn-like ${liked ? 'ativo' : ''}`}
-            disabled={loadingLike}
+            type="button"
+            className={`btn-like ${liked ? 'ativo' : ''} ${
+              justToggled ? 'just-toggled' : ''
+            }`}
+            aria-pressed={liked ? 'true' : 'false'}
             onClick={alternarFavorito}
+            disabled={loadingLike}
           >
-            {liked ? '★ Favoritado' : '☆ Favoritar'}
+            {/* Ícone OFF (contorno) */}
+            <span className="ico ico--off" aria-hidden>
+              <svg width="16" height="16" viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M12.1 21.35 10 19.45c-4.55-4.09-7.5-6.76-7.5-9.75A5.25 5.25 0 0 1 7.75 4 5.8 5.8 0 0 1 12 6.09 5.8 5.8 0 0 1 16.25 4 5.25 5.25 0 0 1 21.5 9.7c0 2.99-2.95 5.66-7.5 9.75l-1.9 1.9Z"
+                />
+              </svg>
+            </span>
+
+            {/* Ícone ON (cheio) */}
+            <span className="ico ico--on" aria-hidden>
+              <svg width="16" height="16" viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M12.1 21.35 10 19.45C5.45 15.36 2.5 12.69 2.5 9.7A5.25 5.25 0 0 1 7.75 4c1.7 0 3.23.83 4.25 2.09A5.8 5.8 0 0 1 16.25 4 5.25 5.25 0 0 1 21.5 9.7c0 2.99-2.95 5.66-7.5 9.75l-1.9 1.9Z"
+                />
+              </svg>
+            </span>
+            {liked ? 'Favorito' : 'Favoritar'}
           </button>
 
-          {/* Ações */}
+          {/* Botões de ação */}
           <div className="detalhe-acoes">
             <button className="btn btn--ghost" onClick={() => navigate(-1)}>
               Voltar
             </button>
             <button
               className="btn btn--primary"
-              onClick={() => window.open(linkExterno, '_blank')}
-              disabled={!raw?.linkExterno}
-              title={
-                raw?.linkExterno ? 'Ir para a compra' : 'Link indisponível'
-              }
+              onClick={handleComprar}
+              title="Abrir chat com o vendedor"
             >
               Comprar
             </button>
+            {linkExterno && (
+              <a
+                className="btn btn--ghost"
+                href={linkExterno}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Comprar no site
+              </a>
+            )}
           </div>
         </div>
       </div>
+
+      {/* ==========================================================================
+         4.7. CHAT FLUTUANTE
+         ========================================================================== */}
+      {user &&
+        (chatAberto ? (
+          <div className="chat-float">
+            <ChatFlutuante
+              usuarioAlvo={chatAberto}
+              onFechar={() => setChatAberto(null)}
+            />
+          </div>
+        ) : (
+          <button
+            className="chat-mini-bubble"
+            title="Mensagens"
+            onClick={() => setChatAberto({ id: 'ultimo', nome: 'Mensagens' })}
+          >
+            <span className="chat-mini-bubble__icon">💬</span>
+            <span className="chat-mini-bubble__label">Mensagens</span>
+            {unreads > 0 && (
+              <span className="chat-mini-bubble__badge">{unreads}</span>
+            )}
+          </button>
+        ))}
     </div>
   );
 }

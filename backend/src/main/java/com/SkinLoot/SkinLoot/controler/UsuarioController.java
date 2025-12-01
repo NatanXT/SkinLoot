@@ -121,11 +121,11 @@ public class UsuarioController {
 
         // ── AQUI: criar o cookie de accessToken ──
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
-                .httpOnly(true) // JavaScript não consegue ler
-                .secure(false) // troque para true em produção HTTPS
-                .path("/") // enviado em todas as rotas
-                .maxAge(Duration.ofMinutes(15))
-                .sameSite("Strict")
+                .httpOnly(true)
+                .secure(true) // ✅ IGUAL AO LOGIN
+                .path("/")
+                .maxAge(10 * 60) // ✅ IGUAL AO LOGIN (ou 15 min, como preferir)
+                .sameSite("None") // ✅ IGUAL AO LOGIN (Necessário para cross-origin)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 
@@ -192,18 +192,18 @@ public class UsuarioController {
         // 9. Crie os cookies (copiado do seu /login)
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                 .httpOnly(true)
-                .secure(false) // Mantenha false para localhost (HTTP)
+                .secure(true) // ✅
                 .path("/")
-                .maxAge(10 * 60) // 10 minutos
-                .sameSite("Lax")
+                .maxAge(10 * 60)
+                .sameSite("None") // ✅
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true) // ✅
                 .path("/")
-                .maxAge(30 * 60 * 60) // 30h
-                .sameSite("Lax")
+                .maxAge(30 * 60 * 60)
+                .sameSite("None") // ✅
                 .build();
 
         // 10. Adicione os cookies à resposta

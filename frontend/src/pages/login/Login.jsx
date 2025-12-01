@@ -19,6 +19,7 @@ const DEV_ENABLED = import.meta.env.VITE_ENABLE_DEV_LOGIN === 'true';
 const DEV_EMAIL = 'natan@email.com';
 const DEV_PASSWORD = '123';
 
+// Ícones olho
 const Eye = (
   <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
     <path
@@ -32,6 +33,30 @@ const EyeOff = (
     <path
       fill="currentColor"
       d="M2 5.27 3.28 4 20 20.72 18.73 22l-2.09-2.09C15.42 20.58 13.77 21 12 21 7 21 3 16 3 16s1.64-2.05 4.31-3.67L2 5.27Zm8.73 8.73a3 3 0 0 1-2.73-2.73l-2-2A11.15 11.15 0 0 0 3 16s4 5 9 5c1.77 0 3.42-.42 4.64-1.09l-2-2a3 3 0 0 1-3.91-3.91Zm1.27-6c5 0 9 5 9 5s-.79 1-2.12 2.22l-1.42-1.42C19.08 12.96 20 12 20 12s-4-5-9-5c-.68 0-1.34.08-1.98.22l-1.6-1.6C8.5 4.24 10.2 4 12 4Z"
+    />
+  </svg>
+);
+
+// Ícone do Google (marca multicolor simples em SVG)
+const GoogleIcon = (
+  <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+    <path
+      fill="#EA4335"
+      d="M12 10.2v3.9h5.5c-.24 1.4-1.67 4.1-5.5 4.1A6.4 6.4 0 1 1 12 5.6c1.82 0 3.05.78 3.75 1.46l2.55-2.46C16.72 3.1 14.6 2.2 12 2.2 6.93 2.2 2.8 6.33 2.8 11.4S6.93 20.6 12 20.6c6.04 0 8-4.24 8-6.3 0-.42-.04-.7-.09-1.0H12z"
+    />
+    <path
+      fill="#4285F4"
+      d="M21.91 12.3c.06.3.09.58.09 1 0 2.06-1.96 6.3-8 6.3-5.07 0-9.2-4.13-9.2-9.2S6.93 1.2 12 1.2c2.6 0 4.72.9 6.3 2.4l-2.55 2.46C14.05 5.38 12.82 4.6 11 4.6A6.4 6.4 0 0 0 4.6 11c0 3.53 2.87 6.4 6.4 6.4 3.83 0 5.26-2.7 5.5-4.1H12v-3.9h9.91z"
+      opacity=".2"
+    />
+    <path
+      fill="#FBBC05"
+      d="M4.6 11A6.4 6.4 0 0 1 11 4.6c1.82 0 3.05.78 3.75 1.46l2.55-2.46C16.72 3.1 14.6 2.2 12 2.2 6.93 2.2 2.8 6.33 2.8 11.4c0 1.73.45 3.36 1.24 4.76l3.06-2.37A6.37 6.37 0 0 1 4.6 11z"
+      opacity=".35"
+    />
+    <path
+      fill="#34A853"
+      d="M12 20.6c3.83 0 6.24-2.02 7.13-4.39l-3.03-2.35c-.68 1.99-2.28 3.34-4.1 3.34-2.53 0-4.66-1.7-5.42-3.98l-3.06 2.37C4.62 18.62 7.98 20.6 12 20.6z"
     />
   </svg>
 );
@@ -65,6 +90,18 @@ export default function Login() {
     return Object.keys(e).length === 0;
   };
 
+  // Handler do OAuth Google: redireciona para o backend
+  const handleGoogleLogin = () => {
+    // Tenta usar a baseURL do Axios; se não houver, usa localhost:8080
+    const base =
+      api?.defaults?.baseURL ||
+      import.meta.env.VITE_API_URL ||
+      'http://localhost:8080';
+    // Ajuste a rota conforme seu backend (ex.: /auth/google ou /oauth2/authorization/google)
+    const redirect = `${base.replace(/\/+$/, '')}/auth/google`;
+    window.location.href = redirect;
+  };
+
   const onSubmit = async (ev) => {
     ev.preventDefault();
     setApiError('');
@@ -87,10 +124,9 @@ export default function Login() {
         const devUserSeed = {
           email: DEV_EMAIL,
           nome: 'Natan (DEV)',
-          plano: 'plus', // mude para "intermediario" ou "gratuito" se quiser
+          plano: 'plus',
         };
 
-        // sem chamar backend em DEV: só hidrata localmente
         const seeded = {
           id: 'dev-user-id',
           ...devUserSeed,
@@ -232,22 +268,16 @@ export default function Login() {
             {isLoading ? 'Entrando...' : 'Entrar'}
           </button>
 
+          {/* OAuth Google */}
           <div className="oauth">
-            <button type="button" className="btn btn--ghost btn--full">
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="9"
-                  fill="currentColor"
-                  opacity=".15"
-                />
-                <path
-                  fill="currentColor"
-                  d="M8 13.5 5 12l3-1.5L12 7l4 2.5 3 1.5-3 1.5L12 17z"
-                />
-              </svg>
-              <span>Entrar com Steam</span>
+            <button
+              type="button"
+              className="btn btn--ghost btn--full"
+              onClick={handleGoogleLogin}
+              aria-label="Entrar com Google"
+            >
+              {GoogleIcon}
+              <span>Entrar com Google</span>
             </button>
           </div>
 

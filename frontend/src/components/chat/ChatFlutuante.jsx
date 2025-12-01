@@ -125,6 +125,50 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     };
   }, [user]);
 
+    useEffect(() => {
+        if (!user || !user.id) return; // Só roda se o usuário estiver carregado
+
+        const carregarListaDeConversas = async () => {
+            try {
+                // 1. Chama o novo endpoint
+                const { data: ultimasMensagens } = await api.get('/api/chat/minhas-conversas');
+
+                // 2. Mapeia a resposta (lista de ChatMessageResponse)
+                const listaContatos = ultimasMensagens.map((msg) => {
+                    const souEu = msg.remetenteId === user.id;
+                    const outroUsuarioId = souEu ? msg.destinatarioId : msg.remetenteId;
+                    const outroUsuarioNome = souEu ? msg.destinatarioNome : msg.remetenteNome;
+
+                    // 3. Formata a última mensagem para o estado local
+                    const msgFormatada = {
+                        id: msg.id,
+                        autor: souEu ? 'eu' : 'ele',
+                        texto: msg.conteudo,
+                        timestamp: msg.timestamp,
+                    };
+
+                    // 4. Cria o objeto de Contato
+                    return {
+                        id: outroUsuarioId,
+                        nome: outroUsuarioNome,
+                        foto: 'https://i.pravatar.cc/60?u=' + outroUsuarioId, // Placeholder
+                        status: 'offline', // Placeholder (precisaria de sistema de presença)
+                        naoLidas: 0, // TODO: O backend precisaria calcular isso
+                        mensagens: [msgFormatada], // Começa com a última mensagem
+                    };
+                });
+
+                // 5. Define o estado com todas as conversas
+                setContatos(listaContatos);
+
+            } catch (error) {
+                console.error("Falha ao carregar lista de conversas:", error);
+            }
+        };
+
+        carregarListaDeConversas();
+    }, [user]); // Roda uma vez quando 'user' é carregado
+
   // ======================================================
   // FUNÇÃO: Carregar histórico de conversa (REST)
   // ======================================================
@@ -148,29 +192,32 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
   // EFEITO: Quando usuário clica em "Contato" (usuarioAlvo)
   // ======================================================
   useEffect(() => {
-    if (!usuarioAlvo) return;
-
+    if (!usuarioAlvo || !usuarioAlvo.seller) {
+      setTexto(''); // Limpa o texto se fechar
+      return;
+    }
+    const { seller, skin } = usuarioAlvo;
     setAberto(true);
 
     const setupContato = async () => {
       const novoContato = {
-        id: usuarioAlvo.id,
-        nome: usuarioAlvo.nome,
+        id: seller.id,
+        nome: seller.nome,
         foto:
-          usuarioAlvo.foto ?? `https://i.pravatar.cc/60?u=${usuarioAlvo.id}`,
+            seller.foto ?? `https://i.pravatar.cc/60?u=${seller.id}`,
         status: 'online agora',
         naoLidas: 0,
         mensagens: [],
       };
 
-      const historico = await carregarHistorico(usuarioAlvo);
+      const historico = await carregarHistorico(seller);
       novoContato.mensagens = historico;
 
       setContatos((prev) => {
-        const existe = prev.some((c) => c.id === usuarioAlvo.id);
+        const existe = prev.some((c) => c.id === seller.id);
         if (existe) {
           return prev.map((c) =>
-            c.id === usuarioAlvo.id ? { ...c, mensagens: historico } : c,
+            c.id === seller.id ? { ...c, mensagens: historico } : c,
           );
         }
         return [...prev, novoContato];
@@ -178,12 +225,15 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
 
       setContatoAtivoId(usuarioAlvo.id);
 
-      const precoFmt = usuarioAlvo.preco?.toLocaleString('pt-BR', {});
+      const precoFmt = skin.preco?.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      });
+
       setTexto(
-        `Olá, fiquei interessado na skin: ${
-          usuarioAlvo.nome || 'Dragon Lore'
-        }, valor: ${precoFmt || '—'}, podemos conversar?`,
+          `Olá, ${seller.nome}. Vi seu anúncio da skin "${skin.titulo}" por ${precoFmt}. Podemos conversar?`,
       );
+      // --- FIM DA ALTERAÇÃO ---
     };
 
     setupContato();

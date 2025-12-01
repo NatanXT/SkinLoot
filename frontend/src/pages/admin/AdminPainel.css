@@ -1,0 +1,1093 @@
+/* ==========================================================
+   Caminho: frontend/src/pages/admin/AdminPainel.css
+   ----------------------------------------------------------
+   Estilos específicos da tela de painel administrativo.
+   - Usa tokens globais: --bg, --panel, --surface, --text,
+     --muted, --primary, --secondary, --border, --border-strong
+   - Não redefine :root para não brigar com outros arquivos.
+========================================================== */
+
+/* Shell/base da página admin */
+.admin-root {
+  position: relative;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Ubuntu, sans-serif;
+  /* Evita rolagem lateral e reduz overscroll para não "puxar" acima da tela */
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+}
+
+/* Backdrop com glow similar à DashboardVitrine/Perfil */
+.admin-backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(
+      800px 400px at 10% 0%,
+      color-mix(in oklab, var(--primary) 18%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 500px at 100% 10%,
+      color-mix(in oklab, var(--secondary) 20%, transparent),
+      transparent 60%
+    );
+}
+
+/* Helpers de visibilidade por breakpoint */
+.admin-only-desktop {
+  display: block;
+}
+
+.admin-only-mobile {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .admin-only-desktop {
+    display: none;
+  }
+
+  .admin-only-mobile {
+    display: block;
+  }
+}
+
+/* ===================== Topbar ===================== */
+
+.admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  background: color-mix(in oklab, var(--panel) 82%, transparent);
+  backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-topbar__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-topbar__titulo {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.admin-topbar__subtitulo {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.admin-topbar__acoes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-topbar__botao {
+  min-width: 150px;
+}
+
+/* Ajuste extra para botões outline quando usados aqui */
+.admin-btn-outline {
+  background: transparent;
+}
+
+/* Mobile: topbar quebra em duas linhas */
+@media (max-width: 640px) {
+  .admin-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 16px;
+  }
+
+  .admin-topbar__acoes {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .admin-topbar__botao {
+    flex: 1 1 40%;
+  }
+}
+
+/* ===================== Hero ===================== */
+
+.admin-hero {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px 20px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--primary) 10%, transparent),
+    transparent
+  );
+}
+
+.admin-hero__copy {
+  max-width: 900px;
+  text-align: center;
+}
+
+.admin-hero__copy h2 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.admin-hero__copy p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* ===================== Container principal ===================== */
+
+.admin-container {
+  position: relative;
+  z-index: 1;
+  max-width: var(--container-max, 1200px);
+  margin: 18px auto 64px;
+  padding: 0 16px;
+}
+
+/* Blocos da página (seções) */
+
+.admin-bloco {
+  margin-bottom: 28px;
+}
+
+.admin-bloco__cabecalho {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.admin-bloco__cabecalho h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.admin-bloco__hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.admin-bloco__cabecalho--tabela {
+  align-items: estão;
+}
+
+.admin-bloco__contador {
+  font-size: 12px;
+  color: color-mix(in oklab, var(--text) 85%, var(--muted));
+}
+
+/* ===================== Cards de resumo ===================== */
+
+.admin-resumo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 1024px) {
+  .admin-resumo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-resumo-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-card {
+  background: linear-gradient(
+    180deg,
+    var(--panel),
+    color-mix(in oklab, var(--panel) 70%, var(--surface))
+  );
+  border-radius: var(--radius, 18px);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.45));
+  padding: 14px 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.admin-card:hover {
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  transform: translateY(-2px);
+}
+
+.admin-card__rotulo {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.admin-card__valor {
+  margin: 0 0 4px;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.admin-card__descricao {
+  font-size: 12px;
+  color: color-mix(in oklab, var(--text) 85%, var(--muted));
+}
+
+/* Variações de cor sutil para os cards de resumo */
+
+.admin-card--sucesso .admin-card__valor {
+  color: #22c55e;
+}
+
+.admin-card--neutro .admin-card__valor {
+  color: color-mix(in oklab, var(--text) 90%, var(--muted));
+}
+
+.admin-card--perigo .admin-card__valor {
+  color: #ef4444;
+}
+
+/* ===================== Filtros (DESKTOP/TABLET) ===================== */
+
+.admin-filtros {
+  display: grid;
+  grid-template-columns: 1.4fr 0.9fr 0.9fr 1.2fr;
+  gap: 12px;
+}
+
+@media (max-width: 960px) {
+  .admin-filtros {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-filtros {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-filtro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--panel);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  box-shadow: var(--shadow);
+}
+
+.admin-filtro--busca {
+  grid-column: span 1;
+}
+
+.admin-filtro__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.admin-filtro__input {
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  padding: 0 10px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.admin-filtro__input::placeholder {
+  color: color-mix(in oklab, var(--muted) 85%, var(--text));
+}
+
+.admin-filtro__input:hover {
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow: 0 0 0 3px
+    color-mix(in oklab, var(--ring, rgba(57, 255, 20, 0.6)) 35%, transparent);
+}
+
+.admin-filtro__input:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px
+    color-mix(in oklab, var(--ring, rgba(57, 255, 20, 0.6)) 60%, transparent);
+}
+
+/* Coluna de ações de filtro (botões) */
+
+.admin-filtro--acoes {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.admin-filtro__botao {
+  width: 100%;
+}
+
+/* Em telas menores, botões em coluna */
+@media (max-width: 960px) {
+  .admin-filtro--acoes {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-filtro--acoes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-filtro__botao {
+    width: 100%;
+  }
+}
+
+/* ===================== PAINEL DE DETALHES ===================== */
+
+.admin-detalhe {
+  background: linear-gradient(
+    180deg,
+    var(--panel),
+    color-mix(in oklab, var(--panel) 70%, var(--surface))
+  );
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 14px 16px 16px;
+}
+
+.admin-detalhe__cabecalho {
+  margin-bottom: 16px;
+}
+
+.admin-detalhe__cabecalho-acoes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-detalhe__tag {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--surface) 85%, var(--panel));
+  border: 1px solid var(--border);
+  color: color-mix(in oklab, var(--text) 80%, var(--muted));
+}
+
+/* Grid superior: coluna de usuário + coluna de destaque */
+.admin-detalhe__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.5fr);
+  gap: 16px;
+}
+
+@media (max-width: 960px) {
+  .admin-detalhe__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-detalhe__usuario {
+  background: color-mix(in oklab, var(--panel) 94%, var(--surface));
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-detalhe__titulo-secao {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.admin-detalhe__linha {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-detalhe__label {
+  font-size: 12px; /* aumentei de 11px para 12px */
+  color: var(--muted);
+}
+
+.admin-detalhe__valor {
+  font-size: 14px; /* aumentei de 13px para 14px */
+  color: var(--text);
+  word-break: break-all;
+}
+
+.admin-detalhe__plano-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  font-size: 12px;
+}
+
+.admin-detalhe__plano-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+/* Coluna direita: destaque (somente) */
+
+.admin-detalhe__conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Bloco do produto em destaque (compacto) */
+
+.admin-detalhe__destaque {
+  background: color-mix(in oklab, var(--panel) 96%, var(--surface));
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 10px 10px 12px;
+}
+
+/* Card compacto de destaque, mais "arrumado" visualmente */
+.admin-destaque-card {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  max-height: 230px;
+  border-radius: 16px;
+  background: radial-gradient(
+      circle at 0% 0%,
+      color-mix(in oklab, var(--primary) 12%, transparent),
+      transparent 60%
+    ),
+    color-mix(in oklab, var(--panel) 96%, var(--surface));
+  border: 1px solid color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  padding: 10px 12px;
+}
+
+.admin-destaque-card__media {
+  flex: 0 0 34%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+.admin-destaque-card__media img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.admin-destaque-card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4px 2px;
+}
+
+/* linha com nome e preço alinhados */
+.admin-destaque-card__header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.admin-destaque-card__nome {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.admin-destaque-card__preco {
+  font-size: 14px;
+  font-weight: 700;
+  color: #22c55e;
+  white-space: nowrap;
+}
+
+/* linha de chips/tags abaixo do header */
+.admin-destaque-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.admin-destaque-tag {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--surface) 90%, var(--panel));
+  color: color-mix(in oklab, var(--text) 85%, var(--muted));
+}
+
+/* variações para o status do produto em destaque */
+.admin-destaque-tag--status-ativo {
+  border-color: rgba(34, 197, 94, 0.55);
+  background: rgba(34, 197, 94, 0.14);
+  color: #4ade80;
+}
+
+.admin-destaque-tag--status-oculto {
+  border-color: rgba(148, 163, 184, 0.6);
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5f5;
+}
+
+.admin-destaque-tag--status-banido {
+  border-color: rgba(239, 68, 68, 0.7);
+  background: rgba(239, 68, 68, 0.16);
+  color: #fecaca;
+}
+
+.admin-destaque-tag--id {
+  font-weight: 500;
+}
+
+/* linha inferior com meta (vendedor etc.) */
+.admin-destaque-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  color: color-mix(in oklab, var(--text) 85%, var(--muted));
+}
+
+.admin-destaque-card__jogo {
+  font-weight: 500;
+}
+
+.admin-destaque-card__seller {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Mobile: destaque em coluna para usar melhor o espaço vertical */
+@media (max-width: 640px) {
+  .admin-destaque-card {
+    flex-direction: column;
+    max-height: none;
+  }
+
+  .admin-destaque-card__media {
+    flex: 0 0 auto;
+    border-radius: 10px;
+  }
+
+  .admin-destaque-card__media img {
+    width: 100%;
+    height: auto;
+    max-height: 240px;
+  }
+}
+
+/* Bloco do carrossel */
+
+.admin-detalhe__carrossel-bloco {
+  background: color-mix(in oklab, var(--panel) 96%, var(--surface));
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 10px 10px 12px;
+}
+
+/* Versão full-width, logo abaixo do grid superior */
+.admin-detalhe__carrossel-bloco--full {
+  margin-top: 14px;
+}
+
+.admin-detalhe__carrossel-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.admin-detalhe__hint-menor {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Carrossel horizontal:
+   - Mobile: ~80% da largura (1 card predominante)
+   - Tablet: ~45% (2 cards)
+   - Desktop grande: ~25% (4 cards na mesma "faixa") */
+
+.admin-detalhe__carrossel {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
+
+.admin-detalhe__carrossel::-webkit-scrollbar {
+  height: 6px;
+}
+
+.admin-detalhe__carrossel::-webkit-scrollbar-track {
+  background: color-mix(in oklab, var(--surface) 80%, var(--panel));
+  border-radius: 999px;
+}
+
+.admin-detalhe__carrossel::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--secondary) 40%, var(--primary));
+  border-radius: 999px;
+}
+
+.admin-detalhe__carrossel-item {
+  flex: 0 0 80%;
+  max-width: 80%;
+  scroll-snap-align: start;
+  padding: 4px 2px;
+}
+
+@media (min-width: 768px) {
+  .admin-detalhe__carrossel-item {
+    flex: 0 0 45%;
+    max-width: 45%;
+  }
+}
+
+@media (min-width: 1100px) {
+  .admin-detalhe__carrossel-item {
+    flex: 0 0 25%;
+    max-width: 25%;
+  }
+}
+
+/* Deixa os cards do carrossel menores e um pouco mais "compactos" */
+.admin-detalhe__carrossel-item .card {
+  --media-min-h: 180px;
+  transform: scale(0.94);
+  transform-origin: center;
+}
+
+/* Mensagem vazia do painel de detalhes */
+.admin-detalhe__mensagem-vazia {
+  margin: 8px 2px 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ===================== Tabela (DESKTOP/TABLET) ===================== */
+
+.admin-tabela__wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    180deg,
+    var(--panel),
+    color-mix(in oklab, var(--panel) 70%, var(--surface))
+  );
+  box-shadow: var(--shadow);
+}
+
+/* Tabela em si */
+
+.admin-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.admin-tabela thead {
+  background: color-mix(in oklab, var(--surface) 90%, var(--panel));
+}
+
+.admin-tabela th,
+.admin-tabela td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--border) 90%, transparent);
+  white-space: nowrap;
+}
+
+.admin-tabela th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.admin-tabela td {
+  color: var(--text);
+}
+
+.admin-tabela__nome {
+  font-weight: 600;
+}
+
+.admin-tabela__tipo,
+.admin-tabela__categoria {
+  text-transform: capitalize;
+  color: color-mix(in oklab, var(--text) 88%, var(--muted));
+}
+
+.admin-tabela__th-acoes,
+.admin-tabela__acoes {
+  text-align: right;
+}
+
+.admin-tabela__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* Linha de tabela vazia (nenhum resultado) */
+
+.admin-tabela__vazio {
+  text-align: center;
+  padding: 18px 12px;
+  color: var(--muted);
+}
+
+/* Destaque leve para a linha/card ativo (quando painel de detalhes está aberto) */
+
+.admin-tabela__linha--ativa {
+  background: color-mix(in oklab, var(--surface) 85%, var(--panel));
+}
+
+/* Status badge (ativo, oculto, banido) */
+
+.admin-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.admin-status-badge--ativo {
+  background: rgba(34, 197, 94, 0.16);
+  color: #22c55e;
+}
+
+.admin-status-badge--oculto {
+  background: rgba(148, 163, 184, 0.16);
+  color: #cbd5f5;
+}
+
+.admin-status-badge--banido {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fca5a5;
+}
+
+/* Responsividade da tabela: em telas bem pequenas,
+   reduzir padding para caber mais colunas. */
+
+@media (max-width: 480px) {
+  .admin-tabela th,
+  .admin-tabela td {
+    padding: 8px 8px;
+  }
+
+  .admin-tabela__acoes {
+    gap: 4px;
+  }
+}
+
+/* ===================== MOBILE: botão para filtros ===================== */
+
+.admin-mobile-filtros-botao {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--primary) 70%, var(--panel)),
+    color-mix(in oklab, var(--secondary) 70%, var(--panel))
+  );
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease,
+    filter 0.12s ease;
+}
+
+.admin-mobile-filtros-botao:hover {
+  filter: brightness(1.04);
+}
+
+.admin-mobile-filtros-botao:active {
+  transform: translateY(1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+}
+
+/* ===================== MOBILE: Modal de filtros/busca ===================== */
+
+.admin-mobile-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.admin-mobile-modal {
+  width: 100%;
+  max-width: 520px;
+  background: var(--panel);
+  border-radius: 18px 18px 0 0;
+  padding: 16px 18px 20px;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.75);
+  border-top: 1px solid var(--border-strong);
+  animation: admin-slide-up 0.2s ease-out;
+}
+
+.admin-mobile-modal__dragbar {
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  margin: 0 auto 14px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--primary) 60%, #ffffff),
+    color-mix(in oklab, var(--secondary) 60%, #ffffff)
+  );
+}
+
+.admin-mobile-modal__titulo {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.admin-mobile-modal__grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.admin-mobile-modal__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.admin-mobile-modal__input {
+  height: 40px;
+}
+
+.admin-mobile-modal__acoes {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.admin-mobile-modal__botao {
+  flex: 1;
+}
+
+/* Animação de subida do modal */
+@keyframes admin-slide-up {
+  from {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ===================== MOBILE: Cards de itens ===================== */
+
+.admin-mobile-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-mobile-cards__mensagem {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.admin-mobile-card {
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    180deg,
+    var(--panel),
+    color-mix(in oklab, var(--panel) 70%, var(--surface))
+  );
+  padding: 12px 14px 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-mobile-card--ativo {
+  box-shadow: 0 0 0 1px
+      color-mix(in oklab, var(--secondary) 35%, transparent),
+    0 12px 30px rgba(0, 0, 0, 0.75);
+}
+
+.admin-mobile-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.admin-mobile-card__id {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.admin-mobile-card__autor {
+  margin: 2px 0 0;
+  font-size: 12px; /* aumentei de 11px para 12px */
+  color: color-mix(in oklab, var(--text) 82%, var(--muted));
+}
+
+.admin-mobile-card__body {
+  margin-top: 4px;
+}
+
+.admin-mobile-card__nome {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.admin-mobile-card__linha {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.admin-mobile-card__label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.admin-mobile-card__valor {
+  font-size: 13px;
+  color: var(--text);
+  text-align: right;
+}
+
+.admin-mobile-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.admin-mobile-card__botao {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ===================== MOBILE: paginação ===================== */
+
+.admin-mobile-paginacao {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.admin-mobile-paginacao__botao {
+  min-width: 110px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease,
+    opacity 0.12s ease;
+}
+
+.admin-mobile-paginacao__botao:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.7);
+}
+
+.admin-mobile-paginacao__botao:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
+}
+
+.admin-mobile-paginacao__botao:disabled {
+  opacity: 0.4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  cursor: default;
+}
+
+.admin-mobile-paginacao__info {
+  font-size: 13px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--text) 90%, var(--muted));
+}
