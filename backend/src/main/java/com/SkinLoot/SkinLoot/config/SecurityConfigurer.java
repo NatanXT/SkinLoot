@@ -93,7 +93,7 @@ public class SecurityConfigurer {
 
 
                         // Área admin
-                        .requestMatchers("/api/user/**").hasAuthority(Role.ADMIN.name())
+                        .requestMatchers("/api/admin/**").hasAuthority(Role.ADMIN.name())
 
 
                         // Outras rotas exigem autenticação

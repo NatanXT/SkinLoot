@@ -656,10 +656,17 @@ export default function DashboardVitrine() {
             </button>
 
             {menuAberto && (
-              <div className="menu">
-                <button onClick={() => navigate('/perfil')}>Meu Perfil</button>
-                <button onClick={handleLogout}>Sair</button>
-              </div>
+                <div className="menu">
+                  {/* ✅ Botão exclusivo para Admin */}
+                  {user?.role === 'ADMIN' && (
+                      <button onClick={() => navigate('/admin')} style={{ color: '#39FF14' }}>
+                        Painel Admin
+                      </button>
+                  )}
+
+                  <button onClick={() => navigate('/perfil')}>Meu Perfil</button>
+                  <button onClick={handleLogout}>Sair</button>
+                </div>
             )}
           </div>
         </div>
