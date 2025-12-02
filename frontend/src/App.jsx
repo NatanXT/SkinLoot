@@ -24,6 +24,9 @@ import DetalheAnuncio from './pages/detalhes/DetalheAnuncio.jsx';
 
 import PerfilUsuario from './pages/usuario/PerfilUsuario';
 
+// Página de administração de usuários
+import AdminPainel from './pages/admin/AdminPainel.jsx';
+import AdminRoute from './components/AdminRoute';
 // Context/Auth
 import { useAuth } from './services/AuthContext';
 
@@ -60,6 +63,7 @@ export default function App() {
         <Route path="/suporte" element={<Suporte />} />
         <Route path="/anuncio/:id" element={<DetalheAnuncio />} />
 
+
         {/* Usuario/Perfil (PROTEGIDA) */}
         <Route
           path="/perfil"
@@ -69,6 +73,11 @@ export default function App() {
             </RequireAuth>
           }
         />
+
+        {/* Usuario/Admin (PROTEGIDA) */}
+        <Route element={<AdminRoute />}>
+          <Route path="/admin" element={<AdminPainel />} />
+        </Route>
 
         {/* 404 */}
         <Route path="*" element={<NotFound />} />

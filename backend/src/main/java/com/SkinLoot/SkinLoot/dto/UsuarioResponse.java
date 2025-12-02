@@ -9,7 +9,7 @@ public class UsuarioResponse {
   private String nome;
   private String email;
   private String plano;
-  private Double mediaNotas;
+   private Double mediaNotas;
   private Integer totalAvaliacoes;
 
   public static UsuarioResponse of(Usuario u) {
@@ -56,5 +56,11 @@ public class UsuarioResponse {
 
   public void setPlano(String plano) {
     this.plano = plano;
+  }
+  public String getRole() {
+      return role;
+  }
+  public void setRole(String role) {
+      this.role = role;
   }
 }

@@ -19,6 +19,7 @@ const pickPayload = (res) => res?.data?.user ?? res?.data ?? null;
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const saveUser = (u) => {
     setUser(u);
@@ -40,29 +41,24 @@ export const AuthProvider = ({ children }) => {
 
     // 2) Valida sessão no backend
     if (!authService?.getCurrentUser) {
-      console.error(
-        '[AuthContext] getCurrentUser não encontrado em AuthService.',
-      );
-      setLoading(false);
+      setIsCheckingAuth(false);
       return;
     }
 
     authService
-      .getCurrentUser()
-      .then((res) => saveUser(pickPayload(res)))
-      .catch((error) => {
-        if (error?.response?.status === 401) {
-          // sessão ausente = esperado na primeira carga se não logou
-        } else {
-          console.warn(
-            'Erro ao checar /me:',
-            error?.response?.data || error.message,
-          );
-        }
-        // se não havia cache, assegure null
-        if (!localStorage.getItem(STORAGE_USER_KEY)) saveUser(null);
-      })
-      .finally(() => setLoading(false));
+        .getCurrentUser()
+        .then((res) => saveUser(pickPayload(res)))
+        .catch((error) => {
+          // Se der 401 ou outro erro, assumimos que não tem usuário
+          if (error?.response?.status !== 401) {
+            console.warn('Sessão inválida:', error.message);
+          }
+          saveUser(null);
+        })
+        .finally(() => {
+          // Só agora liberamos a aplicação para renderizar rotas protegidas
+          setIsCheckingAuth(false);
+        });
   }, []);
 
   // LOGIN: faz login, depois busca /me (o objeto de usuário)
@@ -98,8 +94,15 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, login, logout, register, setUser: saveUser }),
-    [user, loading, login, logout, register],
+      () => ({
+        user,
+        isCheckingAuth, // <--- USE ISSO NO SEU PROTECTED ROUTE
+        login,
+        logout,
+        register,
+        setUser: saveUser
+      }),
+      [user, isCheckingAuth, login, logout, register],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

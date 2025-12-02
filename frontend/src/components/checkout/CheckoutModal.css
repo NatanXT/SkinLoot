@@ -1,0 +1,139 @@
+.checkout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.checkout-modal {
+  width: 430px;
+  background: #0c0f14;
+  border: 1px solid #1d2331;
+  border-radius: 14px;
+  padding: 30px;
+  position: relative;
+  animation: pop 0.15s ease;
+}
+
+@keyframes pop {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.checkout-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.checkout-step h2 {
+  color: #e2e8f0;
+  margin-bottom: 6px;
+}
+
+.checkout-subtitle {
+  font-size: 14px;
+  color: #94a3b8;
+  margin-bottom: 20px;
+}
+
+.checkout-resumo {
+  background: #131822;
+  padding: 16px;
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  margin-bottom: 20px;
+  font-size: 15px;
+  color: #cbd5e1;
+}
+
+.checkout-metodos {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.checkout-metodo {
+  flex: 1;
+  padding: 14px;
+  background: #131822;
+  border: 1px solid #1f2634;
+  border-radius: 10px;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.checkout-metodo.active {
+  border-color: #00c896;
+  color: #00c896;
+}
+
+.full {
+  width: 100%;
+}
+
+.card-form label {
+  color: #cbd5e1;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.card-form input {
+  width: 100%;
+  padding: 10px;
+  background: #11161e;
+  border: 1px solid #1f2634;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.card-row {
+  display: flex;
+  gap: 10px;
+}
+
+.pix-box {
+  text-align: center;
+  color: #cbd5e1;
+}
+
+.pix-qrcode {
+  margin: 12px auto;
+  padding: 14px;
+  background: #11161e;
+  border: 1px dashed #334155;
+  border-radius: 10px;
+  word-break: break-all;
+  font-size: 13px;
+  color: #38bdf8;
+}
+
+.checkout-confirmado {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.checkmark {
+  margin: 16px auto 0;
+  font-size: 42px;
+  color: #00c896;
+  animation: pulse 0.4s ease-out;
+}
+
+@keyframes pulse {
+  from { transform: scale(0.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

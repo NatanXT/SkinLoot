@@ -3,7 +3,7 @@
 // Perfil do usuário (mock até a API ficar pronta)
 // - Dados da conta
 // - Plano/cota
-// - Modal de Renovar/Upgrade
+// - Modal de Renovar/Upgrade + Checkout mockado
 // - Editar Skin: preview clicável + upload de arquivo OU URL/dataURL
 // - Desativar Skin: confirmação dupla com a palavra "Confirmo"
 // - Reativar Skin: abre editor e só ativa após salvar, respeitando limite
@@ -26,6 +26,7 @@ import {
 import { listarJogos } from '../../services/jogoService';
 import { renovarPlano, upgradePlano } from '../../services/planos';
 import AuthBrand from '../../components/logo/AuthBrand';
+import CheckoutModal from '../../components/checkout/CheckoutModal';
 
 // ---------- Helpers ----------
 const fmtBRL = (n) =>
@@ -36,10 +37,11 @@ const fmtBRL = (n) =>
       })
     : '—';
 
+// Mantido em sincronia com DashboardVitrine (label, cor, prioridade)
 const plansMeta = {
-  gratuito: { label: 'Gratuito', color: '#454B54' },
-  intermediario: { label: 'Intermediário', color: '#00C896' },
-  plus: { label: '+ Plus', color: '#39FF14' },
+  gratuito: { label: 'Gratuito', color: '#454B54', weight: 1.0 },
+  intermediario: { label: 'Intermediário', color: '#00C896', weight: 1.6 },
+  plus: { label: '+ Plus', color: '#39FF14', weight: 2.2 },
 };
 
 const DEFAULT_CSGO_DETAILS = {
@@ -114,6 +116,12 @@ export default function PerfilUsuario() {
   const [painel, setPainel] = useState(null); // "renovar" | "upgrade" | null
   const [busy, setBusy] = useState(false);
 
+  // Checkout mockado
+  const [checkoutAberto, setCheckoutAberto] = useState(false);
+  const [checkoutPlano, setCheckoutPlano] = useState(null); // "gratuito" | "intermediario" | "plus"
+  const [checkoutVariante, setCheckoutVariante] = useState('mensal'); // fixo para demo
+  const [checkoutAcao, setCheckoutAcao] = useState(null); // { tipo: 'renovar' } ou { tipo: 'upgrade', planoNovo, label }
+
   const [filtroStatus, setFiltroStatus] = useState('todas');
   const skinsFiltradas = useMemo(() => {
     if (filtroStatus === 'ativas')
@@ -126,13 +134,6 @@ export default function PerfilUsuario() {
   // -------------------- Estado do modal de edição --------------------
   const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
   const [skinEditando, setSkinEditando] = useState(null);
-  // const [formEdicao, setFormEdicao] = useState({
-  //     skinNome: '',
-  //     preco: '',
-  //     imagemUrl: '', // pode receber URL ou dataURL colada manualmente
-  //     descricao: '',
-  //     detalhes: '', // JSON em string
-  // });
   const [formEdicao, setFormEdicao] = useState(DEFAULT_FORM_EDICAO);
   const [imagemFile, setImagemFile] = useState(null); // arquivo selecionado
   const [previewImagem, setPreviewImagem] = useState(''); // preview (arquivo ou URL/dataURL)
@@ -274,6 +275,41 @@ export default function PerfilUsuario() {
     if (!busy) setPainel(null);
   }
 
+  // Checkout para plano
+  function abrirCheckoutRenovar() {
+    setCheckoutPlano(planoKey);
+    setCheckoutVariante('mensal');
+    setCheckoutAcao({ tipo: 'renovar' });
+    setPainel(null);
+    setCheckoutAberto(true);
+  }
+
+  function abrirCheckoutUpgrade(planoNovo, label) {
+    setCheckoutPlano(planoNovo);
+    setCheckoutVariante('mensal');
+    setCheckoutAcao({ tipo: 'upgrade', planoNovo, label });
+    setPainel(null);
+    setCheckoutAberto(true);
+  }
+
+  async function handleCheckoutConfirmar() {
+    if (!checkoutAcao) {
+      setCheckoutAberto(false);
+      return;
+    }
+
+    try {
+      if (checkoutAcao.tipo === 'renovar') {
+        await onConfirmarRenovar();
+      } else if (checkoutAcao.tipo === 'upgrade') {
+        await onEscolherPlano(checkoutAcao.planoNovo, checkoutAcao.label);
+      }
+    } finally {
+      setCheckoutAberto(false);
+      setCheckoutAcao(null);
+    }
+  }
+
   async function handleLogout() {
     try {
       await logout();
@@ -377,11 +413,6 @@ export default function PerfilUsuario() {
     setPreviewImagem('');
     setReativarDepoisDeSalvar(false);
   }
-  // function fecharEditar() {
-  //     setModalEdicaoAberto(false);
-  //     setSalvandoEdicao(false);
-  //     setSkinEditando(null);
-  // }
 
   // Atualiza preview quando digita URL (se não houver arquivo)
   useEffect(() => {
@@ -399,11 +430,8 @@ export default function PerfilUsuario() {
       let dataUrl = String(readEvent.target?.result || '');
 
       // --- INÍCIO DA CORREÇÃO ---
-      // 1. Limpa a string de dataUrl de quebras de linha ou espaços
-      // que podem ter sido introduzidos e quebram a URL.
       dataUrl = dataUrl.replace(/(\r\n|\n|\r)/gm, '').trim();
 
-      // 2. Valida a divisão
       const parts = dataUrl.split(',');
       if (
         parts.length !== 2 ||
@@ -421,19 +449,16 @@ export default function PerfilUsuario() {
       }
       // --- FIM DA CORREÇÃO ---
 
-      // Agora 'parts' é confiável
       const [head, base64] = parts;
       const mime = head.match(/:(.*?);/)?.[1] || 'image/png';
 
-      // Seta o preview APENAS com a dataUrl válida e limpa
       setPreviewImagem(dataUrl);
 
       setImagemFile({
         file: file,
-        base64: base64, // 'base64' agora será uma string válida
+        base64: base64,
         mime: mime,
       });
-      // prioriza arquivo, limpa URL
       setFormEdicao((v) => ({ ...v, imagemUrl: '' }));
     };
     reader.onerror = () => {
@@ -460,17 +485,14 @@ export default function PerfilUsuario() {
 
   const handleExteriorChange = (e) => {
     const novoExterior = e.target.value;
-
-    // Pega o float padrão do nosso map, ou deixa em branco
     const floatPadrao = EXTERIOR_TO_FLOAT_MAP[novoExterior] || '';
 
-    // Atualiza AMBOS os campos no estado
     setFormEdicao((prev) => ({
       ...prev,
       detalhesCsgo: {
         ...prev.detalhesCsgo,
         exterior: novoExterior,
-        desgasteFloat: floatPadrao, // <-- A MÁGICA
+        desgasteFloat: floatPadrao,
       },
     }));
   };
@@ -498,23 +520,19 @@ export default function PerfilUsuario() {
       let skinImageBase64 = null;
       let skinImageMime = null;
       let finalImageUrl = formEdicao.imagemUrl;
-      if (imagemFile) { // 1. Se for ARQUIVO
-        // O estado 'imagemFile' já contém o base64 e o mime
-        // processados pelo 'onEscolherArquivo'
+      if (imagemFile) {
         skinImageBase64 = imagemFile.base64 || null;
         skinImageMime = imagemFile.mime || null;
-        finalImageUrl = null; // Limpa a URL, pois estamos usando Base64
-
-      } else if (formEdicao.imagemUrl?.startsWith('data:')) { // 2. Se for DATAURL
-        const parts = dataUrlToParts(formEdicao.imagemUrl); //
-        skinImageBase64 = parts.base64 || null; //
-        skinImageMime = parts.mime || null; //
-        finalImageUrl = null; //
+        finalImageUrl = null;
+      } else if (formEdicao.imagemUrl?.startsWith('data:')) {
+        const parts = dataUrlToParts(formEdicao.imagemUrl);
+        skinImageBase64 = parts.base64 || null;
+        skinImageMime = parts.mime || null;
+        finalImageUrl = null;
       }
 
       const id = skinEditando?.id || skinEditando?._id;
 
-      // Payload híbrido — preferir base64, senão URL como fallback
       const payload = {
         titulo: formEdicao.skinNome,
         descricao: formEdicao.descricao,
@@ -525,7 +543,6 @@ export default function PerfilUsuario() {
           ? 'ATIVO'
           : skinEditando?.status || 'ATIVO',
 
-        // --- NOVA ESTRUTURA DE DADOS ---
         jogoId: selectedJogoId,
         detalhesCsgo:
           selectedGameName === 'CS:GO' ? formEdicao.detalhesCsgo : null,
@@ -533,12 +550,10 @@ export default function PerfilUsuario() {
           selectedGameName === 'League of Legends'
             ? formEdicao.detalhesLol
             : null,
-        // --- FIM DA NOVA ESTRUTURA ---
 
-        // Campos de imagem (baseado no seu original)
-          skinImageUrl: finalImageUrl, // ✅ Deve ser null se for dataURL
-          skinImageBase64: skinImageBase64,
-          skinImageMime: skinImageMime,
+        skinImageUrl: finalImageUrl,
+        skinImageBase64: skinImageBase64,
+        skinImageMime: skinImageMime,
       };
 
       if (id) {
@@ -643,25 +658,19 @@ export default function PerfilUsuario() {
     const urlAtual = skin?.imagemUrl || skin?.image || skin?.imagem || '';
     const raw = skin?._raw || {}; // Pega os dados brutos da API
 
-    // Define o jogo selecionado
     const jogoId = raw.jogo?.id || skin?.jogo?.id || '';
-
-    // Se já havia jogo, travamos o select; se não havia, deixamos editar.
     jogoInicialVazioRef.current = !jogoId;
-
     setSelectedJogoId(jogoId);
 
-    // Preenche o formulário com a estrutura de DTO correta
     setFormEdicao({
       skinNome: skin?.skinNome || skin?.title || skin?.nome || '',
       preco: skin?.preco ?? skin?.price ?? '',
       imagemUrl: urlAtual,
       descricao: raw.descricao ?? '',
-      // ✅ AQUI ESTÁ A CORREÇÃO: Preenche os detalhes
       detalhesCsgo:
-          raw.detalhesCsgo || skin?._raw?.detalhesCsgo || DEFAULT_CSGO_DETAILS,
+        raw.detalhesCsgo || skin?._raw?.detalhesCsgo || DEFAULT_CSGO_DETAILS,
       detalhesLol:
-          raw.detalhesLol || skin?._raw?.detalhesLol || DEFAULT_LOL_DETAILS,
+        raw.detalhesLol || skin?._raw?.detalhesLol || DEFAULT_LOL_DETAILS,
     });
     setImagemFile(null);
     setPreviewImagem(urlAtual || '');
@@ -979,7 +988,7 @@ export default function PerfilUsuario() {
                   </button>
                   <button
                     className="btn btn--primary"
-                    onClick={onConfirmarRenovar}
+                    onClick={abrirCheckoutRenovar}
                     disabled={busy}
                   >
                     {busy ? 'Confirmando...' : 'Confirmar renovação'}
@@ -999,18 +1008,21 @@ export default function PerfilUsuario() {
                       label: 'Gratuito',
                       lim: getPlanoLimit('gratuito'),
                       cor: plansMeta.gratuito.color,
+                      prio: plansMeta.gratuito.weight,
                     },
                     {
                       key: 'intermediario',
                       label: 'Intermediário',
                       lim: getPlanoLimit('intermediario'),
                       cor: plansMeta.intermediario.color,
+                      prio: plansMeta.intermediario.weight,
                     },
                     {
                       key: 'plus',
                       label: 'Plus',
                       lim: getPlanoLimit('plus'),
                       cor: plansMeta.plus.color,
+                      prio: plansMeta.plus.weight,
                     },
                   ].map((pl) => (
                     <div key={pl.key} className="perfil-upgrade-card">
@@ -1022,29 +1034,33 @@ export default function PerfilUsuario() {
                       </div>
                       <ul className="perfil-upgrade-list">
                         <li>
+                          Prioridade de exibição:{' '}
+                          <strong>{pl.prio.toFixed(1)}x</strong>
+                        </li>
+                        <li>
                           Limite de anúncios:{' '}
                           <strong>
                             {Number.isFinite(pl.lim) ? pl.lim : '∞'}
                           </strong>
                         </li>
-                        <li>Badge de destaque</li>
                         {pl.key !== 'gratuito' && (
-                          <li>Relatórios de visualização</li>
+                          <li>Badge de destaque</li>
                         )}
+                        <li>Suporte via e-mail</li>
                         {pl.key === 'plus' && (
                           <li>Spotlight na página inicial</li>
                         )}
                       </ul>
                       <button
                         className="btn btn--primary btn--full"
-                        data-plan={pl.key} // ✅ usado para focar quando veio da vitrine
+                        data-plan={pl.key}
                         disabled={pl.key === planoKey || busy}
                         title={
                           pl.key === planoKey
                             ? 'Plano atual'
                             : 'Migrar para este plano'
                         }
-                        onClick={() => onEscolherPlano(pl.key, pl.label)}
+                        onClick={() => abrirCheckoutUpgrade(pl.key, pl.label)}
                       >
                         {pl.key === planoKey
                           ? 'Seu plano atual'
@@ -1160,7 +1176,6 @@ export default function PerfilUsuario() {
                     ))}
                   </select>
 
-                  {/* Mostra a dica somente quando o campo está travado */}
                   {!jogoInicialVazioRef.current && (
                     <small className="perfil-form__hint">
                       O jogo deste anúncio já foi definido e não pode ser
@@ -1219,107 +1234,102 @@ export default function PerfilUsuario() {
 
                 {/* Campos de CS:GO */}
                 {selectedGameName === 'CS:GO' && (
-                    <fieldset className="perfil-form__fieldset">
-                      <legend>Detalhes (CS:GO)</legend>
+                  <fieldset className="perfil-form__fieldset">
+                    <legend>Detalhes (CS:GO)</legend>
 
-                      <div className="perfil-form__grid-2">
-                        <div className="perfil-form__row">
-                          <label htmlFor="f-cs-float">Desgaste (Float)</label>
-                          <input
-                              id="f-cs-float"
-                              type="number"
-                              step="0.0001"
-                              placeholder="Ex: 0.0712"
-
-                              min="0"  /* ✅ META 1 */
-                              max="1"  /* ✅ META 1 */
-
-                              value={formEdicao.detalhesCsgo.desgasteFloat}
-                              onChange={(e) =>
-                                  setFormEdicao((prev) => ({
-                                    ...prev,
-                                    detalhesCsgo: {
-                                      ...prev.detalhesCsgo,
-                                      desgasteFloat: e.target.value,
-                                    },
-                                  }))
-                              }
-                          />
-                        </div>
-                        <div className="perfil-form__row">
-                          <label htmlFor="f-cs-pattern">Pattern Index</label>
-                          <input
-                              id="f-cs-pattern"
-                              type="number"
-                              step="1"
-                              placeholder="Ex: 456"
-
-                              min="0"   /* ✅ META 2 */
-                              max="999" /* ✅ META 2 */
-
-                              value={formEdicao.detalhesCsgo.patternIndex}
-                              onChange={(e) =>
-                                  setFormEdicao((prev) => ({
-                                    ...prev,
-                                    detalhesCsgo: {
-                                      ...prev.detalhesCsgo,
-                                      patternIndex: e.target.value,
-                                    },
-                                  }))
-                              }
-                          />
-                        </div>
-                      </div>
-
+                    <div className="perfil-form__grid-2">
                       <div className="perfil-form__row">
-                        <label htmlFor="f-cs-exterior">Exterior</label>
-                        <select
-                            id="f-cs-exterior"
-                            value={formEdicao.detalhesCsgo.exterior}
-
-                            onChange={handleExteriorChange} /* ✅ META 3 */
-                        >
-                          <option value="Factory New">Factory New</option>
-                          <option value="Minimal Wear">Minimal Wear</option>
-                          <option value="Field-Tested">Field-Tested</option>
-                          <option value="Well-Worn">Well-Worn</option>
-                          <option value="Battle-Scarred">Battle-Scarred</option>
-                        </select>
-                      </div>
-
-                      <label className="check" style={{marginTop: 12}}>
+                        <label htmlFor="f-cs-float">Desgaste (Float)</label>
                         <input
-                            type="checkbox"
-                            checked={formEdicao.detalhesCsgo.statTrak}
-                            onChange={(e) =>
-                                setFormEdicao((prev) => ({
-                                  ...prev,
-                                  detalhesCsgo: {
-                                    ...prev.detalhesCsgo,
-                                    statTrak: e.target.checked,
-                                  },
-                                }))
-                            }
+                          id="f-cs-float"
+                          type="number"
+                          step="0.0001"
+                          placeholder="Ex: 0.0712"
+                          min="0"
+                          max="1"
+                          value={formEdicao.detalhesCsgo.desgasteFloat}
+                          onChange={(e) =>
+                            setFormEdicao((prev) => ({
+                              ...prev,
+                              detalhesCsgo: {
+                                ...prev.detalhesCsgo,
+                                desgasteFloat: e.target.value,
+                              },
+                            }))
+                          }
                         />
-                        <span>StatTrak™</span>
-                      </label>
-                    </fieldset>
+                      </div>
+                      <div className="perfil-form__row">
+                        <label htmlFor="f-cs-pattern">Pattern Index</label>
+                        <input
+                          id="f-cs-pattern"
+                          type="number"
+                          step="1"
+                          placeholder="Ex: 456"
+                          min="0"
+                          max="999"
+                          value={formEdicao.detalhesCsgo.patternIndex}
+                          onChange={(e) =>
+                            setFormEdicao((prev) => ({
+                              ...prev,
+                              detalhesCsgo: {
+                                ...prev.detalhesCsgo,
+                                patternIndex: e.target.value,
+                              },
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="perfil-form__row">
+                      <label htmlFor="f-cs-exterior">Exterior</label>
+                      <select
+                        id="f-cs-exterior"
+                        value={formEdicao.detalhesCsgo.exterior}
+                        onChange={handleExteriorChange}
+                      >
+                        <option value="Factory New">Factory New</option>
+                        <option value="Minimal Wear">Minimal Wear</option>
+                        <option value="Field-Tested">Field-Tested</option>
+                        <option value="Well-Worn">Well-Worn</option>
+                        <option value="Battle-Scarred">Battle-Scarred</option>
+                      </select>
+                    </div>
+
+                    <label className="check" style={{ marginTop: 12 }}>
+                      <input
+                        type="checkbox"
+                        checked={formEdicao.detalhesCsgo.statTrak}
+                        onChange={(e) =>
+                          setFormEdicao((prev) => ({
+                            ...prev,
+                            detalhesCsgo: {
+                              ...prev.detalhesCsgo,
+                              statTrak: e.target.checked,
+                            },
+                          }))
+                        }
+                      />
+                      <span>StatTrak™</span>
+                    </label>
+                  </fieldset>
                 )}
 
                 {/* Campos de LoL */}
                 {selectedGameName === 'League of Legends' && (
-                    <fieldset className="perfil-form__fieldset">
-                      <legend>Detalhes (LoL)</legend>
+                  <fieldset className="perfil-form__fieldset">
+                    <legend>Detalhes (LoL)</legend>
 
-                      <div className="perfil-form__row">
-                        <label htmlFor="f-lol-champion">Campeão</label>
-                        <input
-                            id="f-lol-champion"
-                            type="text"
-                            placeholder="Ex: Jinx"
-                            value={formEdicao.detalhesLol.championName}
-                            onChange={(e) =>
-                                setFormEdicao((prev) => ({
+                    <div className="perfil-form__row">
+                      <label htmlFor="f-lol-champion">Campeão</label>
+                      <input
+                        id="f-lol-champion"
+                        type="text"
+                        placeholder="Ex: Jinx"
+                        value={formEdicao.detalhesLol.championName}
+                        onChange={(e) =>
+                          setFormEdicao((prev) => ({
                             ...prev,
                             detalhesLol: {
                               ...prev.detalhesLol,
@@ -1378,7 +1388,7 @@ export default function PerfilUsuario() {
                     placeholder="https://exemplo.com/imagem.png ou cole uma dataURL (data:image/png;base64,...)"
                     value={formEdicao.imagemUrl}
                     onChange={(e) => {
-                      setImagemFile(null); // se digitar URL/dataURL, prioriza isso
+                      setImagemFile(null);
                       setFormEdicao((v) => ({
                         ...v,
                         imagemUrl: e.target.value,
@@ -1392,7 +1402,6 @@ export default function PerfilUsuario() {
                   </small>
                 </div>
 
-                {/* Rodapé sempre visível dentro da área rolável */}
                 <div className="perfil-modal__actions">
                   <button
                     type="button"
@@ -1516,6 +1525,18 @@ export default function PerfilUsuario() {
           </div>
         </div>
       )}
+
+      {/* ========================= CHECKOUT MOCKADO ========================= */}
+      <CheckoutModal
+        open={checkoutAberto}
+        onClose={() => {
+          setCheckoutAberto(false);
+          setCheckoutAcao(null);
+        }}
+        plano={checkoutPlano || planoKey}
+        variante={checkoutVariante}
+        onConfirmar={handleCheckoutConfirmar}
+      />
     </div>
   );
 }
