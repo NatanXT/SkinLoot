@@ -10,7 +10,7 @@
 }
 
 .checkout-modal {
-  width: 430px;
+  width: 520px; /* largura maior para desktop */
   background: #0c0f14;
   border: 1px solid #1d2331;
   border-radius: 14px;
@@ -58,6 +58,12 @@
   color: #cbd5e1;
 }
 
+/* Quando usarmos o resumo como bloco único (ex: período),
+   deixamos ele em coluna */
+.checkout-resumo .checkout-periodos {
+  grid-column: 1 / -1;
+}
+
 .checkout-metodos {
   display: flex;
   gap: 10px;
@@ -98,6 +104,13 @@
   border-radius: 8px;
   margin-bottom: 8px;
   color: #fff;
+  font-size: 14px;
+}
+
+.card-form input:focus {
+  outline: none;
+  border-color: #00c896;
+  box-shadow: 0 0 0 1px #00c89633;
 }
 
 .card-row {
@@ -145,18 +158,218 @@
   font-weight: bold;
 }
 
-.pix-qrcode {
-  margin: 12px auto;
-  padding: 14px;
-  background: #11161e;
-  border: 1px dashed #334155;
-  border-radius: 10px;
-  word-break: break-all;
-  font-size: 13px;
-  color: #38bdf8;
-}
-
 .checkout-step p {
   margin-bottom: 20px;
   font-size: 14px;
+}
+
+/* Botão "copiar código PIX" com espaço para o botão de pagar */
+.pix-box .btn--secondary {
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+
+/* Estado de erro (tempo expirado) */
+.checkout-error {
+  text-align: center;
+  color: #f87171; /* Vermelho para indicar erro */
+}
+
+.checkout-error h2 {
+  font-size: 18px;
+}
+
+.checkout-error button {
+  margin-top: 15px;
+}
+
+/* ----------------- SELEÇÃO DE PERÍODO (mensal / trimestral / anual) ----------------- */
+
+.checkout-periodos {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.checkout-periodo {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 9999px;
+  border: 1px solid #1f2634;
+  background: #0f1724;
+  color: #cbd5e1;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.checkout-periodo:hover {
+  border-color: #334155;
+}
+
+.checkout-periodo.active {
+  border-color: #00c896;
+  background: rgba(0, 200, 150, 0.12);
+  color: #00c896;
+}
+
+/* ----------------- CARTÃO MAIS REALISTA ----------------- */
+
+.card-wrapper {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 18px; /* um pouco mais de espaço entre preview e formulário */
+  align-items: flex-start;
+}
+
+.card-preview {
+  background: radial-gradient(circle at 0 0, #00c89633 0, #020617 55%);
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+  border: 1px solid #1f2937;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 150px;
+}
+
+.card-preview-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #e5e7eb;
+  opacity: 0.85;
+}
+
+.card-brand {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.card-chip {
+  width: 28px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1px solid #9ca3af44;
+  background: linear-gradient(135deg, #e5e7eb44, #9ca3af11);
+}
+
+.card-number {
+  margin: 10px 0 8px;
+  font-size: 15px;
+  letter-spacing: 0.16em;
+  color: #f9fafb;
+}
+
+.card-holder-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #e5e7eb;
+}
+
+.card-holder-row span {
+  display: block;
+}
+
+.card-label {
+  font-size: 9px;
+  opacity: 0.7;
+  margin-bottom: 2px;
+}
+
+.card-value {
+  font-size: 11px;
+}
+
+.card-installments {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+/* ----------------- DROPDOWN CUSTOM DE PARCELAS ----------------- */
+
+.parcelas-select-wrapper {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.parcelas-select-display {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #11161e;
+  border: 1px solid #1f2634;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.parcelas-select-display:hover {
+  border-color: #334155;
+}
+
+.parcelas-select-arrow {
+  font-size: 10px;
+  color: #9ca3af;
+  margin-left: 8px;
+}
+
+.parcelas-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #020617;
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.8);
+  z-index: 10;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.parcelas-option {
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.parcelas-option:hover {
+  background: #0f172a;
+}
+
+.parcelas-option.active {
+  background: rgba(0, 200, 150, 0.12);
+  color: #00c896;
+}
+
+/* Ajuste quando a tela for menor: empilha o preview acima do formulário */
+@media (max-width: 640px) {
+  .checkout-modal {
+    width: 100%;
+    max-width: 430px;
+    margin: 0 10px;
+  }
+
+  .card-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .card-preview {
+    order: -1;
+  }
 }
