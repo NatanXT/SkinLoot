@@ -137,3 +137,26 @@
   from { transform: scale(0.7); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+
+.pix-box .timer {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #fbbf24; /* Amarelo para destaque */
+  font-weight: bold;
+}
+
+.pix-qrcode {
+  margin: 12px auto;
+  padding: 14px;
+  background: #11161e;
+  border: 1px dashed #334155;
+  border-radius: 10px;
+  word-break: break-all;
+  font-size: 13px;
+  color: #38bdf8;
+}
+
+.checkout-step p {
+  margin-bottom: 20px;
+  font-size: 14px;
+}

@@ -1,24 +1,6 @@
-// ========================================================================
-// CheckoutModal.jsx
-// ------------------------------------------------------------------------
-// Modal interno usado dentro da modal de "Renovar" e "Upgrade".
-// Possui três etapas:
-//
-// 1) Resumo do Plano
-// 2) Seleção do método de pagamento (Cartão / PIX)
-// 3) Pagamento e Confirmação
-//
-// Tudo é 100% mockado, porém com UX realista:
-// - Geração de QRCode simulado
-// - Validação básica de cartão fake
-// - Delay com loading
-// - Tela de confirmação
-//
-// Observação: nenhum texto menciona "mock".
-// ========================================================================
-
-import React, { useEffect, useState } from "react";
-import "./CheckoutModal.css";
+import React, { useEffect, useState } from 'react';
+import QRCode from 'qrcode.react';  // Correção da importação
+import './CheckoutModal.css';
 
 export default function CheckoutModal({
   open,
@@ -36,14 +18,12 @@ export default function CheckoutModal({
   };
 
   const [etapa, setEtapa] = useState(1);
-
-  // Dados de pagamento
-  const [metodo, setMetodo] = useState("");
+  const [metodo, setMetodo] = useState('');
   const [card, setCard] = useState({
-    number: "",
-    name: "",
-    cvv: "",
-    venc: "",
+    number: '',
+    name: '',
+    cvv: '',
+    venc: '',
   });
 
   // Loader e confirmação
@@ -51,19 +31,34 @@ export default function CheckoutModal({
   const [confirmado, setConfirmado] = useState(false);
 
   // PIX
-  const [qrCode, setQrCode] = useState("");
+  const [qrCode, setQrCode] = useState('');
+  const [timer, setTimer] = useState(300); // 5 minutos em segundos
 
   useEffect(() => {
-    if (metodo === "pix") {
+    if (metodo === 'pix') {
       const r = Math.random().toString(36).substring(2);
       setQrCode(`000201PIX-SKINLOOT-CODE-${r}`);
+      startTimer();
     }
   }, [metodo]);
 
+  // Função para iniciar o timer
+  const startTimer = () => {
+    const intervalId = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(intervalId); // Parar o timer quando chegar a zero
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000); // Decrementa a cada segundo
+  };
+
   function formatCurrency(v) {
-    return v.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+    return v.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
       minimumFractionDigits: 2,
     });
   }
@@ -121,10 +116,7 @@ export default function CheckoutModal({
               </strong>
             </div>
 
-            <button
-              className="btn btn--primary full"
-              onClick={handleAvancar}
-            >
+            <button className="btn btn--primary full" onClick={handleAvancar}>
               Continuar
             </button>
           </div>
@@ -141,18 +133,18 @@ export default function CheckoutModal({
             <div className="checkout-metodos">
               <button
                 className={`checkout-metodo ${
-                  metodo === "cartao" ? "active" : ""
+                  metodo === 'cartao' ? 'active' : ''
                 }`}
-                onClick={() => setMetodo("cartao")}
+                onClick={() => setMetodo('cartao')}
               >
                 Cartão de Crédito
               </button>
 
               <button
                 className={`checkout-metodo ${
-                  metodo === "pix" ? "active" : ""
+                  metodo === 'pix' ? 'active' : ''
                 }`}
-                onClick={() => setMetodo("pix")}
+                onClick={() => setMetodo('pix')}
               >
                 PIX
               </button>
@@ -174,25 +166,21 @@ export default function CheckoutModal({
             <h2>Pagamento</h2>
 
             {/* ---------- Cartão ---------- */}
-            {metodo === "cartao" && (
+            {metodo === 'cartao' && (
               <div className="card-form">
                 <label>Número do Cartão</label>
                 <input
                   maxLength={19}
                   placeholder="0000 0000 0000 0000"
                   value={card.number}
-                  onChange={(e) =>
-                    setCard({ ...card, number: e.target.value })
-                  }
+                  onChange={(e) => setCard({ ...card, number: e.target.value })}
                 />
 
                 <label>Nome impresso no cartão</label>
                 <input
                   placeholder="JOÃO DA SILVA"
                   value={card.name}
-                  onChange={(e) =>
-                    setCard({ ...card, name: e.target.value })
-                  }
+                  onChange={(e) => setCard({ ...card, name: e.target.value })}
                 />
 
                 <div className="card-row">
@@ -226,30 +214,36 @@ export default function CheckoutModal({
                   disabled={!validarCartao() || processando}
                   onClick={handlePagar}
                 >
-                  {processando ? "Processando..." : "Pagar"}
+                  {processando ? 'Processando...' : 'Pagar'}
                 </button>
               </div>
             )}
 
             {/* ---------- PIX ---------- */}
-            {metodo === "pix" && (
+            {metodo === 'pix' && (
               <div className="pix-box">
                 <p>Escaneie o código abaixo:</p>
 
+                {/* QR Code gerado aqui */}
                 <div className="pix-qrcode">
-                  {qrCode.split("").map((c, i) => (
-                    <span key={i}>{c}</span>
-                  ))}
+                  <QRCode value={qrCode} size={256} />
                 </div>
 
                 <small>{qrCode}</small>
+
+                <div className="timer">
+                  <p>
+                    Tempo restante: {Math.floor(timer / 60)}:
+                    {timer % 60 < 10 ? `0${timer % 60}` : timer % 60}
+                  </p>
+                </div>
 
                 <button
                   className="btn btn--primary full"
                   onClick={handlePagar}
                   disabled={processando}
                 >
-                  {processando ? "Aguardando confirmação..." : "Paguei"}
+                  {processando ? 'Aguardando confirmação...' : 'Paguei'}
                 </button>
               </div>
             )}
