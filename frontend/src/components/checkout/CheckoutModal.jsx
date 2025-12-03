@@ -37,7 +37,7 @@ export default function CheckoutModal({
   // PIX
   const [qrCode, setQrCode] = useState('');
   const [qrCodeImage, setQrCodeImage] = useState(''); // Imagem do QR Code gerado
-  const [timer, setTimer] = useState(5); // 5 minutos em segundos (ajuste para 300 em produção)
+  const [timer, setTimer] = useState(600); // 10 minutos em segundos (ajuste para 300 em produção)
 
   useEffect(() => {
     if (metodo === 'pix') {

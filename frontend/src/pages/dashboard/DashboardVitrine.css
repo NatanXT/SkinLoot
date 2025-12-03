@@ -180,6 +180,120 @@ nav a:hover { color: var(--text); }
 .field--search input { border: 1px solid var(--border); background: var(--surface); }
 .field--search svg { color: var(--muted); }
 
+/* ----- Select refinado nos filtros (Jogo/Plano/Ordenar) ----- */
+.filters-select {
+  width: 100%;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* remove setinha padrão no IE/Edge antigo */
+.filters-select::-ms-expand {
+  display: none;
+}
+
+/* estado hover/focus */
+.filters-select:hover {
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 35%, transparent);
+}
+.filters-select:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 60%, transparent);
+}
+
+/* opções do dropdown seguem o tema (quando o navegador permite) */
+.filters-select option {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* -------- Dropdown customizado (Jogo / Plano / Ordenar) -------- */
+.filters-select-wrapper {
+  position: relative;
+  min-width: 180px;
+}
+
+.filters-select-display {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+.filters-select-display:hover {
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 35%, transparent);
+}
+.filters-select-display:focus-visible {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 60%, transparent);
+  background: color-mix(in oklab, var(--surface) 85%, var(--panel));
+}
+
+.filters-select-arrow {
+  font-size: 10px;
+  color: #9ca3af;
+  margin-left: 8px;
+}
+
+.filters-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #020617;
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.8);
+  z-index: 10;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.filters-dropdown-option {
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  font-size: 13px;
+  cursor: pointer;
+}
+.filters-dropdown-option:hover {
+  background: #0f172a;
+}
+.filters-dropdown-option.active {
+  background: rgba(0, 200, 150, 0.12);
+  color: #00c896;
+}
+
+/* Range de preço */
 .range {
   display: flex; flex-direction: column; gap: 8px;
   background: var(--panel); border: 1px solid var(--border);
@@ -251,13 +365,13 @@ nav a:hover { color: var(--text); }
   border-color: var(--border-strong);
 }
 
-/* ====== OVERRIDES DE CONTRASTE PARA O TEMA CLARO (ghost & disabled) ====== */
+/* ====== OVERRIDES DE CONTRASTE PARA O TEMA CLARO (ghost & disabled & dropdown) ====== */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .btn--ghost,
   :root[data-theme="light"] .btn--ghost {
-    background: #EDF2F7;                   /* preenchimento suave */
-    border-color: #CBD5E1;                 /* borda mais visível */
-    color: #0B0D10;                        /* texto forte */
+    background: #EDF2F7;
+    border-color: #CBD5E1;
+    color: #0B0D10;
   }
   :root:not([data-theme="dark"]) .btn--ghost:hover,
   :root[data-theme="light"] .btn--ghost:hover {
@@ -276,9 +390,74 @@ nav a:hover { color: var(--text); }
     background: #EEF2F6;
     color: #94A3B8;
     border-color: #D5DFEA;
-    opacity: 1;             /* não ficar “apagado demais” */
+    opacity: 1;
     cursor: not-allowed;
   }
+
+  /* Dropdown custom no tema claro (auto) */
+  :root:not([data-theme="dark"]) .filters-select-display {
+    background: #FFFFFF;
+    border-color: #CBD5E1;
+    color: #0B0D10;
+  }
+  :root:not([data-theme="dark"]) .filters-select-display:hover {
+    border-color: #94A3B8;
+    box-shadow: 0 0 0 4px rgba(31,234,0,.18);
+    background: #F9FAFB;
+  }
+  :root:not([data-theme="dark"]) .filters-select-display:focus-visible {
+    border-color: #16A34A;
+    box-shadow: 0 0 0 4px rgba(34,197,94,.35);
+    background: #F1F5F9;
+  }
+
+  :root:not([data-theme="dark"]) .filters-dropdown {
+    background: #FFFFFF;
+    border-color: #CBD5E1;
+    box-shadow: 0 18px 45px rgba(15,23,42,.16);
+  }
+  :root:not([data-theme="dark"]) .filters-dropdown-option {
+    color: #0F172A;
+  }
+  :root:not([data-theme="dark"]) .filters-dropdown-option:hover {
+    background: #F1F5F9;
+  }
+  :root:not([data-theme="dark"]) .filters-dropdown-option.active {
+    background: rgba(16,185,129,.18);
+    color: #047857;
+  }
+}
+
+/* Tema claro forçado (data-theme="light") – garante mesmo se o sistema estiver em dark */
+:root[data-theme="light"] .filters-select-display {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  color: #0B0D10;
+}
+:root[data-theme="light"] .filters-select-display:hover {
+  border-color: #94A3B8;
+  box-shadow: 0 0 0 4px rgba(31,234,0,.18);
+  background: #F9FAFB;
+}
+:root[data-theme="light"] .filters-select-display:focus-visible {
+  border-color: #16A34A;
+  box-shadow: 0 0 0 4px rgba(34,197,94,.35);
+  background: #F1F5F9;
+}
+:root[data-theme="light"] .filters-dropdown {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  box-shadow: 0 18px 45px rgba(15,23,42,.16);
+}
+:root[data-theme="light"] .filters-dropdown-option {
+  color: #0F172A;
+}
+:root[data-theme="light"] .filters-dropdown-option:hover {
+  background: #F1F5F9;
+}
+:root[data-theme="light"] .filters-dropdown-option.active {
+  background: rgba(16,185,129,.18);
+  color: #047857;
 }
 
 /* ============================================================================
@@ -407,23 +586,8 @@ nav a:hover { color: var(--text); }
   .chat-float .chat-body, .chat-float .chat-scroll, .chat-float [data-chat-scroll] { max-height: 60vh; overflow: auto; }
   .chat-mini-bubble { left: auto; right: 12px; min-width: 0; width: auto; max-width: calc(100vw - 24px); }
 }
+
 /* ===== Compatibilidade: garantir que Card siga o tema atual ===== */
-.grid .card { background: linear-gradient(180deg, var(--panel), color-mix(in oklab, var(--panel) 70%, var(--surface))) !important;
-  border-color: var(--border) !important; box-shadow: var(--shadow) !important; }
-.grid .card__media { background: var(--surface) !important; border-bottom: 1px solid var(--border) !important; }
-.grid .like { background: color-mix(in oklab, var(--panel) 75%, transparent) !important; border-color: var(--border-strong) !important; color: color-mix(in oklab, var(--text) 75%, var(--muted)) !important; }
-
-/* Tema claro explícito (quando auto/light): reforça contraste dos cards */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .grid .card { background: linear-gradient(180deg, #FFFFFF, #F7FAFC) !important; border-color: #CBD5E1 !important; box-shadow: 0 12px 28px rgba(15,23,42,.10) !important; }
-  :root:not([data-theme="dark"]) .grid .card__media { background: #F2F6FA !important; border-bottom-color: #E2E8F0 !important; }
-  :root:not([data-theme="dark"]) .grid .like { background: #EEF2F6 !important; border-color: #CBD5E1 !important; color: #334155 !important; }
-}
-:root[data-theme="light"] .grid .card { background: linear-gradient(180deg, #FFFFFF, #F7FAFC) !important; border-color: #CBD5E1 !important; box-shadow: 0 12px 28px rgba(15,23,42,.10) !important; }
-:root[data-theme="light"] .grid .card__media { background: #F2F6FA !important; border-bottom-color: #E2E8F0 !important; }
-:root[data-theme="light"] .grid .like { background: #EEF2F6 !important; border-color: #CBD5E1 !important; color: #334155 !important; }
-
-/* ===== Compat: garantir que Card siga o tema atual ===== */
 .grid .card {
   background: linear-gradient(180deg, var(--panel), color-mix(in oklab, var(--panel) 70%, var(--surface))) !important;
   border-color: var(--border) !important;
@@ -439,6 +603,16 @@ nav a:hover { color: var(--text); }
   color: color-mix(in oklab, var(--text) 75%, var(--muted)) !important;
 }
 
+/* Tema claro explícito (quando auto/light): reforça contraste dos cards */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .grid .card { background: linear-gradient(180deg, #FFFFFF, #F7FAFC) !important; border-color: #CBD5E1 !important; box-shadow: 0 12px 28px rgba(15,23,42,.10) !important; }
+  :root:not([data-theme="dark"]) .grid .card__media { background: #F2F6FA !important; border-bottom-color: #E2E8F0 !important; }
+  :root:not([data-theme="dark"]) .grid .like { background: #EEF2F6 !important; border-color: #CBD5E1 !important; color: #334155 !important; }
+}
+:root[data-theme="light"] .grid .card { background: linear-gradient(180deg, #FFFFFF, #F7FAFC) !important; border-color: #CBD5E1 !important; box-shadow: 0 12px 28px rgba(15,23,42,.10) !important; }
+:root[data-theme="light"] .grid .card__media { background: #F2F6FA !important; border-bottom-color: #E2E8F0 !important; }
+:root[data-theme="light"] .grid .like { background: #EEF2F6 !important; border-color: #CBD5E1 !important; color: #334155 !important; }
+
 /* --------- Like neutro (NÃO curtido) --------- */
 .grid .card .like:not(.is-liked) {
   background: color-mix(in oklab, var(--panel) 75%, transparent) !important;
@@ -448,9 +622,9 @@ nav a:hover { color: var(--text); }
 
 /* --------- Estado CURTIDO (escuro no dark) --------- */
 .grid .card .like.is-liked {
-  background: #0e3b22 !important;           /* verde bem escuro */
+  background: #0e3b22 !important;
   border-color: #0b7a49 !important;
-  color: #E9FFF1 !important;                /* ícone/símbolo claro */
+  color: #E9FFF1 !important;
   box-shadow:
     0 0 0 2px rgba(20,184,102,.22) inset,
     0 4px 16px rgba(0,0,0,.25) !important;
@@ -459,7 +633,7 @@ nav a:hover { color: var(--text); }
 /* --------- Estado CURTIDO no tema CLARO (auto) --------- */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .grid .card .like.is-liked {
-    background: #14B866 !important;        /* verde forte e limpo */
+    background: #14B866 !important;
     border-color: #0EA05A !important;
     color: #ffffff !important;
     box-shadow:
@@ -478,28 +652,21 @@ nav a:hover { color: var(--text); }
     0 6px 16px rgba(20,184,102,.18) !important;
 }
 
-/* Tema claro explícito (auto) */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .grid .card {
-    background: linear-gradient(180deg, #FFFFFF, #F7FAFC) !important;
-    border-color: #CBD5E1 !important;
-    box-shadow: 0 12px 28px rgba(15,23,42,.10) !important;
-  }
-  :root:not([data-theme="dark"]) .grid .card__media {
-    background: #F2F6FA !important;
-    border-bottom-color: #E2E8F0 !important;
-  }
-  :root:not([data-theme="dark"]) .grid .like {
-    background: #EEF2F6 !important;
-    border-color: #CBD5E1 !important;
-    color: #334155 !important;
-  }
+/* Aparência interna das opções do select (quando o navegador permite) */
+.filters-select option {
+  background-color: #050608;
+  color: var(--text);
+  padding: 6px 10px;
 }
-/* Tema claro forçado */
-:root[data-theme="light"] .grid .card {
-  background: linear-gradient(180deg, #FFFFFF, #F7FAFC) !important;
-  border-color: #CBD5E1 !important;
-  box-shadow: 0 12px 28px rgba(15,23,42,.10) !important;
+
+/* Option selecionada dentro da lista aberta */
+.filters-select option:checked {
+  background-color: #11151A;
+  color: #39FF14;
 }
-:root[data-theme="light"] .grid .card__media { background: #F2F6FA !important; border-bottom-color: #E2E8F0 !important; }
-:root[data-theme="light"] .grid .like { background: #EEF2F6 !important; border-color: #CBD5E1 !important; color: #334155 !important; }
+
+/* Alguns navegadores respeitam :hover nas options */
+.filters-select option:hover {
+  background-color: #1A2129;
+  color: #39FF14;
+}

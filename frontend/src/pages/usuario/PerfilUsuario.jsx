@@ -59,7 +59,6 @@ const DEFAULT_FORM_EDICAO = {
   skinNome: '',
   preco: '',
   imagemUrl: '',
-  descricao: '',
   // REMOVIDO: O campo 'detalhes'
   // ADICIONADOS:
   detalhesCsgo: DEFAULT_CSGO_DETAILS,
@@ -123,6 +122,18 @@ export default function PerfilUsuario() {
   const [checkoutAcao, setCheckoutAcao] = useState(null); // { tipo: 'renovar' } ou { tipo: 'upgrade', planoNovo, label }
 
   const [filtroStatus, setFiltroStatus] = useState('todas');
+  const [filtroStatusAberto, setFiltroStatusAberto] = useState(false);
+
+  const filtroOptions = [
+    { value: 'todas', label: 'Todas' },
+    { value: 'ativas', label: 'Apenas ativas' },
+    { value: 'inativas', label: 'Apenas inativas' },
+  ];
+
+  function getFiltroLabel(value) {
+    return filtroOptions.find((opt) => opt.value === value)?.label || 'Todas';
+  }
+
   const skinsFiltradas = useMemo(() => {
     if (filtroStatus === 'ativas')
       return skins.filter((s) => s.ativo !== false);
@@ -815,15 +826,38 @@ export default function PerfilUsuario() {
             <h2>Minhas Skins</h2>
 
             <div className="perfil-filter-area">
-              <select
-                className="perfil-select"
-                value={filtroStatus}
-                onChange={(e) => setFiltroStatus(e.target.value)}
-              >
-                <option value="todas">Todas</option>
-                <option value="ativas">Apenas ativas</option>
-                <option value="inativas">Apenas inativas</option>
-              </select>
+              <div className="perfil-filter-select-wrapper">
+                <button
+                  type="button"
+                  className="perfil-filter-select-display"
+                  onClick={() =>
+                    setFiltroStatusAberto((prevAberto) => !prevAberto)
+                  }
+                >
+                  <span>{getFiltroLabel(filtroStatus)}</span>
+                  <span className="perfil-filter-select-arrow">▼</span>
+                </button>
+
+                {filtroStatusAberto && (
+                  <div className="perfil-filter-dropdown">
+                    {filtroOptions.map((opt) => (
+                      <button
+                        type="button"
+                        key={opt.value}
+                        className={`perfil-filter-option ${
+                          filtroStatus === opt.value ? 'active' : ''
+                        }`}
+                        onClick={() => {
+                          setFiltroStatus(opt.value);
+                          setFiltroStatusAberto(false);
+                        }}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <button
                 className="btn btn--primary"
@@ -1043,9 +1077,7 @@ export default function PerfilUsuario() {
                             {Number.isFinite(pl.lim) ? pl.lim : '∞'}
                           </strong>
                         </li>
-                        {pl.key !== 'gratuito' && (
-                          <li>Badge de destaque</li>
-                        )}
+                        {pl.key !== 'gratuito' && <li>Badge de destaque</li>}
                         <li>Suporte via e-mail</li>
                         {pl.key === 'plus' && (
                           <li>Spotlight na página inicial</li>

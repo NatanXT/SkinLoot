@@ -373,3 +373,221 @@
     order: -1;
   }
 }
+
+/* ====================== Tema claro para modal/parcelas ====================== */
+
+/* Auto (prefers-color-scheme: light) */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .checkout-modal {
+    background: #FFFFFF;
+    border-color: #CBD5E1;
+    box-shadow: 0 22px 60px rgba(15,23,42,.16);
+  }
+  :root:not([data-theme="dark"]) .checkout-step h2 {
+    color: #0F172A;
+  }
+  :root:not([data-theme="dark"]) .checkout-subtitle,
+  :root:not([data-theme="dark"]) .checkout-step p {
+    color: #4B5563;
+  }
+
+  :root:not([data-theme="dark"]) .checkout-resumo {
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    color: #111827;
+  }
+
+  :root:not([data-theme="dark"]) .checkout-metodo {
+    background: #F8FAFC;
+    border-color: #E2E8F0;
+    color: #111827;
+  }
+  :root:not([data-theme="dark"]) .checkout-metodo.active {
+    border-color: #16A34A;
+    color: #047857;
+    background: rgba(16,185,129,.14);
+  }
+
+  :root:not([data-theme="dark"]) .card-form label {
+    color: #111827;
+  }
+  :root:not([data-theme="dark"]) .card-form input {
+    background: #FFFFFF;
+    border-color: #CBD5E1;
+    color: #0F172A;
+  }
+  :root:not([data-theme="dark"]) .card-form input:focus {
+    border-color: #16A34A;
+    box-shadow: 0 0 0 1px rgba(34,197,94,.35);
+  }
+
+  :root:not([data-theme="dark"]) .pix-box {
+    color: #111827;
+  }
+  :root:not([data-theme="dark"]) .pix-qrcode {
+    background: #F9FAFB;
+    border-color: #CBD5E1;
+    color: #0369A1;
+  }
+
+  :root:not([data-theme="dark"]) .checkout-error {
+    color: #B91C1C;
+  }
+
+  :root:not([data-theme="dark"]) .checkout-periodo {
+    border-color: #CBD5E1;
+    background: #F3F4F6;
+    color: #111827;
+  }
+  :root:not([data-theme="dark"]) .checkout-periodo:hover {
+    border-color: #94A3B8;
+  }
+  :root:not([data-theme="dark"]) .checkout-periodo.active {
+    border-color: #16A34A;
+    background: rgba(16,185,129,.14);
+    color: #047857;
+  }
+
+  :root:not([data-theme="dark"]) .card-preview {
+    background: radial-gradient(circle at 0 0, #22C55E33 0, #ECFDF5 55%);
+    border-color: #BBF7D0;
+  }
+  :root:not([data-theme="dark"]) .card-preview-top,
+  :root:not([data-theme="dark"]) .card-number,
+  :root:not([data-theme="dark"]) .card-holder-row,
+  :root:not([data-theme="dark"]) .card-installments {
+    color: #064E3B;
+  }
+
+  :root:not([data-theme="dark"]) .parcelas-select-display {
+    background: #FFFFFF;
+    border-color: #CBD5E1;
+    color: #0F172A;
+  }
+  :root:not([data-theme="dark"]) .parcelas-select-display:hover {
+    border-color: #94A3B8;
+  }
+
+  :root:not([data-theme="dark"]) .parcelas-dropdown {
+    background: #FFFFFF;
+    border-color: #CBD5E1;
+    box-shadow: 0 18px 45px rgba(15,23,42,.14);
+  }
+  :root:not([data-theme="dark"]) .parcelas-option {
+    color: #0F172A;
+  }
+  :root:not([data-theme="dark"]) .parcelas-option:hover {
+    background: #F1F5F9;
+  }
+  :root:not([data-theme="dark"]) .parcelas-option.active {
+    background: rgba(16,185,129,.18);
+    color: #047857;
+  }
+}
+
+/* Tema claro forçado (data-theme="light") */
+:root[data-theme="light"] .checkout-modal {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  box-shadow: 0 22px 60px rgba(15,23,42,.16);
+}
+:root[data-theme="light"] .checkout-step h2 {
+  color: #0F172A;
+}
+:root[data-theme="light"] .checkout-subtitle,
+:root[data-theme="light"] .checkout-step p {
+  color: #4B5563;
+}
+
+:root[data-theme="light"] .checkout-resumo {
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  color: #111827;
+}
+
+:root[data-theme="light"] .checkout-metodo {
+  background: #F8FAFC;
+  border-color: #E2E8F0;
+  color: #111827;
+}
+:root[data-theme="light"] .checkout-metodo.active {
+  border-color: #16A34A;
+  color: #047857;
+  background: rgba(16,185,129,.14);
+}
+
+:root[data-theme="light"] .card-form label {
+  color: #111827;
+}
+:root[data-theme="light"] .card-form input {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  color: #0F172A;
+}
+:root[data-theme="light"] .card-form input:focus {
+  border-color: #16A34A;
+  box-shadow: 0 0 0 1px rgba(34,197,94,.35);
+}
+
+:root[data-theme="light"] .pix-box {
+  color: #111827;
+}
+:root[data-theme="light"] .pix-qrcode {
+  background: #F9FAFB;
+  border-color: #CBD5E1;
+  color: #0369A1;
+}
+
+:root[data-theme="light"] .checkout-error {
+  color: #B91C1C;
+}
+
+:root[data-theme="light"] .checkout-periodo {
+  border-color: #CBD5E1;
+  background: #F3F4F6;
+  color: #111827;
+}
+:root[data-theme="light"] .checkout-periodo:hover {
+  border-color: #94A3B8;
+}
+:root[data-theme="light"] .checkout-periodo.active {
+  border-color: #16A34A;
+  background: rgba(16,185,129,.14);
+  color: #047857;
+}
+
+:root[data-theme="light"] .card-preview {
+  background: radial-gradient(circle at 0 0, #22C55E33 0, #ECFDF5 55%);
+  border-color: #BBF7D0;
+}
+:root[data-theme="light"] .card-preview-top,
+:root[data-theme="light"] .card-number,
+:root[data-theme="light"] .card-holder-row,
+:root[data-theme="light"] .card-installments {
+  color: #064E3B;
+}
+
+:root[data-theme="light"] .parcelas-select-display {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  color: #0F172A;
+}
+:root[data-theme="light"] .parcelas-select-display:hover {
+  border-color: #94A3B8;
+}
+
+:root[data-theme="light"] .parcelas-dropdown {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  box-shadow: 0 18px 45px rgba(15,23,42,.14);
+}
+:root[data-theme="light"] .parcelas-option {
+  color: #0F172A;
+}
+:root[data-theme="light"] .parcelas-option:hover {
+  background: #F1F5F9;
+}
+:root[data-theme="light"] .parcelas-option.active {
+  background: rgba(16,185,129,.18);
+  color: #047857;
+}
