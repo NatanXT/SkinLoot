@@ -342,6 +342,34 @@ export async function unlikeAnuncio(id) {
   await api.delete(`/anuncios/${id}/unlike`);
 }
 
+export async function buscarAvaliacoesDoVendedor(usuarioId) {
+  if (USE_DEV_API) {
+    // Mock simples para desenvolvimento sem backend
+    return [];
+  }
+  const { data } = await api.get(`/avaliacoes/usuario/${usuarioId}`);
+  return data;
+}
+
+export async function enviarAvaliacao(payload) {
+  if (USE_DEV_API) {
+    console.log('DEV: Avaliação enviada', payload);
+    return { success: true };
+  }
+
+  // O backend espera um objeto que corresponda ao DTO AvaliacaoRequest
+  const body = {
+    avaliadoId: payload.vendedorId, // O ID de quem recebe a avaliação
+    anuncioId: payload.anuncioId,   // Opcional, para vincular ao anúncio
+    nota: payload.nota,
+    comentario: payload.comentario
+  };
+
+  const { data } = await api.post('/avaliacoes', body);
+  return data;
+}
+
+
 export default {
   listarMinhasNormalizadas,
   listarFeedNormalizado,
@@ -352,4 +380,6 @@ export default {
   reativarAnuncio,
   likeAnuncio,
   unlikeAnuncio,
+  buscarAvaliacoesDoVendedor,
+  enviarAvaliacao
 };

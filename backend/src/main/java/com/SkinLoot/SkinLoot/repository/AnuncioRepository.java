@@ -21,5 +21,7 @@ public interface AnuncioRepository extends JpaRepository<Anuncio, UUID> {
     // Spring Data JPA vai gerar a query: "SELECT COUNT(*) FROM Anuncio a WHERE a.usuario = ?1 AND a.status = ?2"
     long countByUsuarioAndStatus(Usuario usuario, Status status);
 
+    // Spring Data JPA cria a query automaticamente baseada no nome
+    List<Anuncio> findByUsuarioIdAndStatus(UUID usuarioId, Status status);
 
 }

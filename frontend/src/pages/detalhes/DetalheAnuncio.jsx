@@ -344,31 +344,30 @@ function SecaoReputacaoVendedor({
   onAbrirAvaliacao,
 }) {
   const mediaEfetiva =
-    mediaNota !== null && mediaNota !== undefined ? mediaNota : 4.8;
-  const vendasEfetivas =
-    totalVendas !== null && totalVendas !== undefined ? totalVendas : 120;
+      mediaNota !== null && mediaNota !== undefined ? mediaNota : 0;
 
-  const avaliacoesEfetivas =
-    Array.isArray(avaliacoes) && avaliacoes.length > 0
-      ? avaliacoes
-      : AVALIACOES_VENDEDOR_DEMO;
+  const vendasEfetivas =
+      totalVendas !== null && totalVendas !== undefined ? totalVendas : 0;
+
+  // Se não vier array ou vier vazio, usamos array vazio (nada de fake)
+  const avaliacoesEfetivas = Array.isArray(avaliacoes) ? avaliacoes : [];
 
   const totalAvaliacoesEfetivo =
-    totalAvaliacoes && totalAvaliacoes > 0
-      ? totalAvaliacoes
-      : avaliacoesEfetivas.length;
+      totalAvaliacoes && totalAvaliacoes > 0
+          ? totalAvaliacoes
+          : avaliacoesEfetivas.length;
 
   const { nivel, descricao, classe, score } = calcularNivelConfianca(
-    mediaEfetiva,
-    vendasEfetivas,
+      mediaEfetiva,
+      vendasEfetivas,
   );
 
   // Carrossel simples, 3 avaliações por "página"
   const [pagina, setPagina] = useState(0);
   const itensPorPagina = 3;
   const totalPaginas = Math.max(
-    1,
-    Math.ceil(avaliacoesEfetivas.length / itensPorPagina),
+      1,
+      Math.ceil(avaliacoesEfetivas.length / itensPorPagina),
   );
   const paginaSegura = Math.min(pagina, totalPaginas - 1);
   const inicio = paginaSegura * itensPorPagina;
@@ -378,7 +377,6 @@ function SecaoReputacaoVendedor({
   function irAnterior() {
     setPagina((p) => Math.max(0, p - 1));
   }
-
   function irProxima() {
     setPagina((p) => Math.min(totalPaginas - 1, p + 1));
   }
@@ -550,6 +548,22 @@ export default function DetalheAnuncio() {
   // ----- Estados principais -----
   const [anuncio, setAnuncio] = useState(null);
   const [carregando, setCarregando] = useState(true);
+  const [avaliacoesReais, setAvaliacoesReais] = useState([]);
+  const vendedorId = useMemo(() => {
+    return anuncio?.usuarioId || anuncio?.seller?.id || anuncio?.vendedorId || null;
+  }, [anuncio]);
+
+  const carregarAvaliacoes = async (idDoVendedor) => {
+    if (!idDoVendedor) return;
+    try {
+      const dados = await anuncioService.buscarAvaliacoesDoVendedor(idDoVendedor);
+      // Garante que é um array para não quebrar o map
+      setAvaliacoesReais(Array.isArray(dados) ? dados : []);
+    } catch (error) {
+      console.error("Erro ao buscar avaliações:", error);
+    }
+  };
+
   const [erro, setErro] = useState('');
 
   // ----- Estado de "favoritar" -----
@@ -642,24 +656,35 @@ export default function DetalheAnuncio() {
   /**
    * Envio da avaliação (por enquanto apenas simulação visual)
    */
-  function handleEnviarAvaliacao(event) {
+  async function handleEnviarAvaliacao(event) {
     event.preventDefault();
     if (notaAvaliacao <= 0) {
       alert('Selecione uma nota para o vendedor.');
       return;
     }
+    if (!vendedorId) {
+      alert('Erro: Vendedor não identificado.');
+      return;
+    }
 
-    const vendedorId =
-      anuncio?.usuarioId || anuncio?.seller?.id || anuncio?.vendedorId || null;
+    try {
+      await anuncioService.enviarAvaliacao({
+        vendedorId: vendedorId,
+        anuncioId: id, // Passamos o ID deste anúncio
+        nota: notaAvaliacao,
+        comentario: textoAvaliacao
+      });
 
-    // Aqui será plugado o service de envio para o backend
-    console.log('Simulando envio de avaliação do vendedor:', {
-      vendedorId,
-      nota: notaAvaliacao,
-      comentario: textoAvaliacao,
-    });
+      alert('Avaliação enviada com sucesso!');
+      fecharModalAvaliacao();
 
-    fecharModalAvaliacao();
+      // Atualiza a lista na tela sem precisar de F5
+      await carregarAvaliacoes(vendedorId);
+
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao enviar avaliação. Verifique se você já comprou com este vendedor ou tente novamente.');
+    }
   }
 
   // ==========================================================================
@@ -676,6 +701,10 @@ export default function DetalheAnuncio() {
         if (cancel) return;
         setAnuncio(dados);
         setLiked(Boolean(dados?._raw?.liked || false));
+// A variável definida logo acima na linha 611 é 'dados'
+        const vId = dados?.usuarioId || dados?.seller?.id || dados?.vendedorId;        if (vId) {
+          await carregarAvaliacoes(vId);
+        }
       } catch (e) {
         if (!cancel) setErro('Não foi possível carregar o anúncio.');
       } finally {
@@ -715,30 +744,24 @@ export default function DetalheAnuncio() {
   const linkExterno = raw?.linkExterno || null;
   const jogoInfo = useMemo(() => resolverInfoJogo(anuncio), [anuncio]);
   const { detalhesCsgo, detalhesLol, detalhesGenericos } = useMemo(
-    () => resolverDetalhes(anuncio),
-    [anuncio],
+      () => resolverDetalhes(anuncio),
+      [anuncio],
   );
 
-  // Dados de reputação do vendedor (quando o backend existir, vão sobrescrever os mocks)
-  const avaliacoesVendedor = useMemo(
-    () =>
-      raw?.avaliacoesVendedor || raw?.sellerReviews || raw?.avaliacoes || [],
-    [raw],
-  );
+  const nomeVendedor = anuncio?.seller?.name || anuncio?.usuarioNome || anuncio?.vendedorNome;
 
-  const mediaNotaVendedor =
-    raw?.mediaNotaVendedor || raw?.sellerRating || raw?.notaMedia || null;
+  // CÁLCULO DAS ESTATÍSTICAS REAIS
+  // Aqui pegamos a lista real que veio do backend (avaliacoesReais) e calculamos a média
+  const listaAvaliacoesParaExibir = avaliacoesReais;
 
-  const totalAvaliacoesVendedor =
-    raw?.totalAvaliacoesVendedor ||
-    raw?.sellerReviewsCount ||
-    (Array.isArray(avaliacoesVendedor) ? avaliacoesVendedor.length : 0);
+  const mediaNotaCalculada = useMemo(() => {
+    if (listaAvaliacoesParaExibir.length === 0) return 0;
+    const soma = listaAvaliacoesParaExibir.reduce((acc, av) => acc + (Number(av.nota) || 0), 0);
+    return soma / listaAvaliacoesParaExibir.length;
+  }, [listaAvaliacoesParaExibir]);
 
-  const totalVendasVendedor =
-    raw?.totalVendasVendedor || raw?.sellerSalesCount || null;
-
-  const nomeVendedor =
-    anuncio?.seller?.name || anuncio?.usuarioNome || anuncio?.vendedorNome;
+  // Total de vendas (Se o backend não manda, mantemos 0 ou fallback)
+  const totalVendasReal = raw?.totalVendasVendedor || raw?.sellerSalesCount || 0;
 
   // ==========================================================================
   // 4.5. Estados de carregamento e erro
@@ -913,12 +936,12 @@ export default function DetalheAnuncio() {
 
       {/* Seção de reputação do vendedor (abaixo do card principal) */}
       <SecaoReputacaoVendedor
-        nomeVendedor={nomeVendedor}
-        mediaNota={mediaNotaVendedor}
-        totalAvaliacoes={totalAvaliacoesVendedor}
-        totalVendas={totalVendasVendedor}
-        avaliacoes={avaliacoesVendedor}
-        onAbrirAvaliacao={abrirModalAvaliacao}
+          nomeVendedor={nomeVendedor}
+          mediaNota={mediaNotaCalculada}      // <--- CORREÇÃO: Usar a média calculada do backend
+          totalAvaliacoes={listaAvaliacoesParaExibir.length} // <--- CORREÇÃO: Usar o tamanho da lista real
+          totalVendas={totalVendasReal}       // <--- CORREÇÃO: Usar o total de vendas real
+          avaliacoes={listaAvaliacoesParaExibir} // <--- CORREÇÃO: Passar a lista real
+          onAbrirAvaliacao={abrirModalAvaliacao}
       />
 
       {/* Modal de avaliação do vendedor (apenas visual por enquanto) */}

@@ -129,6 +129,14 @@ public class AnuncioController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/usuario/{usuarioId}/ativos")
+    public ResponseEntity<List<AnuncioResponse>> listarAnunciosAtivosDoVendedor(@PathVariable UUID usuarioId) {
+        // Implemente no service: buscar por usuarioId E status = ATIVO
+        List<AnuncioResponse> dtos = anuncioService.listarAtivosPorUsuario(usuarioId)
+                .stream().map(this::toDto).collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
     // ===================== MÉTODOS AUXILIARES PRIVADOS =====================
 
     /**

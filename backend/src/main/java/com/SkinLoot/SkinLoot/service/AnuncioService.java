@@ -277,6 +277,12 @@ public class AnuncioService {
         return anunciosAtivos < limite;
     }
 
+    @Transactional(readOnly = true)
+    public List<Anuncio> listarAtivosPorUsuario(UUID usuarioId) {
+        // Retorna apenas os que estão com status ATIVO
+        return anuncioRepository.findByUsuarioIdAndStatus(usuarioId, Status.ATIVO);
+    }
+
     // ---------- Métodos utilitários ----------
 
     public Anuncio save(Anuncio anuncio) {
