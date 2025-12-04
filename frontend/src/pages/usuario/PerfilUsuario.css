@@ -525,6 +525,7 @@
   gap: 10px;
 }
 
+/* Select antigo (deixei caso use em outro lugar) */
 .perfil-select {
   background: var(--surface);
   border: 1px solid var(--border-strong);
@@ -545,11 +546,92 @@
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 60%, transparent);
 }
 
+/* Dropdown customizado (igual vibe do parcelas) */
+.perfil-filter-select-wrapper {
+  position: relative;
+  min-width: 180px;
+}
+
+.perfil-filter-select-display {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+.perfil-filter-select-display:hover {
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 35%, transparent);
+}
+.perfil-filter-select-display:focus-visible {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 60%, transparent);
+  background: color-mix(in oklab, var(--surface) 85%, var(--panel));
+}
+
+.perfil-filter-select-arrow {
+  font-size: 10px;
+  color: #9ca3af;
+  margin-left: 8px;
+}
+
+.perfil-filter-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #020617;
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.8);
+  z-index: 10;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.perfil-filter-option {
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  font-size: 13px;
+  cursor: pointer;
+}
+.perfil-filter-option:hover {
+  background: #0f172a;
+}
+.perfil-filter-option.active {
+  background: rgba(0, 200, 150, 0.12);
+  color: #00c896;
+}
+
 /* ====================== Responsividade do filtro/botão ====================== */
 @media (max-width: 640px) {
-  .perfil-filter-area { flex-direction: column; align-items: stretch; gap: 8px; }
-  .perfil-select { width: 100%; font-size: 15px; }
-  .perfil-filter-area .btn { width: 100%; justify-content: center; font-weight: 700; }
+  .perfil-filter-area {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .perfil-filter-select-display {
+    width: 100%;
+    font-size: 15px;
+  }
+  .perfil-filter-area .btn {
+    width: 100%;
+    justify-content: center;
+    font-weight: 700;
+  }
 }
 
 /* ====================== Correção: scroll dentro das modais ====================== */
@@ -599,4 +681,71 @@
 /* ====================== Mobile: planos roláveis ====================== */
 @media (max-width: 640px) {
   .perfil-upgrade-grid { grid-template-columns: 1fr; max-height: calc(88vh - 160px); overflow-y: auto; }
+}
+
+/* ===== Overrides de tema claro para dropdown custom de status ===== */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .perfil-filter-select-display {
+    background: #FFFFFF;
+    border-color: #CBD5E1;
+    color: #0B0D10;
+  }
+  :root:not([data-theme="dark"]) .perfil-filter-select-display:hover {
+    border-color: #94A3B8;
+    box-shadow: 0 0 0 4px rgba(31,234,0,.18);
+    background: #F9FAFB;
+  }
+  :root:not([data-theme="dark"]) .perfil-filter-select-display:focus-visible {
+    border-color: #16A34A;
+    box-shadow: 0 0 0 4px rgba(34,197,94,.35);
+    background: #F1F5F9;
+  }
+
+  :root:not([data-theme="dark"]) .perfil-filter-dropdown {
+    background: #FFFFFF;
+    border-color: #CBD5E1;
+    box-shadow: 0 18px 45px rgba(15,23,42,.16);
+  }
+  :root:not([data-theme="dark"]) .perfil-filter-option {
+    color: #0F172A;
+  }
+  :root:not([data-theme="dark"]) .perfil-filter-option:hover {
+    background: #F1F5F9;
+  }
+  :root:not([data-theme="dark"]) .perfil-filter-option.active {
+    background: rgba(16,185,129,.18);
+    color: #047857;
+  }
+}
+
+/* Tema claro forçado (data-theme="light") */
+:root[data-theme="light"] .perfil-filter-select-display {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  color: #0B0D10;
+}
+:root[data-theme="light"] .perfil-filter-select-display:hover {
+  border-color: #94A3B8;
+  box-shadow: 0 0 0 4px rgba(31,234,0,.18);
+  background: #F9FAFB;
+}
+:root[data-theme="light"] .perfil-filter-select-display:focus-visible {
+  border-color: #16A34A;
+  box-shadow: 0 0 0 4px rgba(34,197,94,.35);
+  background: #F1F5F9;
+}
+:root[data-theme="light"] .perfil-filter-dropdown {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  box-shadow: 0 18px 45px rgba(15,23,42,.16);
+}
+:root[data-theme="light"] .perfil-filter-option {
+  color: #0F172A;
+}
+:root[data-theme="light"] .perfil-filter-option:hover {
+  background: #F1F5F9;
+}
+:root[data-theme="light"] .perfil-filter-option.active {
+  background: rgba(16,185,129,.18);
+  color: #047857;
 }

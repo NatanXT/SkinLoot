@@ -3,16 +3,6 @@
 // Caminho: frontend/src/pages/DashboardVitrine.jsx
 // ------------------------------------------------------
 // Página principal do marketplace de skins.
-// Inclui:
-//  - Filtros de pesquisa
-//  - Listagem de anúncios (componente <SkinCard />)
-//  - Sessão de planos
-//  - Menu de perfil e chat flutuante
-// ------------------------------------------------------
-// Observações:
-//  - Lógica de ranking, filtragem e ordenação das skins
-//  - Sincronização de filtros com URL
-//  - Integração com AuthContext e AnuncioService
 // ======================================================
 
 import { useEffect, useMemo, useState, useRef } from 'react';
@@ -27,9 +17,6 @@ import { listarJogos } from '../../services/jogoService.js';
 
 /* ======================================================
    Metadados dos planos
-   - label: nome exibido no card
-   - weight: impacto no ranking da vitrine (prioridade de exibição)
-   - color: cor usada no gradiente/borda do plano
 ====================================================== */
 const plansMeta = {
   gratuito: { label: 'Gratuito', weight: 1.0, color: '#454B54' },
@@ -54,6 +41,24 @@ const ALLOWED_SORT = new Set([
   'preco_asc',
   'preco_desc',
 ]);
+
+// Opções estáticas de plano e ordenação (usadas no dropdown custom)
+const PLAN_OPTIONS = [
+  { value: 'todos', label: 'Todos' },
+  { value: 'gratuito', label: 'Gratuito' },
+  { value: 'intermediario', label: 'Intermediário' },
+  { value: 'plus', label: 'Plus' },
+];
+
+const SORT_OPTIONS = [
+  {
+    value: 'relevancia',
+    label: 'Relevância (plano + likes + recência)',
+  },
+  { value: 'recentes', label: 'Mais recentes' },
+  { value: 'preco_asc', label: 'Preço: menor → maior' },
+  { value: 'preco_desc', label: 'Preço: maior → menor' },
+];
 
 /* ======================================================
    Utilitários de formatação e URL
@@ -110,7 +115,6 @@ const toMs = (v) => {
 /**
  * Extrai um "conjunto" de chaves de jogo possíveis do anúncio (IDs e nomes),
  * para permitir filtrar mesmo quando algum item ainda não estiver normalizado.
- * - Preferimos ID (string). Também incluímos o nome normalizado (minúsculo).
  */
 function getGameKeysFromAnuncio(anuncio) {
   const id =
@@ -136,13 +140,11 @@ function getGameKeysFromAnuncio(anuncio) {
     keys.add(String(nome).toLowerCase().trim());
   }
 
-  // Alias como "CS2", "CS:GO" etc. — adiciona variante compacta
   if (nome) {
     const compact = String(nome).toLowerCase().replace(/[:\s]/g, '');
     if (compact) keys.add(compact);
   }
 
-  // Fallback se o feed usar somente uma string "game" (ex.: "CS2")
   if (anuncio?.game) {
     const g = String(anuncio.game).toLowerCase().trim();
     if (g) keys.add(g);
@@ -157,7 +159,6 @@ function getGameKeysFromAnuncio(anuncio) {
    Hook de ranking e filtragem das skins
 ====================================================== */
 function useRankedSkins(list, sortBy, filters, jogosList) {
-  // Nome do game selecionado a partir do ID (quando filtros.game é um ID válido)
   const selectedGameName = useMemo(() => {
     if (filters.game === 'todos') return null;
     const found = (jogosList || []).find(
@@ -166,7 +167,6 @@ function useRankedSkins(list, sortBy, filters, jogosList) {
     return found?.nome || null;
   }, [filters.game, jogosList]);
 
-  // Nomes normalizados para comparação
   const selectedGameNameLower = useMemo(() => {
     if (!selectedGameName) return null;
     return String(selectedGameName).toLowerCase().trim();
@@ -177,7 +177,6 @@ function useRankedSkins(list, sortBy, filters, jogosList) {
     return selectedGameNameLower.replace(/[:\s]/g, '');
   }, [selectedGameNameLower]);
 
-  // Fallback extra: trata o PRÓPRIO valor de filters.game como nome cru (ex.: "?game=cs2")
   const rawGameKey = useMemo(() => {
     if (filters.game === 'todos') return null;
     const asText = String(filters.game).toLowerCase().trim();
@@ -187,7 +186,6 @@ function useRankedSkins(list, sortBy, filters, jogosList) {
     };
   }, [filters.game]);
 
-  // Ranking + filtragem
   return useMemo(() => {
     const now = Date.now();
     const rec = (t) => Math.max(0.6, 1.4 - (now - t) / (1000 * 60 * 60 * 72));
@@ -195,19 +193,15 @@ function useRankedSkins(list, sortBy, filters, jogosList) {
     const filtrados = list.filter((s) => {
       if (s.ativo === false) return false;
 
-      // -------- Plano --------
       const planOk = filters.plan === 'todos' || s.plan === filters.plan;
 
-      // -------- Jogo --------
       let gameOk = true;
       if (filters.game !== 'todos') {
         const keys = getGameKeysFromAnuncio(s);
 
-        // 1) Bate pelo ID
         if (keys.has(String(filters.game))) {
           gameOk = true;
         } else {
-          // 2) Fallbacks por nome (normalizado)
           const byName =
             (selectedGameNameLower && keys.has(selectedGameNameLower)) ||
             (selectedGameCompact && keys.has(selectedGameCompact)) ||
@@ -218,11 +212,9 @@ function useRankedSkins(list, sortBy, filters, jogosList) {
         }
       }
 
-      // -------- Texto --------
       const nome = (s.title ?? s.skinNome ?? s.nome ?? '').toLowerCase();
       const textoOk = nome.includes(String(filters.search || '').toLowerCase());
 
-      // -------- Preço --------
       const priceVal = Number(s.price ?? s.preco ?? NaN);
       const priceOk =
         Number.isFinite(priceVal) &&
@@ -232,7 +224,6 @@ function useRankedSkins(list, sortBy, filters, jogosList) {
       return planOk && gameOk && textoOk && priceOk;
     });
 
-    // Aplica a pontuação de relevância
     const pontuados = filtrados.map((s) => {
       const meta = plansMeta[s.plan] || { weight: 1.0 };
       const likes = Number(s.likes ?? 0);
@@ -264,7 +255,7 @@ function useRankedSkins(list, sortBy, filters, jogosList) {
     filters.max,
     selectedGameNameLower,
     selectedGameCompact,
-    rawGameKey, // <- AQUI entram as dependências incluindo o fallback cru
+    rawGameKey,
   ]);
 }
 
@@ -278,11 +269,9 @@ export default function DashboardVitrine() {
 
   const initial = readStateFromURL();
 
-  // Estado do menu de perfil
   const [menuAberto, setMenuAberto] = useState(false);
   const toggleMenu = () => setMenuAberto((prev) => !prev);
 
-  // Estados principais
   const [minhasSkins, setMinhasSkins] = useState([]);
   const [feedApi, setFeedApi] = useState([]);
   const [carregandoMinhas, setCarregandoMinhas] = useState(false);
@@ -301,6 +290,31 @@ export default function DashboardVitrine() {
 
   const [jogosList, setJogosList] = useState([]);
   const [jogosErr, setJogosErr] = useState('');
+
+  // Dropdowns customizados dos filtros (Jogo / Plano / Ordenar)
+  const [gameDropdownOpen, setGameDropdownOpen] = useState(false);
+  const [planDropdownOpen, setPlanDropdownOpen] = useState(false);
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+
+  /* Helpers para labels dos dropdowns */
+  function getGameLabel() {
+    if (filters.game === 'todos') return 'Todos';
+    const found = jogosList.find((j) => String(j.id) === String(filters.game));
+    return found?.nome || 'Todos';
+  }
+
+  function getPlanLabel() {
+    return (
+      PLAN_OPTIONS.find((opt) => opt.value === filters.plan)?.label || 'Todos'
+    );
+  }
+
+  function getSortLabel() {
+    return (
+      SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label ||
+      'Relevância (plano + likes + recência)'
+    );
+  }
 
   /* ======================================================
      Autenticação e navegação
@@ -359,7 +373,6 @@ export default function DashboardVitrine() {
      Efeitos e sincronização
   ====================================================== */
 
-  // Carrega a lista de jogos para o filtro
   useEffect(() => {
     let ativo = true;
     (async () => {
@@ -380,7 +393,6 @@ export default function DashboardVitrine() {
     };
   }, []);
 
-  // Minhas skins
   useEffect(() => {
     let ativo = true;
     async function carregarMinhas() {
@@ -424,7 +436,6 @@ export default function DashboardVitrine() {
     };
   }, [user]);
 
-  // Atualiza peso do plano nas minhas skins quando plano do usuário muda
   useEffect(() => {
     const planKey = String(
       user?.plano || user?.plan || 'gratuito',
@@ -436,7 +447,6 @@ export default function DashboardVitrine() {
     );
   }, [user?.plano, user?.plan]);
 
-  // Feed público
   useEffect(() => {
     let ativo = true;
     (async () => {
@@ -458,7 +468,6 @@ export default function DashboardVitrine() {
     };
   }, []);
 
-  // Pequena atualização periódica do feed
   useEffect(() => {
     const id = setInterval(async () => {
       try {
@@ -473,7 +482,6 @@ export default function DashboardVitrine() {
     return () => clearInterval(id);
   }, []);
 
-  // Sincroniza filtros na URL
   useEffect(() => {
     writeStateToURL(filters, sortBy, true);
   }, [filters, sortBy]);
@@ -493,26 +501,24 @@ export default function DashboardVitrine() {
     ).toLowerCase();
     const ratio = plansMeta[planKey]?.weight ?? 1.0;
 
-    // Mistura simples: favorece intercalar minhas skins de acordo com o peso
-    const mixByPlanRatio = (mine, others, ratio) => {
+    const mixByPlanRatio = (mine, othersList, ratioVal) => {
       const res = [];
-      let i = 0,
-        j = 0,
-        acc = 0;
-      while (i < mine.length || j < others.length) {
-        acc += ratio;
+      let i = 0;
+      let j = 0;
+      let acc = 0;
+      while (i < mine.length || j < othersList.length) {
+        acc += ratioVal;
         while (acc >= 1 && i < mine.length) {
           res.push(mine[i++]);
           acc -= 1;
         }
-        if (j < others.length) res.push(others[j++]);
+        if (j < othersList.length) res.push(othersList[j++]);
       }
       return res;
     };
     return mixByPlanRatio(minhasSkins || [], others, ratio);
   }, [feedApi, minhasSkins, user]);
 
-  // Agora o hook já trata todos os fallbacks (ID, nome e valor cru da URL)
   const ranked = useRankedSkins(listaCombinada, sortBy, filters, jogosList);
 
   /* ======================================================
@@ -536,7 +542,7 @@ export default function DashboardVitrine() {
   };
 
   /* ======================================================
-     Handlers e Refs dos campos de preço
+     Preço
   ====================================================== */
   const minRef = useRef(null);
   const handleMinChange = (e) => {
@@ -636,13 +642,12 @@ export default function DashboardVitrine() {
     .toUpperCase();
 
   /* ======================================================
-     Renderização
+     Render
   ====================================================== */
   return (
     <div className="dash-root">
       <div className="backdrop" aria-hidden />
 
-      {/* ---------- Topbar (logado) ---------- */}
       {user ? (
         <div className="topbar logged">
           <AuthBrand />
@@ -653,29 +658,29 @@ export default function DashboardVitrine() {
             <a href="#planos">Anunciar</a>
           </nav>
 
-          {/* Avatar direto na topbar (fora do .actions) */}
           <div className="profile-menu">
             <button className="avatar neon" onClick={toggleMenu}>
               {initials}
             </button>
 
             {menuAberto && (
-                <div className="menu">
-                  {/* ✅ Botão exclusivo para Admin */}
-                  {user?.role === 'ADMIN' && (
-                      <button onClick={() => navigate('/admin')} style={{ color: '#39FF14' }}>
-                        Painel Admin
-                      </button>
-                  )}
+              <div className="menu">
+                {user?.role === 'ADMIN' && (
+                  <button
+                    onClick={() => navigate('/admin')}
+                    style={{ color: '#39FF14' }}
+                  >
+                    Painel Admin
+                  </button>
+                )}
 
-                  <button onClick={() => navigate('/perfil')}>Meu Perfil</button>
-                  <button onClick={handleLogout}>Sair</button>
-                </div>
+                <button onClick={() => navigate('/perfil')}>Meu Perfil</button>
+                <button onClick={handleLogout}>Sair</button>
+              </div>
             )}
           </div>
         </div>
       ) : (
-        /* ---------- Topbar (deslogado) ---------- */
         <div className="topbar guest">
           <AuthBrand />
           <nav>
@@ -695,7 +700,6 @@ export default function DashboardVitrine() {
         </div>
       )}
 
-      {/* ---------- Hero ---------- */}
       <header className="hero">
         <div className="hero__copy">
           <h1>SkinLoot</h1>
@@ -733,49 +737,125 @@ export default function DashboardVitrine() {
             />
           </div>
 
+          {/* Jogo - dropdown custom (lista de jogos da API) */}
           <div className="field">
             <label>Jogo</label>
-            <select
-              value={filters.game}
-              onChange={(e) => setFilters({ ...filters, game: e.target.value })}
-              title="Filtre por jogo (lista sincronizada.)"
-            >
-              <option value="todos">Todos</option>
-              {jogosList.map((jogo) => (
-                <option key={jogo.id} value={String(jogo.id)}>
-                  {jogo.nome}
-                </option>
-              ))}
-            </select>
+            <div className="filters-select-wrapper">
+              <button
+                type="button"
+                className="filters-select-display"
+                onClick={() => setGameDropdownOpen((prevAberto) => !prevAberto)}
+                title="Filtre por jogo (lista sincronizada.)"
+              >
+                <span>{getGameLabel()}</span>
+                <span className="filters-select-arrow">▼</span>
+              </button>
+
+              {gameDropdownOpen && (
+                <div className="filters-dropdown">
+                  <button
+                    type="button"
+                    className={`filters-dropdown-option ${
+                      filters.game === 'todos' ? 'active' : ''
+                    }`}
+                    onClick={() => {
+                      setFilters({ ...filters, game: 'todos' });
+                      setGameDropdownOpen(false);
+                    }}
+                  >
+                    Todos
+                  </button>
+                  {jogosList.map((jogo) => (
+                    <button
+                      type="button"
+                      key={jogo.id}
+                      className={`filters-dropdown-option ${
+                        String(filters.game) === String(jogo.id) ? 'active' : ''
+                      }`}
+                      onClick={() => {
+                        setFilters({ ...filters, game: String(jogo.id) });
+                        setGameDropdownOpen(false);
+                      }}
+                    >
+                      {jogo.nome}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             {jogosErr && <small style={{ color: '#f66' }}>{jogosErr}</small>}
           </div>
 
+          {/* Plano - dropdown custom */}
           <div className="field">
             <label>Plano</label>
-            <select
-              value={filters.plan}
-              onChange={(e) => setFilters({ ...filters, plan: e.target.value })}
-            >
-              <option value="todos">Todos</option>
-              <option value="gratuito">Gratuito</option>
-              <option value="intermediario">Intermediário</option>
-              <option value="plus">Plus</option>
-            </select>
+            <div className="filters-select-wrapper">
+              <button
+                type="button"
+                className="filters-select-display"
+                onClick={() => setPlanDropdownOpen((prevAberto) => !prevAberto)}
+              >
+                <span>{getPlanLabel()}</span>
+                <span className="filters-select-arrow">▼</span>
+              </button>
+
+              {planDropdownOpen && (
+                <div className="filters-dropdown">
+                  {PLAN_OPTIONS.map((opt) => (
+                    <button
+                      type="button"
+                      key={opt.value}
+                      className={`filters-dropdown-option ${
+                        filters.plan === opt.value ? 'active' : ''
+                      }`}
+                      onClick={() => {
+                        setFilters({ ...filters, plan: opt.value });
+                        setPlanDropdownOpen(false);
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
+          {/* Ordenar - dropdown custom */}
           <div className="field">
             <label>Ordenar</label>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-              <option value="relevancia">
-                Relevância (plano + likes + recência)
-              </option>
-              <option value="recentes">Mais recentes</option>
-              <option value="preco_asc">Preço: menor → maior</option>
-              <option value="preco_desc">Preço: maior → menor</option>
-            </select>
+            <div className="filters-select-wrapper">
+              <button
+                type="button"
+                className="filters-select-display"
+                onClick={() => setSortDropdownOpen((prevAberto) => !prevAberto)}
+              >
+                <span>{getSortLabel()}</span>
+                <span className="filters-select-arrow">▼</span>
+              </button>
+
+              {sortDropdownOpen && (
+                <div className="filters-dropdown">
+                  {SORT_OPTIONS.map((opt) => (
+                    <button
+                      type="button"
+                      key={opt.value}
+                      className={`filters-dropdown-option ${
+                        sortBy === opt.value ? 'active' : ''
+                      }`}
+                      onClick={() => {
+                        setSortBy(opt.value);
+                        setSortDropdownOpen(false);
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Preço com máscara e prefixo "R$" */}
           <div className="range">
             <label>Preço</label>
             <div className="range__inputs">
@@ -848,7 +928,6 @@ export default function DashboardVitrine() {
         <h2>Planos de Destaque</h2>
         <div className="plans__grid">
           {Object.entries(plansMeta).map(([key, p]) => {
-            // Limite de anúncios por plano
             const anunciosLimit =
               key === 'gratuito' ? '5' : key === 'intermediario' ? '20' : '∞';
 
@@ -869,8 +948,7 @@ export default function DashboardVitrine() {
                     <strong>{p.weight.toFixed(1)}x</strong>
                   </li>
                   <li>
-                    Limite de anúncios:{' '}
-                    <strong>{anunciosLimit}</strong>
+                    Limite de anúncios: <strong>{anunciosLimit}</strong>
                   </li>
                   {hasBadge && <li>Badge de destaque</li>}
                   <li>Suporte via e-mail</li>
@@ -889,7 +967,6 @@ export default function DashboardVitrine() {
         </div>
       </section>
 
-      {/* ---------- Footer ---------- */}
       <footer className="foot">
         <p>
           © {new Date().getFullYear()} SkinLoot — Nós apenas conectamos vendedor
@@ -897,7 +974,6 @@ export default function DashboardVitrine() {
         </p>
       </footer>
 
-      {/* ---------- Chat Flutuante ---------- */}
       {user &&
         (chatAberto ? (
           <div className="chat-float">

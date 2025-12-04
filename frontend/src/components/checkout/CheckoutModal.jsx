@@ -1,24 +1,6 @@
-// ========================================================================
-// CheckoutModal.jsx
-// ------------------------------------------------------------------------
-// Modal interno usado dentro da modal de "Renovar" e "Upgrade".
-// Possui três etapas:
-//
-// 1) Resumo do Plano
-// 2) Seleção do método de pagamento (Cartão / PIX)
-// 3) Pagamento e Confirmação
-//
-// Tudo é 100% mockado, porém com UX realista:
-// - Geração de QRCode simulado
-// - Validação básica de cartão fake
-// - Delay com loading
-// - Tela de confirmação
-//
-// Observação: nenhum texto menciona "mock".
-// ========================================================================
-
-import React, { useEffect, useState } from "react";
-import "./CheckoutModal.css";
+import React, { useEffect, useState } from 'react';
+import QRCode from 'qrcode'; // Correção da importação
+import './CheckoutModal.css';
 
 export default function CheckoutModal({
   open,
@@ -36,36 +18,81 @@ export default function CheckoutModal({
   };
 
   const [etapa, setEtapa] = useState(1);
-
-  // Dados de pagamento
-  const [metodo, setMetodo] = useState("");
+  const [metodo, setMetodo] = useState('');
   const [card, setCard] = useState({
-    number: "",
-    name: "",
-    cvv: "",
-    venc: "",
+    number: '',
+    name: '',
+    cvv: '',
+    venc: '',
   });
 
-  // Loader e confirmação
+  const [selectedPeriod, setSelectedPeriod] = useState('mensal'); // Seleção do tipo de plano
+  const [parcelas, setParcelas] = useState(1); // número de parcelas
+  const [parcelasAberto, setParcelasAberto] = useState(false); // dropdown customizado
+
   const [processando, setProcessando] = useState(false);
   const [confirmado, setConfirmado] = useState(false);
+  const [erro, setErro] = useState(false); // Estado para erro (quando o tempo expirar)
 
   // PIX
-  const [qrCode, setQrCode] = useState("");
+  const [qrCode, setQrCode] = useState('');
+  const [qrCodeImage, setQrCodeImage] = useState(''); // Imagem do QR Code gerado
+  const [timer, setTimer] = useState(600); // 10 minutos em segundos (ajuste para 300 em produção)
 
   useEffect(() => {
-    if (metodo === "pix") {
+    if (metodo === 'pix') {
       const r = Math.random().toString(36).substring(2);
       setQrCode(`000201PIX-SKINLOOT-CODE-${r}`);
+      startTimer();
     }
   }, [metodo]);
 
+  useEffect(() => {
+    if (qrCode) {
+      QRCode.toDataURL(qrCode).then(setQrCodeImage);
+    }
+  }, [qrCode]);
+
+  // Função para iniciar o timer
+  const startTimer = () => {
+    const intervalId = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(intervalId); // Parar o timer quando chegar a zero
+          setErro(true); // Exibe mensagem de erro
+          setTimeout(() => {
+            onClose(); // Fecha o modal após 1 segundo
+          }, 1000);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000); // Decrementa a cada segundo
+  };
+
+  // Função para copiar o código PIX
+  const handleCopyCode = () => {
+    navigator.clipboard
+      .writeText(qrCode)
+      .then(() => {
+        alert('Código PIX copiado para a área de transferência!');
+      })
+      .catch((err) => {
+        console.error('Erro ao copiar código:', err);
+      });
+  };
+
   function formatCurrency(v) {
-    return v.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+    return v.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
       minimumFractionDigits: 2,
     });
+  }
+
+  function getValorAtual() {
+    const base = precos[plano]?.[selectedPeriod] ?? 0;
+    return base;
   }
 
   function handleAvancar() {
@@ -73,16 +100,53 @@ export default function CheckoutModal({
     else if (etapa === 2 && metodo) setEtapa(3);
   }
 
+  // Número do cartão: só dígitos, máximo 16, formatado em blocos de 4
+  function handleNumeroCartaoChange(e) {
+    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 16);
+    const formatted = digitsOnly.replace(/(.{4})/g, '$1 ').trim();
+    setCard((prev) => ({ ...prev, number: formatted }));
+  }
+
+  // Validade: só dígitos, máximo 4, formata MM/AA
+  function handleVencChange(e) {
+    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 4);
+    let formatted = digitsOnly;
+
+    if (digitsOnly.length >= 3) {
+      formatted = `${digitsOnly.slice(0, 2)}/${digitsOnly.slice(2, 4)}`;
+    }
+
+    setCard((prev) => ({ ...prev, venc: formatted }));
+  }
+
+  // CVV: só dígitos, máximo 4
+  function handleCvvChange(e) {
+    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 4);
+    setCard((prev) => ({ ...prev, cvv: digitsOnly }));
+  }
+
   function validarCartao() {
-    return (
-      card.number.trim().length >= 12 &&
-      card.name.trim().length >= 3 &&
-      card.cvv.trim().length >= 3 &&
-      card.venc.trim().length >= 4
-    );
+    const numeroLimpo = card.number.replace(/\D/g, '');
+    const cvvLimpo = card.cvv.replace(/\D/g, '');
+    const vencLimpo = card.venc.replace(/\D/g, '');
+
+    if (numeroLimpo.length !== 16) return false;
+    if (cvvLimpo.length < 3 || cvvLimpo.length > 4) return false;
+    if (card.name.trim().length < 3) return false;
+
+    if (vencLimpo.length !== 4) return false;
+    const mes = parseInt(vencLimpo.slice(0, 2), 10);
+    const ano = parseInt(vencLimpo.slice(2, 4), 10);
+
+    if (Number.isNaN(mes) || Number.isNaN(ano)) return false;
+    if (mes < 1 || mes > 12) return false;
+
+    return true;
   }
 
   function handlePagar() {
+    if (!validarCartao() && metodo === 'cartao') return;
+
     setProcessando(true);
 
     setTimeout(() => {
@@ -94,6 +158,28 @@ export default function CheckoutModal({
         onClose();
       }, 1800);
     }, 1500);
+  }
+
+  // Dados derivados para o preview do cartão
+  const rawNumber = card.number.replace(/\D/g, '');
+  const padded = (rawNumber + '••••••••••••••••').slice(0, 16);
+  const maskedNumber = padded.replace(/(.{4})/g, '$1 ').trim();
+
+  const cardName = card.name || 'NOME DO TITULAR';
+  const cardVenc = card.venc || 'MM/AA';
+
+  let bandeira = 'Cartão crédito';
+  if (rawNumber.startsWith('4')) bandeira = 'Visa';
+  else if (rawNumber.startsWith('5')) bandeira = 'Mastercard';
+
+  const valorAtual = getValorAtual();
+  const valorParcela = parcelas > 0 ? valorAtual / parcelas : valorAtual;
+
+  const opcoesParcelas = [1, 2, 3, 4, 5, 6];
+
+  function getLabelParcela(n) {
+    const valor = n > 0 ? valorAtual / n : valorAtual;
+    return `${n}x de ${formatCurrency(valor)} sem juros`;
   }
 
   return (
@@ -117,14 +203,41 @@ export default function CheckoutModal({
 
               <span>Valor:</span>
               <strong>
-                {formatCurrency(precos[plano][variante])} / {variante}
+                {formatCurrency(valorAtual)} / {selectedPeriod}
               </strong>
             </div>
 
-            <button
-              className="btn btn--primary full"
-              onClick={handleAvancar}
-            >
+            <div className="checkout-resumo">
+              <span>Selecione o período:</span>
+              <div className="checkout-periodos">
+                <button
+                  className={`checkout-periodo ${
+                    selectedPeriod === 'mensal' ? 'active' : ''
+                  }`}
+                  onClick={() => setSelectedPeriod('mensal')}
+                >
+                  Mensal
+                </button>
+                <button
+                  className={`checkout-periodo ${
+                    selectedPeriod === 'trimestral' ? 'active' : ''
+                  }`}
+                  onClick={() => setSelectedPeriod('trimestral')}
+                >
+                  Trimestral
+                </button>
+                <button
+                  className={`checkout-periodo ${
+                    selectedPeriod === 'anual' ? 'active' : ''
+                  }`}
+                  onClick={() => setSelectedPeriod('anual')}
+                >
+                  Anual
+                </button>
+              </div>
+            </div>
+
+            <button className="btn btn--primary full" onClick={handleAvancar}>
               Continuar
             </button>
           </div>
@@ -141,18 +254,18 @@ export default function CheckoutModal({
             <div className="checkout-metodos">
               <button
                 className={`checkout-metodo ${
-                  metodo === "cartao" ? "active" : ""
+                  metodo === 'cartao' ? 'active' : ''
                 }`}
-                onClick={() => setMetodo("cartao")}
+                onClick={() => setMetodo('cartao')}
               >
                 Cartão de Crédito
               </button>
 
               <button
                 className={`checkout-metodo ${
-                  metodo === "pix" ? "active" : ""
+                  metodo === 'pix' ? 'active' : ''
                 }`}
-                onClick={() => setMetodo("pix")}
+                onClick={() => setMetodo('pix')}
               >
                 PIX
               </button>
@@ -169,90 +282,172 @@ export default function CheckoutModal({
         )}
 
         {/* ---------------------- ETAPA 3 ---------------------- */}
-        {etapa === 3 && !confirmado && (
+        {etapa === 3 && !confirmado && !erro && (
           <div className="checkout-step">
             <h2>Pagamento</h2>
 
             {/* ---------- Cartão ---------- */}
-            {metodo === "cartao" && (
-              <div className="card-form">
-                <label>Número do Cartão</label>
-                <input
-                  maxLength={19}
-                  placeholder="0000 0000 0000 0000"
-                  value={card.number}
-                  onChange={(e) =>
-                    setCard({ ...card, number: e.target.value })
-                  }
-                />
-
-                <label>Nome impresso no cartão</label>
-                <input
-                  placeholder="JOÃO DA SILVA"
-                  value={card.name}
-                  onChange={(e) =>
-                    setCard({ ...card, name: e.target.value })
-                  }
-                />
-
-                <div className="card-row">
-                  <div>
-                    <label>Validade</label>
-                    <input
-                      placeholder="MM/AA"
-                      maxLength={5}
-                      value={card.venc}
-                      onChange={(e) =>
-                        setCard({ ...card, venc: e.target.value })
-                      }
-                    />
+            {metodo === 'cartao' && (
+              <div className="card-wrapper">
+                {/* Preview do cartão */}
+                <div className="card-preview">
+                  <div className="card-preview-top">
+                    <span>SkinLoot</span>
+                    <span className="card-brand">{bandeira}</span>
                   </div>
 
-                  <div>
-                    <label>CVV</label>
-                    <input
-                      placeholder="000"
-                      maxLength={4}
-                      value={card.cvv}
-                      onChange={(e) =>
-                        setCard({ ...card, cvv: e.target.value })
-                      }
-                    />
+                  <div className="card-chip" />
+
+                  <div className="card-number">{maskedNumber}</div>
+
+                  <div className="card-holder-row">
+                    <div>
+                      <span className="card-label">Titular</span>
+                      <span className="card-value">{cardName}</span>
+                    </div>
+                    <div>
+                      <span className="card-label">Validade</span>
+                      <span className="card-value">{cardVenc}</span>
+                    </div>
+                  </div>
+
+                  <div className="card-installments">
+                    {parcelas}x de {formatCurrency(valorParcela)}{' '}
+                    {parcelas > 1 && 'sem juros'}
                   </div>
                 </div>
 
-                <button
-                  className="btn btn--primary full"
-                  disabled={!validarCartao() || processando}
-                  onClick={handlePagar}
-                >
-                  {processando ? "Processando..." : "Pagar"}
-                </button>
+                {/* Formulário do cartão */}
+                <div className="card-form">
+                  <label>Número do Cartão</label>
+                  <input
+                    inputMode="numeric"
+                    autoComplete="cc-number"
+                    placeholder="0000 0000 0000 0000"
+                    value={card.number}
+                    onChange={handleNumeroCartaoChange}
+                  />
+
+                  <label>Nome impresso no cartão</label>
+                  <input
+                    placeholder="JOÃO DA SILVA"
+                    value={card.name}
+                    onChange={(e) => setCard({ ...card, name: e.target.value })}
+                  />
+
+                  <div className="card-row">
+                    <div>
+                      <label>Validade</label>
+                      <input
+                        inputMode="numeric"
+                        autoComplete="cc-exp"
+                        placeholder="MM/AA"
+                        maxLength={5}
+                        value={card.venc}
+                        onChange={handleVencChange}
+                      />
+                    </div>
+
+                    <div>
+                      <label>CVV</label>
+                      <input
+                        inputMode="numeric"
+                        autoComplete="cc-csc"
+                        placeholder="000"
+                        maxLength={4}
+                        value={card.cvv}
+                        onChange={handleCvvChange}
+                      />
+                    </div>
+                  </div>
+
+                  <label>Parcelas</label>
+                  <div className="parcelas-select-wrapper">
+                    <button
+                      type="button"
+                      className="parcelas-select-display"
+                      onClick={() => setParcelasAberto((prev) => !prev)}
+                    >
+                      <span>{getLabelParcela(parcelas)}</span>
+                      <span className="parcelas-select-arrow">▼</span>
+                    </button>
+
+                    {parcelasAberto && (
+                      <div className="parcelas-dropdown">
+                        {opcoesParcelas.map((n) => (
+                          <button
+                            type="button"
+                            key={n}
+                            className={`parcelas-option ${
+                              parcelas === n ? 'active' : ''
+                            }`}
+                            onClick={() => {
+                              setParcelas(n);
+                              setParcelasAberto(false);
+                            }}
+                          >
+                            {getLabelParcela(n)}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    className="btn btn--primary full"
+                    disabled={!validarCartao() || processando}
+                    onClick={handlePagar}
+                  >
+                    {processando ? 'Processando...' : 'Pagar'}
+                  </button>
+                </div>
               </div>
             )}
 
             {/* ---------- PIX ---------- */}
-            {metodo === "pix" && (
+            {metodo === 'pix' && (
               <div className="pix-box">
                 <p>Escaneie o código abaixo:</p>
 
+                {/* QR Code gerado aqui */}
                 <div className="pix-qrcode">
-                  {qrCode.split("").map((c, i) => (
-                    <span key={i}>{c}</span>
-                  ))}
+                  <img src={qrCodeImage} alt="QR Code" />
                 </div>
 
                 <small>{qrCode}</small>
+
+                <div className="timer">
+                  <p>
+                    Tempo restante: {Math.floor(timer / 60)}:
+                    {timer % 60 < 10 ? `0${timer % 60}` : timer % 60}
+                  </p>
+                </div>
+
+                {/* Botão para copiar o código */}
+                <button className="btn btn--secondary" onClick={handleCopyCode}>
+                  Copiar código PIX
+                </button>
 
                 <button
                   className="btn btn--primary full"
                   onClick={handlePagar}
                   disabled={processando}
                 >
-                  {processando ? "Aguardando confirmação..." : "Paguei"}
+                  {processando ? 'Aguardando confirmação...' : 'Paguei'}
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ---------------------- MENSAGEM DE ERRO ---------------------- */}
+        {erro && (
+          <div className="checkout-step checkout-error">
+            <h2>Tempo expirado</h2>
+            <p>O tempo para completar o pagamento expirou. Tente novamente.</p>
+            <button className="btn btn--primary full" onClick={onClose}>
+              Fechar
+            </button>
           </div>
         )}
 
