@@ -479,39 +479,47 @@ function SecaoReputacaoVendedor({
               </p>
             )}
 
-            {listaAvaliacoes.map((av, idx) => {
-              const nome =
-                av.autorNome ||
-                av.buyerName ||
-                av.usuarioNome ||
-                'Comprador da plataforma';
-              const nota = av.nota || av.rating || av.score || 0;
-              const comentario =
-                av.comentario ||
-                av.comment ||
-                av.texto ||
-                'Sem comentário adicional.';
-              const data =
-                fmtData(av.dataCriacao || av.createdAt || av.date) || '';
+              {listaAvaliacoes.map((av, idx) => {
+                  // Mapeamento robusto dos campos
+                  const nome =
+                      av.autorNome ||
+                      av.buyerName ||
+                      av.usuarioNome ||
+                      av.avaliadorNome || // Tente adicionar este, comum em Java
+                      av.nome ||
+                      'Comprador da plataforma';
 
-              return (
-                <article
-                  key={av.id || av._id || idx}
-                  className="vendedor-avaliacao-item"
-                >
-                  <div className="vendedor-avaliacao-topo">
-                    <div>
-                      <div className="vendedor-avaliacao-autor">{nome}</div>
-                      {data && (
-                        <div className="vendedor-avaliacao-data">{data}</div>
-                      )}
-                    </div>
-                    <EstrelasAvaliacao nota={nota} />
-                  </div>
-                  <p className="vendedor-avaliacao-comentario">{comentario}</p>
-                </article>
-              );
-            })}
+                  const nota = Number(av.nota ?? av.rating ?? av.score ?? av.stars ?? 0);
+
+                  const comentario =
+                      av.comentario ||
+                      av.comment ||
+                      av.message ||
+                      av.texto ||
+                      av.description ||
+                      'Sem comentário adicional.';
+
+                  const data =
+                      fmtData(av.dataCriacao || av.createdAt || av.date || av.timestamp) || '';
+
+                  return (
+                      <article
+                          key={av.id || av._id || idx}
+                          className="vendedor-avaliacao-item"
+                      >
+                          <div className="vendedor-avaliacao-topo">
+                              <div>
+                                  <div className="vendedor-avaliacao-autor">{nome}</div>
+                                  {data && (
+                                      <div className="vendedor-avaliacao-data">{data}</div>
+                                  )}
+                              </div>
+                              <EstrelasAvaliacao nota={nota} />
+                          </div>
+                          <p className="vendedor-avaliacao-comentario">{comentario}</p>
+                      </article>
+                  );
+              })}
           </div>
 
           <div className="vendedor-avaliacoes-footer">
@@ -756,8 +764,14 @@ export default function DetalheAnuncio() {
 
   const mediaNotaCalculada = useMemo(() => {
     if (listaAvaliacoesParaExibir.length === 0) return 0;
-    const soma = listaAvaliacoesParaExibir.reduce((acc, av) => acc + (Number(av.nota) || 0), 0);
-    return soma / listaAvaliacoesParaExibir.length;
+    console.log("DADOS VINDOS DO BACKEND:", listaAvaliacoesParaExibir);
+      const soma = listaAvaliacoesParaExibir.reduce((acc, av) => {
+          // Tenta ler a nota de vários lugares possíveis para garantir
+          const valor = Number(av.nota ?? av.rating ?? av.score ?? av.stars ?? 0);
+          return acc + valor;
+      }, 0);
+
+      return soma / listaAvaliacoesParaExibir.length;
   }, [listaAvaliacoesParaExibir]);
 
   // Total de vendas (Se o backend não manda, mantemos 0 ou fallback)

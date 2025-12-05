@@ -102,10 +102,10 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
           console.log('WebSocket conectado.');
 
           // Inscrição na fila privada do usuário
-          stompClient.subscribe(`/user/queue/mensagens`, (payload) => {
-            const novaMensagem = JSON.parse(payload.body);
-            receberMensagem(novaMensagem);
-          });
+            stompClient.subscribe(`/topic/user/${user.id}`, (payload) => {
+                const novaMensagem = JSON.parse(payload.body);
+                receberMensagem(novaMensagem);
+            });
         },
         onStompError: (frame) => {
           console.error('Erro STOMP:', frame.headers['message'], frame.body);
@@ -346,9 +346,16 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
 
     if (!textoLimpo || !contatoAtivoId || !stompClientRef.current) return;
 
+      // DEBUG NO FRONTEND
+      console.log("Tentando enviar mensagem:", {
+          destinatarioId: contatoAtivoId,
+          conteudo: textoLimpo,
+          remetenteId: user.id
+      });
     const payload = {
       destinatarioId: contatoAtivoId,
       conteudo: textoLimpo,
+        remetenteId: user.id
     };
 
     stompClientRef.current.publish({
