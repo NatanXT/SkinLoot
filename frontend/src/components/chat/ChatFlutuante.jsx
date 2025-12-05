@@ -1,6 +1,6 @@
+// frontend/src/components/chat/ChatFlutuante.jsx
 // ======================================================
 // ChatFlutuante.jsx
-// Caminho: src/components/chat/ChatFlutuante.jsx
 // ------------------------------------------------------
 // Componente principal do chat flutuante.
 // Recursos:
@@ -9,7 +9,7 @@
 // - Envio e recebimento via WebSocket (STOMP + SockJS)
 // - Histórico de conversa via API REST
 // - Auto-scroll e controle de não lidas
-// ------------------------------------------------------
+// ======================================================
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import './ChatFlutuante.css';
@@ -69,6 +69,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     if (contatoAtivo) return contatoAtivo;
     const candidato = contatos
       .map((c) => ({
+
         contato: c,
         lastTs:
           c.mensagens?.length > 0
@@ -125,49 +126,52 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     };
   }, [user]);
 
-    useEffect(() => {
-        if (!user || !user.id) return; // Só roda se o usuário estiver carregado
+  useEffect(() => {
+    if (!user || !user.id) return; // Só roda se o usuário estiver carregado
 
-        const carregarListaDeConversas = async () => {
-            try {
-                // 1. Chama o novo endpoint
-                const { data: ultimasMensagens } = await api.get('/api/chat/minhas-conversas');
+    const carregarListaDeConversas = async () => {
+      try {
+        // 1. Chama o novo endpoint
+        const { data: ultimasMensagens } = await api.get(
+          '/api/chat/minhas-conversas',
+        );
 
-                // 2. Mapeia a resposta (lista de ChatMessageResponse)
-                const listaContatos = ultimasMensagens.map((msg) => {
-                    const souEu = msg.remetenteId === user.id;
-                    const outroUsuarioId = souEu ? msg.destinatarioId : msg.remetenteId;
-                    const outroUsuarioNome = souEu ? msg.destinatarioNome : msg.remetenteNome;
+        // 2. Mapeia a resposta (lista de ChatMessageResponse)
+        const listaContatos = ultimasMensagens.map((msg) => {
+          const souEu = msg.remetenteId === user.id;
+          const outroUsuarioId = souEu ? msg.destinatarioId : msg.remetenteId;
+          const outroUsuarioNome = souEu
+            ? msg.destinatarioNome
+            : msg.remetenteNome;
 
-                    // 3. Formata a última mensagem para o estado local
-                    const msgFormatada = {
-                        id: msg.id,
-                        autor: souEu ? 'eu' : 'ele',
-                        texto: msg.conteudo,
-                        timestamp: msg.timestamp,
-                    };
+          // 3. Formata a última mensagem para o estado local
+          const msgFormatada = {
+            id: msg.id,
+            autor: souEu ? 'eu' : 'ele',
+            texto: msg.conteudo,
+            timestamp: msg.timestamp,
+          };
 
-                    // 4. Cria o objeto de Contato
-                    return {
-                        id: outroUsuarioId,
-                        nome: outroUsuarioNome,
-                        foto: 'https://i.pravatar.cc/60?u=' + outroUsuarioId, // Placeholder
-                        status: 'offline', // Placeholder (precisaria de sistema de presença)
-                        naoLidas: 0, // TODO: O backend precisaria calcular isso
-                        mensagens: [msgFormatada], // Começa com a última mensagem
-                    };
-                });
+          // 4. Cria o objeto de Contato
+          return {
+            id: outroUsuarioId,
+            nome: outroUsuarioNome,
+            foto: 'https://i.pravatar.cc/60?u=' + outroUsuarioId, // Placeholder
+            status: 'offline', // Placeholder (precisaria de sistema de presença)
+            naoLidas: 0, // TODO: O backend precisaria calcular isso
+            mensagens: [msgFormatada], // Começa com a última mensagem
+          };
+        });
 
-                // 5. Define o estado com todas as conversas
-                setContatos(listaContatos);
+        // 5. Define o estado com todas as conversas
+        setContatos(listaContatos);
+      } catch (error) {
+        console.error('Falha ao carregar lista de conversas:', error);
+      }
+    };
 
-            } catch (error) {
-                console.error("Falha ao carregar lista de conversas:", error);
-            }
-        };
-
-        carregarListaDeConversas();
-    }, [user]); // Roda uma vez quando 'user' é carregado
+    carregarListaDeConversas();
+  }, [user]); // Roda uma vez quando 'user' é carregado
 
   // ======================================================
   // FUNÇÃO: Carregar histórico de conversa (REST)
@@ -203,8 +207,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
       const novoContato = {
         id: seller.id,
         nome: seller.nome,
-        foto:
-            seller.foto ?? `https://i.pravatar.cc/60?u=${seller.id}`,
+        foto: seller.foto ?? `https://i.pravatar.cc/60?u=${seller.id}`,
         status: 'online agora',
         naoLidas: 0,
         mensagens: [],
@@ -231,7 +234,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
       });
 
       setTexto(
-          `Olá, ${seller.nome}. Vi seu anúncio da skin "${skin.titulo}" por ${precoFmt}. Podemos conversar?`,
+        `Olá, ${seller.nome}. Vi seu anúncio da skin "${skin.titulo}" por ${precoFmt}. Podemos conversar?`,
       );
       // --- FIM DA ALTERAÇÃO ---
     };
@@ -372,8 +375,9 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
                   className="btn-fechar"
                   onClick={toggleChat}
                   aria-label="Fechar"
+                  type="button"
                 >
-                  ✕
+                  X
                 </button>
               </div>
 
@@ -413,15 +417,17 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
                     className="btn-voltar"
                     onClick={() => setContatoAtivoId(null)}
                     aria-label="Voltar para lista"
+                    type="button"
                   >
-                    ←
+                    {'<'}
                   </button>
                   <button
                     className="btn-fechar"
                     onClick={toggleChat}
                     aria-label="Fechar"
+                    type="button"
                   >
-                    ✕
+                    X
                   </button>
                 </div>
               </div>
@@ -461,10 +467,11 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
           className="chat-icone chat-icone--pill"
           onClick={toggleChat}
           aria-label="Abrir mensagens"
+          type="button"
         >
           {/* Ícone à esquerda */}
           <span className="chat-icone__left">
-            <span className="chat-icone__emoji">💬</span>
+            <span className="chat-icone__emoji">MSG</span>
             {totalNaoLidas > 0 && (
               <span className="chat-icone__badge">{totalNaoLidas}</span>
             )}

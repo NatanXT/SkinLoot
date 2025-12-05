@@ -23,6 +23,7 @@ import DashboardVitrine from './pages/dashboard/DashboardVitrine.jsx';
 import DetalheAnuncio from './pages/detalhes/DetalheAnuncio.jsx';
 
 import PerfilUsuario from './pages/usuario/PerfilUsuario';
+import PerfilPublicoUsuario from './pages/usuario/PerfilPublicoUsuario';
 
 // Página de administração de usuários
 import AdminPainel from './pages/admin/AdminPainel.jsx';
@@ -63,6 +64,8 @@ export default function App() {
         <Route path="/suporte" element={<Suporte />} />
         <Route path="/anuncio/:id" element={<DetalheAnuncio />} />
 
+        {/* Perfil público de usuário (PÚBLICA) */}
+        <Route path="/perfil-publico/:userId" element={<PerfilPublicoUsuario />} />
 
         {/* Usuario/Perfil (PROTEGIDA) */}
         <Route

@@ -4,6 +4,8 @@
 // ----------------------------------------------------------
 // Componente visual responsável por exibir um anúncio de skin,
 // incluindo imagem, preço, vendedor e ações.
+// Agora o nome do vendedor pode ser clicado para abrir
+// a página de perfil público do usuário (quando houver ID).
 // ==========================================================
 
 import { useNavigate } from 'react-router-dom';
@@ -55,6 +57,26 @@ export default function SkinCard({
   ).toLowerCase();
   const planMeta = plansMeta[planKey] || { label: '—', color: '#999' };
 
+  // Tentativa de resolver o ID do vendedor a partir de vários campos possíveis.
+  // Isso evita quebrar o componente caso o backend envie chaves diferentes.
+  const sellerId =
+    data?.usuarioId ??
+    data?.seller?.id ??
+    data?.vendedorId ??
+    data?.usuario?.id ??
+    data?.sellerId ??
+    data?.userId ??
+    null;
+
+  // Navega para a página de perfil público do vendedor, se o ID existir.
+  const handleSellerClick = () => {
+    if (!sellerId) {
+      // Sem ID, não navega (componente continua funcional).
+      return;
+    }
+    navigate(`/perfil-publico/${sellerId}`);
+  };
+
   return (
     <article className="card">
       {/* ---------- Imagem + Plano + Favorito ---------- */}
@@ -63,7 +85,9 @@ export default function SkinCard({
           src={imagem}
           alt={titulo}
           loading="lazy"
-          onError={(e) => (e.currentTarget.src = '/img/placeholder.png')}
+          onError={(e) => {
+            e.currentTarget.src = '/img/placeholder.png';
+          }}
         />
 
         <span className="badge" style={{ background: planMeta.color }}>
@@ -74,6 +98,7 @@ export default function SkinCard({
           className={`like ${liked ? 'is-liked' : ''}`}
           onClick={onLike}
           aria-label="Favoritar"
+          type="button"
         >
           <svg width="20" height="20" viewBox="0 0 24 24">
             <path
@@ -94,14 +119,41 @@ export default function SkinCard({
 
         {/* ---------- Informações do vendedor ---------- */}
         <div className="seller">
-          <span>Vendedor: {vendedor}</span>
+          {/* Mesma base visual dos botões ghost (btn btn--ghost) */}
+          <button
+            type="button"
+            className={`btn btn--ghost seller__name ${
+              sellerId ? 'seller__name--clickable' : 'seller__name--disabled'
+            }`}
+            onClick={sellerId ? handleSellerClick : undefined}
+            disabled={!sellerId}
+            title={
+              sellerId
+                ? 'Ver perfil público do vendedor'
+                : 'Perfil do vendedor indisponível'
+            }
+          >
+            <span className="seller__avatar">
+              {vendedor?.charAt(0)?.toUpperCase() ?? '?'}
+            </span>
+
+            <span className="seller__label">
+              <span className="seller__label-title">Vendedor</span>
+              <span className="seller__label-name">{vendedor}</span>
+            </span>
+          </button>
 
           <div className="cta">
-            <button className="btn btn--ghost" onClick={onContato}>
+            <button
+              className="btn btn--ghost"
+              onClick={onContato}
+              type="button"
+            >
               Contato
             </button>
             <button
               className="btn btn--ghost"
+              type="button"
               onClick={() => navigate(`/anuncio/${data.id || data._id}`)}
             >
               Ver detalhes
@@ -111,7 +163,11 @@ export default function SkinCard({
 
         {/* ---------- Botão inferior ---------- */}
         <div className="cta cta--bottom">
-          <button className="btn btn--primary full" onClick={onComprarFora}>
+          <button
+            className="btn btn--primary full"
+            type="button"
+            onClick={onComprarFora}
+          >
             Comprar
           </button>
         </div>

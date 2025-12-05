@@ -1,0 +1,1343 @@
+/* src/pages/usuario/PerfilUsuario.css
+   — Dark por padrão + Tema claro automático/forçado
+   — Backdrop/gradiente igual ao da Dashboard no topo
+*/
+
+/* ===== TOKENS DARK ===== */
+:root{
+  --bg:#0B0D10;
+  --panel:#11151A;
+  --surface:#0E1217;
+  --muted:#7B8694;
+  --text:#E8F1F2;
+
+  --border:#1A2129;
+  --border-strong:#1C2430;
+  --shadow:0 10px 30px rgba(0,0,0,.45);
+
+  --primary:#39FF14;
+  --secondary:#00C896;
+  --ring: rgba(57,255,20,.45);
+
+  --radius: 18px;
+  --container-max: 1200px;
+
+  --media-ratio: 4/3;
+  --media-min-h: 320px;
+}
+
+/* ===== THEME LIGHT (auto) ===== */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg:#F7FAFC;
+    --panel:#FFFFFF;
+    --surface:#F2F6FA;
+    --muted:#5A6573;
+    --text:#0B0D10;
+
+    --border:#E2E8F0;
+    --border-strong:#CBD5E1;
+    --shadow:0 12px 28px rgba(15,23,42,.10);
+
+    --primary:#1FEA00;
+    --secondary:#00C896;
+    --ring: rgba(31,234,0,.35);
+  }
+}
+
+/* ===== THEME LIGHT (forçado) ===== */
+:root[data-theme="light"]{
+  --bg:#F7FAFC;
+  --panel:#FFFFFF;
+  --surface:#F2F6FA;
+  --muted:#5A6573;
+  --text:#0B0D10;
+
+  --border:#E2E8F0;
+  --border-strong:#CBD5E1;
+  --shadow:0 12px 28px rgba(15,23,42,.10);
+
+  --primary:#1FEA00;
+  --secondary:#00C896;
+  --ring: rgba(31,234,0,.35);
+}
+
+/* ===== Shell ===== */
+.perfil-root{
+  position: relative;
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* >>> Backdrop com o mesmo “glow” da dashboard */
+.perfil-backdrop{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(800px 400px at 10% 0%,
+      color-mix(in oklab, var(--primary) 18%, transparent),
+      transparent 60%),
+    radial-gradient(900px 500px at 100% 10%,
+      color-mix(in oklab, var(--secondary) 20%, transparent),
+      transparent 60%);
+}
+
+/* Topbar flutuando sobre o backdrop */
+.perfil-topbar{
+  position:sticky; top:0; z-index:10;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:14px 24px;
+  background: color-mix(in oklab, var(--panel) 82%, transparent);
+  backdrop-filter:saturate(140%) blur(8px);
+  border-bottom:1px solid var(--border);
+}
+.perfil-actions{ display:flex; gap:8px }
+
+/* >>> Hero com o mesmo gradiente do topo da dashboard */
+.perfil-hero{
+  position: relative;
+  display:grid; place-items:center;
+  padding:48px 24px 24px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--primary) 10%, transparent),
+    transparent
+  );
+  z-index: 1; /* acima do backdrop */
+}
+.perfil-hero__copy{ text-align:center; max-width:900px }
+.perfil-hero h1{ margin:0 0 10px; font-size:38px }
+.perfil-hero p{ margin:0; color:var(--muted) }
+
+.perfil-container{
+  position: relative;
+  z-index: 1;
+  max-width:var(--container-max);
+  margin: 18px auto 64px;
+  padding: 0 16px;
+}
+
+.perfil-block{ margin: 16px 0 28px }
+.perfil-block h2{ margin:0 0 12px }
+
+/* ===== Grid ===== */
+.perfil-grid{ display:grid; gap:16px; }
+.perfil-grid--2{ grid-template-columns: 1fr 1fr; }
+@media (max-width: 960px){ .perfil-grid--2{ grid-template-columns: 1fr; } }
+
+/* ===== Cards ===== */
+.perfil-card{
+  background:linear-gradient(180deg, var(--panel), color-mix(in oklab, var(--panel) 70%, var(--surface)));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:16px;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.perfil-card:hover{
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow:0 14px 36px rgba(0,0,0,.18);
+}
+
+/* Campos com hover na borda */
+.perfil-field{ margin-bottom:10px }
+.perfil-field label{
+  display:block; font-size:12px; color:var(--muted); margin-bottom:4px;
+}
+.perfil-value{
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-radius:10px;
+  padding:10px 12px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+  outline:none;
+  color:var(--text);
+}
+.perfil-value:hover{
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 35%, transparent);
+}
+.perfil-value:focus{
+  border-color:var(--secondary);
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 60%, transparent);
+}
+
+/* Plano / Cota */
+.perfil-plano-header{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px;
+}
+.perfil-plano-badge{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:6px 12px; border-radius:999px; white-space:nowrap;
+  color:#0B0D10; font-weight:800; font-size:12px; line-height:1;
+  box-shadow:0 0 24px var(--ring);
+  background:var(--primary);
+}
+.perfil-plano-title{ color:var(--muted) }
+
+.perfil-cota{ margin-top:10px }
+.perfil-cota-row{ display:flex; align-items:center; justify-content:space-between; color: color-mix(in oklab, var(--text) 85%, var(--muted)) }
+.perfil-progress{
+  margin:10px 0; height:10px; background:var(--surface); border:1px solid var(--border-strong); border-radius:999px;
+  overflow:hidden;
+}
+.perfil-progress__bar{
+  height:100%; background:linear-gradient(90deg, var(--primary), var(--secondary));
+  width:0%;
+}
+.perfil-cota-hint{ font-size:13px; color:var(--muted) }
+
+.perfil-plano-actions{ display:flex; gap:10px; margin-top:12px }
+
+.perfil-block-header{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+
+/* ====================== Grid de cards das skins ====================== */
+.perfil-grid-cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
+  gap:20px;
+  margin-top:12px;
+}
+
+/* ====================== Botões ====================== */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  border:1px solid var(--border-strong); background:transparent; color:var(--text);
+  text-decoration:none; cursor:pointer; border-radius:12px; padding:12px 16px;
+}
+.btn.sm{ padding:8px 12px; border-radius:10px }
+.btn--primary{
+  background:linear-gradient(180deg, var(--primary), var(--secondary));
+  color:#0B0D10; font-weight:800;
+  border-color: color-mix(in oklab, var(--primary) 35%, var(--border-strong));
+}
+.btn--primary:hover{ filter:brightness(.95) }
+.btn--ghost{
+  border-color: var(--border);
+  color: color-mix(in oklab, var(--text) 88%, var(--muted));
+}
+.btn--ghost:hover{ border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border)); }
+.btn--full{ width:100% }
+
+/* ===== Overrides de contraste (tema claro) para .btn--ghost ===== */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .btn--ghost{
+    background:#EDF2F7;
+    border-color:#CBD5E1;
+    color:#0B0D10;
+  }
+  :root:not([data-theme="dark"]) .btn--ghost:hover{
+    background:#E2E8F0;
+    border-color:#94A3B8;
+  }
+}
+:root[data-theme="light"] .btn--ghost{
+  background:#EDF2F7;
+  border-color:#CBD5E1;
+  color:#0B0D10;
+}
+:root[data-theme="light"] .btn--ghost:hover{
+  background:#E2E8F0;
+  border-color:#94A3B8;
+}
+
+/* ====================== Card (igual vitrine) ====================== */
+.card{
+  display:flex; flex-direction:column;
+  background:linear-gradient(180deg, var(--panel), color-mix(in oklab, var(--panel) 70%, var(--surface)));
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  position:relative;
+  transition:transform .25s ease, box-shadow .25s ease;
+}
+.card:hover{ transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,.18) }
+
+.card__media{
+  position:relative;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--surface);
+  height:auto; aspect-ratio: var(--media-ratio); min-height:var(--media-min-h);
+  padding:48px 20px 20px;
+  border-bottom:1px solid var(--border);
+}
+.card__media img{
+  width:auto; height:auto; max-width:100%; max-height:100%;
+  object-fit:contain; display:block;
+  filter:saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.35));
+}
+.badge{
+  position:absolute; left:16px; top:14px; z-index:3;
+  padding:6px 12px; border-radius:999px; white-space:nowrap;
+  color:#0B0D10; font-weight:800; font-size:12px; line-height:1;
+  box-shadow:0 0 24px var(--ring);
+  background:var(--primary);
+}
+.card__body{ display:flex; flex-direction:column; gap:10px; padding:14px; background:transparent }
+.card h3{ margin:0; font-size:18px; color:var(--text) }
+.meta{ display:flex; justify-content:space-between; align-items:center; color:var(--muted) }
+.price{ color: color-mix(in oklab, var(--text) 92%, var(--muted)); font-weight:800; letter-spacing:.3px }
+.seller{
+  margin-top:auto;
+  display:flex; justify-content:space-between; align-items:end; gap:12px;
+}
+.seller .cta{ display:flex; gap:10px }
+
+/* Empty state */
+.perfil-empty{
+  background:var(--panel); border:1px solid var(--border); border-radius:18px; padding:18px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px; color:var(--muted);
+}
+
+/* ====================== Modal/Painel (base) ====================== */
+.perfil-modal{
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+}
+.perfil-modal__backdrop{
+  position:absolute; inset:0;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(2px);
+}
+.perfil-modal__card{
+  position:relative;
+  width:min(720px, 92vw);
+  max-height:92vh;
+  background:linear-gradient(180deg, var(--panel), color-mix(in oklab, var(--panel) 70%, var(--surface)));
+  border:1px solid var(--border);
+  border-radius:20px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.18);
+  padding:18px;
+  animation: modalIn .18s ease-out both;
+  display:flex; flex-direction:column;
+}
+@keyframes modalIn {
+  from { transform: translateY(8px); opacity: 0 }
+  to   { transform: translateY(0);   opacity: 1 }
+}
+.perfil-modal__head{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:12px;
+  flex: 0 0 auto;
+  color:var(--text);
+}
+.perfil-modal__close{
+  all:unset; cursor:pointer; width:36px; height:36px; line-height:36px; text-align:center;
+  border-radius:10px; background:var(--surface); border:1px solid var(--border-strong); font-size:20px; color:var(--text);
+}
+.perfil-modal__close:hover{ border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border)); }
+
+.perfil-modal__desc{ color:var(--muted); margin:0 0 12px }
+
+.perfil-modal__grid{
+  display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin:8px 0 14px;
+}
+@media (max-width: 640px){
+  .perfil-modal__grid{ grid-template-columns: 1fr; }
+}
+.perfil-modal__item{
+  background:var(--surface); border:1px solid var(--border-strong); border-radius:10px; padding:12px; color:var(--text);
+}
+.perfil-modal__item .k{ display:block; font-size:12px; color:var(--muted) }
+.perfil-modal__item .v{ font-weight:600 }
+
+/* ===== Scroll interno da modal de edição ===== */
+.perfil-modal__scroll{
+  overflow:auto;
+  padding-right:4px;
+  display:flex; flex-direction:column; gap:12px;
+  scrollbar-gutter: stable both-edges;
+}
+.perfil-modal__scroll::-webkit-scrollbar{ width:10px; height:10px }
+.perfil-modal__scroll::-webkit-scrollbar-thumb{ background: color-mix(in oklab, var(--text) 35%, transparent); border-radius:999px }
+.perfil-modal__scroll::-webkit-scrollbar-track{ background:transparent }
+
+/* ===== Rodapé da modal (ações) ===== */
+.perfil-modal__actions{
+  position: sticky;
+  bottom: 0;
+  display:flex; gap:10px; justify-content:flex-end;
+  padding-top:10px;
+  margin-top:12px;
+  background:linear-gradient(180deg, transparent, color-mix(in oklab, var(--panel) 80%, transparent) 40%, var(--panel));
+  backdrop-filter: blur(2px);
+  border-top:1px solid var(--border);
+}
+.perfil-modal__actions--inline{
+  display:flex; gap:10px; justify-content:flex-end; margin-top:8px;
+}
+
+/* ====================== Form do modal de edição ====================== */
+.perfil-form{ display:grid; gap:12px; }
+.perfil-form__row{ display:grid; gap:6px; }
+.perfil-form__row label{ font-size:12px; color:var(--muted); }
+
+/* Inputs/Selects */
+.perfil-form__row input[type="text"],
+.perfil-form__row input[type="number"],
+.perfil-form__row select{
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-radius:10px;
+  padding:10px 12px;
+  color:var(--text);
+  outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
+  appearance: none;
+}
+.perfil-form__row input:hover,
+.perfil-form__row select:hover{
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 35%, transparent);
+}
+.perfil-form__row input:focus,
+.perfil-form__row select:focus{
+  border-color:var(--secondary);
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 60%, transparent);
+}
+.perfil-form__hint{ display:block; font-size:12px; color:var(--muted); }
+
+/* Textareas */
+.textarea,
+.perfil-form__row textarea{
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-radius:10px;
+  padding:10px 12px;
+  color:var(--text);
+  outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
+  min-height:120px;
+  resize:vertical;
+  line-height:1.5;
+}
+.textarea:hover,
+.perfil-form__row textarea:hover{
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 35%, transparent);
+}
+.textarea:focus,
+.perfil-form__row textarea:focus{
+  border-color:var(--secondary);
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 60%, transparent);
+}
+
+/* Variante monoespaçada */
+.textarea--code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  white-space: pre;
+  tab-size: 2;
+  overflow: auto;
+  caret-color: currentColor;
+}
+
+/* Placeholders */
+.perfil-form__row input::placeholder,
+.perfil-form__row textarea::placeholder{
+  color: color-mix(in oklab, var(--muted) 85%, var(--text));
+  opacity:.95;
+}
+
+/* ====================== Uploader clicável + preview ====================== */
+.perfil-upload{
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-radius:14px;
+  padding:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:220px;
+  cursor:pointer;
+  transition:border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+  margin-bottom:12px;
+  overflow:hidden;
+}
+.perfil-upload:hover{
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 35%, transparent);
+  transform: translateY(-1px);
+}
+.perfil-upload:focus{
+  outline:none;
+  border-color:var(--secondary);
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--ring) 60%, transparent);
+}
+.perfil-upload img{
+  display:block;
+  width:auto;
+  max-width:100%;
+  height:auto;
+  max-height: min(48vh, 420px);
+  object-fit:contain;
+  filter:saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.35));
+}
+.perfil-upload__placeholder{
+  color:var(--muted);
+  font-size:14px;
+}
+
+/* ====================== Lista de alerta / checkbox ====================== */
+.perfil-alerta{ margin:0 0 12px 18px; color: color-mix(in oklab, var(--text) 92%, var(--muted)); }
+.perfil-check{
+  display:flex; align-items:flex-start; gap:8px; margin-top:6px; color:var(--muted);
+}
+.perfil-check input{ transform: translateY(2px); accent-color: var(--secondary); }
+
+/* ====================== Card inativa ====================== */
+.card.card--inativa{ opacity:.75; filter:grayscale(.15); }
+.card.card--inativa .badge{ background:#8b8f97; color:#0B0D10; }
+
+/* ====================== Upgrade cards ====================== */
+.perfil-upgrade-grid{
+  display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin: 8px 0 10px;
+}
+@media (max-width: 860px){
+  .perfil-upgrade-grid{ grid-template-columns: 1fr; }
+}
+.perfil-upgrade-card{
+  background:var(--surface); border:1px solid var(--border-strong); border-radius:12px; padding:12px; color:var(--text);
+}
+.perfil-upgrade-badge{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:6px 12px; border-radius:999px; white-space:nowrap;
+  color:#0B0D10; font-weight:800; font-size:12px; line-height:1;
+  box-shadow:0 0 24px var(--ring); margin-bottom:10px;
+  background:var(--primary);
+}
+.perfil-upgrade-list{
+  margin:0 0 12px 0; padding-left: 18px; color: color-mix(in oklab, var(--text) 85%, var(--muted));
+}
+
+/* ---------- Filtro de status (ativas/inativas) ---------- */
+.perfil-filter-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Select antigo (deixei caso use em outro lugar) */
+.perfil-select {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.perfil-select:hover {
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 35%, transparent);
+}
+.perfil-select:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 60%, transparent);
+}
+
+/* Dropdown customizado (igual vibe do parcelas) */
+.perfil-filter-select-wrapper {
+  position: relative;
+  min-width: 180px;
+}
+
+.perfil-filter-select-display {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+.perfil-filter-select-display:hover {
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 35%, transparent);
+}
+.perfil-filter-select-display:focus-visible {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 60%, transparent);
+  background: color-mix(in oklab, var(--surface) 85%, var(--panel));
+}
+
+.perfil-filter-select-arrow {
+  font-size: 10px;
+  color: #9ca3af;
+  margin-left: 8px;
+}
+
+.perfil-filter-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #020617;
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.8);
+  z-index: 10;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.perfil-filter-option {
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  font-size: 13px;
+  cursor: pointer;
+}
+.perfil-filter-option:hover {
+  background: #0f172a;
+}
+.perfil-filter-option.active {
+  background: rgba(0, 200, 150, 0.12);
+  color: #00c896;
+}
+
+/* ====================== Responsividade do filtro/botão ====================== */
+@media (max-width: 640px) {
+  .perfil-filter-area {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .perfil-filter-select-display {
+    width: 100%;
+    font-size: 15px;
+  }
+  .perfil-filter-area .btn {
+    width: 100%;
+    justify-content: center;
+    font-weight: 700;
+  }
+}
+
+/* ====================== Correção: scroll dentro das modais ====================== */
+.perfil-modal__card { display: flex; flex-direction: column; max-height: 92vh; overflow: hidden; }
+.perfil-modal__scroll, .perfil-upgrade-grid { overflow-y: auto; max-height: calc(92vh - 180px); padding-right: 6px; scrollbar-gutter: stable; }
+.perfil-modal__scroll::-webkit-scrollbar,
+.perfil-upgrade-grid::-webkit-scrollbar { width: 8px; }
+.perfil-modal__scroll::-webkit-scrollbar-thumb,
+.perfil-upgrade-grid::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--text) 35%, transparent); border-radius: 999px; }
+.perfil-modal__scroll::-webkit-scrollbar-track,
+.perfil-upgrade-grid::-webkit-scrollbar-track { background: transparent; }
+
+/* ====================== Fieldset de detalhes do jogo ====================== */
+.perfil-form__fieldset {
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 14px 16px 16px;
+  margin-top: 16px;
+  background: linear-gradient(180deg, var(--surface), color-mix(in oklab, var(--surface) 85%, var(--panel)));
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  color:var(--text);
+}
+.perfil-form__fieldset:hover {
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 35%, transparent);
+}
+.perfil-form__fieldset:focus-within {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 60%, transparent);
+}
+.perfil-form__fieldset legend {
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--secondary);
+  text-shadow: 0 0 8px color-mix(in oklab, var(--secondary) 45%, transparent);
+}
+
+/* Grid interno dos detalhes */
+.perfil-form__grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 600px) { .perfil-form__grid-2 { grid-template-columns: 1fr; } }
+
+/* Checkbox refinado */
+.check { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: var(--text); }
+.check input[type="checkbox"] { accent-color: var(--secondary); transform: scale(1.1); }
+
+/* ====================== Mobile: planos roláveis ====================== */
+@media (max-width: 640px) {
+  .perfil-upgrade-grid { grid-template-columns: 1fr; max-height: calc(88vh - 160px); overflow-y: auto; }
+}
+
+/* ===== Overrides de tema claro para dropdown custom de status ===== */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .perfil-filter-select-display {
+    background: #FFFFFF;
+    border-color: #CBD5E1;
+    color: #0B0D10;
+  }
+  :root:not([data-theme="dark"]) .perfil-filter-select-display:hover {
+    border-color: #94A3B8;
+    box-shadow: 0 0 0 4px rgba(31,234,0,.18);
+    background: #F9FAFB;
+  }
+  :root:not([data-theme="dark"]) .perfil-filter-select-display:focus-visible {
+    border-color: #16A34A;
+    box-shadow: 0 0 0 4px rgba(34,197,94,.35);
+    background: #F1F5F9;
+  }
+
+  :root:not([data-theme="dark"]) .perfil-filter-dropdown {
+    background: #FFFFFF;
+    border-color: #CBD5E1;
+    box-shadow: 0 18px 45px rgba(15,23,42,.16);
+  }
+  :root:not([data-theme="dark"]) .perfil-filter-option {
+    color: #0F172A;
+  }
+  :root:not([data-theme="dark"]) .perfil-filter-option:hover {
+    background: #F1F5F9;
+  }
+  :root:not([data-theme="dark"]) .perfil-filter-option.active {
+    background: rgba(16,185,129,.18);
+    color: #047857;
+  }
+}
+
+/* Tema claro forçado (data-theme="light") */
+:root[data-theme="light"] .perfil-filter-select-display {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  color: #0B0D10;
+}
+:root[data-theme="light"] .perfil-filter-select-display:hover {
+  border-color: #94A3B8;
+  box-shadow: 0 0 0 4px rgba(31,234,0,.18);
+  background: #F9FAFB;
+}
+:root[data-theme="light"] .perfil-filter-select-display:focus-visible {
+  border-color: #16A34A;
+  box-shadow: 0 0 0 4px rgba(34,197,94,.35);
+  background: #F1F5F9;
+}
+:root[data-theme="light"] .perfil-filter-dropdown {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  box-shadow: 0 18px 45px rgba(15,23,42,.16);
+}
+:root[data-theme="light"] .perfil-filter-option {
+  color: #0F172A;
+}
+:root[data-theme="light"] .perfil-filter-option:hover {
+  background: #F1F5F9;
+}
+:root[data-theme="light"] .perfil-filter-option.active {
+  background: rgba(16,185,129,.18);
+  color: #047857;
+}
+
+/* ==========================================================
+   PERFIL PÚBLICO DO VENDEDOR (usa mesma shell: perfil-root,
+   perfil-topbar, perfil-hero, perfil-container)
+   ========================================================== */
+
+.perfil-publico__card {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.25rem 1.35rem;
+  border-radius: var(--radius);
+  background: linear-gradient(
+    180deg,
+    var(--panel),
+    color-mix(in oklab, var(--panel) 70%, var(--surface))
+  );
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+/* Left: avatar + info */
+.perfil-publico__left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.perfil-publico__avatar {
+  min-width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 20%, var(--primary), #022c22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #ecfdf5;
+}
+
+.perfil-publico__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.perfil-publico__demo {
+  margin: 0 0 0.6rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.perfil-publico__since {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Right: ranking */
+.perfil-publico__right {
+  flex: 0 0 340px;
+  max-width: 380px;
+}
+
+.perfil-publico__ranking-card {
+  border-radius: 0.9rem;
+  border: 1px solid var(--border-strong);
+  background: radial-gradient(
+    circle at top left,
+    color-mix(in oklab, var(--secondary) 30%, transparent),
+    var(--panel)
+  );
+  padding: 0.8rem 0.9rem 0.95rem;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+}
+
+/* Badge de nível */
+.perfil-publico__ranking-badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.perfil-publico__ranking-badge--high {
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.14);
+  border-color: rgba(22, 163, 74, 0.45);
+}
+
+.perfil-publico__ranking-badge--medium {
+  color: #eab308;
+  background: rgba(234, 179, 8, 0.14);
+  border-color: rgba(234, 179, 8, 0.45);
+}
+
+.perfil-publico__ranking-badge--low {
+  color: #f97316;
+  background: rgba(248, 113, 38, 0.16);
+  border-color: rgba(248, 113, 38, 0.45);
+}
+
+.perfil-publico__ranking-badge--new {
+  color: #6b7280;
+  background: rgba(107, 114, 128, 0.18);
+  border-color: rgba(75, 85, 99, 0.4);
+}
+
+.perfil-publico__ranking-text {
+  margin: 0.4rem 0 0.55rem;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+/* Barra de score */
+.perfil-publico__ranking-bar {
+  margin-bottom: 0.55rem;
+}
+
+.perfil-publico__ranking-bar-track {
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    #fecaca,
+    #fed7aa,
+    #fef9c3,
+    #bbf7d0
+  );
+}
+
+.perfil-publico__ranking-bar-fill {
+  height: 100%;
+  width: var(--nivel-pct, 40%);
+  max-width: 100%;
+  background: linear-gradient(90deg, #f97316, #eab308, #22c55e);
+  transition: width 0.35s ease-out;
+}
+
+.perfil-publico__ranking-bar-legend {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.25rem;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+/* Métricas (pills) */
+.perfil-publico__ranking-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.perfil-publico__ranking-pill {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text);
+}
+
+/* Estrelas reutilizadas em ranking + reviews */
+.perfil-publico__stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.perfil-publico__star {
+  width: 14px;
+  height: 14px;
+  color: #4b5563;
+  opacity: 0.4;
+}
+
+.perfil-publico__star--full {
+  color: #facc15;
+  opacity: 1;
+}
+
+/* Bloco de reviews */
+.perfil-publico__reviews {
+  margin-top: 16px;
+  padding: 1.15rem 1.2rem 1.25rem;
+  border-radius: var(--radius);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.perfil-publico__reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.perfil-publico__reviews-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.perfil-publico__reviews-count {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.perfil-publico__reviews-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.perfil-publico__reviews-score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.perfil-publico__reviews-score-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.perfil-publico__reviews-score-label {
+  margin-top: 0.1rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.perfil-publico__reviews-empty {
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* Lista de avaliações */
+.perfil-publico__reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 0.4rem;
+}
+
+.perfil-publico__review-item {
+  border-radius: 0.75rem;
+  border: 1px solid rgba(15, 23, 42, 0.6);
+  background: radial-gradient(
+    circle at top left,
+    color-mix(in oklab, var(--secondary) 30%, transparent),
+    var(--panel) 60%
+  );
+  padding: 0.65rem 0.75rem 0.7rem;
+}
+
+.perfil-publico__review-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.perfil-publico__review-author {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.perfil-publico__review-date {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.perfil-publico__review-comment {
+  margin-top: 0.3rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+/* Controles de carrossel + botão avaliar */
+.perfil-publico__reviews-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.perfil-publico__reviews-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.perfil-publico__reviews-arrow {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.perfil-publico__reviews-arrow:hover:not(:disabled) {
+  background: var(--surface);
+  transform: translateY(-1px);
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+}
+
+.perfil-publico__reviews-arrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Rodapé do bloco de reviews */
+.perfil-publico__reviews-footer {
+  margin-top: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.perfil-publico__reviews-button {
+  padding: 0.55rem 0.95rem;
+  font-size: 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(34, 197, 94, 0.6);
+  background: radial-gradient(
+    circle at top left,
+    color-mix(in oklab, var(--primary) 35%, transparent),
+    var(--panel) 65%
+  );
+  color: #bbf7d0;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: filter 0.15s ease, box-shadow 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.perfil-publico__reviews-button:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.4);
+}
+
+.perfil-publico__reviews-pagination {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Seção de anúncios do vendedor */
+.perfil-publico__section {
+  margin-top: 16px;
+  padding: 1.25rem;
+  border-radius: var(--radius);
+  background: var(--panel);
+  border: 1px dashed var(--border-strong);
+}
+
+.perfil-publico__section h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.perfil-publico__placeholder {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.perfil-publico__placeholder--error {
+  color: #fecaca;
+  opacity: 1;
+}
+
+.perfil-publico__skins-grid {
+  margin-top: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+/* Modal de avaliação do vendedor */
+.perfil-publico__modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2300;
+  padding: 16px;
+}
+
+.perfil-publico__modal {
+  width: 100%;
+  max-width: 520px;
+  background: var(--panel);
+  border-radius: 18px;
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.8);
+  padding: 18px 20px 20px;
+  color: var(--text);
+}
+
+.perfil-publico__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.perfil-publico__modal-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.perfil-publico__modal-close {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.perfil-publico__modal-close:hover {
+  color: var(--text);
+}
+
+.perfil-publico__modal-subtitle {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.perfil-publico__modal-field {
+  margin-top: 14px;
+}
+
+.perfil-publico__modal-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.perfil-publico__modal-stars {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.perfil-publico__modal-star {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: #6b7280;
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.perfil-publico__modal-star--active {
+  border-color: #facc15;
+  background: radial-gradient(circle at center, #facc15, #f59e0b);
+  color: #111827;
+  transform: translateY(-1px);
+}
+
+.perfil-publico__modal-textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.perfil-publico__modal-textarea:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring) 70%, transparent);
+}
+
+.perfil-publico__modal-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.perfil-publico__modal-button {
+  min-width: 120px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.perfil-publico__modal-button--ghost {
+  background: transparent;
+  color: var(--text);
+}
+
+.perfil-publico__modal-button--ghost:hover {
+  background: var(--surface);
+  border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
+  transform: translateY(-1px);
+}
+
+.perfil-publico__modal-button--primary {
+  background: linear-gradient(180deg, var(--primary), var(--secondary));
+  color: #020617;
+  font-weight: 600;
+  border-color: color-mix(in oklab, var(--primary) 35%, var(--border-strong));
+}
+
+.perfil-publico__modal-button--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+}
+
+/* Responsividade do perfil público */
+@media (max-width: 800px) {
+  .perfil-publico__card {
+    flex-direction: column;
+  }
+
+  .perfil-publico__right {
+    flex: 1 1 auto;
+    max-width: none;
+  }
+
+  .perfil-publico__reviews-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .perfil-publico__left {
+    align-items: flex-start;
+  }
+
+  .perfil-publico__avatar {
+    min-width: 64px;
+    height: 64px;
+    font-size: 1.8rem;
+  }
+
+  .perfil-publico__ranking-card {
+    padding: 0.8rem;
+  }
+
+  .perfil-publico__reviews {
+    padding: 0.95rem 1rem 1.05rem;
+  }
+}

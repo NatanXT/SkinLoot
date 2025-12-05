@@ -1,16 +1,4 @@
-// ============================================================================
-// DetalheAnuncio.jsx
-// Caminho: frontend/src/pages/DetalheAnuncio.jsx
-//
-// OBJETIVO
-// - Exibir detalhes completos de um anúncio (imagens, vendedor, preço, etc.)
-// - Suportar múltiplos formatos de dados (camelCase / snake_case / raw)
-// - Exibir detalhes específicos por jogo (CS:GO, LoL, genérico)
-// - Permitir favoritar (com animação e sincronização com backend)
-// - Abrir chat flutuante para negociação (similar à Dashboard)
-// - Exibir reputação do vendedor (nível de confiança + avaliações)
-// - Permitir abrir modal para avaliar o vendedor
-// ============================================================================
+// frontend/src/pages/DetalheAnuncio.jsx
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
