@@ -69,15 +69,38 @@ public class AvaliacaoService{
     @Transactional(readOnly = true)
     public List<AvaliacaoResponse> listarPorAvaliado(UUID avaliadoId) {
 
-        // Verifica se o usuário existe
-        if (!usuarioRepository.existsById(avaliadoId)) {
-            throw new RuntimeException("Usuário avaliado não encontrado.");
-        }
+        List<Avaliacao> avaliacoes = avaliacaoRepository.findByAvaliadoIdOrderByDataCriacaoDesc(avaliadoId);
 
-        return avaliacaoRepository.findByAvaliadoIdOrderByDataCriacaoDesc(avaliadoId)
-                .stream()
-                .map(AvaliacaoResponse::new) // Converte Entidade -> DTO
+        return avaliacoes.stream()
+                .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
+    private AvaliacaoResponse toDto(Avaliacao entity) {
+        AvaliacaoResponse dto = new AvaliacaoResponse(entity);
+        dto.setId(entity.getId());
+        dto.setAvaliadoId(entity.getAvaliado().getId());
+        dto.setAvaliadorId(entity.getAvaliador().getId());
+
+        // --- PREENCHENDO OS DADOS QUE FALTAVAM ---
+        // 1. Nome do Avaliador (Comprador)
+        if (entity.getAvaliador() != null) {
+            dto.setAvaliadorNome(entity.getAvaliador().getNome());
+        } else {
+            dto.setAvaliadorNome("Usuário Deletado");
+        }
+
+        // 2. Comentário e Nota
+        dto.setComentario(entity.getComentario()); // Certifique-se que na Entity o campo é 'comentario'
+        dto.setNota(entity.getNota());
+        // -----------------------------------------
+
+        if (entity.getAnuncio() != null) {
+            dto.setAnuncioId(entity.getAnuncio().getId());
+        }
+
+        dto.setDataCriacao(entity.getDataCriacao());
+
+        return dto;
+    }
 }
