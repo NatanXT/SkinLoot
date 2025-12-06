@@ -1,9 +1,4 @@
-// ======================================================
-// DashboardVitrine.jsx
-// Caminho: frontend/src/pages/DashboardVitrine.jsx
-// ------------------------------------------------------
-// Página principal do marketplace de skins.
-// ======================================================
+// frontend/src/pages/DashboardVitrine.jsx
 
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useAuth } from '../../services/AuthContext.jsx';
@@ -14,6 +9,7 @@ import ChatFlutuante from '../../components/chat/ChatFlutuante';
 import anuncioService from '../../services/anuncioService.js';
 import SkinCard from '../../components/skin/SkinCard.jsx';
 import { listarJogos } from '../../services/jogoService.js';
+import PerfilPreviewModal from '../../components/shared/PerfilPreviewModal.jsx';
 
 /* ======================================================
    Metadados dos planos
@@ -47,7 +43,7 @@ const PLAN_OPTIONS = [
   { value: 'todos', label: 'Todos' },
   { value: 'gratuito', label: 'Gratuito' },
   { value: 'intermediario', label: 'Intermediário' },
-  { value: 'plus', label: 'Plus' },
+  { value: 'plus', label: '+ Plus' },
 ];
 
 const SORT_OPTIONS = [
@@ -291,6 +287,8 @@ export default function DashboardVitrine() {
   const [jogosList, setJogosList] = useState([]);
   const [jogosErr, setJogosErr] = useState('');
 
+  const [perfilPreview, setPerfilPreview] = useState(null);
+
   // Dropdowns customizados dos filtros (Jogo / Plano / Ordenar)
   const [gameDropdownOpen, setGameDropdownOpen] = useState(false);
   const [planDropdownOpen, setPlanDropdownOpen] = useState(false);
@@ -367,6 +365,31 @@ export default function DashboardVitrine() {
       '#';
     if (url && url !== '#') window.open(url, '_blank', 'noopener,noreferrer');
     else abrirChatPara(anuncio);
+  }
+
+  function abrirPerfilPreview(anuncio) {
+    const id =
+      anuncio?.usuarioId ?? anuncio?.seller?.id ?? anuncio?.vendedorId ?? null;
+
+    const nome =
+      anuncio?.usuarioNome ??
+      anuncio?.seller?.name ??
+      anuncio?.vendedorNome ??
+      'Usuário';
+
+    if (!id) return;
+
+    const avatar =
+      anuncio?.seller?.avatarUrl ??
+      anuncio?.usuarioAvatar ??
+      anuncio?.vendedorAvatar ??
+      null;
+
+    setPerfilPreview({
+      id,
+      nome,
+      avatarUrl: avatar,
+    });
   }
 
   /* ======================================================
@@ -919,6 +942,7 @@ export default function DashboardVitrine() {
             onLike={() => handleLikeToggle(anuncio.id || anuncio._id)}
             onContato={() => abrirChatPara(anuncio)}
             onComprarFora={() => comprarFora(anuncio)}
+            onVerPerfil={() => abrirPerfilPreview(anuncio)}
           />
         ))}
       </section>
@@ -988,13 +1012,23 @@ export default function DashboardVitrine() {
             title="Mensagens"
             onClick={() => setChatAberto({ id: 'ultimo', nome: 'Mensagens' })}
           >
-            <span className="chat-mini-bubble__icon">💬</span>
+            <span className="chat-mini-bubble__icon">Chat</span>
             <span className="chat-mini-bubble__label">Mensagens</span>
             {unreads > 0 && (
               <span className="chat-mini-bubble__badge">{unreads}</span>
             )}
           </button>
         ))}
+
+      {perfilPreview && (
+        <PerfilPreviewModal
+          open={!!perfilPreview}
+          onClose={() => setPerfilPreview(null)}
+          usuarioId={perfilPreview.id}
+          nomeFallback={perfilPreview.nome}
+          avatarFallback={perfilPreview.avatarUrl}
+        />
+      )}
     </div>
   );
 }

@@ -1,0 +1,95 @@
+/* frontend/src/components/shared/PerfilPreviewModal.css */
+
+.perfil-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 15, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1400;
+}
+
+.perfil-preview-modal {
+  background: #0e1117;
+  border-radius: 12px;
+  padding: 16px 20px 14px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f5f7fb;
+}
+
+.perfil-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.perfil-preview-identidade {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.perfil-preview-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #39ff14;
+}
+
+.perfil-preview-nome {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.perfil-preview-plano {
+  display: inline-block;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.perfil-preview-fechar {
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.perfil-preview-fechar:hover {
+  color: #f9fafb;
+}
+
+.perfil-preview-corpo {
+  margin-bottom: 12px;
+}
+
+.perfil-preview-bio {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: #e5e7eb;
+}
+
+.perfil-preview-status {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #d1d5db;
+}
+
+.perfil-preview-status--erro {
+  color: #f97373;
+}
+
+.perfil-preview-rodape {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

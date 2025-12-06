@@ -8,7 +8,11 @@
 
 /* ---------- Tokens locais (derivados do :root) ---------- */
 .card {
-  --card-bg: linear-gradient(180deg, var(--panel), color-mix(in oklab, var(--panel) 70%, var(--surface)));
+  --card-bg: linear-gradient(
+    180deg,
+    var(--panel),
+    color-mix(in oklab, var(--panel) 70%, var(--surface))
+  );
   --card-border: var(--border);
   --card-media-bg: var(--surface);
   --card-title: var(--text);
@@ -17,33 +21,86 @@
   --like-bg: color-mix(in oklab, var(--panel) 75%, transparent);
   --like-border: var(--border-strong);
   --like-fg: color-mix(in oklab, var(--text) 75%, var(--muted));
+
+  /* Tema DARK (padrão) do chip de vendedor
+     (a partir de agora só é usado em detalhes como avatar/texto) */
+  --seller-chip-bg: #020617;
+  --seller-chip-border: color-mix(
+    in oklab,
+    var(--primary) 45%,
+    #111827
+  );
+  --seller-title: color-mix(
+    in oklab,
+    #a1a1aa 60%,
+    var(--primary) 30%
+  );
+  --seller-name: #f9fafb;
+  --seller-avatar-bg: #020617;
+  --seller-avatar-fg: #bbf7d0;
 }
 
-/* Tema claro automático */
+/* Tema claro automático (quando o sistema está em light
+   e você não tiver forçado data-theme="dark") */
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .card {
-    --card-bg: linear-gradient(180deg, #FFFFFF, #F7FAFC);
-    --card-border: #CBD5E1;
-    --card-media-bg: #F2F6FA;
-    --card-title: #0B0D10;
-    --card-muted: #5A6573;
-    --card-shadow: 0 12px 28px rgba(15,23,42,.10);
-    --like-bg: #EEF2F6;
-    --like-border: #CBD5E1;
-    --like-fg: #334155;
+  :root:not([data-theme='dark']) .card {
+    --card-bg: linear-gradient(180deg, #ffffff, #f7fafc);
+    --card-border: #cbd5e1;
+    --card-media-bg: #f2f6fa;
+    --card-title: #020617;
+    --card-muted: #4b5563;
+    --card-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
+    --like-bg: #eef2f6;
+    --like-border: #cbd5e1;
+    --like-fg: #111827;
+
+    /* Tema LIGHT do chip de vendedor (avatar/texto) */
+    --seller-chip-bg: #ecfdf5;
+    --seller-chip-border: #22c55e;
+    --seller-title: #16a34a;
+    --seller-name: #022c22;
+    --seller-avatar-bg: #022c22;
+    --seller-avatar-fg: #bbf7d0;
   }
 }
-/* Forçar manualmente */
-:root[data-theme="light"] .card {
-  --card-bg: linear-gradient(180deg, #FFFFFF, #F7FAFC);
-  --card-border: #CBD5E1;
-  --card-media-bg: #F2F6FA;
-  --card-title: #0B0D10;
-  --card-muted: #5A6573;
-  --card-shadow: 0 12px 28px rgba(15,23,42,.10);
-  --like-bg: #EEF2F6;
-  --like-border: #CBD5E1;
-  --like-fg: #334155;
+
+/* Forçar manualmente tema claro com data-theme="light" */
+:root[data-theme='light'] .card {
+  --card-bg: linear-gradient(180deg, #ffffff, #f7fafc);
+  --card-border: #cbd5e1;
+  --card-media-bg: #f2f6fa;
+  --card-title: #020617;
+  --card-muted: #4b5563;
+  --card-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
+  --like-bg: #eef2f6;
+  --like-border: #cbd5e1;
+  --like-fg: #111827;
+
+  --seller-chip-bg: #ecfdf5;
+  --seller-chip-border: #22c55e;
+  --seller-title: #16a34a;
+  --seller-name: #022c22;
+  --seller-avatar-bg: #022c22;
+  --seller-avatar-fg: #bbf7d0;
+}
+
+/* Forçar manualmente tema dark com data-theme="dark" */
+:root[data-theme='dark'] .card {
+  /* mantém o fundo do card no esquema dark global */
+  --seller-chip-bg: #020617;
+  --seller-chip-border: color-mix(
+    in oklab,
+    var(--primary) 45%,
+    #111827
+  );
+  --seller-title: color-mix(
+    in oklab,
+    #a1a1aa 60%,
+    var(--primary) 30%
+  );
+  --seller-name: #f9fafb;
+  --seller-avatar-bg: #020617;
+  --seller-avatar-fg: #bbf7d0;
 }
 
 /* ---------- Estrutura principal ---------- */
@@ -56,9 +113,13 @@
   overflow: hidden;
   position: relative;
   box-shadow: var(--card-shadow);
-  transition: transform .25s, box-shadow .25s, border-color .2s;
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.2s;
 }
-.card:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,.5); }
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
 
 /* ---------- Área da imagem ---------- */
 .card__media {
@@ -72,101 +133,302 @@
   padding: var(--media-pad-top) var(--media-pad) var(--media-pad);
   border-bottom: 1px solid var(--card-border);
 }
+
 .card__media img {
   display: block;
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
   image-rendering: -webkit-optimize-contrast;
-  filter: saturate(1.05) drop-shadow(0 14px 30px rgba(0,0,0,.55));
+  filter: saturate(1.05) drop-shadow(0 14px 30px rgba(0, 0, 0, 0.55));
 }
+
 .card__media::after {
-  content: "";
-  position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
   background:
-    radial-gradient(420px 180px at 85% 30%, rgba(0,200,150,.10), transparent 60%),
-    radial-gradient(400px 160px at 20% 15%, rgba(57,255,20,.08), transparent 55%);
+    radial-gradient(
+      420px 180px at 85% 30%,
+      rgba(0, 200, 150, 0.1),
+      transparent 60%
+    ),
+    radial-gradient(
+      400px 160px at 20% 15%,
+      rgba(57, 255, 20, 0.08),
+      transparent 55%
+    );
 }
 
 /* ---------- Badge de plano ---------- */
 .badge {
-  position: absolute; top: 14px; left: 16px; z-index: 3;
-  padding: 6px 12px; border-radius: 999px; font-weight: 800; font-size: 12px;
-  color: #0B0D10; white-space: nowrap; box-shadow: 0 0 24px var(--ring);
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  z-index: 3;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  color: #0b0d10;
+  white-space: nowrap;
+  box-shadow: 0 0 24px var(--ring);
   background: var(--primary);
 }
 
 /* ---------- Botão de favorito ---------- */
 .like {
-  position: absolute; top: 12px; right: 12px; z-index: 3;
-  padding: 8px; display: grid; place-items: center;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  padding: 8px;
+  display: grid;
+  place-items: center;
   background: var(--like-bg);
   border: 1px solid var(--like-border);
-  border-radius: 999px; color: var(--like-fg); cursor: pointer;
-  transition: box-shadow .2s, background .2s, color .2s, border-color .2s;
+  border-radius: 999px;
+  color: var(--like-fg);
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s,
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
 }
-.like:is(:hover,:focus-visible){ outline: none; box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 55%, transparent); }
+
+.like:is(:hover, :focus-visible) {
+  outline: none;
+  box-shadow: 0 0 0 3px
+    color-mix(in oklab, var(--ring) 55%, transparent);
+}
+
 .like.is-liked {
   color: var(--primary);
   background: color-mix(in oklab, var(--primary) 10%, transparent);
-  box-shadow: 0 0 0 2px rgba(57,255,20,.15) inset;
+  box-shadow: 0 0 0 2px rgba(57, 255, 20, 0.15) inset;
 }
 
 /* ---------- Corpo do card ---------- */
 .card__body {
-  display: flex; flex-direction: column; gap: 10px; padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
   background: transparent; /* mantém o gradiente do card, ok no light */
 }
-.card h3 { margin: 0; font-size: 18px; color: var(--card-title); }
-.meta { display: flex; justify-content: space-between; align-items: center; color: var(--card-muted); }
-.price { color: #0B0D10; font-weight: 800; letter-spacing: .3px; }
-@media (prefers-color-scheme: dark){ .price { color: #E9FFF1; } }
-:root[data-theme="dark"] .price { color: #E9FFF1; }
 
-/* ---------- Info vendedor ---------- */
-.seller { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: auto; }
-.seller > span { width: 100%; margin-bottom: 4px; font-size: 14px; color: color-mix(in oklab, var(--card-muted) 80%, var(--text)); text-align: left; }
+.card h3 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--card-title);
+}
 
-/* ---------- CTA ---------- */
-.card .cta:not(.cta--bottom){ display: flex; justify-content: flex-start; gap: 8px; width: 100%; }
-.card .cta:not(.cta--bottom) .btn{ flex: 1 1 50%; max-width: 50%; height: 46px; justify-content: center; border-radius: 10px; }
-.card .cta--bottom{ margin-top: 6px; width: 100%; }
-.card .cta--bottom .btn.full{ width: 100%!important; height: 48px; font-weight: 700; border-radius: 10px; justify-content: center; }
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--card-muted);
+}
+
+.price {
+  color: #0b0d10;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .price {
+    color: #e9fff1;
+  }
+}
+
+:root[data-theme='dark'] .price {
+  color: #e9fff1;
+}
+
+/* ---------- Info vendedor (layout base) ---------- */
+.seller {
+  display: flex;
+  flex-direction: column; /* chip em cima, CTA embaixo */
+  align-items: flex-start; /* força alinhamento à esquerda */
+  justify-content: flex-start;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  width: 100%;
+}
+
+/* Texto solto de dentro de .seller se existir */
+.seller > span {
+  width: 100%;
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: color-mix(
+    in oklab,
+    var(--card-muted) 80%,
+    var(--text)
+  );
+  text-align: left;
+}
+
+/* ---------- CTA (Contato / Ver detalhes) ---------- */
+.card .cta:not(.cta--bottom) {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.card .cta:not(.cta--bottom) .btn {
+  flex: 1 1 50%;
+  max-width: 50%;
+  height: 46px;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.card .cta--bottom {
+  margin-top: 6px;
+  width: 100%;
+}
+
+.card .cta--bottom .btn.full {
+  width: 100% !important;
+  height: 48px;
+  font-weight: 700;
+  border-radius: 10px;
+  justify-content: center;
+}
 
 /* ---------- Efeitos neon ---------- */
-.card{ --neon1: var(--primary); --neon2: var(--secondary); }
-.card:hover{
-  border-color: color-mix(in oklab, var(--neon1) 16%, var(--card-border));
+.card {
+  --neon1: var(--primary);
+  --neon2: var(--secondary);
+}
+
+.card:hover {
+  border-color: color-mix(
+    in oklab,
+    var(--neon1) 16%,
+    var(--card-border)
+  );
   box-shadow:
-    0 16px 40px rgba(0,0,0,.6),
+    0 16px 40px rgba(0, 0, 0, 0.6),
     0 0 0 2px color-mix(in oklab, var(--neon1) 70%, transparent),
     0 0 24px color-mix(in oklab, var(--neon1) 35%, transparent),
     0 0 64px color-mix(in oklab, var(--neon2) 26%, transparent);
 }
-.card:hover .card__media::after { opacity: .9; transition: opacity .2s; }
+
+.card:hover .card__media::after {
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
 
 /* ---------- Variações de plano ---------- */
 .card--intermediario:hover,
-.card--intermediario:focus-within{
+.card--intermediario:focus-within {
   box-shadow:
-    0 16px 40px rgba(0,0,0,.6),
+    0 16px 40px rgba(0, 0, 0, 0.6),
     0 0 0 2px color-mix(in oklab, var(--secondary) 75%, transparent),
     0 0 24px color-mix(in oklab, var(--secondary) 38%, transparent),
     0 0 64px color-mix(in oklab, var(--primary) 24%, transparent);
 }
+
 .card--plus:hover,
-.card--plus:focus-within{
+.card--plus:focus-within {
   box-shadow:
-    0 16px 40px rgba(0,0,0,.6),
+    0 16px 40px rgba(0, 0, 0, 0.6),
     0 0 0 2px color-mix(in oklab, var(--primary) 85%, transparent),
     0 0 26px color-mix(in oklab, var(--primary) 42%, transparent),
     0 0 72px color-mix(in oklab, var(--secondary) 30%, transparent);
 }
 
 /* ---------- Acessibilidade ---------- */
-.card :where(a,button).btn:focus-visible,
-.card .like:focus-visible{
+.card :where(a, button).btn:focus-visible,
+.card .like:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 55%, transparent);
-  transition: box-shadow .2s;
+  box-shadow: 0 0 0 3px
+    color-mix(in oklab, var(--ring) 55%, transparent);
+  transition: box-shadow 0.2s;
+}
+
+/* ================================
+   Bloco de vendedor clicável
+   ================================ */
+
+/* Botão que envolve avatar + nome do vendedor
+   (herda visual de .btn.btn--ghost, aqui é só layout) */
+.seller__name {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  padding: 0.4rem 0.9rem; /* mesma sensação de botão ghost */
+  border-radius: 10px;
+  font: inherit;
+  cursor: default;
+  outline: none;
+  min-width: 0;
+  align-self: flex-start; /* garante chip colado à esquerda */
+}
+
+/* Quando tem ID de vendedor, vira link “clicável” */
+.seller__name--clickable {
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.seller__name--clickable:hover {
+  transform: translateY(-1px);
+}
+
+.seller__name--clickable:focus-visible {
+  box-shadow: 0 0 0 2px
+    color-mix(in oklab, var(--ring) 55%, transparent);
+}
+
+/* Quando não tem ID, mantemos o visual mas sem interação forte */
+.seller__name--disabled {
+  opacity: 0.7;
+}
+
+/* Avatar circular com inicial do vendedor */
+.seller__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: var(--seller-avatar-bg);
+  color: var(--seller-avatar-fg);
+}
+
+/* Bloco de texto do vendedor */
+.seller__label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.seller__label-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--seller-title);
+}
+
+.seller__label-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--seller-name);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 180px;
 }
