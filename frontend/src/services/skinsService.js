@@ -1,13 +1,3 @@
-// ============================================================================
-// Services de Skins (MOCK) — prontos para trocar por API real depois.
-// - getMinhasSkins(): lista as skins do usuário (mock persistido em localStorage)
-// - getPlanoLimit(planoKey): limite por plano
-// - editarSkin(id, payload): atualiza skin (aceita imagemFile ou imagemUrl)
-// - desativarSkin(id): marca ativo=false
-// - reativarSkin(id): marca ativo=true             // << NOVO
-// ----------------------------------------------------------------------------
-// Obs.: Mantemos tudo plugável para você ligar no backend quando quiser.
-// ============================================================================
 
 // import { api } from './api'; // assinatura mantida p/ futura API (não usada no mock)
 import MockSkins from '../components/mock/MockSkins'; 
