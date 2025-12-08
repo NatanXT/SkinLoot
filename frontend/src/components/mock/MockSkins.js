@@ -1,10 +1,3 @@
-// ==========================================================
-// MockSkins.js
-// ----------------------------------------------------------
-// Lista mock de skins populares, utilizada para testes locais
-// antes da integração com o backend real.
-// ==========================================================
-
 /**
  * Cada objeto contém:
  *  - nome: Nome da skin

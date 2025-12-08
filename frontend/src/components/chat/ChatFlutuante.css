@@ -1,21 +1,5 @@
-/* ==========================================================
-   ChatFlutuante.css
-   Caminho: frontend/src/components/chat/ChatFlutuante.css
-   ----------------------------------------------------------
-   Estrutura visual do chat flutuante:
-   - Ícone/botão "pill" minimizado
-   - Janela expandida com contatos e mensagens
-   - Campos e botões
-   ----------------------------------------------------------
-   Paleta baseada em variáveis globais:
-   --bg, --panel, --surface, --text, --muted, --primary, --secondary
-   (light automático por prefers-color-scheme + opção data-theme)
-========================================================== */
-
-
-/* ==========================================================
-   POSICIONAMENTO BASE
-========================================================== */
+/* frontend/src/components/chat/ChatFlutuante.css
+   POSICIONAMENTO BASE */
 .chat-flutuante {
   position: fixed;
   bottom: 20px;
@@ -25,10 +9,8 @@
 }
 
 
-/* ==========================================================
-   BOTÃO PILL MINIMIZADO
-   (Versão compacta exibida quando o chat está fechado)
-========================================================== */
+/*    BOTÃO PILL MINIMIZADO
+   (Versão compacta exibida quando o chat está fechado) */
 .chat-icone {
   position: relative;
   display: inline-flex;
@@ -59,9 +41,9 @@
 }
 
 
-/* ----------------------------------------------------------
+/* 
    Estrutura interna do botão (ícone, label e avatar)
----------------------------------------------------------- */
+ */
 
 /* Ícone à esquerda (com badge) */
 .chat-icone__left {
@@ -134,9 +116,9 @@
 }
 
 
-/* ==========================================================
+/* 
    JANELA EXPANDIDA DO CHAT
-========================================================== */
+ */
 .chat-janela {
   width: 340px;
   height: 420px;
@@ -155,9 +137,9 @@
 }
 
 
-/* ==========================================================
+/* 
    CABEÇALHO (TOPO DA JANELA)
-========================================================== */
+ */
 .chat-topo {
   position: relative;
   display: flex;
@@ -222,9 +204,9 @@
 }
 
 
-/* ==========================================================
+/* 
    LISTA DE CONTATOS
-========================================================== */
+ */
 .chat-contatos {
   flex: 1;
   overflow-y: auto;
@@ -284,9 +266,9 @@
 }
 
 
-/* ==========================================================
+/* 
    MENSAGENS DO CHAT
-========================================================== */
+ */
 .chat-mensagens {
   flex: 1;
   display: flex;
@@ -325,9 +307,9 @@
 }
 
 
-/* ==========================================================
+/* 
    FORMULÁRIO DE ENVIO DE MENSAGEM
-========================================================== */
+ */
 .chat-form {
   display: flex;
   gap: 8px;
@@ -369,10 +351,10 @@
 .chat-form button:active { transform: translateY(1px); }
 
 
-/* ==========================================================
+/* 
    LIGHT MODE — overrides automáticos
    (prefers-color-scheme) + opção de forçar via data-theme
-========================================================== */
+ */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .chat-icone {
     border-color: #CBD5E1;

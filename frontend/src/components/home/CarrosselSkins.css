@@ -1,15 +1,4 @@
-/* ==========================================================
-   CarrosselSkins.css
-   ----------------------------------------------------------
-   Estilos da seção de carrossel de skins.
-   Estrutura:
-   - Seção principal
-   - Grid de cards
-   - Interação hover e animações
-   - Paginação do Swiper
-========================================================== */
-
-/* ---------- Seção principal ---------- */
+/*  Seção principal  */
 .cards-section {
   display: flex;
   flex-direction: column;
@@ -19,7 +8,7 @@
   margin-bottom: 4rem;
 }
 
-/* ---------- Título ---------- */
+/*  Título  */
 .cards-section h2 {
   position: relative;
   display: inline-block;
@@ -40,7 +29,7 @@
   background-color: var(--green);
 }
 
-/* ---------- Grid de cards ---------- */
+/*  Grid de cards  */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -50,7 +39,7 @@
   padding: 0 3rem;
 }
 
-/* ---------- Card individual ---------- */
+/*  Card individual  */
 .card {
   position: relative;
   display: flex;
@@ -85,7 +74,7 @@
   margin-top: 1rem;
 }
 
-/* ---------- Informações inferiores (nome e botão) ---------- */
+/*  Informações inferiores (nome e botão)  */
 .card-info {
   position: absolute;
   bottom: 0;
@@ -119,7 +108,7 @@
   transform: scale(1.05);
 }
 
-/* ---------- Swiper (carrossel) ---------- */
+/*  Swiper (carrossel)  */
 .swiper {
   width: 100%;
   min-height: 550px;
@@ -137,7 +126,7 @@
   min-height: 400px;
 }
 
-/* ---------- Paginação (bolinhas) ---------- */
+/*  Paginação (bolinhas)  */
 .swiper-pagination-container {
   margin-top: 20px;
   text-align: center;
@@ -158,7 +147,7 @@
   background-color: var(--green) !important;
 }
 
-/* ---------- Animação de brilho pulsante ---------- */
+/*  Animação de brilho pulsante  */
 @keyframes pulse-glow {
   0% {
     box-shadow: 0 0 0px rgba(16, 198, 111, 0.3);

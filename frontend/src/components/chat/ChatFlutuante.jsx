@@ -1,15 +1,4 @@
 // frontend/src/components/chat/ChatFlutuante.jsx
-// ======================================================
-// ChatFlutuante.jsx
-// ------------------------------------------------------
-// Componente principal do chat flutuante.
-// Recursos:
-// - Botão minimizado ("pill") com badge de não lidas
-// - Janela expandida com lista de conversas e mensagens
-// - Envio e recebimento via WebSocket (STOMP + SockJS)
-// - Histórico de conversa via API REST
-// - Auto-scroll e controle de não lidas
-// ======================================================
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import './ChatFlutuante.css';
@@ -19,9 +8,7 @@ import { useAuth } from '../../services/AuthContext';
 import api from '../../services/api';
 
 export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
-  // ======================================================
   // CONTEXTO E ESTADOS PRINCIPAIS
-  // ======================================================
   const { user } = useAuth(); // Usuário autenticado (quem sou eu)
 
   const [aberto, setAberto] = useState(false);
@@ -32,9 +19,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
   const mensagensRef = useRef(null); // Ref para auto-scroll
   const stompClientRef = useRef(null); // Ref do cliente STOMP
 
-  // ======================================================
   // DERIVADOS MEMOIZADOS
-  // ======================================================
 
   // Contato atualmente ativo
   const contatoAtivo = useMemo(
@@ -80,17 +65,13 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     return candidato?.contato || null;
   }, [contatoComNaoLidaMaisRecente, contatoAtivo, contatos]);
 
-  // ======================================================
   // AUTO-SCROLL AO TROCAR CONVERSA OU RECEBER NOVAS MSGS
-  // ======================================================
   useEffect(() => {
     if (!mensagensRef.current) return;
     mensagensRef.current.scrollTop = mensagensRef.current.scrollHeight;
   }, [contatoAtivoId, contatoAtivo?.mensagens.length]);
 
-  // ======================================================
   // CONEXÃO WEBSOCKET (STOMP)
-  // ======================================================
   useEffect(() => {
     if (user && !stompClientRef.current) {
       console.log('Iniciando conexão WebSocket...');
@@ -173,9 +154,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     carregarListaDeConversas();
   }, [user]); // Roda uma vez quando 'user' é carregado
 
-  // ======================================================
   // FUNÇÃO: Carregar histórico de conversa (REST)
-  // ======================================================
   const carregarHistorico = async (alvo) => {
     try {
       const { data } = await api.get(`/api/chat/conversa/${alvo.id}`);
@@ -192,9 +171,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     }
   };
 
-  // ======================================================
   // EFEITO: Quando usuário clica em "Contato" (usuarioAlvo)
-  // ======================================================
   useEffect(() => {
     if (!usuarioAlvo || !usuarioAlvo.seller) {
       setTexto(''); // Limpa o texto se fechar
@@ -242,9 +219,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     setupContato();
   }, [usuarioAlvo]);
 
-  // ======================================================
   // FUNÇÃO: Receber mensagem do WebSocket
-  // ======================================================
   const receberMensagem = (novaMensagem) => {
     if (!user || !user.id) {
       console.error('Usuário não encontrado no AuthContext.');
@@ -303,9 +278,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     });
   };
 
-  // ======================================================
   // FUNÇÃO: Alternar janela do chat (abrir/fechar)
-  // ======================================================
   function toggleChat() {
     setAberto((prev) => !prev);
 
@@ -315,9 +288,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     setContatoAtivoId(null);
   }
 
-  // ======================================================
   // FUNÇÃO: Abrir conversa e carregar histórico (se necessário)
-  // ======================================================
   async function abrirConversa(c) {
     if (c.mensagens.length === 0) {
       const historico = await carregarHistorico(c);
@@ -334,9 +305,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     setContatoAtivoId(c.id);
   }
 
-  // ======================================================
   // FUNÇÃO: Enviar mensagem (via WebSocket)
-  // ======================================================
   function enviarMensagem(e) {
     e.preventDefault();
     const textoLimpo = texto.trim();
@@ -356,17 +325,13 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     setTexto('');
   }
 
-  // ======================================================
   // RENDERIZAÇÃO
-  // ======================================================
   return (
     <div className="chat-flutuante">
       {aberto ? (
-        // --------------------------------------------------
         // JANELA EXPANDIDA
-        // --------------------------------------------------
         <div className="chat-janela chat-janela--rounded">
-          {/* ===== LISTA DE CONVERSAS ===== */}
+          {/*  LISTA DE CONVERSAS  */}
           {!contatoAtivo ? (
             <div className="chat-lista">
               <div className="chat-topo">
@@ -403,7 +368,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
               </div>
             </div>
           ) : (
-            // ===== CONVERSA ATIVA =====
+            //  CONVERSA ATIVA 
             <>
               <div className="chat-topo">
                 <div className="user">
@@ -460,9 +425,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
           )}
         </div>
       ) : (
-        // --------------------------------------------------
         // BOTÃO MINIMIZADO ("PILL")
-        // --------------------------------------------------
         <button
           className="chat-icone chat-icone--pill"
           onClick={toggleChat}

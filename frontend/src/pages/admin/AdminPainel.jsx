@@ -1,21 +1,4 @@
-// ==========================================================
-// Caminho: frontend/src/pages/admin/AdminPainel.jsx
-// ----------------------------------------------------------
-// Tela de painel administrativo do SkinLoot.
-// - Backdrop/gradiente seguindo o padrão da Dashboard/Perfil
-// - Topbar fixa com título e ações
-// - Cards de resumo (itens ativos, ocultos, banidos)
-// - Filtros (busca, tipo, status)
-// - Painel de detalhes do usuário/skin selecionado
-// - Tabela com listagem de itens (dados da API)
-// - Listagem em cards no mobile, com paginação
-// - Exportação da tabela filtrada para PDF e CSV
-// ----------------------------------------------------------
-// Observação:
-// Nesta versão os dados vêm da API (anúncios + usuários).
-// A listagem usa tabela no desktop e cards no mobile.
-// ==========================================================
-
+// frontend/src/pages/admin/AdminPainel.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -85,14 +68,6 @@ function escaparParaCsv(valor) {
 
 /**
  * Componente principal da tela de painel admin.
- * Responsável por:
- * - Buscar anúncios e usuários na API
- * - Calcular resumos (totais por status)
- * - Filtrar a lista com base em busca, tipo e status
- * - Renderizar cards, filtros e tabela (desktop)
- * - Renderizar cards com paginação (mobile)
- * - Painel de detalhes do usuário/skin selecionado
- * - Exportar a tabela filtrada para PDF e CSV
  */
 export default function AdminPainel() {
   const [termoBusca, setTermoBusca] = useState('');
@@ -111,36 +86,48 @@ export default function AdminPainel() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedUserSkins, setSelectedUserSkins] = useState([]);
 
+  // Estado do modal "Criar novo item"
+  const [novoItemModalAberto, setNovoItemModalAberto] = useState(false);
+  const [tipoAcaoSelecionado, setTipoAcaoSelecionado] = useState(null); // 'jogo' | 'plano' | null
+
+  // Estado do modal "Gerenciar jogo"
+  const [jogoModalAberto, setJogoModalAberto] = useState(false);
+  const [jogoModo, setJogoModo] = useState('criar'); // 'criar' | 'editar'
+  const [jogoNome, setJogoNome] = useState('');
+  const [jogoAlvoEdicao, setJogoAlvoEdicao] = useState('');
+
+  // Estado do modal "Gerenciar plano"
+  const [planoModalAberto, setPlanoModalAberto] = useState(false);
+  const [planoModo, setPlanoModo] = useState('criar'); // 'criar' | 'editar'
+  const [planoNome, setPlanoNome] = useState('');
+  const [planoAlvoEdicao, setPlanoAlvoEdicao] = useState('');
+
   useEffect(() => {
     async function carregarDados() {
       try {
         setLoading(true);
 
         // 1. Buscar Anúncios (Skins)
-        // Usamos o service pois ele já trata imagens, nomes de jogos e normaliza os campos
         const skinsRaw = await anuncioService.listarFeedNormalizado();
 
         const skinsFormatadas = skinsRaw.map((skin) => ({
           id: skin.id,
-          nome: skin.skinNome, // O service normaliza como 'skinNome'
+          nome: skin.skinNome,
           tipo: 'skin',
-          categoria: skin.game || 'Desconhecido', // Ex: CS2, LoL
-          // Mapeia booleano ou status string para as classes do CSS (ativo, oculto, banido)
+          categoria: skin.game || 'Desconhecido',
           status: skin.ativo ? 'ativo' : 'oculto',
           preco: skin.preco,
           criadoEm: skin.listedAt
             ? new Date(skin.listedAt).toLocaleDateString('pt-BR')
             : '—',
           autor: skin.usuarioNome || skin.seller?.name || 'Desconhecido',
-          original: skin, // Mantém o objeto original caso precise para edição
+          original: skin,
         }));
 
-        // 2. Buscar Usuários (Chamada direta à API se não houver userService pronto)
-        // Assumindo que seu endpoint é /usuarios e retorna uma lista
+        // 2. Buscar Usuários
         let usuariosFormatados = [];
         try {
           const resUsers = await api.get('/usuarios');
-          // Verifica se a resposta é array ou objeto paginado
           const usersData = Array.isArray(resUsers.data)
             ? resUsers.data
             : resUsers.data.content || [];
@@ -149,11 +136,10 @@ export default function AdminPainel() {
             id: u.id,
             nome: u.nome,
             tipo: 'usuario',
-            autor: u.nome, // ou "Próprio" se preferir distinguir
-            categoria: 'Conta', // Categoria fixa para usuários
-            // Exemplo de lógica de status baseada no objeto do usuário
+            autor: u.nome,
+            categoria: 'Conta',
             status: u.statusAssinatura === 'ATIVA' ? 'ativo' : 'banido',
-            preco: 0, // Usuário não tem preço
+            preco: 0,
             criadoEm: u.dataCriacao
               ? new Date(u.dataCriacao).toLocaleDateString('pt-BR')
               : '—',
@@ -166,7 +152,6 @@ export default function AdminPainel() {
           );
         }
 
-        // 3. Juntar tudo na lista principal
         setListaItens([...skinsFormatadas, ...usuariosFormatados]);
       } catch (error) {
         console.error('Erro ao carregar painel administrativo:', error);
@@ -185,9 +170,6 @@ export default function AdminPainel() {
 
   /**
    * Handler centralizado para clique em "Detalhes".
-   * - Descobre o usuário dono (quando item é skin)
-   * - Filtra todas as skins desse usuário
-   * - Atualiza o painel de detalhes
    */
   function handleVerDetalhes(item) {
     if (!item) {
@@ -215,7 +197,6 @@ export default function AdminPainel() {
       }
     }
 
-    // Filtra todas as skins do mesmo usuário (se conseguirmos resolver um ID)
     const skinsUsuario = listaItens.filter((i) => {
       if (i.tipo !== 'skin') return false;
       const idSkinUsuario = obterUsuarioIdDeItemSkin(i);
@@ -226,6 +207,110 @@ export default function AdminPainel() {
     setSelectedItem(item);
     setSelectedUser(usuarioDados);
     setSelectedUserSkins(skinsUsuario);
+  }
+
+  /**
+   * Ações do modal "Criar novo item"
+   */
+  function handleAbrirNovoItemModal() {
+    setTipoAcaoSelecionado(null);
+    setNovoItemModalAberto(true);
+  }
+
+  function handleFecharNovoItemModal() {
+    setNovoItemModalAberto(false);
+    setTipoAcaoSelecionado(null);
+  }
+
+  /**
+   * Quando clicar em Jogo ou Plano dentro do modal de novo item,
+   * apenas marcamos qual tipo foi escolhido, e mostramos o "tooltip"
+   * com Criar / Editar.
+   */
+  function handleSelecionarTipoAcao(tipo) {
+    setTipoAcaoSelecionado(tipo); // 'jogo' ou 'plano'
+  }
+
+  /**
+   * Confirma a ação escolhida no "tooltip" (Criar ou Editar).
+   * - Fecha o modal "Criar novo item"
+   * - Abre o modal de Jogo ou Plano já no modo correto
+   */
+  function handleConfirmarAcao(tipo, acao) {
+    // Fecha o modal principal
+    setNovoItemModalAberto(false);
+    setTipoAcaoSelecionado(null);
+
+    if (tipo === 'jogo') {
+      setJogoModo(acao); // 'criar' ou 'editar'
+      setJogoNome('');
+      setJogoAlvoEdicao('');
+      setJogoModalAberto(true);
+      return;
+    }
+
+    if (tipo === 'plano') {
+      setPlanoModo(acao);
+      setPlanoNome('');
+      setPlanoAlvoEdicao('');
+      setPlanoModalAberto(true);
+    }
+  }
+
+  function handleFecharJogoModal() {
+    setJogoModalAberto(false);
+  }
+
+  function handleFecharPlanoModal() {
+    setPlanoModalAberto(false);
+  }
+
+  /**
+   * Salvar Jogo (criar ou editar, conforme modo)
+   */
+  function handleSalvarJogo() {
+    const nome = jogoModo === 'criar' ? jogoNome.trim() : jogoNome.trim();
+    if (!nome) {
+      window.alert('Informe o nome do jogo antes de salvar.');
+      return;
+    }
+
+    if (jogoModo === 'criar') {
+      console.log('Criar novo jogo:', nome);
+    } else {
+      const alvo = jogoAlvoEdicao.trim();
+      if (!alvo) {
+        window.alert('Informe qual jogo deseja editar (ID ou nome).');
+        return;
+      }
+      console.log('Editar jogo:', { alvo, novoNome: nome });
+    }
+
+    setJogoModalAberto(false);
+  }
+
+  /**
+   * Salvar Plano (criar ou editar, conforme modo)
+   */
+  function handleSalvarPlano() {
+    const nome = planoModo === 'criar' ? planoNome.trim() : planoNome.trim();
+    if (!nome) {
+      window.alert('Informe o nome do plano antes de salvar.');
+      return;
+    }
+
+    if (planoModo === 'criar') {
+      console.log('Criar novo plano:', nome);
+    } else {
+      const alvo = planoAlvoEdicao.trim();
+      if (!alvo) {
+        window.alert('Informe qual plano deseja editar (ID ou nome).');
+        return;
+      }
+      console.log('Editar plano:', { alvo, novoNome: nome });
+    }
+
+    setPlanoModalAberto(false);
   }
 
   /**
@@ -285,8 +370,7 @@ export default function AdminPainel() {
   }, [itensFiltrados, paginaMobile]);
 
   /**
-   * Monta a descrição textual dos filtros atuais
-   * para ser usada no PDF (linha abaixo do título).
+   * Monta a descrição textual dos filtros atuais para o PDF.
    */
   function montarDescricaoFiltros() {
     const partes = [];
@@ -309,15 +393,7 @@ export default function AdminPainel() {
   }
 
   /**
-   * Gera um PDF com a tabela atual (itens filtrados).
-   * Usa jsPDF + autoTable (função importada).
-   *
-   * Estilização:
-   * - Cabeçalho verde SkinLoot
-   * - Linhas claras
-   * - Preço alinhado à direita
-   * - Coluna de status com cores diferentes por valor
-   * - Margens e rodapé configurados
+   * Exportar PDF
    */
   function handleExportarPdf() {
     if (!itensFiltrados || itensFiltrados.length === 0) {
@@ -326,31 +402,26 @@ export default function AdminPainel() {
     }
 
     try {
-      // Documento em paisagem (landscape), A4.
       const doc = new jsPDF({
         orientation: 'landscape',
         unit: 'pt',
         format: 'a4',
       });
 
-      // Título do relatório
       doc.setFontSize(18);
       doc.setTextColor(20, 20, 20);
       doc.text('Relatório de Itens Cadastrados - SkinLoot', 40, 40);
 
-      // Informação de data/hora
       const dataGeracao = new Date().toLocaleString('pt-BR');
       doc.setFontSize(10);
       doc.setTextColor(90);
       doc.text(`Gerado em: ${dataGeracao}`, 40, 58);
 
-      // Linha com descrição dos filtros atuais
       const descricaoFiltros = montarDescricaoFiltros();
       doc.setFontSize(10);
       doc.setTextColor(70);
       doc.text(descricaoFiltros, 40, 72);
 
-      // Cabeçalho da tabela
       const cabecalho = [
         'ID',
         'Nome',
@@ -361,7 +432,6 @@ export default function AdminPainel() {
         'Criado em',
       ];
 
-      // Corpo da tabela: mapeia itensFiltrados em arrays simples
       const corpo = itensFiltrados.map((item) => [
         `#${item.id}`,
         item.nome,
@@ -372,13 +442,10 @@ export default function AdminPainel() {
         item.criadoEm,
       ]);
 
-      // Tabela estilizada
       autoTable(doc, {
         head: [cabecalho],
         body: corpo,
         margin: { top: 90, right: 40, bottom: 40, left: 40 },
-
-        // Estilo 100% claro
         styles: {
           fontSize: 9,
           cellPadding: 6,
@@ -388,21 +455,16 @@ export default function AdminPainel() {
           fillColor: [255, 255, 255],
           valign: 'middle',
         },
-
-        // Cabeçalho verde SkinLoot
         headStyles: {
           fillColor: [16, 198, 111],
           textColor: 255,
           fontStyle: 'bold',
           halign: 'left',
         },
-
-        // Remove zebra completamente
         alternateRowStyles: {
           fillColor: [255, 255, 255],
           textColor: [30, 30, 30],
         },
-
         columnStyles: {
           0: { cellWidth: 40 },
           1: { cellWidth: 170 },
@@ -412,14 +474,11 @@ export default function AdminPainel() {
           5: { halign: 'right', cellWidth: 80 },
           6: { cellWidth: 80 },
         },
-
         didParseCell: (data) => {
           if (data.section !== 'body') return;
-
           const colIndex = data.column.index;
           const valor = data.cell.raw;
 
-          // Coluna STATUS com cores no tema claro
           if (colIndex === 4) {
             if (valor === 'ativo') {
               data.cell.styles.textColor = [15, 160, 70];
@@ -436,7 +495,6 @@ export default function AdminPainel() {
             data.cell.styles.halign = 'right';
           }
         },
-
         didDrawPage: (dados) => {
           const pagina = `Página ${dados.pageNumber}`;
           doc.setFontSize(9);
@@ -449,7 +507,6 @@ export default function AdminPainel() {
         },
       });
 
-      // Nome do arquivo
       doc.save('skinloot-itens.pdf');
     } catch (erro) {
       console.error('Erro ao gerar PDF:', erro);
@@ -460,8 +517,7 @@ export default function AdminPainel() {
   }
 
   /**
-   * Gera um CSV com a tabela atual (itens filtrados)
-   * e dispara o download no navegador.
+   * Exportar CSV
    */
   function handleExportarCsv() {
     if (!itensFiltrados || itensFiltrados.length === 0) {
@@ -489,9 +545,6 @@ export default function AdminPainel() {
       item.criadoEm,
     ]);
 
-    // Monta o conteúdo do CSV:
-    // - Cabeçalho + linhas
-    // - Separador ";", comum para ambiente pt-BR
     const linhasCsv = [
       cabecalho.map(escaparParaCsv).join(';'),
       ...linhas.map((linha) => linha.map(escaparParaCsv).join(';')),
@@ -499,7 +552,6 @@ export default function AdminPainel() {
 
     const conteudoCsv = linhasCsv.join('\n');
 
-    // Cria um Blob e dispara o download
     const blob = new Blob([conteudoCsv], {
       type: 'text/csv;charset=utf-8;',
     });
@@ -514,12 +566,9 @@ export default function AdminPainel() {
     URL.revokeObjectURL(url);
   }
 
-  // =====================================================
   // Dados derivados para o painel de detalhes
-  // =====================================================
   const possuiDetalheAberto = !!selectedItem;
 
-  // Dados básicos do usuário (com fallbacks caso não tenha vindo de /usuarios)
   const usuarioNome =
     selectedUser?.nome ||
     selectedUser?.username ||
@@ -527,9 +576,6 @@ export default function AdminPainel() {
     selectedItem?.autor ||
     'Usuário';
 
-  // Tentativa de seguir a mesma ideia do Perfil:
-  // primeiro pegamos e-mail do objeto de usuário vindo da API,
-  // depois tentamos nos dados brutos da skin.
   const usuarioEmail =
     selectedUser?.email ||
     selectedUser?.contatoEmail ||
@@ -550,15 +596,13 @@ export default function AdminPainel() {
 
   const planoKey = String(planoBruto || 'gratuito').toLowerCase();
   const planoInfo = planosMeta[planoKey] ||
-    planosMeta['gratuito'] || {
+    planosMeta.gratuito || {
       label: planoBruto || '—',
       color: '#454B54',
     };
 
   const totalSkinsUsuario = selectedUserSkins.length;
 
-  // Skin em destaque: se o item selecionado já é uma skin, usamos ela.
-  // Caso seja um usuário, usamos a primeira skin da lista (se existir).
   const skinEmDestaque =
     selectedItem?.tipo === 'skin'
       ? selectedItem.original
@@ -566,7 +610,6 @@ export default function AdminPainel() {
       ? selectedUserSkins[0].original
       : null;
 
-  // Dados básicos do produto em destaque (para o card compacto)
   const skinEmDestaqueNome =
     skinEmDestaque?.skinNome ||
     skinEmDestaque?.title ||
@@ -601,7 +644,6 @@ export default function AdminPainel() {
 
   const skinEmDestaqueId = skinEmDestaque?.id || skinEmDestaque?._id || null;
 
-  // Lista de "outras skins" do usuário (sem a skin em destaque)
   const outrasSkinsDoUsuario = useMemo(() => {
     if (!skinEmDestaque || totalSkinsUsuario === 0) return [];
     const idDestaque = skinEmDestaque.id || skinEmDestaque._id;
@@ -615,10 +657,8 @@ export default function AdminPainel() {
 
   return (
     <div className="admin-root">
-      {/* Backdrop com glow seguindo o padrão da vitrine/perfil */}
       <div className="admin-backdrop" />
 
-      {/* Topbar fixa no topo (overlay sobre o backdrop) */}
       <header className="admin-topbar">
         <div className="admin-topbar__info">
           <h1 className="admin-topbar__titulo">Painel Administrativo</h1>
@@ -645,17 +685,13 @@ export default function AdminPainel() {
           <button
             type="button"
             className="btn btn--primary sm admin-topbar__botao"
-            onClick={() => {
-              // Aqui você pode abrir modal ou navegar para /admin/novo-item.
-              console.log('Criar novo item clicado');
-            }}
+            onClick={handleAbrirNovoItemModal}
           >
             Criar novo item
           </button>
         </div>
       </header>
 
-      {/* Hero curto com contexto da página */}
       <section className="admin-hero">
         <div className="admin-hero__copy">
           <h2>Visão geral da plataforma</h2>
@@ -667,7 +703,6 @@ export default function AdminPainel() {
         </div>
       </section>
 
-      {/* Container principal de conteúdo */}
       <main className="admin-container">
         {/* Bloco: Cards de resumo */}
         <section className="admin-bloco">
@@ -723,7 +758,6 @@ export default function AdminPainel() {
           </header>
 
           <div className="admin-filtros">
-            {/* Campo de busca por texto */}
             <div className="admin-filtro admin-filtro--busca">
               <label htmlFor="admin-busca" className="admin-filtro__label">
                 Buscar
@@ -738,7 +772,6 @@ export default function AdminPainel() {
               />
             </div>
 
-            {/* Seletor de tipo */}
             <div className="admin-filtro">
               <label htmlFor="admin-tipo" className="admin-filtro__label">
                 Tipo
@@ -756,7 +789,6 @@ export default function AdminPainel() {
               </select>
             </div>
 
-            {/* Seletor de status */}
             <div className="admin-filtro">
               <label htmlFor="admin-status" className="admin-filtro__label">
                 Status
@@ -774,7 +806,6 @@ export default function AdminPainel() {
               </select>
             </div>
 
-            {/* Ações de filtro (limpar, aplicar) */}
             <div className="admin-filtro admin-filtro--acoes">
               <button
                 type="button"
@@ -791,9 +822,7 @@ export default function AdminPainel() {
                 type="button"
                 className="btn btn--primary sm admin-filtro__botao"
                 onClick={() => {
-                  // No momento, os filtros já são reativos.
-                  // Este botão pode virar "Salvar preset" ou "Aplicar filtros avançados".
-                  console.log('Aplicar filtros (atual já é reativo)');
+                  console.log('Aplicar filtros (já são reativos)');
                 }}
               >
                 Aplicar
@@ -802,7 +831,7 @@ export default function AdminPainel() {
           </div>
         </section>
 
-        {/* BOTÃO MOBILE: abrir modal de filtros/busca/ordenação */}
+        {/* BOTÃO MOBILE: abrir modal de filtros */}
         <section className="admin-bloco admin-only-mobile">
           <button
             type="button"
@@ -829,7 +858,6 @@ export default function AdminPainel() {
                 Filtros, busca e ordenação
               </h2>
 
-              {/* BUSCA */}
               <div className="admin-mobile-modal__grupo">
                 <label
                   htmlFor="admin-mobile-busca"
@@ -847,7 +875,6 @@ export default function AdminPainel() {
                 />
               </div>
 
-              {/* TIPO */}
               <div className="admin-mobile-modal__grupo">
                 <label
                   htmlFor="admin-mobile-tipo"
@@ -868,7 +895,6 @@ export default function AdminPainel() {
                 </select>
               </div>
 
-              {/* STATUS */}
               <div className="admin-mobile-modal__grupo">
                 <label
                   htmlFor="admin-mobile-status"
@@ -916,7 +942,7 @@ export default function AdminPainel() {
           </div>
         )}
 
-        {/* ================== PAINEL DE DETALHES ================== */}
+        {/* PAINEL DE DETALHES */}
         {possuiDetalheAberto && (
           <section className="admin-bloco admin-detalhe">
             <header className="admin-bloco__cabecalho admin-detalhe__cabecalho">
@@ -947,9 +973,7 @@ export default function AdminPainel() {
               </div>
             </header>
 
-            {/* Grid superior: coluna de usuário + coluna de produto em destaque */}
             <div className="admin-detalhe__grid">
-              {/* Coluna: dados básicos do usuário */}
               <div className="admin-detalhe__usuario">
                 <h4 className="admin-detalhe__titulo-secao">
                   Dados do usuário
@@ -995,7 +1019,6 @@ export default function AdminPainel() {
                 </div>
               </div>
 
-              {/* Coluna: card em destaque (lado direito) */}
               <div className="admin-detalhe__destaque">
                 <h4 className="admin-detalhe__titulo-secao">
                   Produto em destaque
@@ -1062,7 +1085,6 @@ export default function AdminPainel() {
               </div>
             </div>
 
-            {/* Faixa inferior em largura total: carrossel de outros produtos */}
             <div className="admin-detalhe__carrossel-bloco admin-detalhe__carrossel-bloco--full">
               <div className="admin-detalhe__carrossel-header">
                 <h4 className="admin-detalhe__titulo-secao">
@@ -1173,10 +1195,7 @@ export default function AdminPainel() {
                         }
                       >
                         <td>
-                          {/* felipe: O ID (talvez você queira truncar se ficar muito grande) */}
                           <span title={idTexto}>#{idCurto}</span>
-
-                          {/* ✅ O NOME DO USUÁRIO AQUI */}
                           <div
                             style={{
                               fontSize: '0.85rem',
@@ -1383,6 +1402,340 @@ export default function AdminPainel() {
           )}
         </section>
       </main>
+
+      {/* MODAL: CRIAR NOVO ITEM */}
+      {novoItemModalAberto && (
+        <div
+          className="admin-novo-item-modal-overlay"
+          onClick={handleFecharNovoItemModal}
+        >
+          <div
+            className="admin-novo-item-modal"
+            onClick={(evento) => evento.stopPropagation()}
+          >
+            <div className="admin-novo-item-modal__dragbar" />
+
+            <h2 className="admin-novo-item-modal__titulo">Criar novo item</h2>
+            <p className="admin-novo-item-modal__descricao">
+              Selecione o tipo de item que deseja cadastrar ou gerenciar na
+              plataforma.
+            </p>
+
+            <div className="admin-novo-item-modal__opcoes">
+              <button
+                type="button"
+                className={`admin-novo-item-modal__card${
+                  tipoAcaoSelecionado === 'jogo'
+                    ? ' admin-novo-item-modal__card--ativo'
+                    : ''
+                }`}
+                onClick={() => handleSelecionarTipoAcao('jogo')}
+              >
+                <div className="admin-novo-item-modal__card-titulo">Jogo</div>
+                <div className="admin-novo-item-modal__card-texto">
+                  Criar um novo jogo ou editar um existente na base.
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className={`admin-novo-item-modal__card${
+                  tipoAcaoSelecionado === 'plano'
+                    ? ' admin-novo-item-modal__card--ativo'
+                    : ''
+                }`}
+                onClick={() => handleSelecionarTipoAcao('plano')}
+              >
+                <div className="admin-novo-item-modal__card-titulo">Plano</div>
+                <div className="admin-novo-item-modal__card-texto">
+                  Criar um novo plano de assinatura ou editar um existente.
+                </div>
+              </button>
+            </div>
+
+            {tipoAcaoSelecionado && (
+              <div className="admin-novo-item-modal__tooltip">
+                <p className="admin-novo-item-modal__tooltip-texto">
+                  O que você deseja fazer com{' '}
+                  {tipoAcaoSelecionado === 'jogo' ? 'o jogo' : 'o plano'}?
+                </p>
+                <div className="admin-novo-item-modal__tooltip-acoes">
+                  <button
+                    type="button"
+                    className="btn btn--primary sm admin-novo-item-modal__botao"
+                    onClick={() =>
+                      handleConfirmarAcao(tipoAcaoSelecionado, 'criar')
+                    }
+                  >
+                    Criar novo
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn--outline sm admin-novo-item-modal__botao"
+                    onClick={() =>
+                      handleConfirmarAcao(tipoAcaoSelecionado, 'editar')
+                    }
+                  >
+                    Editar existente
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="admin-novo-item-modal__acoes">
+              <button
+                type="button"
+                className="btn btn--ghost sm admin-novo-item-modal__botao"
+                onClick={handleFecharNovoItemModal}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: GERENCIAR JOGOS */}
+      {jogoModalAberto && (
+        <div
+          className="admin-novo-item-modal-overlay"
+          onClick={handleFecharJogoModal}
+        >
+          <div
+            className="admin-novo-item-modal"
+            onClick={(evento) => evento.stopPropagation()}
+          >
+            <div className="admin-novo-item-modal__dragbar" />
+
+            <h2 className="admin-novo-item-modal__titulo">Gerenciar jogos</h2>
+            <p className="admin-novo-item-modal__descricao">
+              {jogoModo === 'criar'
+                ? 'Crie um novo jogo para ser usado nos anúncios do SkinLoot.'
+                : 'Edite o nome de um jogo já cadastrado no SkinLoot.'}
+            </p>
+
+            <div className="admin-entidade-modal__tabs">
+              <button
+                type="button"
+                className={
+                  jogoModo === 'criar'
+                    ? 'admin-entidade-modal__tab admin-entidade-modal__tab--ativo'
+                    : 'admin-entidade-modal__tab'
+                }
+                onClick={() => setJogoModo('criar')}
+              >
+                Criar novo
+              </button>
+              <button
+                type="button"
+                className={
+                  jogoModo === 'editar'
+                    ? 'admin-entidade-modal__tab admin-entidade-modal__tab--ativo'
+                    : 'admin-entidade-modal__tab'
+                }
+                onClick={() => setJogoModo('editar')}
+              >
+                Editar existente
+              </button>
+            </div>
+
+            {jogoModo === 'criar' ? (
+              <div className="admin-jogo-modal__grupo">
+                <label
+                  htmlFor="admin-jogo-nome"
+                  className="admin-jogo-modal__label"
+                >
+                  Nome do jogo
+                </label>
+                <input
+                  id="admin-jogo-nome"
+                  type="text"
+                  className="admin-filtro__input admin-jogo-modal__input"
+                  placeholder="Ex.: Counter-Strike 2"
+                  value={jogoNome}
+                  onChange={(evento) => setJogoNome(evento.target.value)}
+                />
+              </div>
+            ) : (
+              <>
+                <div className="admin-jogo-modal__grupo">
+                  <label
+                    htmlFor="admin-jogo-alvo"
+                    className="admin-jogo-modal__label"
+                  >
+                    Jogo a editar (ID ou nome)
+                  </label>
+                  <input
+                    id="admin-jogo-alvo"
+                    type="text"
+                    className="admin-filtro__input admin-jogo-modal__input"
+                    placeholder="Ex.: ID #123 ou 'Counter-Strike 2'"
+                    value={jogoAlvoEdicao}
+                    onChange={(evento) =>
+                      setJogoAlvoEdicao(evento.target.value)
+                    }
+                  />
+                </div>
+
+                <div className="admin-jogo-modal__grupo">
+                  <label
+                    htmlFor="admin-jogo-nome-edit"
+                    className="admin-jogo-modal__label"
+                  >
+                    Novo nome do jogo
+                  </label>
+                  <input
+                    id="admin-jogo-nome-edit"
+                    type="text"
+                    className="admin-filtro__input admin-jogo-modal__input"
+                    placeholder="Ex.: CS2"
+                    value={jogoNome}
+                    onChange={(evento) => setJogoNome(evento.target.value)}
+                  />
+                </div>
+              </>
+            )}
+
+            <div className="admin-novo-item-modal__acoes">
+              <button
+                type="button"
+                className="btn btn--ghost sm admin-novo-item-modal__botao"
+                onClick={handleFecharJogoModal}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn btn--primary sm admin-novo-item-modal__botao"
+                onClick={handleSalvarJogo}
+              >
+                Salvar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: GERENCIAR PLANOS */}
+      {planoModalAberto && (
+        <div
+          className="admin-novo-item-modal-overlay"
+          onClick={handleFecharPlanoModal}
+        >
+          <div
+            className="admin-novo-item-modal"
+            onClick={(evento) => evento.stopPropagation()}
+          >
+            <div className="admin-novo-item-modal__dragbar" />
+
+            <h2 className="admin-novo-item-modal__titulo">Gerenciar planos</h2>
+            <p className="admin-novo-item-modal__descricao">
+              {planoModo === 'criar'
+                ? 'Crie um novo plano de assinatura disponível para os usuários.'
+                : 'Edite o nome de um plano de assinatura já cadastrado.'}
+            </p>
+
+            <div className="admin-entidade-modal__tabs">
+              <button
+                type="button"
+                className={
+                  planoModo === 'criar'
+                    ? 'admin-entidade-modal__tab admin-entidade-modal__tab--ativo'
+                    : 'admin-entidade-modal__tab'
+                }
+                onClick={() => setPlanoModo('criar')}
+              >
+                Criar novo
+              </button>
+              <button
+                type="button"
+                className={
+                  planoModo === 'editar'
+                    ? 'admin-entidade-modal__tab admin-entidade-modal__tab--ativo'
+                    : 'admin-entidade-modal__tab'
+                }
+                onClick={() => setPlanoModo('editar')}
+              >
+                Editar existente
+              </button>
+            </div>
+
+            {planoModo === 'criar' ? (
+              <div className="admin-plano-modal__grupo">
+                <label
+                  htmlFor="admin-plano-nome"
+                  className="admin-plano-modal__label"
+                >
+                  Nome do plano
+                </label>
+                <input
+                  id="admin-plano-nome"
+                  type="text"
+                  className="admin-filtro__input admin-plano-modal__input"
+                  placeholder="Ex.: Plus, Intermediário"
+                  value={planoNome}
+                  onChange={(evento) => setPlanoNome(evento.target.value)}
+                />
+              </div>
+            ) : (
+              <>
+                <div className="admin-plano-modal__grupo">
+                  <label
+                    htmlFor="admin-plano-alvo"
+                    className="admin-plano-modal__label"
+                  >
+                    Plano a editar (ID ou nome)
+                  </label>
+                  <input
+                    id="admin-plano-alvo"
+                    type="text"
+                    className="admin-filtro__input admin-plano-modal__input"
+                    placeholder="Ex.: ID #3 ou 'Plus'"
+                    value={planoAlvoEdicao}
+                    onChange={(evento) =>
+                      setPlanoAlvoEdicao(evento.target.value)
+                    }
+                  />
+                </div>
+
+                <div className="admin-plano-modal__grupo">
+                  <label
+                    htmlFor="admin-plano-nome-edit"
+                    className="admin-plano-modal__label"
+                  >
+                    Novo nome do plano
+                  </label>
+                  <input
+                    id="admin-plano-nome-edit"
+                    type="text"
+                    className="admin-filtro__input admin-plano-modal__input"
+                    placeholder="Ex.: Plano Pro"
+                    value={planoNome}
+                    onChange={(evento) => setPlanoNome(evento.target.value)}
+                  />
+                </div>
+              </>
+            )}
+
+            <div className="admin-novo-item-modal__acoes">
+              <button
+                type="button"
+                className="btn btn--ghost sm admin-novo-item-modal__botao"
+                onClick={handleFecharPlanoModal}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn btn--primary sm admin-novo-item-modal__botao"
+                onClick={handleSalvarPlano}
+              >
+                Salvar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

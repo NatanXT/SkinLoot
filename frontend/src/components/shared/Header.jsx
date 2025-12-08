@@ -1,13 +1,3 @@
-// ==========================================================
-// Header.jsx
-// ----------------------------------------------------------
-// Cabeçalho principal do site, com:
-// - Ícone para abrir/recolher a sidebar
-// - Logo da SkinLoot
-// - Barra de busca central
-// - Links de navegação (Início, Categorias, Avaliações)
-// ==========================================================
-
 import React from 'react';
 import './Header.css';
 import { FaBars, FaTimes } from 'react-icons/fa';

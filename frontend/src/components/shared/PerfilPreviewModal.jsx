@@ -1,10 +1,3 @@
-// frontend/src/components/shared/PerfilPreviewModal.jsx
-// ------------------------------------------------------
-// Modal de preview rápido do perfil do vendedor.
-// Busca dados públicos do usuário e exibe nome, avatar
-// e reputação, com atalho para o perfil público completo.
-// ------------------------------------------------------
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './PerfilPreviewModal.css';

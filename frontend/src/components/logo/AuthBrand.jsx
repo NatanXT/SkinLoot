@@ -1,10 +1,3 @@
-// ==========================================================
-// AuthBrand.jsx
-// ----------------------------------------------------------
-// Exibe a marca "SkinLoot" com ícone SVG e link para Home.
-// Utilizado em telas de autenticação (Login, Register, etc).
-// ==========================================================
-
 import { Link } from 'react-router-dom';
 import './AuthBrand.css';
 

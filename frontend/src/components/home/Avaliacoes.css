@@ -1,15 +1,4 @@
-/* ==========================================================
-   Avaliacoes.css
-   ----------------------------------------------------------
-   Estilos da seção de avaliações / depoimentos de usuários.
-   Estrutura:
-   - Container principal
-   - Título da seção
-   - Linha decorativa
-   - Blocos de citação
-========================================================== */
-
-/* ---------- Container principal ---------- */
+/*  Container principal  */
 .avaliacoes-grid {
   display: flex;
   flex-direction: column;
@@ -20,7 +9,7 @@
   text-align: center;
 }
 
-/* ---------- Título da seção ---------- */
+/*  Título da seção  */
 .avaliacoes-grid h2 {
   position: relative;
   display: inline-block;
@@ -41,7 +30,7 @@
   background-color: var(--green);
 }
 
-/* ---------- Bloco de citação (depoimento) ---------- */
+/*  Bloco de citação (depoimento)  */
 blockquote {
   max-width: 600px;
   padding: 15px 20px;

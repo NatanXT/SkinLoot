@@ -1,13 +1,3 @@
-// ==========================================================
-// SkinCard.jsx
-// Caminho: frontend/src/components/skin/SkinCard.jsx
-// ----------------------------------------------------------
-// Componente visual responsável por exibir um anúncio de skin,
-// incluindo imagem, preço, vendedor e ações.
-// Agora o nome do vendedor pode ser clicado para abrir
-// a página de perfil público do usuário (quando houver ID).
-// ==========================================================
-
 import { useNavigate } from 'react-router-dom';
 import './SkinCard.css';
 
@@ -58,7 +48,6 @@ export default function SkinCard({
   const planMeta = plansMeta[planKey] || { label: '—', color: '#999' };
 
   // Tentativa de resolver o ID do vendedor a partir de vários campos possíveis.
-  // Isso evita quebrar o componente caso o backend envie chaves diferentes.
   const sellerId =
     data?.usuarioId ??
     data?.seller?.id ??
@@ -79,7 +68,7 @@ export default function SkinCard({
 
   return (
     <article className="card">
-      {/* ---------- Imagem + Plano + Favorito ---------- */}
+      {/*  Imagem + Plano + Favorito  */}
       <div className="card__media">
         <img
           src={imagem}
@@ -109,7 +98,7 @@ export default function SkinCard({
         </button>
       </div>
 
-      {/* ---------- Corpo do Card ---------- */}
+      {/*  Corpo do Card  */}
       <div className="card__body">
         <h3>{titulo}</h3>
 
@@ -117,7 +106,7 @@ export default function SkinCard({
           <span className="price">R$ {precoFmt}</span>
         </div>
 
-        {/* ---------- Informações do vendedor ---------- */}
+        {/*  Informações do vendedor  */}
         <div className="seller">
           {/* Mesma base visual dos botões ghost (btn btn--ghost) */}
           <button
@@ -161,7 +150,7 @@ export default function SkinCard({
           </div>
         </div>
 
-        {/* ---------- Botão inferior ---------- */}
+        {/*  Botão inferior  */}
         <div className="cta cta--bottom">
           <button
             className="btn btn--primary full"

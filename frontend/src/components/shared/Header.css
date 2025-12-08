@@ -1,11 +1,4 @@
-/* ==========================================================
-   Header.css
-   ----------------------------------------------------------
-   Estilos do cabeçalho principal (navbar superior)
-   - Contém logo, barra de busca e navegação
-========================================================== */
-
-/* ---------- Container principal ---------- */
+/*  Container principal  */
 .header {
   position: sticky;
   top: 0;
@@ -17,7 +10,7 @@
   background-color: var(--gray-dark);
 }
 
-/* ---------- Logo ---------- */
+/*  Logo  */
 .logo {
   font-size: 1.8rem;
   font-weight: 700;
@@ -25,7 +18,7 @@
   white-space: nowrap;
 }
 
-/* ---------- Navegação ---------- */
+/*  Navegação  */
 .nav-links {
   display: flex;
   gap: 1.5rem;
@@ -45,7 +38,7 @@
   color: var(--green);
 }
 
-/* ---------- Campo de busca ---------- */
+/*  Campo de busca  */
 .search-header {
   display: flex;
   align-items: center;
@@ -77,7 +70,7 @@
   cursor: pointer;
 }
 
-/* ---------- Botão de toggle da sidebar (mobile) ---------- */
+/*  Botão de toggle da sidebar (mobile)  */
 .sidebar-toggle {
   background-color: transparent;
   border: none;

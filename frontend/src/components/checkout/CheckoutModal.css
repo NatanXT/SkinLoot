@@ -183,7 +183,7 @@
   margin-top: 15px;
 }
 
-/* ----------------- SELEÇÃO DE PERÍODO (mensal / trimestral / anual) ----------------- */
+/*  SELEÇÃO DE PERÍODO (mensal / trimestral / anual)  */
 
 .checkout-periodos {
   display: flex;
@@ -213,7 +213,7 @@
   color: #00c896;
 }
 
-/* ----------------- CARTÃO MAIS REALISTA ----------------- */
+/*  CARTÃO MAIS REALISTA  */
 
 .card-wrapper {
   display: grid;
@@ -292,7 +292,7 @@
   color: #cbd5e1;
 }
 
-/* ----------------- DROPDOWN CUSTOM DE PARCELAS ----------------- */
+/*  DROPDOWN CUSTOM DE PARCELAS  */
 
 .parcelas-select-wrapper {
   position: relative;
@@ -374,7 +374,7 @@
   }
 }
 
-/* ====================== Tema claro para modal/parcelas ====================== */
+/*  Tema claro para modal/parcelas  */
 
 /* Auto (prefers-color-scheme: light) */
 @media (prefers-color-scheme: light) {

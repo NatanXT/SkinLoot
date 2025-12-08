@@ -1,25 +1,5 @@
-/* ============================================================================
-   DashboardVitrine.css
-   Caminho: frontend/src/pages/DashboardVitrine.css
-
-   ESCOPO
-   - Tokens/variáveis (Dark por padrão) + Tema Claro (auto por prefers-color-scheme)
-   - Base (html/body/backdrop)
-   - Topbar + ações (login/perfil) e versão logada (.topbar.logged)
-   - Hero
-   - Filtros
-   - Grid dos cards
-   - Botões globais
-   - Planos
-   - Footer
-   - Profile menu (avatar + dropdown)
-   - Chat (mini-bubble + flutuante)
-   - Responsividade: Desktop, Tablet (≤1024px), Mobile (≤640px)
-   ========================================================================== */
-
-/* ============================================================================
-   1) TOKENS / VARIÁVEIS — DARK (padrão)
-   ========================================================================== */
+/*frontend/src/pages/DashboardVitrine.css
+ TOKENS / VARIÁVEIS — DARK (padrão) */
 :root {
   --bg: #0B0D10;
   --panel: #11151A;
@@ -50,9 +30,7 @@
   --topbar-h: 64px;
 }
 
-/* ============================================================================
-   1.1) TEMA CLARO — AUTO (prefers-color-scheme: light)
-   ========================================================================== */
+/* TEMA CLARO — AUTO (prefers-color-scheme: light) */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --bg: #F7FAFC;
@@ -87,9 +65,7 @@
 }
 :root[data-theme="dark"] {}
 
-/* ============================================================================
-   2) BASE
-   ========================================================================== */
+/* BASE */
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: calc(var(--topbar-h) + 8px); }
 section[id] { scroll-margin-top: calc(var(--topbar-h) + 8px); }
@@ -111,9 +87,7 @@ body {
     radial-gradient(900px 500px at 100% 10%, color-mix(in oklab, var(--secondary) 20%, transparent), transparent 60%);
 }
 
-/* ============================================================================
-   3) TOPBAR + AÇÕES
-   ========================================================================== */
+/* TOPBAR + AÇÕES */
 .topbar {
   position: sticky; top: 0; z-index: 20;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -143,9 +117,7 @@ nav a:hover { color: var(--text); }
 .topbar.logged .nav-links a { color: var(--text); font-weight: 600; text-decoration: none; transition: color 0.2s ease; }
 .topbar.logged .nav-links a:hover { color: var(--primary); }
 
-/* ============================================================================
-   4) HERO
-   ========================================================================== */
+/* HERO */
 .hero {
   display: grid; place-items: center;
   padding: 64px 24px 32px;
@@ -156,9 +128,7 @@ nav a:hover { color: var(--text); }
 .hero p { color: var(--muted); margin: 0 0 20px; }
 .hero__cta { display: flex; gap: 12px; justify-content: center; }
 
-/* ============================================================================
-   5) FILTROS
-   ========================================================================== */
+/* FILTROS */
 .filters { padding: 14px clamp(16px, 4vw, 32px); }
 .filters__row {
   display: grid; grid-template-columns: 1.2fr .7fr .7fr .8fr 1fr;
@@ -180,7 +150,7 @@ nav a:hover { color: var(--text); }
 .field--search input { border: 1px solid var(--border); background: var(--surface); }
 .field--search svg { color: var(--muted); }
 
-/* ----- Select refinado nos filtros (Jogo/Plano/Ordenar) ----- */
+/*  Select refinado nos filtros (Jogo/Plano/Ordenar)  */
 .filters-select {
   width: 100%;
   background: var(--surface);
@@ -221,7 +191,7 @@ nav a:hover { color: var(--text); }
   color: var(--text);
 }
 
-/* -------- Dropdown customizado (Jogo / Plano / Ordenar) -------- */
+/*  Dropdown customizado (Jogo / Plano / Ordenar)  */
 .filters-select-wrapper {
   position: relative;
   min-width: 180px;
@@ -319,9 +289,7 @@ nav a:hover { color: var(--text); }
 
 .filters__actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; }
 
-/* ============================================================================
-   6) GRID DOS CARDS
-   ========================================================================== */
+/* GRID DOS CARDS */
 .grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--card-min-col), 1fr));
   gap: var(--card-gap); max-width: var(--container-max);
@@ -329,9 +297,7 @@ nav a:hover { color: var(--text); }
 }
 @media (min-width: 1200px) { .grid { grid-template-columns: repeat(3, minmax(var(--card-min-col), 1fr)); } }
 
-/* ============================================================================
-   7) BOTÕES GLOBAIS
-   ========================================================================== */
+/* BOTÕES GLOBAIS */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   border: 1px solid var(--border-strong); background: transparent; color: var(--text);
@@ -365,7 +331,6 @@ nav a:hover { color: var(--text); }
   border-color: var(--border-strong);
 }
 
-/* ====== OVERRIDES DE CONTRASTE PARA O TEMA CLARO (ghost & disabled & dropdown) ====== */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .btn--ghost,
   :root[data-theme="light"] .btn--ghost {
@@ -460,9 +425,7 @@ nav a:hover { color: var(--text); }
   color: #047857;
 }
 
-/* ============================================================================
-   8) PLANOS
-   ========================================================================== */
+/*PLANOS */
 .plans { max-width: var(--container-max); margin: 0 auto 80px; padding: 0 clamp(16px, 4vw, 32px); }
 .plans h2 { text-align: center; margin: 24px 0; }
 .plans__grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 16px; }
@@ -481,9 +444,7 @@ nav a:hover { color: var(--text); }
     0 0 80px color-mix(in oklab, var(--primary) 6%, transparent);
 }
 
-/* ============================================================================
-   9) FOOTER
-   ========================================================================== */
+/*  FOOTER */
 .foot {
   padding: 32px clamp(16px, 4vw, 32px);
   border-top: 1px solid var(--border);
@@ -491,9 +452,7 @@ nav a:hover { color: var(--text); }
   text-align: center;
 }
 
-/* ============================================================================
-   10) PROFILE MENU
-   ========================================================================== */
+/* PROFILE MENU */
 .profile-menu { position: relative; }
 .profile-menu .avatar {
   width: 36px; height: 36px; border-radius: 999px;
@@ -517,9 +476,7 @@ nav a:hover { color: var(--text); }
 .profile-menu .menu button:hover { background: color-mix(in oklab, var(--surface) 80%, var(--panel)); border: 1px solid var(--border-strong); }
 @keyframes pmenu-in { from { transform: translateY(-6px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* ============================================================================
-   11) CHAT
-   ========================================================================== */
+/*CHAT */
 .chat-mini-bubble {
   position: fixed; bottom: 20px; right: 20px; z-index: 2000;
   display: inline-flex; align-items: center; gap: 8px;
@@ -543,9 +500,7 @@ nav a:hover { color: var(--text); }
   z-index: 2140; width: min(420px, 100vw - 32px); max-height: min(70vh, 640px);
 }
 
-/* ============================================================================
-   12) RESPONSIVIDADE
-   ========================================================================== */
+/*RESPONSIVIDADE */
 @media (max-width: 1024px) {
   .filters__row { grid-template-columns: 1fr 1fr 1fr; }
   .hero h1 { font-size: 40px; }
@@ -587,7 +542,7 @@ nav a:hover { color: var(--text); }
   .chat-mini-bubble { left: auto; right: 12px; min-width: 0; width: auto; max-width: calc(100vw - 24px); }
 }
 
-/* ===== Compatibilidade: garantir que Card siga o tema atual ===== */
+/*  Compatibilidade: garantir que Card siga o tema atual  */
 .grid .card {
   background: linear-gradient(180deg, var(--panel), color-mix(in oklab, var(--panel) 70%, var(--surface))) !important;
   border-color: var(--border) !important;
@@ -613,14 +568,14 @@ nav a:hover { color: var(--text); }
 :root[data-theme="light"] .grid .card__media { background: #F2F6FA !important; border-bottom-color: #E2E8F0 !important; }
 :root[data-theme="light"] .grid .like { background: #EEF2F6 !important; border-color: #CBD5E1 !important; color: #334155 !important; }
 
-/* --------- Like neutro (NÃO curtido) --------- */
+/*  Like neutro (NÃO curtido)  */
 .grid .card .like:not(.is-liked) {
   background: color-mix(in oklab, var(--panel) 75%, transparent) !important;
   border-color: var(--border-strong) !important;
   color: color-mix(in oklab, var(--text) 75%, var(--muted)) !important;
 }
 
-/* --------- Estado CURTIDO (escuro no dark) --------- */
+/*  Estado CURTIDO (escuro no dark)  */
 .grid .card .like.is-liked {
   background: #0e3b22 !important;
   border-color: #0b7a49 !important;
@@ -630,7 +585,7 @@ nav a:hover { color: var(--text); }
     0 4px 16px rgba(0,0,0,.25) !important;
 }
 
-/* --------- Estado CURTIDO no tema CLARO (auto) --------- */
+/*  Estado CURTIDO no tema CLARO (auto)  */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .grid .card .like.is-liked {
     background: #14B866 !important;
@@ -642,7 +597,7 @@ nav a:hover { color: var(--text); }
   }
 }
 
-/* --------- Estado CURTIDO no tema CLARO (forçado) --------- */
+/*  Estado CURTIDO no tema CLARO (forçado)  */
 :root[data-theme="light"] .grid .card .like.is-liked {
   background: #14B866 !important;
   border-color: #0EA05A !important;

@@ -1,4 +1,4 @@
-import api from './api'; // Importa a mesma instância do Axios que o anuncioService usa
+import api from './api';
 
 /**
  * Busca a lista de todos os jogos disponíveis no banco de dados.

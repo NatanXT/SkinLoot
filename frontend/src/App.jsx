@@ -1,6 +1,5 @@
 // src/App.jsx
 import React from 'react';
-// OBS: como usamos Router dentro do App, o main.jsx NÃO deve criar Router de novo
 import {
   BrowserRouter as Router,
   Routes,
@@ -14,9 +13,9 @@ import Login from './pages/login/Login';
 import ForgotPassword from './pages/login/ForgotPassword';
 import ResetPassword from './pages/login/ResetPassword';
 
-import Marketplace from './pages/marketplace/Marketplace.jsx';
-import Carrinho from './pages/carrinho/Carrinho';
-import Historico from './pages/historico/Historico';
+//import Marketplace from './pages/marketplace/Marketplace.jsx';
+//import Carrinho from './pages/carrinho/Carrinho';
+//import Historico from './pages/historico/Historico';
 import Suporte from './pages/suporte/Suporte';
 import NotFound from './pages/notfound/NotFound';
 import DashboardVitrine from './pages/dashboard/DashboardVitrine.jsx';
@@ -34,7 +33,7 @@ import { useAuth } from './services/AuthContext';
 // Layout persistente (Sidebar/Header/Footer) para rotas específicas
 import Layout from './components/layout/Layout'; // (import mantido caso vá usar em outras rotas)
 
-// ------ Guard de rota (protege rotas que exigem login) ------
+//  Guard de rota (protege rotas que exigem login) 
 function RequireAuth({ children }) {
   const { user } = useAuth(); // espera que seu AuthContext exponha 'user'
   if (!user) {
@@ -50,7 +49,6 @@ export default function App() {
         {/* Raiz agora é a Vitrine */}
         <Route path="/" element={<DashboardVitrine />} />
 
-        {/* (Opcional) manter /home compatível redirecionando para / */}
         <Route path="/home" element={<Navigate to="/" replace />} />
 
         {/* Rotas públicas “planas” */}
@@ -58,9 +56,9 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/marketplace" element={<Marketplace />} />
+        {/* <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/carrinho" element={<Carrinho />} />
-        <Route path="/historico" element={<Historico />} />
+        <Route path="/historico" element={<Historico />} /> */}
         <Route path="/suporte" element={<Suporte />} />
         <Route path="/anuncio/:id" element={<DetalheAnuncio />} />
 

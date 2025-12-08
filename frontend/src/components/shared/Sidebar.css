@@ -1,12 +1,4 @@
-/* ==========================================================
-   Sidebar.css
-   ----------------------------------------------------------
-   Menu lateral fixo (navegação secundária)
-   - Recolhível no mobile
-   - Fixo e sempre visível em telas grandes
-========================================================== */
-
-/* ---------- Container principal ---------- */
+/*  Container principal  */
 .sidebar {
   position: fixed;
   top: 70px;
@@ -24,7 +16,7 @@
   left: 0;
 }
 
-/* ---------- Overlay (sombra ao fundo) ---------- */
+/*  Overlay (sombra ao fundo)  */
 .sidebar-overlay {
   position: fixed;
   top: 0;
@@ -35,7 +27,7 @@
   z-index: 1000;
 }
 
-/* ---------- Lista de navegação ---------- */
+/*  Lista de navegação  */
 .sidebar ul {
   list-style: none;
   margin: 0;
@@ -57,7 +49,7 @@
   color: var(--green);
 }
 
-/* ---------- Layout Desktop ---------- */
+/*  Layout Desktop  */
 @media (min-width: 1024px) {
   .sidebar {
     left: 0 !important;

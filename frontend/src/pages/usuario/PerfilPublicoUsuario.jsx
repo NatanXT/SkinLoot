@@ -1,12 +1,4 @@
 // src/pages/usuario/PerfilPublicoUsuario.jsx
-// ============================================================================
-// Perfil público do vendedor
-// - Usa a mesma shell visual do PerfilUsuario (navbar + hero + gradiente)
-// - Mostra informações mockadas de reputação/ranking do vendedor
-// - Lista anúncios deste vendedor usando o mesmo SkinCard da vitrine
-// - Integra com o chat flutuante para contato
-// ============================================================================
-
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -18,9 +10,6 @@ import SkinCard from '../../components/skin/SkinCard.jsx';
 import ChatFlutuante from '../../components/chat/ChatFlutuante';
 import AuthBrand from '../../components/logo/AuthBrand';
 
-/**
- * Dados mock do vendedor enquanto o backend não existe
- */
 const MOCK_VENDOR = {
   id: 'demo-seller',
   name: 'Vendedor Demo',
@@ -30,7 +19,7 @@ const MOCK_VENDOR = {
 };
 
 /**
- * Avaliações mock, reaproveitando a ideia do DetalheAnuncio
+ * Avaliações reaproveitando a ideia do DetalheAnuncio
  */
 const MOCK_REVIEWS = [
   {
@@ -195,7 +184,6 @@ export default function PerfilPublicoUsuario() {
   const { id } = useParams();
   const { user } = useAuth();
 
-  // Enquanto não tem backend, ignoramos o id e usamos o mock como base
   const vendor = useMemo(
     () => ({
       ...MOCK_VENDOR,
@@ -267,7 +255,6 @@ export default function PerfilPublicoUsuario() {
       return;
     }
 
-    // Apenas simulação visual por enquanto; depois plugamos o backend aqui
     console.log('Simulando envio de avaliação do vendedor público:', {
       sellerId: vendor.id,
       rating: reviewRating,
@@ -277,10 +264,7 @@ export default function PerfilPublicoUsuario() {
     closeReviewModal();
   }
 
-  /* ======================================================
-     Estado e lógica dos anúncios (skins) deste vendedor
-     ====================================================== */
-
+  /*  Estado e lógica dos anúncios (skins) deste vendedor */
   const [sellerSkins, setSellerSkins] = useState([]);
   const [skinsLoading, setSkinsLoading] = useState(false);
   const [skinsError, setSkinsError] = useState('');
@@ -727,7 +711,6 @@ export default function PerfilPublicoUsuario() {
                     onLike={() => handleLikeToggle(key)}
                     onContato={() => abrirChatPara(anuncio)}
                     onComprarFora={() => comprarFora(anuncio)}
-                    // Importante: não passamos onVerPerfil aqui para evitar loop
                   />
                 );
               })}

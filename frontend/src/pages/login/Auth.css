@@ -1,14 +1,4 @@
-/* ======================================================
-   Auth.css (compartilhado por Login/Cadastro)
-   Tema Dark (padrão) + Tema Claro (auto/forçado)
-   - Tokens globais
-   - Base / Card
-   - Campos, botões, links
-   - Medidor de força de senha
-   - Responsivo
-====================================================== */
-
-/* ---------- TOKENS — DARK (padrão) ---------- */
+/* TOKENS — DARK (padrão) */
 :root{
   /* base */
   --bg: #0B0D10;
@@ -36,7 +26,7 @@
   --root-grad2: radial-gradient(900px 500px at 100% 10%, rgba(0,200,150,.08), transparent 60%);
 }
 
-/* ---------- TEMA CLARO — AUTO ---------- */
+/* TEMA CLARO — AUTO */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --bg: #F7FAFC;
@@ -59,7 +49,7 @@
   }
 }
 
-/* ---------- OVERRIDE MANUAL ---------- */
+/* OVERRIDE MANUAL */
 :root[data-theme="light"] {
   --bg: #F7FAFC;
   --panel: #FFFFFF;
@@ -81,7 +71,7 @@
 }
 :root[data-theme="dark"] {}
 
-/* ---------- BASE ---------- */
+/* BASE */
 *{ box-sizing:border-box }
 body{ background:var(--bg); color:var(--text) }
 
@@ -95,7 +85,7 @@ body{ background:var(--bg); color:var(--text) }
     var(--bg);
 }
 
-/* ---------- CARD ---------- */
+/* CARD */
 .auth-card{
   width:100%; max-width:520px;
   background: var(--card-grad);
@@ -111,13 +101,13 @@ body{ background:var(--bg); color:var(--text) }
   background:linear-gradient(90deg, var(--secondary), var(--primary));
 }
 
-/* ---------- TÍTULOS ---------- */
+/* TÍTULOS */
 .auth-title{ margin:6px 0 4px; font-size:28px; color: var(--text) }
 .auth-subtitle{ margin:0 0 18px; color:var(--muted) }
 
 .auth-form{ display:flex; flex-direction:column; gap:12px }
 
-/* ---------- CAMPOS ---------- */
+/* CAMPOS */
 .field{
   display:flex; flex-direction:column; gap:6px;
   background:var(--panel);
@@ -139,7 +129,7 @@ body{ background:var(--bg); color:var(--text) }
 }
 .field__error{ color:#ff8b8b; font-size:12px; margin-top:4px }
 
-/* ---------- ERRO DA API ---------- */
+/* ERRO DA API */
 .api-error-message{
   background: color-mix(in oklab, #ff4d6d 12%, transparent);
   border:1px solid color-mix(in oklab, #ff4d6d 45%, var(--border-strong));
@@ -147,7 +137,7 @@ body{ background:var(--bg); color:var(--text) }
   padding:10px; border-radius:12px;
 }
 
-/* ---------- SENHA COM TOGGLE (FIX) ---------- */
+/* SENHA COM TOGGLE (FIX) */
 .input-pass{
   position: relative;    /* garante contexto pro botão */
 }
@@ -171,7 +161,7 @@ body{ background:var(--bg); color:var(--text) }
   border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border));
 }
 
-/* ---------- LINHA AUXILIAR ---------- */
+/* LINHA AUXILIAR */
 .form-row{
   display:flex; align-items:center; justify-content:space-between;
   gap:12px; margin-top:2px;
@@ -179,12 +169,12 @@ body{ background:var(--bg); color:var(--text) }
 .check{ display:inline-flex; align-items:center; gap:8px; color: color-mix(in oklab, var(--text) 88%, var(--muted)); font-size:14px }
 .check input{ width:16px; height:16px }
 
-/* ---------- LINKS ---------- */
+/* LINKS */
 .link{ color:var(--secondary); text-decoration:none }
 .link:hover{ text-decoration:underline }
 .link:focus-visible{ outline:2px solid var(--secondary); outline-offset:2px }
 
-/* ---------- BOTÕES ---------- */
+/* BOTÕES */
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
   border:1px solid var(--border-strong); background:transparent; color:var(--text);
@@ -210,11 +200,11 @@ body{ background:var(--bg); color:var(--text) }
 .btn--ghost{ border-color:var(--border); color: color-mix(in oklab, var(--text) 88%, var(--muted)) }
 .btn--ghost:hover{ border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border)); transform:translateY(-1px) }
 
-/* ---------- OAUTH / SWITCH ---------- */
+/* OAUTH / SWITCH */
 .oauth{ margin-top:8px; display:flex; flex-direction:column; gap:10px }
 .switch{ text-align:center; color:var(--muted); margin-top:10px }
 
-/* ---------- MEDIDOR DE FORÇA ---------- */
+/* MEDIDOR DE FORÇA */
 .pass-strength{
   display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:8px;
 }
@@ -227,7 +217,7 @@ body{ background:var(--bg); color:var(--text) }
   border-color:transparent;
 }
 
-/* ---------- RESPONSIVO ---------- */
+/* RESPONSIVO */
 @media (max-width:480px){
   .auth-card{ padding:18px 16px }
   .auth-title{ font-size:24px }

@@ -1,19 +1,10 @@
-/* ==========================================================
-   Layout.css
-   ----------------------------------------------------------
-   Define o esqueleto da aplicação:
-   - Sidebar fixa
-   - Área principal (Header + Content)
-   - Comportamento flexível e responsivo
-========================================================== */
-
-/* ---------- Container principal ---------- */
+/*  Container principal  */
 .layout-container {
   display: flex;
   min-height: 100vh;
 }
 
-/* ---------- Coluna principal (conteúdo) ---------- */
+/*  Coluna principal (conteúdo)  */
 .main-section {
   display: flex;
   flex-direction: column;
@@ -22,7 +13,7 @@
   min-height: 100vh;
 }
 
-/* ---------- Bloco de conteúdo ---------- */
+/*  Bloco de conteúdo  */
 .content {
   flex-grow: 1;
   padding: 20px 30px;

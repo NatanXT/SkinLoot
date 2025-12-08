@@ -16,12 +16,11 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
 
 const ProtectedRoute = () => {
-  // 1. MUDANÇA AQUI: Pegue 'isCheckingAuth' em vez de 'loading'
+  // 1.Pegue 'isCheckingAuth' em vez de 'loading'
   const { user, isCheckingAuth } = useAuth();
   const loc = useLocation();
 
-  // 2. MUDANÇA AQUI: Use a variável correta
-  // Se estiver checando, retorna null (tela branca) para esperar
+  // 2.Se estiver checando, retorna null (tela branca) para esperar
   if (isCheckingAuth) return null;
 
   // Se terminou de checar e não tem usuário, redireciona
