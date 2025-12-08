@@ -1,10 +1,6 @@
 package com.SkinLoot.SkinLoot.service;
 
-import com.SkinLoot.SkinLoot.dto.DMarketResponseDto;
 import com.SkinLoot.SkinLoot.util.DMarketSignatureUtil;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
-import org.bouncycastle.crypto.signers.Ed25519Signer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -13,13 +9,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.Map;
 
 @Service

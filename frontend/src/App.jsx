@@ -65,7 +65,7 @@ export default function App() {
         <Route path="/anuncio/:id" element={<DetalheAnuncio />} />
 
         {/* Perfil público de usuário (PÚBLICA) */}
-        <Route path="/perfil-publico/:userId" element={<PerfilPublicoUsuario />} />
+        <Route path="/perfil-publico/:id" element={<PerfilPublicoUsuario />} />
 
         {/* Usuario/Perfil (PROTEGIDA) */}
         <Route
