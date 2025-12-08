@@ -1,5 +1,4 @@
 // frontend/src/pages/DashboardVitrine.jsx
-
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useAuth } from '../../services/AuthContext.jsx';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -11,18 +10,14 @@ import SkinCard from '../../components/skin/SkinCard.jsx';
 import { listarJogos } from '../../services/jogoService.js';
 import PerfilPreviewModal from '../../components/shared/PerfilPreviewModal.jsx';
 
-/* ======================================================
-   Metadados dos planos
-====================================================== */
+/* Metadados dos planos */
 const plansMeta = {
   gratuito: { label: 'Gratuito', weight: 1.0, color: '#454B54' },
   intermediario: { label: 'Intermediário', weight: 1.6, color: '#00C896' },
   plus: { label: '+ Plus', weight: 2.2, color: '#39FF14' },
 };
 
-/* ======================================================
-   Constantes de filtros e ordenação
-====================================================== */
+/* Constantes de filtros e ordenação */
 const DEFAULT_FILTERS = Object.freeze({
   search: '',
   game: 'todos',
@@ -56,9 +51,7 @@ const SORT_OPTIONS = [
   { value: 'preco_desc', label: 'Preço: maior → menor' },
 ];
 
-/* ======================================================
-   Utilitários de formatação e URL
-====================================================== */
+/*  Utilitários de formatação e URL */
 const onlyDigits = (s) => (s || '').replace(/\D/g, '');
 const brlPlain = (n) =>
   Number.isFinite(n)
@@ -100,9 +93,7 @@ function writeStateToURL(filters, sort, replace = true) {
   window.history[method]({}, '', newUrl);
 }
 
-/* ======================================================
-   Conversões e normalizações
-====================================================== */
+/*  Conversões e normalizações */
 const toMs = (v) => {
   const t = typeof v === 'string' ? Date.parse(v) : Number(v);
   return Number.isFinite(t) ? t : Date.now();
@@ -151,9 +142,7 @@ function getGameKeysFromAnuncio(anuncio) {
   return keys;
 }
 
-/* ======================================================
-   Hook de ranking e filtragem das skins
-====================================================== */
+/*  Hook de ranking e filtragem das skins */
 function useRankedSkins(list, sortBy, filters, jogosList) {
   const selectedGameName = useMemo(() => {
     if (filters.game === 'todos') return null;
@@ -255,9 +244,7 @@ function useRankedSkins(list, sortBy, filters, jogosList) {
   ]);
 }
 
-/* ======================================================
-   Componente Principal
-====================================================== */
+/*  Componente Principa */
 export default function DashboardVitrine() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -314,9 +301,7 @@ export default function DashboardVitrine() {
     );
   }
 
-  /* ======================================================
-     Autenticação e navegação
-  ====================================================== */
+  /* Autenticação e navegação */
   function exigirLogin(acao, payload) {
     if (!user) {
       navigate('/login', {
@@ -388,9 +373,7 @@ export default function DashboardVitrine() {
     });
   }
 
-  /* ======================================================
-     Efeitos e sincronização
-  ====================================================== */
+  /* Efeitos e sincronização */
 
   useEffect(() => {
     let ativo = true;
@@ -505,9 +488,7 @@ export default function DashboardVitrine() {
     writeStateToURL(filters, sortBy, true);
   }, [filters, sortBy]);
 
-  /* ======================================================
-     Lógica de ranking
-  ====================================================== */
+  /* Lógica de ranking */
   const listaCombinada = useMemo(() => {
     const minhasIds = new Set(
       (minhasSkins || []).map((m) => String(m.id ?? m._id)),
@@ -540,9 +521,7 @@ export default function DashboardVitrine() {
 
   const ranked = useRankedSkins(listaCombinada, sortBy, filters, jogosList);
 
-  /* ======================================================
-     Handlers
-  ====================================================== */
+  /* Handlers */
   const handleLikeToggle = (keyId) => {
     setLikes((prev) => {
       const newLikes = new Set(prev);
@@ -560,9 +539,7 @@ export default function DashboardVitrine() {
     }
   };
 
-  /* ======================================================
-     Preço
-  ====================================================== */
+  /* Preço */
   const minRef = useRef(null);
   const handleMinChange = (e) => {
     const cleaned = onlyDigits(e.target.value);
@@ -660,9 +637,7 @@ export default function DashboardVitrine() {
     .join('')
     .toUpperCase();
 
-  /* ======================================================
-     Render
-  ====================================================== */
+  /* Render */
   return (
     <div className="dash-root">
       <div className="backdrop" aria-hidden />
@@ -737,7 +712,7 @@ export default function DashboardVitrine() {
         </div>
       </header>
 
-      {/* ---------- Filtros ---------- */}
+      {/*  Filtros  */}
       <section className="filters" id="grid">
         <div className="filters__row">
           <div className="field field--search">
@@ -928,7 +903,7 @@ export default function DashboardVitrine() {
         </div>
       </section>
 
-      {/* ---------- Grid ---------- */}
+      {/*  Grid  */}
       <section className="grid">
         {ranked.map((anuncio) => (
           <SkinCard
@@ -943,7 +918,7 @@ export default function DashboardVitrine() {
         ))}
       </section>
 
-      {/* ---------- Planos ---------- */}
+      {/*  Planos  */}
       <section id="planos" className="plans">
         <h2>Planos de Destaque</h2>
         <div className="plans__grid">

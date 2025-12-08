@@ -1,12 +1,4 @@
-/* ==========================================================
-   SkinCard.css
-   Caminho: frontend/src/components/skin/SkinCard.css
-   ----------------------------------------------------------
-   Estilos do componente <SkinCard /> — anúncios de skin.
-   Dark por padrão + Light automático/forçado via data-theme.
-========================================================== */
-
-/* ---------- Tokens locais (derivados do :root) ---------- */
+/*  Tokens locais (derivados do :root)  */
 .card {
   --card-bg: linear-gradient(
     180deg,
@@ -103,7 +95,7 @@
   --seller-avatar-fg: #bbf7d0;
 }
 
-/* ---------- Estrutura principal ---------- */
+/*  Estrutura principal  */
 .card {
   display: flex;
   flex-direction: column;
@@ -121,7 +113,7 @@
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
 }
 
-/* ---------- Área da imagem ---------- */
+/*  Área da imagem  */
 .card__media {
   position: relative;
   display: flex;
@@ -162,7 +154,7 @@
     );
 }
 
-/* ---------- Badge de plano ---------- */
+/*  Badge de plano  */
 .badge {
   position: absolute;
   top: 14px;
@@ -178,7 +170,7 @@
   background: var(--primary);
 }
 
-/* ---------- Botão de favorito ---------- */
+/*  Botão de favorito  */
 .like {
   position: absolute;
   top: 12px;
@@ -211,7 +203,7 @@
   box-shadow: 0 0 0 2px rgba(57, 255, 20, 0.15) inset;
 }
 
-/* ---------- Corpo do card ---------- */
+/*  Corpo do card  */
 .card__body {
   display: flex;
   flex-direction: column;
@@ -249,7 +241,7 @@
   color: #e9fff1;
 }
 
-/* ---------- Info vendedor (layout base) ---------- */
+/*  Info vendedor (layout base)  */
 .seller {
   display: flex;
   flex-direction: column; /* chip em cima, CTA embaixo */
@@ -273,7 +265,7 @@
   text-align: left;
 }
 
-/* ---------- CTA (Contato / Ver detalhes) ---------- */
+/*  CTA (Contato / Ver detalhes)  */
 .card .cta:not(.cta--bottom) {
   display: flex;
   justify-content: flex-start;
@@ -302,7 +294,7 @@
   justify-content: center;
 }
 
-/* ---------- Efeitos neon ---------- */
+/*  Efeitos neon  */
 .card {
   --neon1: var(--primary);
   --neon2: var(--secondary);
@@ -326,7 +318,7 @@
   transition: opacity 0.2s;
 }
 
-/* ---------- Variações de plano ---------- */
+/*  Variações de plano  */
 .card--intermediario:hover,
 .card--intermediario:focus-within {
   box-shadow:
@@ -345,7 +337,7 @@
     0 0 72px color-mix(in oklab, var(--secondary) 30%, transparent);
 }
 
-/* ---------- Acessibilidade ---------- */
+/*  Acessibilidade  */
 .card :where(a, button).btn:focus-visible,
 .card .like:focus-visible {
   outline: none;
@@ -354,9 +346,9 @@
   transition: box-shadow 0.2s;
 }
 
-/* ================================
+/* 
    Bloco de vendedor clicável
-   ================================ */
+    */
 
 /* Botão que envolve avatar + nome do vendedor
    (herda visual de .btn.btn--ghost, aqui é só layout) */

@@ -1,9 +1,8 @@
 // frontend/src/components/shared/ReputacaoVendedor.jsx
-
 import { useState } from 'react';
 
 /**
- * Dados fake para manter o visual em pé enquanto não tiver backend real.
+ * Dados para manter o visual em pé enquanto não tiver backend real.
  */
 const AVALIACOES_VENDEDOR_DEMO = [
   {

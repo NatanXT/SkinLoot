@@ -1,8 +1,4 @@
-/* ==========================================================
-   Caminho: frontend/src/pages/admin/AdminPainel.css
-   ----------------------------------------------------------
-   Estilos específicos da tela de painel administrativo.
-========================================================== */
+/* frontend/src/pages/admin/AdminPainel.css*/
 
 .admin-root {
   position: relative;
@@ -51,7 +47,7 @@
   }
 }
 
-/* ===================== Topbar ===================== */
+/*  Topbar   */
 
 .admin-topbar {
   position: sticky;
@@ -117,7 +113,7 @@
   }
 }
 
-/* ===================== Hero ===================== */
+/*  Hero  */
 
 .admin-hero {
   position: relative;
@@ -147,7 +143,7 @@
   color: var(--muted);
 }
 
-/* ===================== Container principal ===================== */
+/*  Container principal  */
 
 .admin-container {
   position: relative;
@@ -188,7 +184,7 @@
   color: color-mix(in oklab, var(--text) 85%, var(--muted));
 }
 
-/* ===================== Cards de resumo ===================== */
+/*  Cards de resumo  */
 
 .admin-resumo-grid {
   display: grid;
@@ -259,7 +255,7 @@
   color: #ef4444;
 }
 
-/* ===================== Filtros ===================== */
+/*  Filtros  */
 
 .admin-filtros {
   display: grid;
@@ -357,7 +353,7 @@
   }
 }
 
-/* ===================== PAINEL DE DETALHES ===================== */
+/*  PAINEL DE DETALHES  */
 
 .admin-detalhe {
   background: linear-gradient(
@@ -671,7 +667,7 @@
   color: var(--muted);
 }
 
-/* ===================== Tabela (desktop) ===================== */
+/*  Tabela (desktop)  */
 
 .admin-tabela__wrapper {
   width: 100%;
@@ -784,7 +780,7 @@
   }
 }
 
-/* ===================== MOBILE: botão de filtros ===================== */
+/*  MOBILE: botão de filtros  */
 
 .admin-mobile-filtros-botao {
   width: 100%;
@@ -815,7 +811,7 @@
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
 }
 
-/* ===================== MOBILE: modal de filtros ===================== */
+/*  MOBILE: modal de filtros  */
 
 .admin-mobile-modal-overlay {
   position: fixed;
@@ -896,7 +892,7 @@
   }
 }
 
-/* ===================== MOBILE: cards ===================== */
+/*  MOBILE: cards  */
 
 .admin-mobile-cards {
   display: flex;
@@ -989,7 +985,7 @@
   min-width: 0;
 }
 
-/* ===================== MOBILE: paginação ===================== */
+/*  MOBILE: paginação  */
 
 .admin-mobile-paginacao {
   margin-top: 16px;
@@ -1036,7 +1032,7 @@
   color: color-mix(in oklab, var(--text) 90%, var(--muted));
 }
 
-/* ===================== MODAIS "NOVO ITEM" / ENTIDADES ===================== */
+/*  MODAIS "NOVO ITEM" / ENTIDADES  */
 
 .admin-novo-item-modal-overlay {
   position: fixed;

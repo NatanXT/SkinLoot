@@ -1,58 +1,40 @@
-/* ============================================================================
-   DetalheAnuncio.css
-   Caminho: frontend/src/pages/DetalheAnuncio.css
-
-   ESCOPO GERAL
-   - Tokens/variáveis (Dark padrão + Light auto/forçado)
-   - Estrutura principal do detalhe (container, imagem e info)
-   - Boxes de informações por jogo
-   - Botões gerais e botão de favoritar (ON/OFF + animações)
-   - Chat flutuante e mini-bubble
-   - Reputação do vendedor (confiança + avaliações + carrossel)
-   - Modal de avaliação do vendedor
-   - Responsividade (Desktop, Tablet, Mobile)
-   ========================================================================= */
-
-/* ============================================================================
-   1. TOKENS — Tema DARK (padrão)
-   ========================================================================= */
+/*frontend/src/pages/DetalheAnuncio.css
+TOKENS — Tema DARK (padrão) */
 :root {
-  /* === Base === */
+  /*  Base  */
   --bg: #0B0D10;
   --panel: #11151A;
   --surface: #0E1217;
   --text: #E8F1F2;
   --muted: #7B8694;
 
-  /* === Marca === */
+  /*  Marca  */
   --primary: #39FF14;
   --secondary: #00C896;
   --ring: rgba(57,255,20,.45);
 
-  /* === Borda e sombra === */
+  /*  Borda e sombra  */
   --border: #1A2129;
   --border-strong: #1C2430;
   --shadow: 0 12px 40px rgba(0,0,0,.45);
 
-  /* === Gradientes === */
+  /*  Gradientes  */
   --card-grad: linear-gradient(180deg, #12171E, #0F1319);
   --panel-grad: linear-gradient(180deg, #0E1217, #0B0D10);
 
-  /* === Favoritar (estado base) === */
+  /*  Favoritar (estado base)  */
   --fav-off-bg: transparent;
   --fav-off-border: var(--primary);
   --fav-off-text: var(--primary);
   --fav-off-hover: color-mix(in oklab, var(--primary) 12%, transparent);
 
-  /* === Favoritar (ativo) === */
+  /*  Favoritar (ativo)  */
   --fav-on-bg: var(--primary);
   --fav-on-text: #0B0D10;
   --fav-on-ring: color-mix(in oklab, var(--primary) 40%, transparent);
 }
 
-/* ============================================================================
-   2. TOKENS — Tema CLARO (automático)
-   ========================================================================= */
+/* TOKENS — Tema CLARO (automático) */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --bg: #F7FAFC;
@@ -82,9 +64,7 @@
   }
 }
 
-/* ============================================================================
-   3. OVERRIDES MANUAIS — Forçar tema Light/Dark via atributo data-theme
-   ========================================================================= */
+/* OVERRIDES MANUAIS — Forçar tema Light/Dark via atributo data-theme */
 :root[data-theme="light"] {
   --bg: #F7FAFC;
   --panel: #FFFFFF;
@@ -110,9 +90,7 @@
 }
 :root[data-theme="dark"] {}
 
-/* ============================================================================
-   4. BASE DO DETALHE
-   ========================================================================= */
+/*  BASE DO DETALHE */
 .detalhe-root {
   background: var(--bg);
   color: var(--text);
@@ -142,9 +120,7 @@
   box-shadow: var(--shadow);
 }
 
-/* ============================================================================
-   5. IMAGEM DO ANÚNCIO
-   ========================================================================= */
+/* IMAGEM DO ANÚNCIO */
 .detalhe-imagem {
   position: relative;
   flex: 1 1 50%;
@@ -180,9 +156,7 @@
   box-shadow: 0 0 24px color-mix(in oklab, var(--primary) 35%, transparent);
 }
 
-/* ============================================================================
-   6. INFORMAÇÕES DO ANÚNCIO
-   ========================================================================= */
+/* INFORMAÇÕES DO ANÚNCIO */
 .detalhe-info {
   flex: 1 1 50%;
   display: flex;
@@ -202,9 +176,7 @@
   color: var(--primary);
 }
 
-/* ============================================================================
-   7. BOXES E LISTAS DE CHAVE-VALOR
-   ========================================================================= */
+/* BOXES E LISTAS DE CHAVE-VALOR */
 .kv {
   display: grid;
   grid-template-columns: 160px 1fr;
@@ -252,9 +224,7 @@
 .box--info { margin-top: 8px; }
 .box--detalhes { margin-top: 6px; }
 
-/* ============================================================================
-   8. BOTÕES PADRÃO
-   ========================================================================= */
+/* BOTÕES PADRÃO */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -295,9 +265,7 @@
   transform: translateY(-1px);
 }
 
-/* ============================================================================
-   9. BOTÃO DE FAVORITAR (ON/OFF)
-   ========================================================================= */
+/* BOTÃO DE FAVORITAR (ON/OFF) */
 
 /* Animações visuais */
 @keyframes fav-pop {
@@ -367,9 +335,7 @@
   margin-top: 8px;
 }
 
-/* ============================================================================
-   10. CHAT FLUTUANTE (mini bubble)
-   ========================================================================= */
+/* CHAT FLUTUANTE (mini bubble) */
 .chat-mini-bubble {
   position: fixed;
   bottom: 20px;
@@ -421,9 +387,7 @@
   max-height: min(70vh, 640px);
 }
 
-/* ============================================================================
-   11. REPUTAÇÃO DO VENDEDOR (confiança + avaliações + carrossel)
-   ========================================================================= */
+/* REPUTAÇÃO DO VENDEDOR (confiança + avaliações + carrossel) */
 
 .detalhe-vendedor {
   max-width: 1200px;
@@ -724,10 +688,7 @@
   color: var(--muted);
 }
 
-/* ============================================================================
-   12. MODAL DE AVALIAÇÃO DO VENDEDOR
-   ========================================================================= */
-
+/* MODAL DE AVALIAÇÃO DO VENDEDOR */
 .avaliacao-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -846,11 +807,9 @@
   justify-content: center;
 }
 
-/* ============================================================================
-   13. RESPONSIVIDADE (Tablet e Mobile)
-   ========================================================================= */
+/* RESPONSIVIDADE (Tablet e Mobile) */
 
-/* === Tablet (≤1024px) === */
+/* Tablet (≤1024px) */
 @media (max-width: 1024px) {
   .detalhe-card { gap: 18px; padding: 16px; }
   .detalhe-info h1 { font-size: 26px; }
@@ -872,7 +831,7 @@
   }
 }
 
-/* === Mobile (≤680px) === */
+/* Mobile (≤680px) */
 @media (max-width: 680px) {
   .detalhe-card { flex-direction: column; }
   .kv-grid { grid-template-columns: 1fr; }

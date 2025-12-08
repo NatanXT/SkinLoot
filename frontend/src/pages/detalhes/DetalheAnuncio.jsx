@@ -1,5 +1,4 @@
 // frontend/src/pages/DetalheAnuncio.jsx
-
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import anuncioService from '../../services/anuncioService.js';
@@ -8,9 +7,7 @@ import AuthBrand from '../../components/logo/AuthBrand.jsx';
 import ChatFlutuante from '../../components/chat/ChatFlutuante';
 import { useAuth } from '../../services/AuthContext.jsx';
 
-// ============================================================================
-// 1. FUNÇÕES UTILITÁRIAS
-// ============================================================================
+// FUNÇÕES UTILITÁRIAS
 
 /**
  * Formata número como moeda BRL (R$)
@@ -54,9 +51,7 @@ function getRaw(a) {
   return a?._raw || {};
 }
 
-// ============================================================================
-// 2. NORMALIZADORES DE DADOS (compatibilidade entre APIs)
-// ============================================================================
+// NORMALIZADORES DE DADOS (compatibilidade entre APIs)
 
 /**
  * Normaliza e extrai informações do jogo (nome e id)
@@ -118,9 +113,7 @@ function resolverDetalhes(anuncio) {
   return { detalhesCsgo, detalhesLol, detalhesGenericos };
 }
 
-// ============================================================================
-// 3. COMPONENTES DE APOIO — Detalhes por jogo e reputação do vendedor
-// ============================================================================
+// COMPONENTES DE APOIO — Detalhes por jogo e reputação do vendedor
 
 /**
  * Renderiza o bloco de detalhes conforme o jogo (CS:GO, LoL ou genérico)
@@ -134,7 +127,7 @@ function DetalhesPorJogo({
   if (!jogoNome && !detalhesCsgo && !detalhesLol && !detalhesGenericos)
     return null;
 
-  // ----- Caso: CS:GO -----
+  //  Caso: CS:GO 
   if (
     jogoNome === 'CS:GO' ||
     jogoNome === 'Counter-Strike' ||
@@ -173,7 +166,7 @@ function DetalhesPorJogo({
     );
   }
 
-  // ----- Caso: League of Legends -----
+  //  Caso: League of Legends 
   if (jogoNome === 'League of Legends' || jogoNome === 'LoL') {
     const d = detalhesLol || {};
     const tem = d.championName || d.tipoSkin || d.chroma;
@@ -198,7 +191,7 @@ function DetalhesPorJogo({
     );
   }
 
-  // ----- Caso genérico -----
+  //  Caso genérico 
   if (detalhesGenericos && typeof detalhesGenericos === 'object') {
     const entradas = Object.entries(detalhesGenericos);
     if (entradas.length === 0) return null;
@@ -524,39 +517,34 @@ function SecaoReputacaoVendedor({
   );
 }
 
-// ============================================================================
-// 4. COMPONENTE PRINCIPAL — DetalheAnuncio
-// ============================================================================
-
+// COMPONENTE PRINCIPAL — DetalheAnuncio
 export default function DetalheAnuncio() {
-  // ----- Hooks de contexto e navegação -----
+  //  Hooks de contexto e navegação 
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
 
-  // ----- Estados principais -----
+  // Estados principais
   const [anuncio, setAnuncio] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
 
-  // ----- Estado de "favoritar" -----
+  // Estado de "favoritar"
   const [liked, setLiked] = useState(false);
   const [loadingLike, setLoadingLike] = useState(false);
   const [justToggled, setJustToggled] = useState(false);
 
-  // ----- Estado do chat -----
+  // Estado do chat
   const [chatAberto, setChatAberto] = useState(null);
   const [unreads, setUnreads] = useState(0);
 
-  // ----- Estado do modal de avaliação do vendedor -----
+  // Estado do modal de avaliação do vendedor
   const [avaliarAberto, setAvaliarAberto] = useState(false);
   const [notaAvaliacao, setNotaAvaliacao] = useState(0);
   const [textoAvaliacao, setTextoAvaliacao] = useState('');
 
-  // ==========================================================================
-  // 4.1. Funções auxiliares
-  // ==========================================================================
+  // Funções auxiliares
 
   /**
    * Exige login antes de uma ação (redireciona se não autenticado)
@@ -650,9 +638,7 @@ export default function DetalheAnuncio() {
     fecharModalAvaliacao();
   }
 
-  // ==========================================================================
-  // 4.2. Carregamento inicial do anúncio
-  // ==========================================================================
+  // Carregamento inicial do anúncio
   useEffect(() => {
     let cancel = false;
 
@@ -676,9 +662,7 @@ export default function DetalheAnuncio() {
     };
   }, [id]);
 
-  // ==========================================================================
-  // 4.3. Alternar favorito
-  // ==========================================================================
+  // Alternar favorito
   async function alternarFavorito() {
     if (loadingLike) return;
     setLoadingLike(true);
@@ -696,9 +680,7 @@ export default function DetalheAnuncio() {
     }
   }
 
-  // ==========================================================================
-  // 4.4. Derivações e memoizações
-  // ==========================================================================
+  // Derivações e memoizações
   const raw = useMemo(() => getRaw(anuncio), [anuncio]);
   const linkExterno = raw?.linkExterno || null;
   const jogoInfo = useMemo(() => resolverInfoJogo(anuncio), [anuncio]);
@@ -707,7 +689,7 @@ export default function DetalheAnuncio() {
     [anuncio],
   );
 
-  // Dados de reputação do vendedor (quando o backend existir, vão sobrescrever os mocks)
+  // Dados de reputação do vendedor
   const avaliacoesVendedor = useMemo(
     () =>
       raw?.avaliacoesVendedor || raw?.sellerReviews || raw?.avaliacoes || [],
@@ -728,9 +710,7 @@ export default function DetalheAnuncio() {
   const nomeVendedor =
     anuncio?.seller?.name || anuncio?.usuarioNome || anuncio?.vendedorNome;
 
-  // ==========================================================================
-  // 4.5. Estados de carregamento e erro
-  // ==========================================================================
+  // Estados de carregamento e erro
   if (carregando) {
     return (
       <div className="detalhe-root">
@@ -758,9 +738,7 @@ export default function DetalheAnuncio() {
 
   if (!anuncio) return null;
 
-  // ==========================================================================
-  // 4.6. Renderização principal
-  // ==========================================================================
+  // Renderização principal
   return (
     <div className="detalhe-root">
       {/* Topbar com logo e voltar */}
@@ -909,7 +887,7 @@ export default function DetalheAnuncio() {
         onAbrirAvaliacao={abrirModalAvaliacao}
       />
 
-      {/* Modal de avaliação do vendedor (apenas visual por enquanto) */}
+      {/* Modal de avaliação do vendedor */}
       {avaliarAberto && (
         <div
           className="avaliacao-modal-backdrop"
@@ -995,9 +973,8 @@ export default function DetalheAnuncio() {
         </div>
       )}
 
-      {/* ==========================================================================
-         4.7. CHAT FLUTUANTE
-         ========================================================================== */}
+    
+      {/* CHAT FLUTUANTE */}
       {user &&
         (chatAberto ? (
           <div className="chat-float">

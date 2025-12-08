@@ -189,7 +189,7 @@ export default function CheckoutModal({
           ✕
         </button>
 
-        {/* ---------------------- ETAPA 1 ---------------------- */}
+        {/*  ETAPA 1  */}
         {etapa === 1 && (
           <div className="checkout-step">
             <h2>Confirmar Plano</h2>
@@ -243,7 +243,7 @@ export default function CheckoutModal({
           </div>
         )}
 
-        {/* ---------------------- ETAPA 2 ---------------------- */}
+        {/*  ETAPA 2  */}
         {etapa === 2 && (
           <div className="checkout-step">
             <h2>Forma de Pagamento</h2>
@@ -281,12 +281,12 @@ export default function CheckoutModal({
           </div>
         )}
 
-        {/* ---------------------- ETAPA 3 ---------------------- */}
+        {/*  ETAPA 3  */}
         {etapa === 3 && !confirmado && !erro && (
           <div className="checkout-step">
             <h2>Pagamento</h2>
 
-            {/* ---------- Cartão ---------- */}
+            {/*  Cartão  */}
             {metodo === 'cartao' && (
               <div className="card-wrapper">
                 {/* Preview do cartão */}
@@ -404,7 +404,7 @@ export default function CheckoutModal({
               </div>
             )}
 
-            {/* ---------- PIX ---------- */}
+            {/*  PIX  */}
             {metodo === 'pix' && (
               <div className="pix-box">
                 <p>Escaneie o código abaixo:</p>
@@ -440,7 +440,7 @@ export default function CheckoutModal({
           </div>
         )}
 
-        {/* ---------------------- MENSAGEM DE ERRO ---------------------- */}
+        {/*  MENSAGEM DE ERRO  */}
         {erro && (
           <div className="checkout-step checkout-error">
             <h2>Tempo expirado</h2>
@@ -451,7 +451,7 @@ export default function CheckoutModal({
           </div>
         )}
 
-        {/* ---------------------- CONFIRMAÇÃO ---------------------- */}
+        {/*  CONFIRMAÇÃO  */}
         {confirmado && (
           <div className="checkout-step checkout-confirmado">
             <h2>Pagamento confirmado</h2>

@@ -1,14 +1,14 @@
 // src/services/api.js
 import axios from 'axios';
 
-// ---------- instancia ----------
+// instancia
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
   timeout: 20000,
   withCredentials: true, // ok manter; não atrapalha o header Bearer
 });
 
-// ---------- storage unificado ----------
+// storage unificado
 const storage = {
   get remember() {
     return localStorage.getItem('remember') === 'true';
@@ -49,7 +49,7 @@ const storage = {
 const AUTH_REFRESH_PATH =
   import.meta.env.VITE_AUTH_REFRESH_PATH || '/usuarios/auth/refresh';
 
-// ---------- request interceptor: injeta Bearer ----------
+// request interceptor: injeta Bearer
 api.interceptors.request.use((config) => {
   const token = storage.access;
   if (token) {
@@ -59,7 +59,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ---------- response interceptor: tenta refresh 401 ----------
+// response interceptor: tenta refresh 401
 let refreshing = null;
 
 api.interceptors.response.use(
@@ -94,7 +94,6 @@ api.interceptors.response.use(
               { withCredentials: true },
             )
             .then((r) => {
-              // adapte ao shape real do seu backend
               const newAccess =
                 r?.data?.accessToken || r?.data?.token || r?.data?.access;
               const newRefresh = r?.data?.refreshToken || storage.refresh;

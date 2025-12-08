@@ -1,10 +1,3 @@
-// ==========================================================
-// Sidebar.jsx
-// ----------------------------------------------------------
-// Menu lateral da aplicação.
-// Pode ser expandido/recolhido no mobile e permanece fixo no desktop.
-// ==========================================================
-
 import React from 'react';
 import './Sidebar.css';
 

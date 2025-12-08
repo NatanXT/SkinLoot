@@ -1,24 +1,6 @@
-// ==========================================================
-// publicProfile.js
-// Caminho: frontend/src/services/publicProfile.js
-// ----------------------------------------------------------
-// Service responsável por buscar dados públicos de um usuário
-// (vendedor) para exibição no Perfil Público.
-// Usa a mesma instância de API (axios) usada no resto do app.
-// ==========================================================
-
+//frontend/src/services/publicProfile.js
 import api from './api';
 
-/**
- * Busca um perfil público de usuário/vendedor pelo ID.
- *
- * IMPORTANTE:
- *   Ajuste a URL abaixo para o endpoint real do seu backend.
- *   Exemplos comuns:
- *     - GET /api/public/usuarios/:id
- *     - GET /api/usuarios/public/:id
- *     - GET /api/users/public/:id
- */
 export async function getPublicUserProfile(userId) {
   if (!userId) {
     throw new Error('UserId is required to fetch public profile.');
@@ -26,7 +8,6 @@ export async function getPublicUserProfile(userId) {
 
   const encodedId = encodeURIComponent(userId);
 
-  // TODO: ajuste este caminho conforme a sua API real
   const url = `/api/public/usuarios/${encodedId}`;
 
   const response = await api.get(url);

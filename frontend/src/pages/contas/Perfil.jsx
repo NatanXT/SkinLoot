@@ -1,4 +1,3 @@
-// Tela "Minha Conta": exibe e permite atualizar nome/gênero e alterar senha.
 // Protegida via <ProtectedRoute> no roteador.
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../services/AuthContext';

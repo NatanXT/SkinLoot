@@ -1,11 +1,10 @@
 // frontend/src/services/anuncioService.js
 import api from './api';
 
-// ✅ agora quem decide usar localStorage (mock) é este flag:
 const USE_DEV_API = import.meta.env.VITE_ENABLE_DEV_API === 'true';
 const LS_KEY = 'dev_skins';
 
-// --------- helpers DEV (localStorage) ----------
+//  helpers DEV (localStorage) 
 function devLoad() {
   try {
     const raw = localStorage.getItem(LS_KEY);
@@ -69,7 +68,7 @@ function dataUrlToParts(dataUrl) {
   }
 }
 
-// ------------ Normalização (quando usar backend) ------------
+//  Normalização (quando usar backend) 
 function normalizarDoBackend(anuncio = {}) {
   const id = anuncio.id ?? anuncio.uuid ?? anuncio._id ?? uid();
   const title =
@@ -95,7 +94,7 @@ function normalizarDoBackend(anuncio = {}) {
       '';
   }
 
-  // 🔹 Agora com suporte aos novos campos do backend (e correção do nome do jogo)
+  // Agora com suporte aos novos campos do backend (e correção do nome do jogo)
   let jogo = anuncio.jogo || null;
 
   // Detecta automaticamente o nome do jogo se vier vazio
@@ -176,7 +175,7 @@ function normalizarDoBackend(anuncio = {}) {
   };
 }
 
-// ================= BUSCAR POR ID =================
+//  BUSCAR POR ID 
 export async function buscarPorId(id) {
   if (USE_DEV_API) {
     // DEV: busca no localStorage
@@ -199,7 +198,7 @@ export async function buscarPorId(id) {
   return normalizarDoBackend(data);
 }
 
-// ================= LISTAGENS =================
+//  LISTAGENS 
 function extrairArray(data) {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.content)) return data.content;
@@ -238,7 +237,7 @@ export async function listarFeedNormalizado() {
   return extrairArray(data).map(normalizarDoBackend);
 }
 
-// ================= CRUD =================
+//  CRUD 
 export async function criarAnuncio(payload) {
   const body = {
     titulo: payload.titulo,

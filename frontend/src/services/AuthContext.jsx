@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // 1) Hidrata visualmente a partir do cache local
+    // Hidrata visualmente a partir do cache local
     try {
       const saved = localStorage.getItem(STORAGE_USER_KEY);
       if (saved) {
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch {}
 
-    // 2) Valida sessão no backend
+    // Valida sessão no backend
     if (!authService?.getCurrentUser) {
       setIsCheckingAuth(false);
       return;
@@ -81,7 +81,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // opcional: se tiver fluxo de cadastro que já autentica
   const register = useCallback(async (nome, email, senha, genero) => {
     if (!authService?.register)
       throw new Error('[AuthContext] authService.register indisponível.');
@@ -96,7 +95,7 @@ export const AuthProvider = ({ children }) => {
   const value = useMemo(
       () => ({
         user,
-        isCheckingAuth, // <--- USE ISSO NO SEU PROTECTED ROUTE
+        isCheckingAuth,
         login,
         logout,
         register,

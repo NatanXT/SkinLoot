@@ -1,13 +1,4 @@
 // src/pages/usuario/PerfilUsuario.jsx
-// ============================================================================
-// Perfil do usuário (mock até a API ficar pronta)
-// - Dados da conta
-// - Plano/cota
-// - Modal de Renovar/Upgrade + Checkout mockado
-// - Editar Skin: preview clicável + upload de arquivo OU URL/dataURL
-// - Desativar Skin: confirmação dupla com a palavra "Confirmo"
-// - Reativar Skin: abre editor e só ativa após salvar, respeitando limite
-// ============================================================================
 
 import { useContext, useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -28,7 +19,7 @@ import { renovarPlano, upgradePlano } from '../../services/planos';
 import AuthBrand from '../../components/logo/AuthBrand';
 import CheckoutModal from '../../components/checkout/CheckoutModal';
 
-// ---------- Helpers ----------
+// Helpers
 const fmtBRL = (n) =>
   Number.isFinite(Number(n))
     ? Number(n).toLocaleString('pt-BR', {
@@ -104,7 +95,7 @@ export default function PerfilUsuario() {
   const { user, logout, setUser } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation(); // ✅ usado para abrir modal vinda da vitrine
+  const location = useLocation(); // usado para abrir modal vinda da vitrine
 
   const [perfil, setPerfil] = useState(null);
   const [skins, setSkins] = useState([]);
@@ -142,7 +133,7 @@ export default function PerfilUsuario() {
     return skins;
   }, [skins, filtroStatus]);
 
-  // -------------------- Estado do modal de edição --------------------
+  // Estado do modal de edição
   const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
   const [skinEditando, setSkinEditando] = useState(null);
   const [formEdicao, setFormEdicao] = useState(DEFAULT_FORM_EDICAO);
@@ -157,7 +148,7 @@ export default function PerfilUsuario() {
   // flag: reativar após salvar (fluxo de reativação abre editor primeiro)
   const [reativarDepoisDeSalvar, setReativarDepoisDeSalvar] = useState(false);
 
-  // --------------- Estado do modal de desativação (2 passos) --------
+  // Estado do modal de desativação (2 passos)
   const [modalDesativarAberto, setModalDesativarAberto] = useState(false);
   const [skinDesativando, setSkinDesativando] = useState(null);
   const [passoDesativar, setPassoDesativar] = useState(1); // 1 ou 2
@@ -174,7 +165,7 @@ export default function PerfilUsuario() {
     );
   }, [jogosList, selectedJogoId]);
 
-  // 🔔 dispara para a vitrine recarregar quando suas skins mudarem
+  // dispara para a vitrine recarregar quando suas skins mudarem
   function notifySkinsChanged() {
     window.dispatchEvent(new CustomEvent('skins:changed'));
   }
@@ -221,7 +212,7 @@ export default function PerfilUsuario() {
     };
   }, []);
 
-  // ✅ abre a modal de upgrade automaticamente se veio da vitrine
+  // abre a modal de upgrade automaticamente se veio da vitrine
   useEffect(() => {
     const panel = location.state?.openPlanoPanel; // 'upgrade' | 'renovar'
     const pre = location.state?.preselectPlan; // 'gratuito' | 'intermediario' | 'plus'
@@ -330,7 +321,7 @@ export default function PerfilUsuario() {
     }
   }
 
-  // --------------------------- Plano -------------------------------
+  // Plano
   async function onConfirmarRenovar() {
     setBusy(true);
     try {
@@ -380,7 +371,7 @@ export default function PerfilUsuario() {
     }
   }
 
-  // ========================== EDITAR / CRIAR SKIN ============================
+  //  EDITAR / CRIAR SKIN
   function abrirEditar(skin) {
     setSkinEditando(skin);
 
@@ -440,7 +431,7 @@ export default function PerfilUsuario() {
     reader.onload = (readEvent) => {
       let dataUrl = String(readEvent.target?.result || '');
 
-      // --- INÍCIO DA CORREÇÃO ---
+      // INÍCIO DA CORREÇÃO
       dataUrl = dataUrl.replace(/(\r\n|\n|\r)/gm, '').trim();
 
       const parts = dataUrl.split(',');
@@ -458,7 +449,6 @@ export default function PerfilUsuario() {
         setImagemFile(null);
         return;
       }
-      // --- FIM DA CORREÇÃO ---
 
       const [head, base64] = parts;
       const mime = head.match(/:(.*?);/)?.[1] || 'image/png';
@@ -520,7 +510,7 @@ export default function PerfilUsuario() {
         return;
       }
 
-      // NOVO: Validação de Jogo
+      // Validação de Jogo
       if (!selectedJogoId) {
         addToast('Você precisa selecionar um jogo.', 'error');
         setSalvandoEdicao(false);
@@ -606,7 +596,7 @@ export default function PerfilUsuario() {
     }
   }
 
-  // ==================== DESATIVAR / REATIVAR ====================
+  //  DESATIVAR / REATIVAR
   function abrirDesativar(skin) {
     setSkinDesativando(skin);
     setPassoDesativar(1);
@@ -688,7 +678,7 @@ export default function PerfilUsuario() {
     setModalEdicaoAberto(true);
   }
 
-  // ============================ RENDER =============================
+  // RENDER
   if (loading) {
     return (
       <div className="perfil-root">
@@ -1118,7 +1108,7 @@ export default function PerfilUsuario() {
         </div>
       )}
 
-      {/* ========================= MODAL: EDITAR / NOVA ========================= */}
+      {/* MODAL: EDITAR / NOVA */}
       {modalEdicaoAberto && (
         <div className="perfil-modal" role="dialog" aria-modal="true">
           <div className="perfil-modal__backdrop" onClick={fecharEditar} />
@@ -1182,7 +1172,7 @@ export default function PerfilUsuario() {
                   salvarEdicao();
                 }}
               >
-                {/* NOVO: Seletor de Jogo */}
+                {/* Seletor de Jogo */}
                 <div className="perfil-form__row">
                   <label htmlFor="f-jogo">Jogo (Obrigatório)</label>
                   <select
@@ -1190,7 +1180,7 @@ export default function PerfilUsuario() {
                     value={selectedJogoId}
                     onChange={(e) => setSelectedJogoId(e.target.value)}
                     required
-                    // 🔒 Desabilita se o anúncio JÁ tinha jogo ao abrir o editor
+                    // Desabilita se o anúncio JÁ tinha jogo ao abrir o editor
                     disabled={!jogoInicialVazioRef.current}
                     title={
                       !jogoInicialVazioRef.current
@@ -1230,7 +1220,7 @@ export default function PerfilUsuario() {
                   />
                 </div>
 
-                {/* --- Descrição --- */}
+                {/* Descrição */}
                 <div className="perfil-form__row">
                   <label htmlFor="f-descricao">Descrição</label>
                   <textarea
@@ -1461,7 +1451,7 @@ export default function PerfilUsuario() {
         </div>
       )}
 
-      {/* ============== MODAL: DESATIVAR (CONFIRMAÇÃO DUPLA) ============== */}
+      {/* MODAL: DESATIVAR (CONFIRMAÇÃO DUPLA) */}
       {modalDesativarAberto && (
         <div className="perfil-modal" role="dialog" aria-modal="true">
           <div className="perfil-modal__backdrop" onClick={fecharDesativar} />
@@ -1558,7 +1548,7 @@ export default function PerfilUsuario() {
         </div>
       )}
 
-      {/* ========================= CHECKOUT MOCKADO ========================= */}
+      {/* CHECKOUT MOCKADO */}
       <CheckoutModal
         open={checkoutAberto}
         onClose={() => {

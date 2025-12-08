@@ -1,18 +1,4 @@
-// ==========================================================
-// Caminho: frontend/src/pages/admin/AdminPainel.jsx
-// ----------------------------------------------------------
-// Tela de painel administrativo do SkinLoot.
-// - Backdrop/gradiente seguindo o padrão da Dashboard/Perfil
-// - Topbar fixa com título e ações
-// - Cards de resumo (itens ativos, ocultos, banidos)
-// - Filtros (busca, tipo, status)
-// - Painel de detalhes do usuário/skin selecionado
-// - Tabela com listagem de itens (dados da API)
-// - Listagem em cards no mobile, com paginação
-// - Exportação da tabela filtrada para PDF e CSV
-// - Modais para criar/editar jogos e planos
-// ==========================================================
-
+// frontend/src/pages/admin/AdminPainel.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -290,7 +276,6 @@ export default function AdminPainel() {
     }
 
     if (jogoModo === 'criar') {
-      // TODO: integrar com API real de criação de jogo
       console.log('Criar novo jogo:', nome);
     } else {
       const alvo = jogoAlvoEdicao.trim();
@@ -298,7 +283,6 @@ export default function AdminPainel() {
         window.alert('Informe qual jogo deseja editar (ID ou nome).');
         return;
       }
-      // TODO: integrar com API real de edição de jogo
       console.log('Editar jogo:', { alvo, novoNome: nome });
     }
 
@@ -316,7 +300,6 @@ export default function AdminPainel() {
     }
 
     if (planoModo === 'criar') {
-      // TODO: integrar com API real de criação de plano
       console.log('Criar novo plano:', nome);
     } else {
       const alvo = planoAlvoEdicao.trim();
@@ -324,7 +307,6 @@ export default function AdminPainel() {
         window.alert('Informe qual plano deseja editar (ID ou nome).');
         return;
       }
-      // TODO: integrar com API real de edição de plano
       console.log('Editar plano:', { alvo, novoNome: nome });
     }
 
@@ -584,9 +566,7 @@ export default function AdminPainel() {
     URL.revokeObjectURL(url);
   }
 
-  // =====================================================
   // Dados derivados para o painel de detalhes
-  // =====================================================
   const possuiDetalheAberto = !!selectedItem;
 
   const usuarioNome =
