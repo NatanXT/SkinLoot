@@ -10,19 +10,23 @@ public class UsuarioResponse {
   private String email;
   private String plano;
   private String role;
+   private Double mediaNotas;
+  private Integer totalAvaliacoes;
 
-    public static UsuarioResponse of(Usuario u) {
-      UsuarioResponse r = new UsuarioResponse();
-      r.id = u.getId();
-      r.nome = u.getNome();
-      r.email = u.getEmail();
-      // adapte se seu modelo guardar o plano de outra forma:
-      r.plano = u.getPlanoAssinatura() != null
-          ? u.getPlanoAssinatura().getNome().name().toLowerCase()
-          : "gratuito";
-      r.role = u.getRole().name();
-      return r;
-    }
+  public static UsuarioResponse of(Usuario u) {
+    UsuarioResponse r = new UsuarioResponse();
+    r.id = u.getId();
+    r.nome = u.getNome();
+    r.email = u.getEmail();
+    // adapte se seu modelo guardar o plano de outra forma:
+    r.plano = u.getPlanoAssinatura() != null
+        ? u.getPlanoAssinatura().getNome().name().toLowerCase()
+        : "gratuito";
+    r.mediaNotas = u.getMediaNotas();
+    r.totalAvaliacoes = u.getTotalAvaliacoes();
+    r.role = u.getRole().name();
+    return r;
+  }
 
   public UUID getId() {
     return id;
@@ -55,6 +59,7 @@ public class UsuarioResponse {
   public void setPlano(String plano) {
     this.plano = plano;
   }
+
   public String getRole() {
       return role;
   }

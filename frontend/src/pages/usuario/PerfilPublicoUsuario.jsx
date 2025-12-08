@@ -1,15 +1,28 @@
-// src/pages/usuario/PerfilPublicoUsuario.jsx
+// ==========================================================
+// Caminho: src/pages/usuario/PerfilPublicoUsuario.jsx
+// ----------------------------------------------------------
+// Tela de perfil público de um vendedor/usuário na SkinLoot.
+// - Busca anúncios ativos do vendedor no backend
+// - Busca avaliações reais do vendedor no backend (quando existir endpoint)
+// - Calcula nível de confiança (mesma regra do DetalheAnuncio)
+// - Exibe vitrine das skins deste vendedor
+// - Permite abrir o chat flutuante para contato
+// - Modal para o usuário avaliar o vendedor (mock, aguardando backend)
+// ==========================================================
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import './PerfilUsuario.css'; // reaproveita a mesma base de estilos
+import './PerfilPublicoUsuario.css';
 
 import { useAuth } from '../../services/AuthContext.jsx';
 import anuncioService from '../../services/anuncioService.js';
+import api from '../../services/api';
 import SkinCard from '../../components/skin/SkinCard.jsx';
 import ChatFlutuante from '../../components/chat/ChatFlutuante';
 import AuthBrand from '../../components/logo/AuthBrand';
 
+// Mock de vendedor mantido como fallback em desenvolvimento
 const MOCK_VENDOR = {
   id: 'demo-seller',
   name: 'Vendedor Demo',
@@ -19,7 +32,8 @@ const MOCK_VENDOR = {
 };
 
 /**
- * Avaliações reaproveitando a ideia do DetalheAnuncio
+ * Avaliações mock reaproveitando a ideia do DetalheAnuncio.
+ * Mantidas como referência de layout enquanto o backend é integrado.
  */
 const MOCK_REVIEWS = [
   {
@@ -53,7 +67,7 @@ const MOCK_REVIEWS = [
 ];
 
 /**
- * Formata data em dd/mm/aaaa
+ * Formata data em dd/mm/aaaa.
  */
 function formatDate(value) {
   if (!value) return '';
@@ -63,7 +77,7 @@ function formatDate(value) {
 }
 
 /**
- * Formata “na plataforma desde …”
+ * Formata texto do tipo “Na plataforma desde mês de ano”.
  */
 function formatSince(value) {
   if (!value) return 'Na plataforma';
@@ -75,7 +89,7 @@ function formatSince(value) {
 }
 
 /**
- * Desenha estrelas de 0–5
+ * Componente de estrelas de nota (0 a 5).
  */
 function RatingStars({ value }) {
   const numeric = Number.isFinite(Number(value)) ? Number(value) : 0;
@@ -107,7 +121,7 @@ function RatingStars({ value }) {
 }
 
 /**
- * Converte datas para timestamp em ms
+ * Converte valores de data para timestamp em ms (para ordenação).
  */
 const toMs = (v) => {
   const t = typeof v === 'string' ? Date.parse(v) : Number(v);
@@ -115,37 +129,8 @@ const toMs = (v) => {
 };
 
 /**
- * Pega o id do vendedor a partir do anúncio (várias formas possíveis)
- */
-function getSellerIdFromAnuncio(anuncio) {
-  return (
-    anuncio?.usuarioId ??
-    anuncio?.seller?.id ??
-    anuncio?.vendedorId ??
-    anuncio?._raw?.usuarioId ??
-    anuncio?._raw?.seller?.id ??
-    anuncio?._raw?.vendedorId ??
-    null
-  );
-}
-
-/**
- * Pega o nome do vendedor a partir do anúncio (fallback para textos)
- */
-function getSellerNameFromAnuncio(anuncio) {
-  return (
-    anuncio?.usuarioNome ??
-    anuncio?.seller?.name ??
-    anuncio?.vendedorNome ??
-    anuncio?._raw?.usuarioNome ??
-    anuncio?._raw?.seller?.name ??
-    anuncio?._raw?.vendedorNome ??
-    'Usuário'
-  );
-}
-
-/**
- * Calcula nível de confiança (mesma ideia do DetalheAnuncio)
+ * Calcula nível de confiança do vendedor com base em nota média e volume de vendas.
+ * Mesma lógica aplicada na tela de DetalheAnuncio.
  */
 function computeTrustLevel(avgRating, totalSales) {
   const avg = Number.isFinite(Number(avgRating)) ? Number(avgRating) : 0;
@@ -177,155 +162,164 @@ function computeTrustLevel(avgRating, totalSales) {
 }
 
 /**
- * Componente principal de perfil público do usuário (vendedor)
+ * Componente principal de perfil público do usuário (vendedor).
  */
 export default function PerfilPublicoUsuario() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useAuth();
 
-  const vendor = useMemo(
-    () => ({
-      ...MOCK_VENDOR,
-      id: id || MOCK_VENDOR.id,
-    }),
-    [id],
-  );
+  // --- Estados de dados vindos do backend ---
+  const [vendor, setVendor] = useState(null); // Dados agregados do vendedor
+  const [sellerSkins, setSellerSkins] = useState([]); // Anúncios deste vendedor
+  const [reviews, setReviews] = useState([]); // Avaliações do vendedor
 
-  const initials = useMemo(() => {
-    const base = vendor.name || 'Usuário';
-    return base
-      .split(' ')
-      .filter(Boolean)
-      .map((part) => part[0])
-      .slice(0, 2)
-      .join('')
-      .toUpperCase();
-  }, [vendor.name]);
+  // --- Estados de controle de UI ---
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const totalReviews = MOCK_REVIEWS.length;
-  const avgRating = vendor.avgRating;
-  const totalSales = vendor.totalSales;
-
-  const { level, description, badgeModifier, score } = computeTrustLevel(
-    avgRating,
-    totalSales,
-  );
-
-  // Carrossel de avaliações
+  // Paginação das avaliações
   const [reviewPage, setReviewPage] = useState(0);
-  const reviewsPerPage = 3;
-  const totalPages = Math.max(
-    1,
-    Math.ceil((totalReviews || 1) / reviewsPerPage),
-  );
-  const safePage = Math.min(reviewPage, totalPages - 1);
-  const pageStart = safePage * reviewsPerPage;
-  const pageEnd = pageStart + reviewsPerPage;
-  const reviewsPageItems =
-    totalReviews > 0 ? MOCK_REVIEWS.slice(pageStart, pageEnd) : [];
 
-  function handlePrevPage() {
-    setReviewPage((current) => Math.max(0, current - 1));
-  }
+  // Chat e likes
+  const [chatOpen, setChatOpen] = useState(null);
+  const [likes, setLikes] = useState(() => new Set());
 
-  function handleNextPage() {
-    setReviewPage((current) => Math.min(totalPages - 1, current + 1));
-  }
-
-  // Modal de avaliação do vendedor (visual apenas)
+  // Modal de avaliação
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState('');
 
-  function openReviewModal() {
-    setIsReviewModalOpen(true);
-  }
+  // ----------------------------------------------------
+  // Efeito principal: busca anúncios + avaliações no backend
+  // ----------------------------------------------------
+  useEffect(() => {
+    let isMounted = true; // Evita setState depois do unmount
 
-  function closeReviewModal() {
-    setIsReviewModalOpen(false);
-    setReviewRating(0);
-    setReviewComment('');
-  }
+    async function fetchData() {
+      if (!id) {
+        setLoading(false);
+        return;
+      }
 
-  function handleSubmitReview(event) {
-    event.preventDefault();
-    if (reviewRating <= 0) {
-      alert('Selecione uma nota para o vendedor.');
-      return;
+      try {
+        setLoading(true);
+        setError('');
+
+        // 1) Buscar anúncios ativos deste vendedor
+        let listaSkins = [];
+        try {
+          const resAnuncios = await api.get(`/anuncios/usuario/${id}/ativos`);
+          const rawAnuncios = resAnuncios.data || [];
+
+          listaSkins = rawAnuncios
+            .map((a) =>
+              anuncioService.normalizarDoBackend
+                ? anuncioService.normalizarDoBackend(a)
+                : a,
+            )
+            .sort((a, b) => toMs(b.listedAt) - toMs(a.listedAt));
+        } catch (e) {
+          console.warn('Sem anúncios ou erro ao buscar skins:', e);
+          // Não tratamos como erro fatal: o vendedor pode apenas não ter anúncios ativos.
+        }
+
+        // 2) Buscar avaliações reais do vendedor (quando backend estiver disponível)
+        let listaReviews = [];
+        try {
+          const resReviews = await anuncioService.buscarAvaliacoesDoVendedor(
+            id,
+          );
+          const arrayReviews = Array.isArray(resReviews) ? resReviews : [];
+
+          listaReviews = arrayReviews.map((r) => ({
+            id: r.id,
+            authorName: r.avaliadorNome || 'Usuário',
+            rating: Number(r.nota) || 0,
+            comment: r.comentario,
+            createdAt: r.dataCriacao,
+          }));
+        } catch (e) {
+          console.warn('Erro ao buscar reviews:', e);
+          // Se der erro, podemos manter listaReviews vazia ou cair no mock se quiser.
+        }
+
+        // 3) Montar objeto agregador do vendedor.
+        let nomeVendedor = 'Usuário da SkinLoot';
+        let dataEntrada = new Date().toISOString(); // Fallback: hoje
+
+        if (listaSkins.length > 0) {
+          const ref = listaSkins[0];
+          const possivelNome =
+            ref.usuarioNome || ref.seller?.name || ref.vendedorNome;
+          if (possivelNome) nomeVendedor = possivelNome;
+
+          const possivelData = ref.seller?.createdAt;
+          if (possivelData) dataEntrada = possivelData;
+        }
+
+        // Calcula nota média real (se houver avaliações)
+        let mediaReal = 0;
+        if (listaReviews.length > 0) {
+          const soma = listaReviews.reduce((acc, r) => acc + r.rating, 0);
+          mediaReal = soma / listaReviews.length;
+        }
+
+        if (isMounted) {
+          setSellerSkins(listaSkins);
+          setReviews(listaReviews);
+          setVendor({
+            id,
+            name: nomeVendedor,
+            memberSince: dataEntrada,
+            totalSales: listaReviews.length, // Proxy temporário
+            avgRating: mediaReal,
+          });
+        }
+      } catch (err) {
+        console.error('Erro fatal ao carregar perfil:', err);
+        if (isMounted) {
+          setError('Não foi possível carregar as informações deste vendedor.');
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
     }
 
-    console.log('Simulando envio de avaliação do vendedor público:', {
-      sellerId: vendor.id,
-      rating: reviewRating,
-      comment: reviewComment,
-    });
+    fetchData();
 
-    closeReviewModal();
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
+  // ----------------------------------------------------
+  // Lógica de interação e dados derivados
+  // ----------------------------------------------------
+
+  // Iniciais do vendedor para o "avatar" circular
+  const initials = useMemo(() => {
+    const base = vendor?.name || MOCK_VENDOR.name || 'U';
+    return base.slice(0, 2).toUpperCase();
+  }, [vendor]);
+
+  // Paginação das avaliações
+  const reviewsPerPage = 3;
+  const totalReviews = reviews.length;
+  const totalPages = Math.max(1, Math.ceil(totalReviews / reviewsPerPage));
+  const safePage = Math.min(reviewPage, totalPages - 1);
+  const pageStart = safePage * reviewsPerPage;
+  const reviewsPageItems = reviews.slice(pageStart, pageStart + reviewsPerPage);
+
+  function handlePrevPage() {
+    setReviewPage((p) => Math.max(0, p - 1));
   }
 
-  /*  Estado e lógica dos anúncios (skins) deste vendedor */
-  const [sellerSkins, setSellerSkins] = useState([]);
-  const [skinsLoading, setSkinsLoading] = useState(false);
-  const [skinsError, setSkinsError] = useState('');
-  const [likes, setLikes] = useState(() => new Set());
-
-  const [chatOpen, setChatOpen] = useState(null);
-  const [unreads, setUnreads] = useState(0);
-
-  // Exige login para certas ações
-  function exigirLogin(acao, payload) {
-    if (!user) {
-      navigate('/login', {
-        state: {
-          returnTo: window.location.pathname + window.location.search,
-          acao,
-          payload,
-        },
-        replace: true,
-      });
-      return true;
-    }
-    return false;
+  function handleNextPage() {
+    setReviewPage((p) => Math.min(totalPages - 1, p + 1));
   }
 
-  function abrirChatPara(anuncio) {
-    if (exigirLogin('contato', { anuncioId: anuncio?.id })) return;
-
-    const sellerId = getSellerIdFromAnuncio(anuncio);
-    const sellerName = getSellerNameFromAnuncio(anuncio);
-
-    const nomeSkin = anuncio.title ?? anuncio.skinNome ?? 'Skin';
-    const precoSkin = anuncio.price ?? anuncio.preco ?? 0;
-
-    const safeSellerId = sellerId
-      ? String(sellerId)
-      : `temp-${anuncio?.id || anuncio?._id}`;
-
-    setChatOpen({
-      seller: { id: safeSellerId, nome: sellerName },
-      skin: { titulo: nomeSkin, preco: precoSkin },
-    });
-    setUnreads(0);
-  }
-
-  function comprarFora(anuncio) {
-    if (exigirLogin('comprar_fora', { anuncioId: anuncio?.id })) return;
-
-    const url =
-      anuncio?.linkExterno ||
-      anuncio?._raw?.linkExterno ||
-      anuncio?.seller?.contactUrl ||
-      anuncio?._raw?.urlCompra ||
-      '#';
-
-    if (url && url !== '#') {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    } else {
-      abrirChatPara(anuncio);
-    }
-  }
-
+  // Toggle de like das skins
   const handleLikeToggle = (keyId) => {
     setLikes((prev) => {
       const next = new Set(prev);
@@ -335,72 +329,121 @@ export default function PerfilPublicoUsuario() {
     });
   };
 
-  // Carrega as skins deste vendedor a partir do feed normalizado
-  useEffect(() => {
-    let active = true;
-
-    async function loadSellerSkins() {
-      if (!id) {
-        setSellerSkins([]);
-        setSkinsError('Vendedor não encontrado.');
-        return;
-      }
-
-      try {
-        setSkinsLoading(true);
-        setSkinsError('');
-
-        const feed = await anuncioService.listarFeedNormalizado();
-        const lista = Array.isArray(feed) ? feed : [];
-
-        const filtrados = lista.filter((anuncio) => {
-          const sellerId = getSellerIdFromAnuncio(anuncio);
-          return (
-            sellerId !== null &&
-            sellerId !== undefined &&
-            String(sellerId) === String(id)
-          );
-        });
-
-        const normalizados = filtrados
-          .map((a) => ({
-            ...a,
-            listedAt: toMs(a?.listedAt ?? a?.createdAt),
-          }))
-          .sort((a, b) => b.listedAt - a.listedAt);
-
-        if (!active) return;
-        setSellerSkins(normalizados);
-      } catch (error) {
-        console.error(
-          'Falha ao carregar os anúncios deste vendedor (perfil público).',
-          error,
-        );
-        if (!active) return;
-        setSkinsError(
-          'Não foi possível carregar os anúncios deste vendedor no momento.',
-        );
-        setSellerSkins([]);
-      } finally {
-        if (active) setSkinsLoading(false);
-      }
+  /**
+   * Garante que o usuário esteja logado antes de executar uma ação.
+   * - Se não estiver logado, redireciona para /login com intenção salva no state.
+   * - Retorna true se bloqueou a ação (não autenticado).
+   */
+  function exigirLogin(acao, payload) {
+    if (!user) {
+      navigate('/login', {
+        state: { returnTo: window.location.pathname, acao, payload },
+      });
+      return true;
     }
+    return false;
+  }
 
-    loadSellerSkins();
+  /**
+   * Abre o chat flutuante já direcionado para este vendedor e anúncio.
+   */
+  function abrirChatPara(anuncio) {
+    if (exigirLogin('contato', { anuncioId: anuncio?.id })) return;
+    setChatOpen({
+      seller: { id: vendor.id, nome: vendor.name },
+      skin: {
+        id: anuncio.id,
+        titulo: anuncio.title || anuncio.skinNome,
+        preco: anuncio.price || anuncio.preco,
+      },
+    });
+  }
 
-    return () => {
-      active = false;
-    };
-  }, [id]);
+  /**
+   * Abre link externo de compra (caso exista) ou cai no chat se não houver.
+   */
+  function comprarFora(anuncio) {
+    const url = anuncio.linkExterno || '#';
+    if (url !== '#') window.open(url, '_blank');
+    else abrirChatPara(anuncio);
+  }
 
-  const totalSkins = sellerSkins.length;
+  /**
+   * Envio da avaliação do vendedor.
+   * Neste momento é apenas mock, aguardando implementação no backend.
+   */
+  function handleSubmitReview(e) {
+    e.preventDefault();
+    if (exigirLogin('avaliar', { vendedorId: id })) return;
+
+    alert('Funcionalidade de avaliação será implementada no backend em breve!');
+
+    setIsReviewModalOpen(false);
+    setReviewComment('');
+    setReviewRating(0);
+  }
+
+  // ----------------------------------------------------
+  // Renderização condicional (loading / erro)
+  // ----------------------------------------------------
+
+  if (loading) {
+    return (
+      <div
+        className="perfil-root"
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <div className="perfil-loading">
+          <span className="spinner" /> Carregando perfil...
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !vendor) {
+    return (
+      <div
+        className="perfil-root"
+        style={{ paddingTop: '100px', textAlign: 'center' }}
+      >
+        <p
+          className="perfil-error"
+          style={{ color: '#ff6b6b', fontSize: '1.2rem' }}
+        >
+          {error || 'Vendedor não encontrado.'}
+        </p>
+        <button
+          className="btn btn--ghost"
+          onClick={() => navigate(-1)}
+          style={{ marginTop: '20px' }}
+          type="button"
+        >
+          Voltar
+        </button>
+      </div>
+    );
+  }
+
+  // Dados derivados para exibição (nível de confiança)
+  const { level, description, badgeModifier, score } = computeTrustLevel(
+    vendor.avgRating,
+    vendor.totalSales,
+  );
+
+  // ----------------------------------------------------
+  // JSX principal da página
+  // ----------------------------------------------------
 
   return (
     <div className="perfil-root">
-      {/* Topbar igual ao perfil, com Voltar à direita */}
+      {/* Navbar simplificada, reaproveitando a identidade do AuthBrand */}
       <div className="perfil-topbar">
         <AuthBrand />
-
         <div className="perfil-actions">
           <button
             type="button"
@@ -412,26 +455,19 @@ export default function PerfilPublicoUsuario() {
         </div>
       </div>
 
-      {/* Hero com o mesmo gradiente, mas texto de perfil público */}
       <header className="perfil-hero">
         <div className="perfil-hero__copy">
           <h1>Perfil público do vendedor</h1>
-          <p>Veja informações do vendedor e os anúncios ativos.</p>
+          <p>Veja informações, reputação e os anúncios ativos.</p>
         </div>
       </header>
 
-      {/* Conteúdo principal reaproveitando a mesma largura/container */}
       <div className="perfil-container">
-        {/* Card principal: dados básicos + ranking */}
+        {/* === CARD PRINCIPAL DO VENDEDOR === */}
         <section className="perfil-publico__card">
           <div className="perfil-publico__left">
             <div className="perfil-publico__avatar">{initials}</div>
-
             <div className="perfil-publico__info">
-              <p className="perfil-publico__demo">
-                Dados de perfil e ranking são mockados enquanto o backend não
-                está pronto.
-              </p>
               <h2>{vendor.name}</h2>
               <p className="perfil-publico__since">
                 {formatSince(vendor.memberSince)}
@@ -446,260 +482,131 @@ export default function PerfilPublicoUsuario() {
               >
                 {level}
               </span>
-
-              <p className="perfil-publico__ranking-text">
-                {description} Este painel será alimentado automaticamente assim
-                que integrarmos com o backend.
-              </p>
+              <p className="perfil-publico__ranking-text">{description}</p>
 
               <div className="perfil-publico__ranking-bar">
                 <div className="perfil-publico__ranking-bar-track">
+                  {/* aqui usamos width diretamente para evitar qualquer
+                     incompatibilidade com CSS custom properties no inline style */}
                   <div
                     className="perfil-publico__ranking-bar-fill"
-                    style={{ '--nivel-pct': `${score}%` }}
+                    style={{ width: `${score}%` }}
                   />
                 </div>
                 <div className="perfil-publico__ranking-bar-legend">
-                  <span>Baixa</span>
-                  <span>Média</span>
-                  <span>Alta</span>
-                  <span>Excelente</span>
+                  <span>Iniciante</span>
+                  <span>Médio</span>
+                  <span>Alto</span>
+                  <span>Top</span>
                 </div>
               </div>
 
               <div className="perfil-publico__ranking-metrics">
                 <span className="perfil-publico__ranking-pill">
-                  Nota média {avgRating.toFixed(1)} / 5
+                  Nota {Number(vendor.avgRating).toFixed(1)}
                 </span>
                 <span className="perfil-publico__ranking-pill">
-                  {totalReviews}{' '}
-                  {totalReviews === 1
-                    ? 'avaliação de compradores'
-                    : 'avaliações de compradores'}
+                  {totalReviews} avaliações
                 </span>
                 <span className="perfil-publico__ranking-pill">
-                  {totalSales >= 100
-                    ? '+100 vendas concluídas'
-                    : `${totalSales} vendas concluídas`}
+                  {vendor.totalSales} vendas est.
                 </span>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Bloco de avaliações */}
+        {/* === SEÇÃO DE AVALIAÇÕES === */}
         <section className="perfil-publico__reviews">
           <header className="perfil-publico__reviews-header">
             <div>
-              <h3 className="perfil-publico__reviews-title">
-                Avaliações sobre este vendedor
-              </h3>
+              <h3 className="perfil-publico__reviews-title">Avaliações</h3>
               <span className="perfil-publico__reviews-count">
-                {totalReviews}{' '}
-                {totalReviews === 1
-                  ? 'avaliação registrada'
-                  : 'avaliações registradas'}
+                {totalReviews} opiniões
               </span>
             </div>
 
             <div className="perfil-publico__reviews-summary">
               <div className="perfil-publico__reviews-score">
                 <span className="perfil-publico__reviews-score-value">
-                  {avgRating.toFixed(1)}
-                </span>
-                <span className="perfil-publico__reviews-score-label">
-                  média geral
+                  {Number(vendor.avgRating).toFixed(1)}
                 </span>
               </div>
-              <RatingStars value={avgRating} />
+              <RatingStars value={vendor.avgRating} />
 
               {totalReviews > 0 && (
                 <div className="perfil-publico__reviews-actions">
-                  <div className="perfil-publico__reviews-controls">
-                    <button
-                      type="button"
-                      className="perfil-publico__reviews-arrow"
-                      onClick={handlePrevPage}
-                      disabled={safePage === 0}
-                      aria-label="Ver avaliações anteriores"
-                    >
-                      ‹
-                    </button>
-                    <button
-                      type="button"
-                      className="perfil-publico__reviews-arrow"
-                      onClick={handleNextPage}
-                      disabled={safePage >= totalPages - 1}
-                      aria-label="Ver próximas avaliações"
-                    >
-                      ›
-                    </button>
-                  </div>
+                  <button
+                    className="perfil-publico__reviews-arrow"
+                    onClick={handlePrevPage}
+                    disabled={safePage === 0}
+                    type="button"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    className="perfil-publico__reviews-arrow"
+                    onClick={handleNextPage}
+                    disabled={safePage >= totalPages - 1}
+                    type="button"
+                  >
+                    ›
+                  </button>
                 </div>
               )}
             </div>
           </header>
 
           {totalReviews === 0 ? (
-            <p className="perfil-publico__reviews-empty">
-              Ainda não há avaliações para este vendedor. Assim que as primeiras
-              compras forem concluídas, os feedbacks aparecerão aqui.
-            </p>
+            <div className="perfil-publico__reviews-empty">
+              <p>Este vendedor ainda não possui avaliações públicas.</p>
+            </div>
           ) : (
-            <>
-              <div className="perfil-publico__reviews-list">
-                {reviewsPageItems.map((review) => (
-                  <article
-                    key={review.id}
-                    className="perfil-publico__review-item"
-                  >
-                    <div className="perfil-publico__review-top">
-                      <div>
-                        <div className="perfil-publico__review-author">
-                          {review.authorName || 'Comprador da plataforma'}
-                        </div>
-                        <div className="perfil-publico__review-date">
-                          {formatDate(review.createdAt)}
-                        </div>
-                      </div>
-                      <RatingStars value={review.rating} />
-                    </div>
-
-                    <p className="perfil-publico__review-comment">
-                      {review.comment || 'Sem comentário adicional.'}
-                    </p>
-                  </article>
-                ))}
-              </div>
-
-              <div className="perfil-publico__reviews-footer">
-                <button
-                  type="button"
-                  className="perfil-publico__reviews-button"
-                  onClick={openReviewModal}
+            <div className="perfil-publico__reviews-list">
+              {reviewsPageItems.map((review, idx) => (
+                <article
+                  key={review.id || idx}
+                  className="perfil-publico__review-item"
                 >
-                  Avaliar este vendedor
-                </button>
-
-                {totalPages > 1 && (
-                  <span className="perfil-publico__reviews-pagination">
-                    Página {safePage + 1} de {totalPages}
-                  </span>
-                )}
-              </div>
-            </>
+                  <div className="perfil-publico__review-top">
+                    <div>
+                      <div className="perfil-publico__review-author">
+                        {review.authorName}
+                      </div>
+                      <div className="perfil-publico__review-date">
+                        {formatDate(review.createdAt)}
+                      </div>
+                    </div>
+                    <RatingStars value={review.rating} />
+                  </div>
+                  <p className="perfil-publico__review-comment">
+                    {review.comment || 'Sem comentário.'}
+                  </p>
+                </article>
+              ))}
+            </div>
           )}
+
+          <div className="perfil-publico__reviews-footer">
+            <button
+              type="button"
+              className="perfil-publico__reviews-button"
+              onClick={() => setIsReviewModalOpen(true)}
+            >
+              Avaliar este vendedor
+            </button>
+          </div>
         </section>
 
-        {/* Modal de avaliação (visual, ainda sem backend) */}
-        {isReviewModalOpen && (
-          <div
-            className="perfil-publico__modal-backdrop"
-            role="dialog"
-            aria-modal="true"
-          >
-            <div className="perfil-publico__modal">
-              <header className="perfil-publico__modal-header">
-                <h2 className="perfil-publico__modal-title">Avaliar vendedor</h2>
-                <button
-                  type="button"
-                  className="perfil-publico__modal-close"
-                  onClick={closeReviewModal}
-                  aria-label="Fechar"
-                >
-                  ×
-                </button>
-              </header>
-
-              <p className="perfil-publico__modal-subtitle">
-                Conte para outros compradores como foi a sua experiência com{' '}
-                <strong>{vendor.name || 'este vendedor'}</strong>.
-              </p>
-
-              <form onSubmit={handleSubmitReview}>
-                <div className="perfil-publico__modal-field">
-                  <label className="perfil-publico__modal-label">
-                    Nota do vendedor
-                  </label>
-                  <div className="perfil-publico__modal-stars">
-                    {Array.from({ length: 5 }).map((_, idx) => {
-                      const value = idx + 1;
-                      const active = value <= reviewRating;
-                      return (
-                        <button
-                          key={value}
-                          type="button"
-                          className={
-                            active
-                              ? 'perfil-publico__modal-star perfil-publico__modal-star--active'
-                              : 'perfil-publico__modal-star'
-                          }
-                          onClick={() => setReviewRating(value)}
-                          aria-label={`Dar nota ${value} de 5`}
-                        >
-                          ★
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="perfil-publico__modal-field">
-                  <label className="perfil-publico__modal-label">
-                    Comentário (opcional)
-                  </label>
-                  <textarea
-                    className="perfil-publico__modal-textarea"
-                    rows={4}
-                    placeholder="Fale sobre atendimento, cumprimento do combinado, tempo de resposta..."
-                    value={reviewComment}
-                    onChange={(e) => setReviewComment(e.target.value)}
-                  />
-                </div>
-
-                <div className="perfil-publico__modal-actions">
-                  <button
-                    type="button"
-                    className="perfil-publico__modal-button perfil-publico__modal-button--ghost"
-                    onClick={closeReviewModal}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="perfil-publico__modal-button perfil-publico__modal-button--primary"
-                  >
-                    Enviar avaliação
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Anúncios deste vendedor */}
+        {/* === SEÇÃO DE ANÚNCIOS (VITRINE DO VENDEDOR) === */}
         <section className="perfil-publico__section">
-          <h3>Anúncios deste vendedor</h3>
+          <h3>Anúncios ativos de {vendor.name}</h3>
 
-          {skinsLoading && (
-            <p className="perfil-publico__placeholder">
-              Carregando anúncios deste vendedor...
-            </p>
-          )}
-
-          {!skinsLoading && skinsError && (
-            <p className="perfil-publico__placeholder perfil-publico__placeholder--error">
-              {skinsError}
-            </p>
-          )}
-
-          {!skinsLoading && !skinsError && totalSkins === 0 && (
-            <p className="perfil-publico__placeholder">
-              Este vendedor ainda não possui skins ativas na plataforma.
-            </p>
-          )}
-
-          {!skinsLoading && !skinsError && totalSkins > 0 && (
+          {sellerSkins.length === 0 ? (
+            <div className="perfil-publico__placeholder">
+              <p>Nenhum anúncio ativo no momento.</p>
+            </div>
+          ) : (
             <div className="perfil-publico__skins-grid">
               {sellerSkins.map((anuncio) => {
                 const key = anuncio.id || anuncio._id;
@@ -719,28 +626,88 @@ export default function PerfilPublicoUsuario() {
         </section>
       </div>
 
-      {/* Chat flutuante para o botão "Contato" dos cards */}
-      {user &&
-        (chatOpen ? (
-          <div className="chat-float">
-            <ChatFlutuante
-              usuarioAlvo={chatOpen}
-              onFechar={() => setChatOpen(null)}
-            />
+      {/* === MODAL DE AVALIAÇÃO DO VENDEDOR === */}
+      {isReviewModalOpen && (
+        <div
+          className="perfil-publico__modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="perfil-publico__modal">
+            <header className="perfil-publico__modal-header">
+              <h2 className="perfil-publico__modal-title">Avaliar vendedor</h2>
+              <button
+                className="perfil-publico__modal-close"
+                onClick={() => setIsReviewModalOpen(false)}
+                type="button"
+              >
+                ×
+              </button>
+            </header>
+            <p className="perfil-publico__modal-subtitle">
+              Como foi sua experiência com <strong>{vendor.name}</strong>?
+            </p>
+            <form onSubmit={handleSubmitReview}>
+              <div className="perfil-publico__modal-field">
+                <label className="perfil-publico__modal-label">Nota</label>
+                <div className="perfil-publico__modal-stars">
+                  {[1, 2, 3, 4, 5].map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      className={`perfil-publico__modal-star ${
+                        v <= reviewRating
+                          ? 'perfil-publico__modal-star--active'
+                          : ''
+                      }`}
+                      onClick={() => setReviewRating(v)}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="perfil-publico__modal-field">
+                <label className="perfil-publico__modal-label">
+                  Comentário
+                </label>
+                <textarea
+                  className="perfil-publico__modal-textarea"
+                  rows={4}
+                  placeholder="Ex: Vendedor rápido, produto entregue conforme combinado..."
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                />
+              </div>
+              <div className="perfil-publico__modal-actions">
+                <button
+                  type="button"
+                  className="perfil-publico__modal-button perfil-publico__modal-button--ghost"
+                  onClick={() => setIsReviewModalOpen(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="perfil-publico__modal-button perfil-publico__modal-button--primary"
+                >
+                  Enviar
+                </button>
+              </div>
+            </form>
           </div>
-        ) : (
-          <button
-            className="chat-mini-bubble"
-            title="Mensagens"
-            onClick={() => setChatOpen({ id: 'ultimo', nome: 'Mensagens' })}
-          >
-            <span className="chat-mini-bubble__icon">Chat</span>
-            <span className="chat-mini-bubble__label">Mensagens</span>
-            {unreads > 0 && (
-              <span className="chat-mini-bubble__badge">{unreads}</span>
-            )}
-          </button>
-        ))}
+        </div>
+      )}
+
+      {/* === CHAT FLUTUANTE === */}
+      {user && chatOpen && (
+        <div className="chat-float">
+          <ChatFlutuante
+            usuarioAlvo={chatOpen}
+            onFechar={() => setChatOpen(null)}
+          />
+        </div>
+      )}
     </div>
   );
 }

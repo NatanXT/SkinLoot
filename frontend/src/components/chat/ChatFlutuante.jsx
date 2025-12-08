@@ -15,6 +15,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
   const [contatos, setContatos] = useState([]);
   const [contatoAtivoId, setContatoAtivoId] = useState(null);
   const [texto, setTexto] = useState('');
+  const [anuncioIdAtivo, setAnuncioIdAtivo] = useState(null);
 
   const mensagensRef = useRef(null); // Ref para auto-scroll
   const stompClientRef = useRef(null); // Ref do cliente STOMP
@@ -83,10 +84,10 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
           console.log('WebSocket conectado.');
 
           // Inscrição na fila privada do usuário
-          stompClient.subscribe(`/user/queue/mensagens`, (payload) => {
-            const novaMensagem = JSON.parse(payload.body);
-            receberMensagem(novaMensagem);
-          });
+            stompClient.subscribe(`/topic/user/${user.id}`, (payload) => {
+                const novaMensagem = JSON.parse(payload.body);
+                receberMensagem(novaMensagem);
+            });
         },
         onStompError: (frame) => {
           console.error('Erro STOMP:', frame.headers['message'], frame.body);
@@ -175,6 +176,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
   useEffect(() => {
     if (!usuarioAlvo || !usuarioAlvo.seller) {
       setTexto(''); // Limpa o texto se fechar
+      setAnuncioIdAtivo(null);
       return;
     }
     const { seller, skin } = usuarioAlvo;
@@ -203,7 +205,11 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
         return [...prev, novoContato];
       });
 
-      setContatoAtivoId(usuarioAlvo.id);
+      setContatoAtivoId(usuarioAlvo.seller.id);
+
+      if (skin && skin.id) {
+        setAnuncioIdAtivo(skin.id);
+      }
 
       const precoFmt = skin.preco?.toLocaleString('pt-BR', {
         style: 'currency',
@@ -312,9 +318,16 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
 
     if (!textoLimpo || !contatoAtivoId || !stompClientRef.current) return;
 
+      // DEBUG NO FRONTEND
+      console.log("Tentando enviar mensagem:", {
+          destinatarioId: contatoAtivoId,
+          conteudo: textoLimpo,
+          remetenteId: user.id
+      });
     const payload = {
       destinatarioId: contatoAtivoId,
       conteudo: textoLimpo,
+        remetenteId: user.id
     };
 
     stompClientRef.current.publish({
@@ -378,6 +391,21 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
                   </div>
                 </div>
                 <div className="chat-topo-actions">
+                  {/* ✅ BOTÃO AVALIAR (Só aparece se tivermos um ID de anúncio) */}
+                  {anuncioIdAtivo && (
+                      <button
+                          className="btn-avaliar"
+                          style={{ marginRight: '8px', fontSize: '0.8rem', cursor: 'pointer' }}
+                          onClick={() => {
+                            // AQUI VOCÊ VAI ABRIR O MODAL DE AVALIAÇÃO
+                            console.log("Abrir modal para avaliar anúncio:", anuncioIdAtivo);
+                            // ex: setModalAvaliacaoAberto(true);
+                          }}
+                          title="Avaliar negociação"
+                      >
+                        ⭐
+                      </button>
+                  )}
                   <button
                     className="btn-voltar"
                     onClick={() => setContatoAtivoId(null)}

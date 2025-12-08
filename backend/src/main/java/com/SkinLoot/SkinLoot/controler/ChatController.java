@@ -53,11 +53,30 @@ public class ChatController {
      */
     @MessageMapping("/chat/enviar")
     public void enviarMensagem(@Payload ChatMessageRequest request, Principal principal) {
+        System.out.println(">>> CHEGOU MENSAGEM NO CONTROLLER!");
+        System.out.println("Conteúdo: " + request.getConteudo());
+        System.out.println("Remetente ID (Payload): " + request.getRemetenteId());
+        // ----------------------------------------
 
-        // Pega o remetente (usuário logado)
-        String username = principal.getName();
-        Usuario remetente = usuarioRepository.findByEmail(username)
-                .orElseThrow(() -> new RuntimeException("Usuário remetente não encontrado."));
+        Usuario remetente = null;
+
+        // 1. Tenta pegar pela autenticação do WebSocket (Cenário Ideal)
+        if (principal != null) {
+            String username = principal.getName();
+            remetente = usuarioRepository.findByEmail(username).orElse(null);
+        }
+
+        // 2. Se falhou (principal nulo), tenta pegar pelo ID enviado no corpo (Fallback)
+        if (remetente == null && request.getRemetenteId() != null) {
+            remetente = usuarioRepository.findById(request.getRemetenteId()).orElse(null);
+        }
+
+        // 3. Se ainda assim não achou ninguém, lança erro
+        if (remetente == null) {
+            throw new RuntimeException("Remetente não identificado. Logue novamente.");
+        }
+
+        // --- DAQUI PARA BAIXO SEGUE IGUAL AO SEU CÓDIGO ANTERIOR ---
 
         // Pega o destinatário
         Usuario destinatario = usuarioRepository.findById(request.getDestinatarioId())
@@ -78,23 +97,20 @@ public class ChatController {
                 msgSalva.getTimestamp(),
                 remetente.getNome(),
                 destinatario.getNome(),
-                remetente.getId(), // <-- Adicionado ID do remetente
+                remetente.getId(),
                 destinatario.getId()
         );
 
         // ✅ MUDANÇA 4: Envia a mensagem em tempo real para o destinatário
         // Ele se inscreveu em "/user/queue/mensagens"
-        messagingTemplate.convertAndSendToUser(
-                destinatario.getEmail(),      // O email (username) do destinatário
-                "/queue/mensagens",         // O tópico privado
-                responseDto                 // O payload (a mensagem)
+        messagingTemplate.convertAndSend(
+                "/topic/user/" + destinatario.getId(),
+                responseDto
         );
 
-        // ✅ MUDANÇA 5: (Opcional) Envia a mensagem de volta para o remetente
-        // Isso permite que o remetente veja sua própria mensagem aparecer em outros dispositivos
-        messagingTemplate.convertAndSendToUser(
-                remetente.getEmail(),
-                "/queue/mensagens",
+        // 2. Envia para o canal do Remetente (para aparecer na sua tela também)
+        messagingTemplate.convertAndSend(
+                "/topic/user/" + remetente.getId(),
                 responseDto
         );
     }

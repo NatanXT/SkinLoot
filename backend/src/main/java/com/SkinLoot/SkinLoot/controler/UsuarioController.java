@@ -1,9 +1,6 @@
 package com.SkinLoot.SkinLoot.controler;
 
-import com.SkinLoot.SkinLoot.dto.LoginRequest;
-import com.SkinLoot.SkinLoot.dto.LoginResponse;
-import com.SkinLoot.SkinLoot.dto.RegisterRequest;
-import com.SkinLoot.SkinLoot.dto.UsuarioDto;
+import com.SkinLoot.SkinLoot.dto.*;
 import com.SkinLoot.SkinLoot.model.Usuario;
 import com.SkinLoot.SkinLoot.repository.UsuarioRepository;
 import com.SkinLoot.SkinLoot.service.UsuarioService;
@@ -52,6 +49,14 @@ public class UsuarioController {
         Optional<Usuario> usuario = usuarioRepository.findById(id);
         return usuario.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/public/{id}") // Nova rota pública
+    public ResponseEntity<UsuarioResponse> getPerfilPublico(@PathVariable UUID id) {
+        return usuarioRepository.findById(id)
+                .map(UsuarioResponse::of) // Converte para o DTO seguro (sem senha)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/user")
