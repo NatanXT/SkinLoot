@@ -19,13 +19,14 @@ public class Anuncio {
 
     // ===================== Identificação =====================
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
 
     // ===================== Dados principais =====================
     private String titulo;
 
+    @Column(columnDefinition = "text")
     private String descricao;
 
     private BigDecimal preco;

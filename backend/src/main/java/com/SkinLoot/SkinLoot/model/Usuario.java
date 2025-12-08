@@ -18,7 +18,7 @@ import java.util.UUID;
 public class Usuario {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO) // Gera automaticamente um UUID para o ID
+    @GeneratedValue(strategy = GenerationType.UUID) // Gera automaticamente um UUID para o ID
     private UUID id;
 
     @Column(nullable = false) // Nome obrigatório
