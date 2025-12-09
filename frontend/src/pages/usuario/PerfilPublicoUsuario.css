@@ -1,4 +1,4 @@
-/* src/pages/usuario/PerfilUsuario.css
+/* src/pages/usuario/PerfilUsuario.css */
 
 /* TOKENS DARK */
 :root{
@@ -1140,11 +1140,28 @@
   opacity: 1;
 }
 
+/* >>> AQUI são os cards do perfil público que você mostrou <<< */
 .perfil-publico__skins-grid {
   margin-top: 0.75rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1rem;
+  /* Cards mais largos: mínimo de 360px, o que já limita a 3 colunas
+     dentro do container de ~1200px */
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1.25rem;
+}
+
+/* Desktop grande: força exatamente 3 colunas quando houver espaço */
+@media (min-width: 1200px) {
+  .perfil-publico__skins-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Mobile / tablet: um card por linha para legibilidade */
+@media (max-width: 768px) {
+  .perfil-publico__skins-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Modal de avaliação do vendedor */
@@ -1335,4 +1352,12 @@
   .perfil-publico__reviews {
     padding: 0.95rem 1rem 1.05rem;
   }
+}
+
+/* Contêiner do chat flutuante no perfil público */
+.chat-float {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2400;
 }

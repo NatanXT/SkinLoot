@@ -1,15 +1,4 @@
-// ==========================================================
-// Caminho: src/pages/usuario/PerfilPublicoUsuario.jsx
-// ----------------------------------------------------------
-// Tela de perfil público de um vendedor/usuário na SkinLoot.
-// - Busca anúncios ativos do vendedor no backend
-// - Busca avaliações reais do vendedor no backend (quando existir endpoint)
-// - Calcula nível de confiança (mesma regra do DetalheAnuncio)
-// - Exibe vitrine das skins deste vendedor
-// - Permite abrir o chat flutuante para contato
-// - Modal para o usuário avaliar o vendedor (mock, aguardando backend)
-// ==========================================================
-
+// src/pages/usuario/PerfilPublicoUsuario.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -22,7 +11,6 @@ import SkinCard from '../../components/skin/SkinCard.jsx';
 import ChatFlutuante from '../../components/chat/ChatFlutuante';
 import AuthBrand from '../../components/logo/AuthBrand';
 
-// Mock de vendedor mantido como fallback em desenvolvimento
 const MOCK_VENDOR = {
   id: 'demo-seller',
   name: 'Vendedor Demo',
@@ -31,10 +19,6 @@ const MOCK_VENDOR = {
   avgRating: 4.8,
 };
 
-/**
- * Avaliações mock reaproveitando a ideia do DetalheAnuncio.
- * Mantidas como referência de layout enquanto o backend é integrado.
- */
 const MOCK_REVIEWS = [
   {
     id: 'rev-1',
@@ -130,7 +114,6 @@ const toMs = (v) => {
 
 /**
  * Calcula nível de confiança do vendedor com base em nota média e volume de vendas.
- * Mesma lógica aplicada na tela de DetalheAnuncio.
  */
 function computeTrustLevel(avgRating, totalSales) {
   const avg = Number.isFinite(Number(avgRating)) ? Number(avgRating) : 0;
@@ -169,12 +152,12 @@ export default function PerfilPublicoUsuario() {
   const { id } = useParams();
   const { user } = useAuth();
 
-  // --- Estados de dados vindos do backend ---
+  // Estados de dados vindos do backend
   const [vendor, setVendor] = useState(null); // Dados agregados do vendedor
   const [sellerSkins, setSellerSkins] = useState([]); // Anúncios deste vendedor
   const [reviews, setReviews] = useState([]); // Avaliações do vendedor
 
-  // --- Estados de controle de UI ---
+  // Estados de controle de UI
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -190,9 +173,7 @@ export default function PerfilPublicoUsuario() {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState('');
 
-  // ----------------------------------------------------
   // Efeito principal: busca anúncios + avaliações no backend
-  // ----------------------------------------------------
   useEffect(() => {
     let isMounted = true; // Evita setState depois do unmount
 
@@ -206,7 +187,7 @@ export default function PerfilPublicoUsuario() {
         setLoading(true);
         setError('');
 
-        // 1) Buscar anúncios ativos deste vendedor
+        // Buscar anúncios ativos deste vendedor
         let listaSkins = [];
         try {
           const resAnuncios = await api.get(`/anuncios/usuario/${id}/ativos`);
@@ -224,7 +205,7 @@ export default function PerfilPublicoUsuario() {
           // Não tratamos como erro fatal: o vendedor pode apenas não ter anúncios ativos.
         }
 
-        // 2) Buscar avaliações reais do vendedor (quando backend estiver disponível)
+        // Buscar avaliações reais do vendedor (quando backend estiver disponível)
         let listaReviews = [];
         try {
           const resReviews = await anuncioService.buscarAvaliacoesDoVendedor(
@@ -244,7 +225,7 @@ export default function PerfilPublicoUsuario() {
           // Se der erro, podemos manter listaReviews vazia ou cair no mock se quiser.
         }
 
-        // 3) Montar objeto agregador do vendedor.
+        // Montar objeto agregador do vendedor.
         let nomeVendedor = 'Usuário da SkinLoot';
         let dataEntrada = new Date().toISOString(); // Fallback: hoje
 
@@ -293,9 +274,7 @@ export default function PerfilPublicoUsuario() {
     };
   }, [id]);
 
-  // ----------------------------------------------------
   // Lógica de interação e dados derivados
-  // ----------------------------------------------------
 
   // Iniciais do vendedor para o "avatar" circular
   const initials = useMemo(() => {
@@ -349,14 +328,18 @@ export default function PerfilPublicoUsuario() {
    */
   function abrirChatPara(anuncio) {
     if (exigirLogin('contato', { anuncioId: anuncio?.id })) return;
-    setChatOpen({
-      seller: { id: vendor.id, nome: vendor.name },
+
+    const payload = {
+      seller: { id: vendor?.id, nome: vendor?.name },
       skin: {
         id: anuncio.id,
         titulo: anuncio.title || anuncio.skinNome,
         preco: anuncio.price || anuncio.preco,
       },
-    });
+    };
+
+    console.log('[PerfilPublicoUsuario] abrindo chat com payload:', payload);
+    setChatOpen(payload);
   }
 
   /**
@@ -368,10 +351,6 @@ export default function PerfilPublicoUsuario() {
     else abrirChatPara(anuncio);
   }
 
-  /**
-   * Envio da avaliação do vendedor.
-   * Neste momento é apenas mock, aguardando implementação no backend.
-   */
   function handleSubmitReview(e) {
     e.preventDefault();
     if (exigirLogin('avaliar', { vendedorId: id })) return;
@@ -383,10 +362,7 @@ export default function PerfilPublicoUsuario() {
     setReviewRating(0);
   }
 
-  // ----------------------------------------------------
   // Renderização condicional (loading / erro)
-  // ----------------------------------------------------
-
   if (loading) {
     return (
       <div
@@ -435,10 +411,7 @@ export default function PerfilPublicoUsuario() {
     vendor.totalSales,
   );
 
-  // ----------------------------------------------------
   // JSX principal da página
-  // ----------------------------------------------------
-
   return (
     <div className="perfil-root">
       {/* Navbar simplificada, reaproveitando a identidade do AuthBrand */}
@@ -463,7 +436,7 @@ export default function PerfilPublicoUsuario() {
       </header>
 
       <div className="perfil-container">
-        {/* === CARD PRINCIPAL DO VENDEDOR === */}
+        {/*  CARD PRINCIPAL DO VENDEDOR  */}
         <section className="perfil-publico__card">
           <div className="perfil-publico__left">
             <div className="perfil-publico__avatar">{initials}</div>
@@ -516,7 +489,7 @@ export default function PerfilPublicoUsuario() {
           </div>
         </section>
 
-        {/* === SEÇÃO DE AVALIAÇÕES === */}
+        {/*  SEÇÃO DE AVALIAÇÕES  */}
         <section className="perfil-publico__reviews">
           <header className="perfil-publico__reviews-header">
             <div>
@@ -598,7 +571,7 @@ export default function PerfilPublicoUsuario() {
           </div>
         </section>
 
-        {/* === SEÇÃO DE ANÚNCIOS (VITRINE DO VENDEDOR) === */}
+        {/* SEÇÃO DE ANÚNCIOS (VITRINE DO VENDEDOR) */}
         <section className="perfil-publico__section">
           <h3>Anúncios ativos de {vendor.name}</h3>
 
@@ -615,8 +588,8 @@ export default function PerfilPublicoUsuario() {
                     key={key}
                     data={anuncio}
                     liked={likes.has(key)}
-                    onLike={() => handleLikeToggle(key)}
                     onContato={() => abrirChatPara(anuncio)}
+                    onLike={() => handleLikeToggle(key)}
                     onComprarFora={() => comprarFora(anuncio)}
                   />
                 );
@@ -626,7 +599,7 @@ export default function PerfilPublicoUsuario() {
         </section>
       </div>
 
-      {/* === MODAL DE AVALIAÇÃO DO VENDEDOR === */}
+      {/*  MODAL DE AVALIAÇÃO DO VENDEDOR  */}
       {isReviewModalOpen && (
         <div
           className="perfil-publico__modal-backdrop"
@@ -699,10 +672,11 @@ export default function PerfilPublicoUsuario() {
         </div>
       )}
 
-      {/* === CHAT FLUTUANTE === */}
-      {user && chatOpen && (
+      {/*  CHAT FLUTUANTE  */}
+      {user && (
         <div className="chat-float">
           <ChatFlutuante
+            isOpen={!!chatOpen}
             usuarioAlvo={chatOpen}
             onFechar={() => setChatOpen(null)}
           />
