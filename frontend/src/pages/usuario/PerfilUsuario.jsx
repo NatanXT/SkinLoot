@@ -388,7 +388,7 @@ export default function PerfilUsuario() {
     const raw = skin?._raw || {}; // Pega os dados brutos da API
 
     // NOVO: Define o jogo selecionado
-    const jogoId = raw.jogfo?.id || skin?.jogo?.id || '';
+    const jogoId = raw.jogo?.id || skin?.jogo?.id || '';
 
     // Se já havia jogo, travamos o select; se não havia, deixamos editar.
     jogoInicialVazioRef.current = !jogoId;
