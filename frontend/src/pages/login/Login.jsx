@@ -6,7 +6,7 @@ import './Auth.css';
 import AuthBrand from '../../components/logo/AuthBrand';
 
 // Wrapper da API e storage (tokens)
-import api, { storage } from '../../services/api';
+import api, { storage } from '../../services/api.js';
 
 // E-mail simples
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -267,7 +267,7 @@ export default function Login() {
             {isLoading ? 'Entrando...' : 'Entrar'}
           </button>
 
-          {/* OAuth Google */}
+          {/* OAuth Google
           <div className="oauth">
             <button
               type="button"
@@ -278,7 +278,7 @@ export default function Login() {
               {GoogleIcon}
               <span>Entrar com Google</span>
             </button>
-          </div>
+          </div> */}
 
           <p className="switch">
             Não tem conta?{' '}

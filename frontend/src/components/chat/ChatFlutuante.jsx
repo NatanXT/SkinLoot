@@ -5,7 +5,7 @@ import './ChatFlutuante.css';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useAuth } from '../../services/AuthContext';
-import api from '../../services/api';
+import api from '../../services/api.js';
 
 export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
   // CONTEXTO E ESTADOS PRINCIPAIS

@@ -6,7 +6,7 @@ import './PerfilPublicoUsuario.css';
 
 import { useAuth } from '../../services/AuthContext.jsx';
 import anuncioService from '../../services/anuncioService.js';
-import api from '../../services/api';
+import api from '../../services/api.js';
 import SkinCard from '../../components/skin/SkinCard.jsx';
 import ChatFlutuante from '../../components/chat/ChatFlutuante';
 import AuthBrand from '../../components/logo/AuthBrand';
@@ -462,8 +462,8 @@ export default function PerfilPublicoUsuario() {
                   {/* aqui usamos width diretamente para evitar qualquer
                      incompatibilidade com CSS custom properties no inline style */}
                   <div
-                    className="perfil-publico__ranking-bar-fill"
-                    style={{ width: `${score}%` }}
+                    className="vendedor-confianca-barra__fill-inner"
+                    style={{ "--nivel-pct": `${score}%` }}
                   />
                 </div>
                 <div className="perfil-publico__ranking-bar-legend">

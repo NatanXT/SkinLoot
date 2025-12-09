@@ -21,6 +21,19 @@ function fmtBRL(n) {
   });
 }
 
+function normalizarNomeJogo(nome) {
+  if (!nome) return null;
+
+  const n = nome.toLowerCase();
+
+  if (n.includes('cs2') || n.includes('counter-strike 2')) return 'CS2';
+  if (n.includes('cs:go') || n.includes('csgo') || n.includes('counter-strike'))
+    return 'CS:GO';
+  if (n.includes('league of legends') || n.includes('lol')) return 'LoL';
+
+  return nome; // fallback original
+}
+
 /**
  * Formata data em dd/mm/aaaa (para avaliações)
  */
@@ -96,6 +109,15 @@ function resolverDetalhes(anuncio) {
     anuncio?.detalhes?.csgo ||
     null;
 
+  const detalhesCs2 =
+    raw?.detalhesCs2 ||
+    raw?.detalhes?.cs2 ||
+    raw?.cs2 ||
+    anuncio?.detalhesCs2 ||
+    anuncio?.detalhes?.cs2 ||
+    anuncio?.cs2 ||
+    null;
+
   const detalhesLol =
     raw?.detalhesLol ||
     raw?.detalhes?.lol ||
@@ -110,7 +132,7 @@ function resolverDetalhes(anuncio) {
     anuncio?.details ||
     null;
 
-  return { detalhesCsgo, detalhesLol, detalhesGenericos };
+  return { detalhesCsgo, detalhesCs2, detalhesLol, detalhesGenericos };
 }
 
 // COMPONENTES DE APOIO — Detalhes por jogo e reputação do vendedor
@@ -121,13 +143,51 @@ function resolverDetalhes(anuncio) {
 function DetalhesPorJogo({
   jogoNome,
   detalhesCsgo,
+  detalhesCs2,
   detalhesLol,
   detalhesGenericos,
 }) {
   if (!jogoNome && !detalhesCsgo && !detalhesLol && !detalhesGenericos)
     return null;
 
-  //  Caso: CS:GO 
+  // Caso: CS2
+  if (jogoNome === 'CS2') {
+    const d = detalhesCs2 || {};
+    const tem =
+      d.desgasteFloat ||
+      d.patternIndex ||
+      d.exterior ||
+      typeof d.statTrak === 'boolean';
+
+    if (!tem) return null;
+
+    return (
+      <fieldset className="box box--detalhes" tabIndex={0}>
+        <legend>Detalhes (CS2)</legend>
+        <div className="kv-grid">
+          <div className="kv">
+            <span className="k">Desgaste (Float)</span>
+            <span className="v">{d.desgasteFloat ?? '—'}</span>
+          </div>
+          <div className="kv">
+            <span className="k">Pattern Index</span>
+            <span className="v">{d.patternIndex ?? '—'}</span>
+          </div>
+        </div>
+
+        <div className="kv">
+          <span className="k">Exterior</span>
+          <span className="v">{d.exterior ?? '—'}</span>
+        </div>
+        <div className="kv">
+          <span className="k">StatTrak™</span>
+          <span className="v">{d.statTrak ? 'Sim' : 'Não'}</span>
+        </div>
+      </fieldset>
+    );
+  }
+
+  //  Caso: CS:GO
   if (
     jogoNome === 'CS:GO' ||
     jogoNome === 'Counter-Strike' ||
@@ -166,7 +226,7 @@ function DetalhesPorJogo({
     );
   }
 
-  //  Caso: League of Legends 
+  //  Caso: League of Legends
   if (jogoNome === 'League of Legends' || jogoNome === 'LoL') {
     const d = detalhesLol || {};
     const tem = d.championName || d.tipoSkin || d.chroma;
@@ -191,7 +251,7 @@ function DetalhesPorJogo({
     );
   }
 
-  //  Caso genérico 
+  //  Caso genérico
   if (detalhesGenericos && typeof detalhesGenericos === 'object') {
     const entradas = Object.entries(detalhesGenericos);
     if (entradas.length === 0) return null;
@@ -325,30 +385,30 @@ function SecaoReputacaoVendedor({
   onAbrirAvaliacao,
 }) {
   const mediaEfetiva =
-      mediaNota !== null && mediaNota !== undefined ? mediaNota : 0;
+    mediaNota !== null && mediaNota !== undefined ? mediaNota : 0;
 
   const vendasEfetivas =
-      totalVendas !== null && totalVendas !== undefined ? totalVendas : 0;
+    totalVendas !== null && totalVendas !== undefined ? totalVendas : 0;
 
   // Se não vier array ou vier vazio, usamos array vazio (nada de fake)
   const avaliacoesEfetivas = Array.isArray(avaliacoes) ? avaliacoes : [];
 
   const totalAvaliacoesEfetivo =
-      totalAvaliacoes && totalAvaliacoes > 0
-          ? totalAvaliacoes
-          : avaliacoesEfetivas.length;
+    totalAvaliacoes && totalAvaliacoes > 0
+      ? totalAvaliacoes
+      : avaliacoesEfetivas.length;
 
   const { nivel, descricao, classe, score } = calcularNivelConfianca(
-      mediaEfetiva,
-      vendasEfetivas,
+    mediaEfetiva,
+    vendasEfetivas,
   );
 
   // Carrossel simples, 3 avaliações por "página"
   const [pagina, setPagina] = useState(0);
   const itensPorPagina = 3;
   const totalPaginas = Math.max(
-      1,
-      Math.ceil(avaliacoesEfetivas.length / itensPorPagina),
+    1,
+    Math.ceil(avaliacoesEfetivas.length / itensPorPagina),
   );
   const paginaSegura = Math.min(pagina, totalPaginas - 1);
   const inicio = paginaSegura * itensPorPagina;
@@ -460,47 +520,51 @@ function SecaoReputacaoVendedor({
               </p>
             )}
 
-              {listaAvaliacoes.map((av, idx) => {
-                  // Mapeamento robusto dos campos
-                  const nome =
-                      av.autorNome ||
-                      av.buyerName ||
-                      av.usuarioNome ||
-                      av.avaliadorNome || // Tente adicionar este, comum em Java
-                      av.nome ||
-                      'Comprador da plataforma';
+            {listaAvaliacoes.map((av, idx) => {
+              // Mapeamento robusto dos campos
+              const nome =
+                av.autorNome ||
+                av.buyerName ||
+                av.usuarioNome ||
+                av.avaliadorNome || // Tente adicionar este, comum em Java
+                av.nome ||
+                'Comprador da plataforma';
 
-                  const nota = Number(av.nota ?? av.rating ?? av.score ?? av.stars ?? 0);
+              const nota = Number(
+                av.nota ?? av.rating ?? av.score ?? av.stars ?? 0,
+              );
 
-                  const comentario =
-                      av.comentario ||
-                      av.comment ||
-                      av.message ||
-                      av.texto ||
-                      av.description ||
-                      'Sem comentário adicional.';
+              const comentario =
+                av.comentario ||
+                av.comment ||
+                av.message ||
+                av.texto ||
+                av.description ||
+                'Sem comentário adicional.';
 
-                  const data =
-                      fmtData(av.dataCriacao || av.createdAt || av.date || av.timestamp) || '';
+              const data =
+                fmtData(
+                  av.dataCriacao || av.createdAt || av.date || av.timestamp,
+                ) || '';
 
-                  return (
-                      <article
-                          key={av.id || av._id || idx}
-                          className="vendedor-avaliacao-item"
-                      >
-                          <div className="vendedor-avaliacao-topo">
-                              <div>
-                                  <div className="vendedor-avaliacao-autor">{nome}</div>
-                                  {data && (
-                                      <div className="vendedor-avaliacao-data">{data}</div>
-                                  )}
-                              </div>
-                              <EstrelasAvaliacao nota={nota} />
-                          </div>
-                          <p className="vendedor-avaliacao-comentario">{comentario}</p>
-                      </article>
-                  );
-              })}
+              return (
+                <article
+                  key={av.id || av._id || idx}
+                  className="vendedor-avaliacao-item"
+                >
+                  <div className="vendedor-avaliacao-topo">
+                    <div>
+                      <div className="vendedor-avaliacao-autor">{nome}</div>
+                      {data && (
+                        <div className="vendedor-avaliacao-data">{data}</div>
+                      )}
+                    </div>
+                    <EstrelasAvaliacao nota={nota} />
+                  </div>
+                  <p className="vendedor-avaliacao-comentario">{comentario}</p>
+                </article>
+              );
+            })}
           </div>
 
           <div className="vendedor-avaliacoes-footer">
@@ -525,7 +589,7 @@ function SecaoReputacaoVendedor({
 
 // COMPONENTE PRINCIPAL — DetalheAnuncio
 export default function DetalheAnuncio() {
-  //  Hooks de contexto e navegação 
+  //  Hooks de contexto e navegação
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -536,17 +600,21 @@ export default function DetalheAnuncio() {
   const [carregando, setCarregando] = useState(true);
   const [avaliacoesReais, setAvaliacoesReais] = useState([]);
   const vendedorId = useMemo(() => {
-    return anuncio?.usuarioId || anuncio?.seller?.id || anuncio?.vendedorId || null;
+    return (
+      anuncio?.usuarioId || anuncio?.seller?.id || anuncio?.vendedorId || null
+    );
   }, [anuncio]);
 
   const carregarAvaliacoes = async (idDoVendedor) => {
     if (!idDoVendedor) return;
     try {
-      const dados = await anuncioService.buscarAvaliacoesDoVendedor(idDoVendedor);
+      const dados = await anuncioService.buscarAvaliacoesDoVendedor(
+        idDoVendedor,
+      );
       // Garante que é um array para não quebrar o map
       setAvaliacoesReais(Array.isArray(dados) ? dados : []);
     } catch (error) {
-      console.error("Erro ao buscar avaliações:", error);
+      console.error('Erro ao buscar avaliações:', error);
     }
   };
 
@@ -656,7 +724,7 @@ export default function DetalheAnuncio() {
         vendedorId: vendedorId,
         anuncioId: id, // Passamos o ID deste anúncio
         nota: notaAvaliacao,
-        comentario: textoAvaliacao
+        comentario: textoAvaliacao,
       });
 
       alert('Avaliação enviada com sucesso!');
@@ -664,10 +732,11 @@ export default function DetalheAnuncio() {
 
       // Atualiza a lista na tela sem precisar de F5
       await carregarAvaliacoes(vendedorId);
-
     } catch (error) {
       console.error(error);
-      alert('Erro ao enviar avaliação. Verifique se você já comprou com este vendedor ou tente novamente.');
+      alert(
+        'Erro ao enviar avaliação. Verifique se você já comprou com este vendedor ou tente novamente.',
+      );
     }
   }
 
@@ -680,11 +749,21 @@ export default function DetalheAnuncio() {
         setCarregando(true);
         setErro('');
         const dados = await anuncioService.buscarPorId(id);
+        console.log('DEBUG DETALHES:', {
+          jogo: jogoInfo?.nome,
+          csgo: detalhesCsgo,
+          cs2: detalhesCs2,
+          lol: detalhesLol,
+          generico: detalhesGenericos,
+        });
+        console.log('ANÚNCIO BRUTO DO BACKEND:', dados);
+        console.log('RAW:', dados?._raw);
         if (cancel) return;
         setAnuncio(dados);
         setLiked(Boolean(dados?._raw?.liked || false));
-// A variável definida logo acima na linha 611 é 'dados'
-        const vId = dados?.usuarioId || dados?.seller?.id || dados?.vendedorId;        if (vId) {
+        // A variável definida logo acima na linha 611 é 'dados'
+        const vId = dados?.usuarioId || dados?.seller?.id || dados?.vendedorId;
+        if (vId) {
           await carregarAvaliacoes(vId);
         }
       } catch (e) {
@@ -721,13 +800,13 @@ export default function DetalheAnuncio() {
   const raw = useMemo(() => getRaw(anuncio), [anuncio]);
   const linkExterno = raw?.linkExterno || null;
   const jogoInfo = useMemo(() => resolverInfoJogo(anuncio), [anuncio]);
-  const { detalhesCsgo, detalhesLol, detalhesGenericos } = useMemo(
-      () => resolverDetalhes(anuncio),
-      [anuncio],
+  const { detalhesCsgo, detalhesCs2, detalhesLol, detalhesGenericos } = useMemo(
+    () => resolverDetalhes(anuncio),
+    [anuncio],
   );
 
-
-  const nomeVendedor = anuncio?.seller?.name || anuncio?.usuarioNome || anuncio?.vendedorNome;
+  const nomeVendedor =
+    anuncio?.seller?.name || anuncio?.usuarioNome || anuncio?.vendedorNome;
 
   // CÁLCULO DAS ESTATÍSTICAS REAIS
   // Aqui pegamos a lista real que veio do backend (avaliacoesReais) e calculamos a média
@@ -735,18 +814,19 @@ export default function DetalheAnuncio() {
 
   const mediaNotaCalculada = useMemo(() => {
     if (listaAvaliacoesParaExibir.length === 0) return 0;
-    console.log("DADOS VINDOS DO BACKEND:", listaAvaliacoesParaExibir);
-      const soma = listaAvaliacoesParaExibir.reduce((acc, av) => {
-          // Tenta ler a nota de vários lugares possíveis para garantir
-          const valor = Number(av.nota ?? av.rating ?? av.score ?? av.stars ?? 0);
-          return acc + valor;
-      }, 0);
+    console.log('DADOS VINDOS DO BACKEND:', listaAvaliacoesParaExibir);
+    const soma = listaAvaliacoesParaExibir.reduce((acc, av) => {
+      // Tenta ler a nota de vários lugares possíveis para garantir
+      const valor = Number(av.nota ?? av.rating ?? av.score ?? av.stars ?? 0);
+      return acc + valor;
+    }, 0);
 
-      return soma / listaAvaliacoesParaExibir.length;
+    return soma / listaAvaliacoesParaExibir.length;
   }, [listaAvaliacoesParaExibir]);
 
   // Total de vendas (Se o backend não manda, mantemos 0 ou fallback)
-  const totalVendasReal = raw?.totalVendasVendedor || raw?.sellerSalesCount || 0;
+  const totalVendasReal =
+    raw?.totalVendasVendedor || raw?.sellerSalesCount || 0;
 
   // Estados de carregamento e erro
   if (carregando) {
@@ -851,8 +931,9 @@ export default function DetalheAnuncio() {
 
           {/* Detalhes específicos por jogo */}
           <DetalhesPorJogo
-            jogoNome={jogoInfo?.nome}
+            jogoNome={normalizarNomeJogo(jogoInfo?.nome)}
             detalhesCsgo={detalhesCsgo}
+            detalhesCs2={detalhesCs2}
             detalhesLol={detalhesLol}
             detalhesGenericos={detalhesGenericos}
           />
@@ -917,12 +998,12 @@ export default function DetalheAnuncio() {
 
       {/* Seção de reputação do vendedor (abaixo do card principal) */}
       <SecaoReputacaoVendedor
-          nomeVendedor={nomeVendedor}
-          mediaNota={mediaNotaCalculada}      // <--- CORREÇÃO: Usar a média calculada do backend
-          totalAvaliacoes={listaAvaliacoesParaExibir.length} // <--- CORREÇÃO: Usar o tamanho da lista real
-          totalVendas={totalVendasReal}       // <--- CORREÇÃO: Usar o total de vendas real
-          avaliacoes={listaAvaliacoesParaExibir} // <--- CORREÇÃO: Passar a lista real
-          onAbrirAvaliacao={abrirModalAvaliacao}
+        nomeVendedor={nomeVendedor}
+        mediaNota={mediaNotaCalculada} // <--- CORREÇÃO: Usar a média calculada do backend
+        totalAvaliacoes={listaAvaliacoesParaExibir.length} // <--- CORREÇÃO: Usar o tamanho da lista real
+        totalVendas={totalVendasReal} // <--- CORREÇÃO: Usar o total de vendas real
+        avaliacoes={listaAvaliacoesParaExibir} // <--- CORREÇÃO: Passar a lista real
+        onAbrirAvaliacao={abrirModalAvaliacao}
       />
 
       {/* Modal de avaliação do vendedor */}
@@ -1011,7 +1092,6 @@ export default function DetalheAnuncio() {
         </div>
       )}
 
-    
       {/* CHAT FLUTUANTE */}
       {user &&
         (chatAberto ? (

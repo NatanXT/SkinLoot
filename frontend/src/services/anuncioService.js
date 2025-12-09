@@ -4,7 +4,7 @@ import api from './api';
 const USE_DEV_API = import.meta.env.VITE_ENABLE_DEV_API === 'true';
 const LS_KEY = 'dev_skins';
 
-//  helpers DEV (localStorage) 
+//  helpers DEV (localStorage)
 function devLoad() {
   try {
     const raw = localStorage.getItem(LS_KEY);
@@ -68,7 +68,7 @@ function dataUrlToParts(dataUrl) {
   }
 }
 
-//  Normalização (quando usar backend) 
+//  Normalização (quando usar backend)
 function normalizarDoBackend(anuncio = {}) {
   const id = anuncio.id ?? anuncio.uuid ?? anuncio._id ?? uid();
   const title =
@@ -99,18 +99,21 @@ function normalizarDoBackend(anuncio = {}) {
 
   // Detecta automaticamente o nome do jogo se vier vazio
   if (!jogo || Object.keys(jogo).length === 0) {
-    if (anuncio.cs2 || anuncio.detalhesCsgo || anuncio.detalhes_csgo) {
+    if (anuncio.cs2 || anuncio.detalhesCs2 || anuncio.detalhes_cs2) {
+      jogo = { nome: 'CS2' };
+    } else if (anuncio.csgo || anuncio.detalhesCsgo || anuncio.detalhes_csgo) {
       jogo = { nome: 'CS:GO' };
     } else if (anuncio.lol || anuncio.detalhesLol || anuncio.detalhes_lol) {
       jogo = { nome: 'League of Legends' };
     }
   }
 
+  // Suporte REAL ao CS2 / CSGO (ambos têm estrutura idêntica)
   const detalhesCsgo =
-    anuncio.detalhesCsgo ||
-    anuncio.detalhes_csgo ||
-    anuncio.cs2 || // suporte ao backend atual
-    null;
+    anuncio.detalhesCsgo || anuncio.detalhes_csgo || anuncio.csgo || null;
+
+  const detalhesCs2 =
+    anuncio.cs2 || anuncio.detalhesCs2 || anuncio.detalhes_cs2 || null;
 
   const detalhesLol =
     anuncio.detalhesLol ||
@@ -162,6 +165,7 @@ function normalizarDoBackend(anuncio = {}) {
       ...anuncio,
       jogo,
       detalhesCsgo,
+      detalhesCs2,
       detalhesLol,
     },
 
@@ -175,7 +179,7 @@ function normalizarDoBackend(anuncio = {}) {
   };
 }
 
-//  BUSCAR POR ID 
+//  BUSCAR POR ID
 export async function buscarPorId(id) {
   if (USE_DEV_API) {
     // DEV: busca no localStorage
@@ -198,7 +202,7 @@ export async function buscarPorId(id) {
   return normalizarDoBackend(data);
 }
 
-//  LISTAGENS 
+//  LISTAGENS
 function extrairArray(data) {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.content)) return data.content;
@@ -237,7 +241,7 @@ export async function listarFeedNormalizado() {
   return extrairArray(data).map(normalizarDoBackend);
 }
 
-//  CRUD 
+//  CRUD
 export async function criarAnuncio(payload) {
   const body = {
     titulo: payload.titulo,
@@ -248,6 +252,7 @@ export async function criarAnuncio(payload) {
     skinName: payload.skinName,
     jogoId: payload.jogoId,
     detalhesCsgo: payload.detalhesCsgo,
+    detalhesCs2: payload.detalhesCs2,
     detalhesLol: payload.detalhesLol,
     skinImageUrl: payload.skinImageUrl,
     skinImageBase64: payload.skinImageBase64,
@@ -299,6 +304,7 @@ export async function editarAnuncio(id, payload) {
     skinName: payload.skinName,
     jogoId: payload.jogoId,
     detalhesCsgo: payload.detalhesCsgo,
+    detalhesCs2: payload.detalhesCs2,
     detalhesLol: payload.detalhesLol,
     skinImageUrl: payload.skinImageUrl,
     skinImageBase64: payload.skinImageBase64,
@@ -359,15 +365,14 @@ export async function enviarAvaliacao(payload) {
   // O backend espera um objeto que corresponda ao DTO AvaliacaoRequest
   const body = {
     avaliadoId: payload.vendedorId, // O ID de quem recebe a avaliação
-    anuncioId: payload.anuncioId,   // Opcional, para vincular ao anúncio
+    anuncioId: payload.anuncioId, // Opcional, para vincular ao anúncio
     nota: payload.nota,
-    comentario: payload.comentario
+    comentario: payload.comentario,
   };
 
   const { data } = await api.post('/avaliacoes', body);
   return data;
 }
-
 
 export default {
   listarMinhasNormalizadas,
@@ -380,5 +385,5 @@ export default {
   likeAnuncio,
   unlikeAnuncio,
   buscarAvaliacoesDoVendedor,
-  enviarAvaliacao
+  enviarAvaliacao,
 };
