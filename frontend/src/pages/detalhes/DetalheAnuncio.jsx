@@ -191,7 +191,8 @@ function DetalhesPorJogo({
   if (
     jogoNome === 'CS:GO' ||
     jogoNome === 'Counter-Strike' ||
-    jogoNome === 'Counter-Strike 2'
+    jogoNome === 'Counter-Strike 2' ||
+      jogoNome === 'CS2'
   ) {
     const d = detalhesCsgo || {};
     const tem =
@@ -203,7 +204,7 @@ function DetalhesPorJogo({
 
     return (
       <fieldset className="box box--detalhes" tabIndex={0}>
-        <legend>Detalhes (CS:GO)</legend>
+        <legend>Detalhes (Counter Strike)</legend>
         <div className="kv-grid">
           <div className="kv">
             <span className="k">Desgaste (Float)</span>

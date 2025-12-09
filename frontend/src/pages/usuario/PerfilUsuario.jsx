@@ -578,8 +578,7 @@ export default function PerfilUsuario() {
 
         jogoId: selectedJogoId,
         detalhesCsgo:
-          selectedGameName === 'CS:GO' ? formEdicao.detalhesCsgo : null,
-        detalhesCs2: selectedGameName === 'CS2' ? formEdicao.detalhesCs2 : null,
+            ['CS2', 'CS:GO', 'Counter Strike'].includes(selectedGameName) ? formEdicao.detalhesCsgo : null,
         detalhesLol:
           selectedGameName === 'League of Legends'
             ? formEdicao.detalhesLol
@@ -1294,9 +1293,9 @@ export default function PerfilUsuario() {
                 </div>
 
                 {/* Campos de CS:GO */}
-                {selectedGameName === 'CS:GO' && (
+                {['CS:GO', 'CS2', 'Counter Strike'].includes(selectedGameName) && (
                   <fieldset className="perfil-form__fieldset">
-                    <legend>Detalhes (CS:GO)</legend>
+                    <legend>Detalhes ({selectedGameName})</legend>
 
                     <div className="perfil-form__grid-2">
                       <div className="perfil-form__row">
