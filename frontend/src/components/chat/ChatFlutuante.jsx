@@ -1,15 +1,4 @@
-// ======================================================
-// ChatFlutuante.jsx
-// Caminho: src/components/chat/ChatFlutuante.jsx
-// ------------------------------------------------------
-// Componente principal do chat flutuante.
-// Recursos:
-// - Botão minimizado ("pill") com badge de não lidas
-// - Janela expandida com lista de conversas e mensagens
-// - Envio e recebimento via WebSocket (STOMP + SockJS)
-// - Histórico de conversa via API REST
-// - Auto-scroll e controle de não lidas
-// ------------------------------------------------------
+// frontend/src/components/chat/ChatFlutuante.jsx
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import './ChatFlutuante.css';
@@ -19,22 +8,19 @@ import { useAuth } from '../../services/AuthContext';
 import api from '../../services/api';
 
 export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
-  // ======================================================
   // CONTEXTO E ESTADOS PRINCIPAIS
-  // ======================================================
   const { user } = useAuth(); // Usuário autenticado (quem sou eu)
 
   const [aberto, setAberto] = useState(false);
   const [contatos, setContatos] = useState([]);
   const [contatoAtivoId, setContatoAtivoId] = useState(null);
   const [texto, setTexto] = useState('');
+  const [anuncioIdAtivo, setAnuncioIdAtivo] = useState(null);
 
   const mensagensRef = useRef(null); // Ref para auto-scroll
   const stompClientRef = useRef(null); // Ref do cliente STOMP
 
-  // ======================================================
   // DERIVADOS MEMOIZADOS
-  // ======================================================
 
   // Contato atualmente ativo
   const contatoAtivo = useMemo(
@@ -69,6 +55,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     if (contatoAtivo) return contatoAtivo;
     const candidato = contatos
       .map((c) => ({
+
         contato: c,
         lastTs:
           c.mensagens?.length > 0
@@ -79,17 +66,13 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     return candidato?.contato || null;
   }, [contatoComNaoLidaMaisRecente, contatoAtivo, contatos]);
 
-  // ======================================================
   // AUTO-SCROLL AO TROCAR CONVERSA OU RECEBER NOVAS MSGS
-  // ======================================================
   useEffect(() => {
     if (!mensagensRef.current) return;
     mensagensRef.current.scrollTop = mensagensRef.current.scrollHeight;
   }, [contatoAtivoId, contatoAtivo?.mensagens.length]);
 
-  // ======================================================
   // CONEXÃO WEBSOCKET (STOMP)
-  // ======================================================
   useEffect(() => {
     if (user && !stompClientRef.current) {
       console.log('Iniciando conexão WebSocket...');
@@ -101,10 +84,10 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
           console.log('WebSocket conectado.');
 
           // Inscrição na fila privada do usuário
-          stompClient.subscribe(`/user/queue/mensagens`, (payload) => {
-            const novaMensagem = JSON.parse(payload.body);
-            receberMensagem(novaMensagem);
-          });
+            stompClient.subscribe(`/topic/user/${user.id}`, (payload) => {
+                const novaMensagem = JSON.parse(payload.body);
+                receberMensagem(novaMensagem);
+            });
         },
         onStompError: (frame) => {
           console.error('Erro STOMP:', frame.headers['message'], frame.body);
@@ -125,53 +108,54 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     };
   }, [user]);
 
-    useEffect(() => {
-        if (!user || !user.id) return; // Só roda se o usuário estiver carregado
+  useEffect(() => {
+    if (!user || !user.id) return; // Só roda se o usuário estiver carregado
 
-        const carregarListaDeConversas = async () => {
-            try {
-                // 1. Chama o novo endpoint
-                const { data: ultimasMensagens } = await api.get('/api/chat/minhas-conversas');
+    const carregarListaDeConversas = async () => {
+      try {
+        // 1. Chama o novo endpoint
+        const { data: ultimasMensagens } = await api.get(
+          '/api/chat/minhas-conversas',
+        );
 
-                // 2. Mapeia a resposta (lista de ChatMessageResponse)
-                const listaContatos = ultimasMensagens.map((msg) => {
-                    const souEu = msg.remetenteId === user.id;
-                    const outroUsuarioId = souEu ? msg.destinatarioId : msg.remetenteId;
-                    const outroUsuarioNome = souEu ? msg.destinatarioNome : msg.remetenteNome;
+        // 2. Mapeia a resposta (lista de ChatMessageResponse)
+        const listaContatos = ultimasMensagens.map((msg) => {
+          const souEu = msg.remetenteId === user.id;
+          const outroUsuarioId = souEu ? msg.destinatarioId : msg.remetenteId;
+          const outroUsuarioNome = souEu
+            ? msg.destinatarioNome
+            : msg.remetenteNome;
 
-                    // 3. Formata a última mensagem para o estado local
-                    const msgFormatada = {
-                        id: msg.id,
-                        autor: souEu ? 'eu' : 'ele',
-                        texto: msg.conteudo,
-                        timestamp: msg.timestamp,
-                    };
+          // 3. Formata a última mensagem para o estado local
+          const msgFormatada = {
+            id: msg.id,
+            autor: souEu ? 'eu' : 'ele',
+            texto: msg.conteudo,
+            timestamp: msg.timestamp,
+          };
 
-                    // 4. Cria o objeto de Contato
-                    return {
-                        id: outroUsuarioId,
-                        nome: outroUsuarioNome,
-                        foto: 'https://i.pravatar.cc/60?u=' + outroUsuarioId, // Placeholder
-                        status: 'offline', // Placeholder (precisaria de sistema de presença)
-                        naoLidas: 0, // TODO: O backend precisaria calcular isso
-                        mensagens: [msgFormatada], // Começa com a última mensagem
-                    };
-                });
+          // 4. Cria o objeto de Contato
+          return {
+            id: outroUsuarioId,
+            nome: outroUsuarioNome,
+            foto: 'https://i.pravatar.cc/60?u=' + outroUsuarioId, // Placeholder
+            status: 'offline', // Placeholder (precisaria de sistema de presença)
+            naoLidas: 0, // TODO: O backend precisaria calcular isso
+            mensagens: [msgFormatada], // Começa com a última mensagem
+          };
+        });
 
-                // 5. Define o estado com todas as conversas
-                setContatos(listaContatos);
+        // 5. Define o estado com todas as conversas
+        setContatos(listaContatos);
+      } catch (error) {
+        console.error('Falha ao carregar lista de conversas:', error);
+      }
+    };
 
-            } catch (error) {
-                console.error("Falha ao carregar lista de conversas:", error);
-            }
-        };
+    carregarListaDeConversas();
+  }, [user]); // Roda uma vez quando 'user' é carregado
 
-        carregarListaDeConversas();
-    }, [user]); // Roda uma vez quando 'user' é carregado
-
-  // ======================================================
   // FUNÇÃO: Carregar histórico de conversa (REST)
-  // ======================================================
   const carregarHistorico = async (alvo) => {
     try {
       const { data } = await api.get(`/api/chat/conversa/${alvo.id}`);
@@ -188,12 +172,11 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     }
   };
 
-  // ======================================================
   // EFEITO: Quando usuário clica em "Contato" (usuarioAlvo)
-  // ======================================================
   useEffect(() => {
     if (!usuarioAlvo || !usuarioAlvo.seller) {
       setTexto(''); // Limpa o texto se fechar
+      setAnuncioIdAtivo(null);
       return;
     }
     const { seller, skin } = usuarioAlvo;
@@ -203,8 +186,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
       const novoContato = {
         id: seller.id,
         nome: seller.nome,
-        foto:
-            seller.foto ?? `https://i.pravatar.cc/60?u=${seller.id}`,
+        foto: seller.foto ?? `https://i.pravatar.cc/60?u=${seller.id}`,
         status: 'online agora',
         naoLidas: 0,
         mensagens: [],
@@ -223,7 +205,11 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
         return [...prev, novoContato];
       });
 
-      setContatoAtivoId(usuarioAlvo.id);
+      setContatoAtivoId(usuarioAlvo.seller.id);
+
+      if (skin && skin.id) {
+        setAnuncioIdAtivo(skin.id);
+      }
 
       const precoFmt = skin.preco?.toLocaleString('pt-BR', {
         style: 'currency',
@@ -231,7 +217,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
       });
 
       setTexto(
-          `Olá, ${seller.nome}. Vi seu anúncio da skin "${skin.titulo}" por ${precoFmt}. Podemos conversar?`,
+        `Olá, ${seller.nome}. Vi seu anúncio da skin "${skin.titulo}" por ${precoFmt}. Podemos conversar?`,
       );
       // --- FIM DA ALTERAÇÃO ---
     };
@@ -239,9 +225,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     setupContato();
   }, [usuarioAlvo]);
 
-  // ======================================================
   // FUNÇÃO: Receber mensagem do WebSocket
-  // ======================================================
   const receberMensagem = (novaMensagem) => {
     if (!user || !user.id) {
       console.error('Usuário não encontrado no AuthContext.');
@@ -300,9 +284,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     });
   };
 
-  // ======================================================
   // FUNÇÃO: Alternar janela do chat (abrir/fechar)
-  // ======================================================
   function toggleChat() {
     setAberto((prev) => !prev);
 
@@ -312,9 +294,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     setContatoAtivoId(null);
   }
 
-  // ======================================================
   // FUNÇÃO: Abrir conversa e carregar histórico (se necessário)
-  // ======================================================
   async function abrirConversa(c) {
     if (c.mensagens.length === 0) {
       const historico = await carregarHistorico(c);
@@ -331,18 +311,23 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     setContatoAtivoId(c.id);
   }
 
-  // ======================================================
   // FUNÇÃO: Enviar mensagem (via WebSocket)
-  // ======================================================
   function enviarMensagem(e) {
     e.preventDefault();
     const textoLimpo = texto.trim();
 
     if (!textoLimpo || !contatoAtivoId || !stompClientRef.current) return;
 
+      // DEBUG NO FRONTEND
+      console.log("Tentando enviar mensagem:", {
+          destinatarioId: contatoAtivoId,
+          conteudo: textoLimpo,
+          remetenteId: user.id
+      });
     const payload = {
       destinatarioId: contatoAtivoId,
       conteudo: textoLimpo,
+        remetenteId: user.id
     };
 
     stompClientRef.current.publish({
@@ -353,17 +338,13 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
     setTexto('');
   }
 
-  // ======================================================
   // RENDERIZAÇÃO
-  // ======================================================
   return (
     <div className="chat-flutuante">
       {aberto ? (
-        // --------------------------------------------------
         // JANELA EXPANDIDA
-        // --------------------------------------------------
         <div className="chat-janela chat-janela--rounded">
-          {/* ===== LISTA DE CONVERSAS ===== */}
+          {/*  LISTA DE CONVERSAS  */}
           {!contatoAtivo ? (
             <div className="chat-lista">
               <div className="chat-topo">
@@ -372,8 +353,9 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
                   className="btn-fechar"
                   onClick={toggleChat}
                   aria-label="Fechar"
+                  type="button"
                 >
-                  ✕
+                  X
                 </button>
               </div>
 
@@ -399,7 +381,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
               </div>
             </div>
           ) : (
-            // ===== CONVERSA ATIVA =====
+            //  CONVERSA ATIVA 
             <>
               <div className="chat-topo">
                 <div className="user">
@@ -409,19 +391,36 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
                   </div>
                 </div>
                 <div className="chat-topo-actions">
+                  {/* ✅ BOTÃO AVALIAR (Só aparece se tivermos um ID de anúncio) */}
+                  {anuncioIdAtivo && (
+                      <button
+                          className="btn-avaliar"
+                          style={{ marginRight: '8px', fontSize: '0.8rem', cursor: 'pointer' }}
+                          onClick={() => {
+                            // AQUI VOCÊ VAI ABRIR O MODAL DE AVALIAÇÃO
+                            console.log("Abrir modal para avaliar anúncio:", anuncioIdAtivo);
+                            // ex: setModalAvaliacaoAberto(true);
+                          }}
+                          title="Avaliar negociação"
+                      >
+                        ⭐
+                      </button>
+                  )}
                   <button
                     className="btn-voltar"
                     onClick={() => setContatoAtivoId(null)}
                     aria-label="Voltar para lista"
+                    type="button"
                   >
-                    ←
+                    {'<'}
                   </button>
                   <button
                     className="btn-fechar"
                     onClick={toggleChat}
                     aria-label="Fechar"
+                    type="button"
                   >
-                    ✕
+                    X
                   </button>
                 </div>
               </div>
@@ -454,17 +453,16 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
           )}
         </div>
       ) : (
-        // --------------------------------------------------
         // BOTÃO MINIMIZADO ("PILL")
-        // --------------------------------------------------
         <button
           className="chat-icone chat-icone--pill"
           onClick={toggleChat}
           aria-label="Abrir mensagens"
+          type="button"
         >
           {/* Ícone à esquerda */}
           <span className="chat-icone__left">
-            <span className="chat-icone__emoji">💬</span>
+            <span className="chat-icone__emoji">MSG</span>
             {totalNaoLidas > 0 && (
               <span className="chat-icone__badge">{totalNaoLidas}</span>
             )}

@@ -1,11 +1,10 @@
 // frontend/src/services/anuncioService.js
 import api from './api';
 
-// ✅ agora quem decide usar localStorage (mock) é este flag:
 const USE_DEV_API = import.meta.env.VITE_ENABLE_DEV_API === 'true';
 const LS_KEY = 'dev_skins';
 
-// --------- helpers DEV (localStorage) ----------
+//  helpers DEV (localStorage) 
 function devLoad() {
   try {
     const raw = localStorage.getItem(LS_KEY);
@@ -69,7 +68,7 @@ function dataUrlToParts(dataUrl) {
   }
 }
 
-// ------------ Normalização (quando usar backend) ------------
+//  Normalização (quando usar backend) 
 function normalizarDoBackend(anuncio = {}) {
   const id = anuncio.id ?? anuncio.uuid ?? anuncio._id ?? uid();
   const title =
@@ -95,7 +94,7 @@ function normalizarDoBackend(anuncio = {}) {
       '';
   }
 
-  // 🔹 Agora com suporte aos novos campos do backend (e correção do nome do jogo)
+  // Agora com suporte aos novos campos do backend (e correção do nome do jogo)
   let jogo = anuncio.jogo || null;
 
   // Detecta automaticamente o nome do jogo se vier vazio
@@ -176,7 +175,7 @@ function normalizarDoBackend(anuncio = {}) {
   };
 }
 
-// ================= BUSCAR POR ID =================
+//  BUSCAR POR ID 
 export async function buscarPorId(id) {
   if (USE_DEV_API) {
     // DEV: busca no localStorage
@@ -199,7 +198,7 @@ export async function buscarPorId(id) {
   return normalizarDoBackend(data);
 }
 
-// ================= LISTAGENS =================
+//  LISTAGENS 
 function extrairArray(data) {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.content)) return data.content;
@@ -238,7 +237,7 @@ export async function listarFeedNormalizado() {
   return extrairArray(data).map(normalizarDoBackend);
 }
 
-// ================= CRUD =================
+//  CRUD 
 export async function criarAnuncio(payload) {
   const body = {
     titulo: payload.titulo,
@@ -342,6 +341,34 @@ export async function unlikeAnuncio(id) {
   await api.delete(`/anuncios/${id}/unlike`);
 }
 
+export async function buscarAvaliacoesDoVendedor(usuarioId) {
+  if (USE_DEV_API) {
+    // Mock simples para desenvolvimento sem backend
+    return [];
+  }
+  const { data } = await api.get(`/avaliacoes/usuario/${usuarioId}`);
+  return data;
+}
+
+export async function enviarAvaliacao(payload) {
+  if (USE_DEV_API) {
+    console.log('DEV: Avaliação enviada', payload);
+    return { success: true };
+  }
+
+  // O backend espera um objeto que corresponda ao DTO AvaliacaoRequest
+  const body = {
+    avaliadoId: payload.vendedorId, // O ID de quem recebe a avaliação
+    anuncioId: payload.anuncioId,   // Opcional, para vincular ao anúncio
+    nota: payload.nota,
+    comentario: payload.comentario
+  };
+
+  const { data } = await api.post('/avaliacoes', body);
+  return data;
+}
+
+
 export default {
   listarMinhasNormalizadas,
   listarFeedNormalizado,
@@ -352,4 +379,6 @@ export default {
   reativarAnuncio,
   likeAnuncio,
   unlikeAnuncio,
+  buscarAvaliacoesDoVendedor,
+  enviarAvaliacao
 };

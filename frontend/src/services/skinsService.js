@@ -1,20 +1,10 @@
-// ============================================================================
-// Services de Skins (MOCK) — prontos para trocar por API real depois.
-// - getMinhasSkins(): lista as skins do usuário (mock persistido em localStorage)
-// - getPlanoLimit(planoKey): limite por plano
-// - editarSkin(id, payload): atualiza skin (aceita imagemFile ou imagemUrl)
-// - desativarSkin(id): marca ativo=false
-// - reativarSkin(id): marca ativo=true             // << NOVO
-// ----------------------------------------------------------------------------
-// Obs.: Mantemos tudo plugável para você ligar no backend quando quiser.
-// ============================================================================
 
-// import { api } from './api'; // assinatura mantida p/ futura API (não usada no mock)
+// import { api } from './api'; // assinatura mantida p/ futura API 
 import MockSkins from '../components/mock/MockSkins'; 
 
 const CHAVE_STORE = 'minhas_skins';
 
-// ---------- Helpers de mock ----------
+// Helpers de mock
 function lerStore() {
   try {
     const raw = localStorage.getItem(CHAVE_STORE);
@@ -127,7 +117,6 @@ export async function editarSkin(id, payload = {}) {
   await new Promise(r => setTimeout(r, 200));
   return atualizado;
 
-  // API real (futuro):
   // const form = new FormData();
   // if (payload.skinNome) form.append('skinNome', payload.skinNome);
   // if (payload.preco!=null) form.append('preco', payload.preco);
@@ -152,7 +141,6 @@ export async function desativarSkin(id) {
 
   await new Promise(r => setTimeout(r, 200));
 
-  // API real (exemplo futuro):
   // const { data } = await api.post(`/skins/${id}/desativar`);
   // return data;
 
@@ -160,7 +148,7 @@ export async function desativarSkin(id) {
 }
 
 /**
- * **NOVO**: Reativa uma skin (marca ativo=true).
+ * Reativa uma skin (marca ativo=true).
  * @param {string} id
  * @returns {Promise<{id:string, ativo:boolean}>}
  */
@@ -174,7 +162,6 @@ export async function reativarSkin(id) {
 
   await new Promise(r => setTimeout(r, 200));
 
-  // API real (exemplo futuro):
   // const { data } = await api.post(`/skins/${id}/reativar`);
   // return data;
 

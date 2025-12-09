@@ -23,7 +23,7 @@ function mockPerfil() {
 }
 
 export async function getMyProfile() {
-  // ✅ Em DEV: não dependa do backend
+  //Em DEV: não dependa do backend
   if (DEV_ENABLED) {
     return mockPerfil();
   }

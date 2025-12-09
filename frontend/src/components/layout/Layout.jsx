@@ -1,13 +1,3 @@
-// ==========================================================
-// Layout.jsx
-// ----------------------------------------------------------
-// Estrutura base de páginas autenticadas:
-// - Sidebar lateral
-// - Header fixo no topo
-// - Conteúdo dinâmico (children ou rotas aninhadas via Outlet)
-// - (Footer opcional - pode ser incluído globalmente)
-// ==========================================================
-
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../shared/Sidebar';

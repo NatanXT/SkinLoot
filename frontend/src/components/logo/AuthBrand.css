@@ -1,11 +1,4 @@
-/* ==========================================================
-   AuthBrand.css
-   ----------------------------------------------------------
-   Estilos do logotipo "SkinLoot" utilizado em telas de login,
-   registro e navbar. Responsivo e com animação de hover suave.
-========================================================== */
-
-/* ---------- Tokens / Variáveis ---------- */
+/*  Tokens / Variáveis  */
 :root {
   --bg: #0B0D10;           /* preto carvão */
   --panel: #11151A;        /* cinza profundo */
@@ -18,7 +11,7 @@
   --radius: 18px;
 }
 
-/* ---------- Marca / Logo ---------- */
+/*  Marca / Logo  */
 .brand,
 .auth-brand {
   display: flex;
@@ -45,7 +38,7 @@
   transform: translateY(-2px);
 }
 
-/* ---------- Responsividade ---------- */
+/*  Responsividade  */
 
 /* 1) Telas pequenas: escondemos o texto "SkinLoot" e mantemos apenas o ícone */
 @media (max-width: 640px) {

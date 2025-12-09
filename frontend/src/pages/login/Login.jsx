@@ -97,7 +97,6 @@ export default function Login() {
       api?.defaults?.baseURL ||
       import.meta.env.VITE_API_URL ||
       'http://localhost:8080';
-    // Ajuste a rota conforme seu backend (ex.: /auth/google ou /oauth2/authorization/google)
     const redirect = `${base.replace(/\/+$/, '')}/auth/google`;
     window.location.href = redirect;
   };

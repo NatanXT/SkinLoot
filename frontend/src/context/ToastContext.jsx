@@ -1,10 +1,3 @@
-// ==========================================================
-// ToastContext.jsx
-// ----------------------------------------------------------
-// Contexto global para exibir notificações do tipo "toast".
-// Inclui provider, hook e container automático de exibição.
-// ==========================================================
-
 import { createContext, useContext, useState, useCallback } from 'react';
 import './ToastContext.css';
 

@@ -7,7 +7,7 @@ public class ChatMessageRequest {
     private String conteudo;
     // ANTES: private Long destinatarioId;
     private UUID destinatarioId; // ✅ CORRIGIDO para UUID
-
+    private UUID remetenteId;
     // Getters e Setters
     public String getConteudo() {
         return conteudo;
@@ -23,5 +23,13 @@ public class ChatMessageRequest {
 
     public void setDestinatarioId(UUID destinatarioId) {
         this.destinatarioId = destinatarioId;
+    }
+
+    public UUID getRemetenteId() {
+        return remetenteId;
+    }
+
+    public void setRemetenteId(UUID remetenteId) {
+        this.remetenteId = remetenteId;
     }
 }

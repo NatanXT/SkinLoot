@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../../pages/login/Auth.css';
 import AuthBrand from '../../components/logo/AuthBrand';
 
-/* -------------------- Ícones (abre/fecha) -------------------- */
+/*  Ícones (abre/fecha)  */
 const Eye = (
   <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
     <path
@@ -22,7 +22,7 @@ const EyeOff = (
   </svg>
 );
 
-/* -------------------- Regex & Constantes -------------------- */
+/*  Regex & Constantes  */
 const NAME_RE = /^[A-Za-zÀ-ÖØ-öø-ÿ\s-]+$/;
 const NAME_BLOCK_RE = /[^A-Za-zÀ-ÖØ-öø-ÿ\s-]/g;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;

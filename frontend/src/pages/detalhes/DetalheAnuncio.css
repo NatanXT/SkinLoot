@@ -1,56 +1,40 @@
-/* ============================================================================
-   DetalheAnuncio.css
-   Caminho: frontend/src/pages/DetalheAnuncio.css
-
-   ESCOPO GERAL
-   - Tokens/variáveis (Dark padrão + Light auto/forçado)
-   - Estrutura principal do detalhe (container, imagem e info)
-   - Boxes de informações por jogo
-   - Botões gerais e botão de favoritar (ON/OFF + animações)
-   - Chat flutuante e mini-bubble
-   - Responsividade (Desktop, Tablet, Mobile)
-   ========================================================================= */
-
-/* ============================================================================
-   1. TOKENS — Tema DARK (padrão)
-   ========================================================================= */
+/*frontend/src/pages/DetalheAnuncio.css
+TOKENS — Tema DARK (padrão) */
 :root {
-  /* === Base === */
+  /*  Base  */
   --bg: #0B0D10;
   --panel: #11151A;
   --surface: #0E1217;
   --text: #E8F1F2;
   --muted: #7B8694;
 
-  /* === Marca === */
+  /*  Marca  */
   --primary: #39FF14;
   --secondary: #00C896;
   --ring: rgba(57,255,20,.45);
 
-  /* === Borda e sombra === */
+  /*  Borda e sombra  */
   --border: #1A2129;
   --border-strong: #1C2430;
   --shadow: 0 12px 40px rgba(0,0,0,.45);
 
-  /* === Gradientes === */
+  /*  Gradientes  */
   --card-grad: linear-gradient(180deg, #12171E, #0F1319);
   --panel-grad: linear-gradient(180deg, #0E1217, #0B0D10);
 
-  /* === Favoritar (estado base) === */
+  /*  Favoritar (estado base)  */
   --fav-off-bg: transparent;
   --fav-off-border: var(--primary);
   --fav-off-text: var(--primary);
   --fav-off-hover: color-mix(in oklab, var(--primary) 12%, transparent);
 
-  /* === Favoritar (ativo) === */
+  /*  Favoritar (ativo)  */
   --fav-on-bg: var(--primary);
   --fav-on-text: #0B0D10;
   --fav-on-ring: color-mix(in oklab, var(--primary) 40%, transparent);
 }
 
-/* ============================================================================
-   2. TOKENS — Tema CLARO (automático)
-   ========================================================================= */
+/* TOKENS — Tema CLARO (automático) */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --bg: #F7FAFC;
@@ -80,9 +64,7 @@
   }
 }
 
-/* ============================================================================
-   3. OVERRIDES MANUAIS — Forçar tema Light/Dark via atributo data-theme
-   ========================================================================= */
+/* OVERRIDES MANUAIS — Forçar tema Light/Dark via atributo data-theme */
 :root[data-theme="light"] {
   --bg: #F7FAFC;
   --panel: #FFFFFF;
@@ -108,9 +90,7 @@
 }
 :root[data-theme="dark"] {}
 
-/* ============================================================================
-   4. BASE DO DETALHE
-   ========================================================================= */
+/*  BASE DO DETALHE */
 .detalhe-root {
   background: var(--bg);
   color: var(--text);
@@ -140,9 +120,7 @@
   box-shadow: var(--shadow);
 }
 
-/* ============================================================================
-   5. IMAGEM DO ANÚNCIO
-   ========================================================================= */
+/* IMAGEM DO ANÚNCIO */
 .detalhe-imagem {
   position: relative;
   flex: 1 1 50%;
@@ -178,9 +156,7 @@
   box-shadow: 0 0 24px color-mix(in oklab, var(--primary) 35%, transparent);
 }
 
-/* ============================================================================
-   6. INFORMAÇÕES DO ANÚNCIO
-   ========================================================================= */
+/* INFORMAÇÕES DO ANÚNCIO */
 .detalhe-info {
   flex: 1 1 50%;
   display: flex;
@@ -200,9 +176,7 @@
   color: var(--primary);
 }
 
-/* ============================================================================
-   7. BOXES E LISTAS DE CHAVE-VALOR
-   ========================================================================= */
+/* BOXES E LISTAS DE CHAVE-VALOR */
 .kv {
   display: grid;
   grid-template-columns: 160px 1fr;
@@ -250,9 +224,7 @@
 .box--info { margin-top: 8px; }
 .box--detalhes { margin-top: 6px; }
 
-/* ============================================================================
-   8. BOTÕES PADRÃO
-   ========================================================================= */
+/* BOTÕES PADRÃO */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -293,9 +265,7 @@
   transform: translateY(-1px);
 }
 
-/* ============================================================================
-   9. BOTÃO DE FAVORITAR (ON/OFF)
-   ========================================================================= */
+/* BOTÃO DE FAVORITAR (ON/OFF) */
 
 /* Animações visuais */
 @keyframes fav-pop {
@@ -365,9 +335,7 @@
   margin-top: 8px;
 }
 
-/* ============================================================================
-   10. CHAT FLUTUANTE (mini bubble)
-   ========================================================================= */
+/* CHAT FLUTUANTE (mini bubble) */
 .chat-mini-bubble {
   position: fixed;
   bottom: 20px;
@@ -419,11 +387,429 @@
   max-height: min(70vh, 640px);
 }
 
-/* ============================================================================
-   11. RESPONSIVIDADE (Tablet e Mobile)
-   ========================================================================= */
+/* REPUTAÇÃO DO VENDEDOR (confiança + avaliações + carrossel) */
 
-/* === Tablet (≤1024px) === */
+.detalhe-vendedor {
+  max-width: 1200px;
+  margin: -12px auto 32px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.detalhe-vendedor__col {
+  flex: 1 1 0;
+}
+
+/* Card de confiança (estilo "nível do vendedor") */
+.vendedor-confianca-card {
+  background: var(--panel-grad);
+  border-radius: 16px;
+  border: 1px solid var(--border-strong);
+  padding: 16px 18px 18px;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.28);
+  width: 100%;
+}
+
+.vendedor-confianca-header {
+  margin-bottom: 10px;
+}
+
+.vendedor-confianca-nivel {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #16a34a;
+  background: rgba(22,163,74,0.12);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.vendedor-confianca-nivel--alto {
+  color: #16a34a;
+  background: rgba(22,163,74,0.12);
+}
+.vendedor-confianca-nivel--medio {
+  color: #eab308;
+  background: rgba(234,179,8,0.14);
+}
+.vendedor-confianca-nivel--baixo {
+  color: #f97316;
+  background: rgba(248,113,38,0.16);
+}
+.vendedor-confianca-nivel--novo {
+  color: #6b7280;
+  background: rgba(107,114,128,0.18);
+}
+
+.vendedor-confianca-sub {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Barra de confiança com "faixas" */
+.vendedor-confianca-barra {
+  margin-top: 14px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.vendedor-confianca-barra__track {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  height: 7px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.vendedor-confianca-barra__segment {
+  height: 100%;
+}
+
+.vendedor-confianca-barra__segment--1 {
+  background: #fecaca;
+}
+.vendedor-confianca-barra__segment--2 {
+  background: #fee2b3;
+}
+.vendedor-confianca-barra__segment--3 {
+  background: #fef9c3;
+}
+.vendedor-confianca-barra__segment--4 {
+  background: #bbf7d0;
+}
+
+/* preenchimento animado por cima */
+.vendedor-confianca-barra__fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.vendedor-confianca-barra__fill-inner {
+  height: 100%;
+  width: var(--nivel-pct, 40%);
+  max-width: 100%;
+  background: linear-gradient(90deg, #f97316, #eab308, #22c55e);
+  transition: width .35s ease-out;
+}
+
+/* Linha de legenda embaixo da barra */
+.vendedor-confianca-legenda {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Métricas adicionais (vendas, nota etc.) */
+.vendedor-confianca-metricas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.vendedor-confianca-tag {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,0.35);
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Card de avaliações */
+.vendedor-avaliacoes-card {
+  background: var(--panel-grad);
+  border-radius: 16px;
+  border: 1px solid var(--border-strong);
+  padding: 16px 18px 18px;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.28);
+  width: 100%;
+}
+
+.vendedor-avaliacoes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.vendedor-avaliacoes-titulo {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.vendedor-avaliacoes-contador {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Área das setas do carrossel */
+.vendedor-avaliacoes-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vendedor-avaliacoes-controles {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vendedor-avaliacoes-arrow {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .15s ease, transform .15s ease, border-color .15s ease;
+}
+.vendedor-avaliacoes-arrow:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--surface) 80%, var(--panel));
+  transform: translateY(-1px);
+}
+.vendedor-avaliacoes-arrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Lista de avaliações */
+.vendedor-avaliacoes-lista {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.vendedor-avaliacao-item {
+  border-radius: 12px;
+  border: 1px solid rgba(15,23,42,0.55);
+  background: radial-gradient(circle at top left, rgba(16,198,111,0.08), transparent 55%);
+  padding: 10px 12px;
+  width: 100%;
+  min-height: 72px;
+}
+
+.vendedor-avaliacao-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+.vendedor-avaliacao-autor {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.vendedor-avaliacao-data {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.vendedor-avaliacao-comentario {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--text) 92%, #f9fafb);
+}
+
+/* Estrelas da avaliação */
+.vendedor-estrelas {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.vendedor-estrela {
+  width: 14px;
+  height: 14px;
+  color: #4b5563;
+  opacity: 0.4;
+}
+.vendedor-estrela--cheia {
+  color: #facc15;
+  opacity: 1;
+}
+
+/* Estado vazio */
+.vendedor-avaliacoes-vazio {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Rodapé da caixa de avaliações: botão + paginação */
+.vendedor-avaliacoes-footer {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Botão de avaliar (mais destacado) */
+.btn-avaliar-vendedor {
+  padding: 10px 18px;
+  font-size: 13px;
+  border-radius: 999px;
+  border-color: color-mix(in oklab, var(--primary) 55%, var(--border-strong));
+  background: radial-gradient(circle at top left, color-mix(in oklab, var(--primary) 24%, transparent), transparent 65%);
+  color: var(--primary);
+  font-weight: 600;
+}
+.btn-avaliar-vendedor:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 35%, transparent);
+}
+
+.vendedor-avaliacoes-paginacao {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* MODAL DE AVALIAÇÃO DO VENDEDOR */
+.avaliacao-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2300;
+  padding: 16px;
+}
+
+.avaliacao-modal {
+  width: 100%;
+  max-width: 560px;
+  background: var(--panel);
+  border-radius: 18px;
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.7);
+  padding: 18px 20px 20px;
+}
+
+.avaliacao-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.avaliacao-modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.avaliacao-modal-close {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.avaliacao-modal-close:hover {
+  color: var(--text);
+}
+
+.avaliacao-modal-subtitulo {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.avaliacao-modal-campo {
+  margin-top: 14px;
+}
+
+.avaliacao-modal-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.avaliacao-modal-estrelas {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.avaliacao-modal-estrela {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: #6b7280;
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, transform .1s ease;
+}
+.avaliacao-modal-estrela--ativa {
+  border-color: #facc15;
+  background: radial-gradient(circle at center, #facc15, #f59e0b);
+  color: #111827;
+  transform: translateY(-1px);
+}
+
+.avaliacao-modal-textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+.avaliacao-modal-textarea:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring) 45%, transparent);
+}
+
+.avaliacao-modal-acoes {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.avaliacao-modal-botao {
+  min-width: 120px;
+  justify-content: center;
+}
+
+/* RESPONSIVIDADE (Tablet e Mobile) */
+
+/* Tablet (≤1024px) */
 @media (max-width: 1024px) {
   .detalhe-card { gap: 18px; padding: 16px; }
   .detalhe-info h1 { font-size: 26px; }
@@ -433,12 +819,42 @@
     bottom: max(14px, env(safe-area-inset-bottom));
     width: min(520px, 100vw - 48px);
   }
+
+  .detalhe-vendedor {
+    flex-direction: column;
+    margin-top: 8px;
+    padding: 0 16px;
+  }
+
+  .detalhe-vendedor__col {
+    width: 100%;
+  }
 }
 
-/* === Mobile (≤680px) === */
+/* Mobile (≤680px) */
 @media (max-width: 680px) {
   .detalhe-card { flex-direction: column; }
   .kv-grid { grid-template-columns: 1fr; }
+
+  .detalhe-vendedor {
+    padding: 0 16px;
+    margin-top: 4px;
+    flex-direction: column;
+  }
+
+  .detalhe-vendedor__col {
+    width: 100%;
+  }
+
+  .vendedor-confianca-card,
+  .vendedor-avaliacoes-card {
+    width: 100%;
+  }
+
+  .vendedor-avaliacoes-header {
+    flex-direction: row;
+    align-items: center;
+  }
 
   .chat-float {
     left: max(12px, env(safe-area-inset-left));
@@ -464,5 +880,9 @@
     min-width: 0;
     width: auto;
     max-width: calc(100vw - 24px);
+  }
+
+  .avaliacao-modal {
+    max-width: 100%;
   }
 }

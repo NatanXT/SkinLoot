@@ -1,13 +1,5 @@
-/* ==========================================================
-   Caminho: frontend/src/pages/admin/AdminPainel.css
-   ----------------------------------------------------------
-   Estilos específicos da tela de painel administrativo.
-   - Usa tokens globais: --bg, --panel, --surface, --text,
-     --muted, --primary, --secondary, --border, --border-strong
-   - Não redefine :root para não brigar com outros arquivos.
-========================================================== */
+/* frontend/src/pages/admin/AdminPainel.css*/
 
-/* Shell/base da página admin */
 .admin-root {
   position: relative;
   min-height: 100vh;
@@ -15,12 +7,10 @@
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     Ubuntu, sans-serif;
-  /* Evita rolagem lateral e reduz overscroll para não "puxar" acima da tela */
   overflow-x: hidden;
   overscroll-behavior-y: contain;
 }
 
-/* Backdrop com glow similar à DashboardVitrine/Perfil */
 .admin-backdrop {
   position: fixed;
   inset: 0;
@@ -39,7 +29,6 @@
     );
 }
 
-/* Helpers de visibilidade por breakpoint */
 .admin-only-desktop {
   display: block;
 }
@@ -58,7 +47,7 @@
   }
 }
 
-/* ===================== Topbar ===================== */
+/*  Topbar   */
 
 .admin-topbar {
   position: sticky;
@@ -102,12 +91,10 @@
   min-width: 150px;
 }
 
-/* Ajuste extra para botões outline quando usados aqui */
 .admin-btn-outline {
   background: transparent;
 }
 
-/* Mobile: topbar quebra em duas linhas */
 @media (max-width: 640px) {
   .admin-topbar {
     flex-direction: column;
@@ -126,7 +113,7 @@
   }
 }
 
-/* ===================== Hero ===================== */
+/*  Hero  */
 
 .admin-hero {
   position: relative;
@@ -156,7 +143,7 @@
   color: var(--muted);
 }
 
-/* ===================== Container principal ===================== */
+/*  Container principal  */
 
 .admin-container {
   position: relative;
@@ -165,8 +152,6 @@
   margin: 18px auto 64px;
   padding: 0 16px;
 }
-
-/* Blocos da página (seções) */
 
 .admin-bloco {
   margin-bottom: 28px;
@@ -191,7 +176,7 @@
 }
 
 .admin-bloco__cabecalho--tabela {
-  align-items: estão;
+  align-items: center;
 }
 
 .admin-bloco__contador {
@@ -199,7 +184,7 @@
   color: color-mix(in oklab, var(--text) 85%, var(--muted));
 }
 
-/* ===================== Cards de resumo ===================== */
+/*  Cards de resumo  */
 
 .admin-resumo-grid {
   display: grid;
@@ -258,8 +243,6 @@
   color: color-mix(in oklab, var(--text) 85%, var(--muted));
 }
 
-/* Variações de cor sutil para os cards de resumo */
-
 .admin-card--sucesso .admin-card__valor {
   color: #22c55e;
 }
@@ -272,7 +255,7 @@
   color: #ef4444;
 }
 
-/* ===================== Filtros (DESKTOP/TABLET) ===================== */
+/*  Filtros  */
 
 .admin-filtros {
   display: grid;
@@ -342,8 +325,6 @@
     color-mix(in oklab, var(--ring, rgba(57, 255, 20, 0.6)) 60%, transparent);
 }
 
-/* Coluna de ações de filtro (botões) */
-
 .admin-filtro--acoes {
   display: flex;
   align-items: center;
@@ -355,7 +336,6 @@
   width: 100%;
 }
 
-/* Em telas menores, botões em coluna */
 @media (max-width: 960px) {
   .admin-filtro--acoes {
     grid-column: 1 / -1;
@@ -373,7 +353,7 @@
   }
 }
 
-/* ===================== PAINEL DE DETALHES ===================== */
+/*  PAINEL DE DETALHES  */
 
 .admin-detalhe {
   background: linear-gradient(
@@ -406,7 +386,6 @@
   color: color-mix(in oklab, var(--text) 80%, var(--muted));
 }
 
-/* Grid superior: coluna de usuário + coluna de destaque */
 .admin-detalhe__grid {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.5fr);
@@ -442,12 +421,12 @@
 }
 
 .admin-detalhe__label {
-  font-size: 12px; /* aumentei de 11px para 12px */
+  font-size: 12px;
   color: var(--muted);
 }
 
 .admin-detalhe__valor {
-  font-size: 14px; /* aumentei de 13px para 14px */
+  font-size: 14px;
   color: var(--text);
   word-break: break-all;
 }
@@ -468,15 +447,7 @@
   border-radius: 999px;
 }
 
-/* Coluna direita: destaque (somente) */
-
-.admin-detalhe__conteudo {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-/* Bloco do produto em destaque (compacto) */
+/* Destaque */
 
 .admin-detalhe__destaque {
   background: color-mix(in oklab, var(--panel) 96%, var(--surface));
@@ -485,7 +456,6 @@
   padding: 10px 10px 12px;
 }
 
-/* Card compacto de destaque, mais "arrumado" visualmente */
 .admin-destaque-card {
   display: flex;
   align-items: stretch;
@@ -524,7 +494,6 @@
   padding: 4px 2px;
 }
 
-/* linha com nome e preço alinhados */
 .admin-destaque-card__header-row {
   display: flex;
   align-items: flex-start;
@@ -546,7 +515,6 @@
   white-space: nowrap;
 }
 
-/* linha de chips/tags abaixo do header */
 .admin-destaque-card__tags {
   display: flex;
   flex-wrap: wrap;
@@ -565,7 +533,6 @@
   color: color-mix(in oklab, var(--text) 85%, var(--muted));
 }
 
-/* variações para o status do produto em destaque */
 .admin-destaque-tag--status-ativo {
   border-color: rgba(34, 197, 94, 0.55);
   background: rgba(34, 197, 94, 0.14);
@@ -588,7 +555,6 @@
   font-weight: 500;
 }
 
-/* linha inferior com meta (vendedor etc.) */
 .admin-destaque-card__meta {
   display: flex;
   flex-direction: column;
@@ -597,16 +563,11 @@
   color: color-mix(in oklab, var(--text) 85%, var(--muted));
 }
 
-.admin-destaque-card__jogo {
-  font-weight: 500;
-}
-
 .admin-destaque-card__seller {
   font-size: 11px;
   color: var(--muted);
 }
 
-/* Mobile: destaque em coluna para usar melhor o espaço vertical */
 @media (max-width: 640px) {
   .admin-destaque-card {
     flex-direction: column;
@@ -615,7 +576,6 @@
 
   .admin-destaque-card__media {
     flex: 0 0 auto;
-    border-radius: 10px;
   }
 
   .admin-destaque-card__media img {
@@ -625,7 +585,7 @@
   }
 }
 
-/* Bloco do carrossel */
+/* Carrossel */
 
 .admin-detalhe__carrossel-bloco {
   background: color-mix(in oklab, var(--panel) 96%, var(--surface));
@@ -634,7 +594,6 @@
   padding: 10px 10px 12px;
 }
 
-/* Versão full-width, logo abaixo do grid superior */
 .admin-detalhe__carrossel-bloco--full {
   margin-top: 14px;
 }
@@ -651,11 +610,6 @@
   font-size: 11px;
   color: var(--muted);
 }
-
-/* Carrossel horizontal:
-   - Mobile: ~80% da largura (1 card predominante)
-   - Tablet: ~45% (2 cards)
-   - Desktop grande: ~25% (4 cards na mesma "faixa") */
 
 .admin-detalhe__carrossel {
   display: flex;
@@ -701,21 +655,19 @@
   }
 }
 
-/* Deixa os cards do carrossel menores e um pouco mais "compactos" */
 .admin-detalhe__carrossel-item .card {
   --media-min-h: 180px;
   transform: scale(0.94);
   transform-origin: center;
 }
 
-/* Mensagem vazia do painel de detalhes */
 .admin-detalhe__mensagem-vazia {
   margin: 8px 2px 4px;
   font-size: 12px;
   color: var(--muted);
 }
 
-/* ===================== Tabela (DESKTOP/TABLET) ===================== */
+/*  Tabela (desktop)  */
 
 .admin-tabela__wrapper {
   width: 100%;
@@ -729,8 +681,6 @@
   );
   box-shadow: var(--shadow);
 }
-
-/* Tabela em si */
 
 .admin-tabela {
   width: 100%;
@@ -783,21 +733,15 @@
   gap: 6px;
 }
 
-/* Linha de tabela vazia (nenhum resultado) */
-
 .admin-tabela__vazio {
   text-align: center;
   padding: 18px 12px;
   color: var(--muted);
 }
 
-/* Destaque leve para a linha/card ativo (quando painel de detalhes está aberto) */
-
 .admin-tabela__linha--ativa {
   background: color-mix(in oklab, var(--surface) 85%, var(--panel));
 }
-
-/* Status badge (ativo, oculto, banido) */
 
 .admin-status-badge {
   display: inline-flex;
@@ -825,9 +769,6 @@
   color: #fca5a5;
 }
 
-/* Responsividade da tabela: em telas bem pequenas,
-   reduzir padding para caber mais colunas. */
-
 @media (max-width: 480px) {
   .admin-tabela th,
   .admin-tabela td {
@@ -839,7 +780,7 @@
   }
 }
 
-/* ===================== MOBILE: botão para filtros ===================== */
+/*  MOBILE: botão de filtros  */
 
 .admin-mobile-filtros-botao {
   width: 100%;
@@ -870,7 +811,7 @@
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
 }
 
-/* ===================== MOBILE: Modal de filtros/busca ===================== */
+/*  MOBILE: modal de filtros  */
 
 .admin-mobile-modal-overlay {
   position: fixed;
@@ -940,7 +881,6 @@
   flex: 1;
 }
 
-/* Animação de subida do modal */
 @keyframes admin-slide-up {
   from {
     transform: translateY(18px);
@@ -952,7 +892,7 @@
   }
 }
 
-/* ===================== MOBILE: Cards de itens ===================== */
+/*  MOBILE: cards  */
 
 .admin-mobile-cards {
   display: flex;
@@ -1001,7 +941,7 @@
 
 .admin-mobile-card__autor {
   margin: 2px 0 0;
-  font-size: 12px; /* aumentei de 11px para 12px */
+  font-size: 12px;
   color: color-mix(in oklab, var(--text) 82%, var(--muted));
 }
 
@@ -1045,7 +985,7 @@
   min-width: 0;
 }
 
-/* ===================== MOBILE: paginação ===================== */
+/*  MOBILE: paginação  */
 
 .admin-mobile-paginacao {
   margin-top: 16px;
@@ -1090,4 +1030,201 @@
   font-size: 13px;
   font-weight: 500;
   color: color-mix(in oklab, var(--text) 90%, var(--muted));
+}
+
+/*  MODAIS "NOVO ITEM" / ENTIDADES  */
+
+.admin-novo-item-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-novo-item-modal {
+  width: 100%;
+  max-width: 460px;
+  background: var(--panel);
+  border-radius: 18px;
+  padding: 16px 18px 18px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--border-strong);
+  animation: admin-slide-up 0.18s ease-out;
+}
+
+.admin-novo-item-modal__dragbar {
+  width: 42px;
+  height: 4px;
+  border-radius: 999px;
+  margin: 0 auto 14px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--primary) 60%, #ffffff),
+    color-mix(in oklab, var(--secondary) 60%, #ffffff)
+  );
+}
+
+.admin-novo-item-modal__titulo {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.admin-novo-item-modal__descricao {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.admin-novo-item-modal__opcoes {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.admin-novo-item-modal__card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--primary) 14%, var(--panel)),
+    color-mix(in oklab, var(--surface) 90%, var(--panel))
+  );
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.12s ease, box-shadow 0.12s ease,
+    border-color 0.12s ease, background 0.12s ease;
+}
+
+.admin-novo-item-modal__card:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in oklab, var(--secondary) 70%, var(--border-strong));
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7);
+}
+
+.admin-novo-item-modal__card:active {
+  transform: translateY(1px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.75);
+}
+
+.admin-novo-item-modal__card--ativo {
+  border-color: var(--secondary);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.75);
+}
+
+.admin-novo-item-modal__card-titulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.admin-novo-item-modal__card-texto {
+  font-size: 12px;
+  color: color-mix(in oklab, var(--text) 80%, var(--muted));
+}
+
+/* Tooltip / escolha de ação (Criar / Editar) */
+
+.admin-novo-item-modal__tooltip {
+  margin-top: 10px;
+  margin-bottom: 12px;
+  padding: 10px 11px;
+  border-radius: 14px;
+  border: 1px dashed var(--border-strong);
+  background: color-mix(in oklab, var(--surface) 92%, var(--panel));
+}
+
+.admin-novo-item-modal__tooltip-texto {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: color-mix(in oklab, var(--text) 86%, var(--muted));
+}
+
+.admin-novo-item-modal__tooltip-acoes {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-novo-item-modal__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.admin-novo-item-modal__botao {
+  min-width: 110px;
+}
+
+/* Tabs de modo (Criar / Editar) em jogos/planos */
+
+.admin-entidade-modal__tabs {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0 14px;
+}
+
+.admin-entidade-modal__tab {
+  flex: 1;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: color-mix(in oklab, var(--surface) 90%, var(--panel));
+  color: color-mix(in oklab, var(--text) 80%, var(--muted));
+  font-size: 12px;
+  font-weight: 500;
+  padding: 7px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease,
+    box-shadow 0.12s ease, transform 0.12s ease;
+}
+
+.admin-entidade-modal__tab:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55);
+}
+
+.admin-entidade-modal__tab--ativo {
+  border-color: var(--secondary);
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--secondary) 40%, var(--panel)),
+    color-mix(in oklab, var(--primary) 40%, var(--panel))
+  );
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+}
+
+/* Inputs de jogo/plano */
+
+.admin-jogo-modal__grupo,
+.admin-plano-modal__grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0 10px;
+}
+
+.admin-jogo-modal__label,
+.admin-plano-modal__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.admin-jogo-modal__input,
+.admin-plano-modal__input {
+  height: 42px;
 }

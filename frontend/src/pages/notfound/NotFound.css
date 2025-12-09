@@ -1,8 +1,4 @@
-/* ============================================================================
-   NotFound.css — 404 com tema escuro (padrão) e claro
-   ========================================================================== */
-
-/* ===================== TOKENS — DARK (padrão) ===================== */
+/* TOKENS — DARK (padrão) */
 :root {
   --bg: #0B0D10;            /* fundo da página */
   --panel: #11151A;         /* planos/cartões */
@@ -17,7 +13,7 @@
   --radius: 12px;
 }
 
-/* ===================== TEMA CLARO — AUTO ===================== */
+/* TEMA CLARO — AUTO */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --bg: #F7FAFC;
@@ -32,7 +28,7 @@
   }
 }
 
-/* ===================== OVERRIDES MANUAIS ===================== */
+/* OVERRIDES MANUAIS */
 :root[data-theme="light"] {
   --bg: #F7FAFC;
   --panel: #FFFFFF;
@@ -46,7 +42,7 @@
 }
 :root[data-theme="dark"] {}
 
-/* ===================== LAYOUT ===================== */
+/* LAYOUT */
 .notfound-root {
   min-height: 100vh;
   background:
@@ -67,7 +63,7 @@
   width: min(640px, 100%);
 }
 
-/* ===== Card MAIS CLARO no tema claro (auto) ===== */
+/* Card MAIS CLARO no tema claro (auto) */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .notfound-container {
     /* gradiente bem clarinho, quase branco */
@@ -82,7 +78,7 @@
   }
 }
 
-/* ===== Card MAIS CLARO no tema claro (forçado) ===== */
+/* Card MAIS CLARO no tema claro (forçado) */
 :root[data-theme="light"] .notfound-container {
   background: linear-gradient(
     180deg,
@@ -94,7 +90,7 @@
   box-shadow: 0 16px 40px rgba(15, 23, 42, .10);
 }
 
-/* ===================== TIPOGRAFIA ===================== */
+/* TIPOGRAFIA */
 .notfound-container h1 {
   font-size: clamp(3rem, 8vw, 6rem);
   color: var(--primary);
@@ -109,7 +105,7 @@
   color: var(--muted);
 }
 
-/* ===================== BOTÃO ===================== */
+/* BOTÃO */
 .notfound-button {
   display: inline-flex;
   align-items: center;
@@ -141,7 +137,7 @@
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 30%, transparent), 0 12px 28px rgba(0,0,0,.3);
 }
 
-/* ===================== RESP ===================== */
+/* RESPONSIVIDADE */
 @media (max-width: 480px) {
   .notfound-container { padding: 22px 16px; }
 }

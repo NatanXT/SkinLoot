@@ -93,6 +93,7 @@ public class SecurityConfigurer {
 
 
                         // Área admin
+                        .requestMatchers("/api/chat/**").authenticated()
                         .requestMatchers("/api/admin/**").hasAuthority(Role.ADMIN.name())
 
 

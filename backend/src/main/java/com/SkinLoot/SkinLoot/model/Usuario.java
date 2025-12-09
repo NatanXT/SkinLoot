@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.Formula;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.UUID;
 public class Usuario {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO) // Gera automaticamente um UUID para o ID
+    @GeneratedValue(strategy = GenerationType.UUID) // Gera automaticamente um UUID para o ID
     private UUID id;
 
     @Column(nullable = false) // Nome obrigatório
@@ -55,9 +56,6 @@ public class Usuario {
     @Column(nullable = false)
     private Role role;
 
-
-
-
     @OneToMany(mappedBy = "usuario", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
     // Um usuário pode possuir várias skins associadas a ele
     // CascadeType.PERSIST: Permite que novas skins sejam salvas automaticamente ao serem associadas a um usuário
@@ -67,8 +65,11 @@ public class Usuario {
     @JsonIgnore
     private List<Skin> skins;
 
+    @Formula("(SELECT COALESCE(AVG(av.nota), 0.0) FROM avaliacao av WHERE av.avaliado_id = id)")
+    private Double mediaNotas;
 
-
+    @Formula("(SELECT COUNT(*) FROM avaliacao av WHERE av.avaliado_id = id)")
+    private Integer totalAvaliacoes;
 
     // Getters e Setters
     public UUID getId() {
@@ -149,5 +150,29 @@ public class Usuario {
 
     public void setDataExpira(LocalDate dataExpira) {
         this.dataExpira = dataExpira;
+    }
+
+    public String getIdAssinaturaGateway() {
+        return idAssinaturaGateway;
+    }
+
+    public void setIdAssinaturaGateway(String idAssinaturaGateway) {
+        this.idAssinaturaGateway = idAssinaturaGateway;
+    }
+
+    public Double getMediaNotas() {
+        return mediaNotas;
+    }
+
+    public void setMediaNotas(Double mediaNotas) {
+        this.mediaNotas = mediaNotas;
+    }
+
+    public Integer getTotalAvaliacoes() {
+        return totalAvaliacoes;
+    }
+
+    public void setTotalAvaliacoes(Integer totalAvaliacoes) {
+        this.totalAvaliacoes = totalAvaliacoes;
     }
 }

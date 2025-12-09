@@ -14,4 +14,6 @@ public interface AvaliacaoRepository extends JpaRepository<Avaliacao, Long> {
 
     // Para evitar spam: o usuário só pode avaliar um anúncio uma vez
     boolean existsByAvaliadorAndAnuncio(Usuario avaliador, Anuncio anuncio);
+
+
 }

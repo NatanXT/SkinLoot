@@ -1,9 +1,6 @@
-/* src/pages/usuario/PerfilUsuario.css
-   — Dark por padrão + Tema claro automático/forçado
-   — Backdrop/gradiente igual ao da Dashboard no topo
-*/
+/* src/pages/usuario/PerfilUsuario.css*/
 
-/* ===== TOKENS DARK ===== */
+/* TOKENS DARK */
 :root{
   --bg:#0B0D10;
   --panel:#11151A;
@@ -26,7 +23,7 @@
   --media-min-h: 320px;
 }
 
-/* ===== THEME LIGHT (auto) ===== */
+/* THEME LIGHT (auto) */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --bg:#F7FAFC;
@@ -45,7 +42,7 @@
   }
 }
 
-/* ===== THEME LIGHT (forçado) ===== */
+/* THEME LIGHT (forçado) */
 :root[data-theme="light"]{
   --bg:#F7FAFC;
   --panel:#FFFFFF;
@@ -62,7 +59,7 @@
   --ring: rgba(31,234,0,.35);
 }
 
-/* ===== Shell ===== */
+/* Shell */
 .perfil-root{
   position: relative;
   min-height:100vh;
@@ -70,7 +67,7 @@
   color:var(--text);
 }
 
-/* >>> Backdrop com o mesmo “glow” da dashboard */
+/* Backdrop com o mesmo “glow” da dashboard */
 .perfil-backdrop{
   position: fixed;
   inset: 0;
@@ -96,7 +93,7 @@
 }
 .perfil-actions{ display:flex; gap:8px }
 
-/* >>> Hero com o mesmo gradiente do topo da dashboard */
+/* Hero com o mesmo gradiente do topo da dashboard */
 .perfil-hero{
   position: relative;
   display:grid; place-items:center;
@@ -123,12 +120,12 @@
 .perfil-block{ margin: 16px 0 28px }
 .perfil-block h2{ margin:0 0 12px }
 
-/* ===== Grid ===== */
+/* Grid */
 .perfil-grid{ display:grid; gap:16px; }
 .perfil-grid--2{ grid-template-columns: 1fr 1fr; }
 @media (max-width: 960px){ .perfil-grid--2{ grid-template-columns: 1fr; } }
 
-/* ===== Cards ===== */
+/* Cards */
 .perfil-card{
   background:linear-gradient(180deg, var(--panel), color-mix(in oklab, var(--panel) 70%, var(--surface)));
   border:1px solid var(--border);
@@ -196,7 +193,7 @@
   display:flex; align-items:center; justify-content:space-between; gap:12px;
 }
 
-/* ====================== Grid de cards das skins ====================== */
+/* Grid de cards das skins */
 .perfil-grid-cards{
   display:grid;
   grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
@@ -204,7 +201,7 @@
   margin-top:12px;
 }
 
-/* ====================== Botões ====================== */
+/* Botões */
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
   border:1px solid var(--border-strong); background:transparent; color:var(--text);
@@ -224,7 +221,7 @@
 .btn--ghost:hover{ border-color: color-mix(in oklab, var(--border-strong) 70%, var(--border)); }
 .btn--full{ width:100% }
 
-/* ===== Overrides de contraste (tema claro) para .btn--ghost ===== */
+/* Overrides de contraste (tema claro) para .btn--ghost */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .btn--ghost{
     background:#EDF2F7;
@@ -246,7 +243,7 @@
   border-color:#94A3B8;
 }
 
-/* ====================== Card (igual vitrine) ====================== */
+/* Card (igual vitrine) */
 .card{
   display:flex; flex-direction:column;
   background:linear-gradient(180deg, var(--panel), color-mix(in oklab, var(--panel) 70%, var(--surface)));
@@ -295,7 +292,7 @@
   display:flex; align-items:center; justify-content:space-between; gap:12px; color:var(--muted);
 }
 
-/* ====================== Modal/Painel (base) ====================== */
+/* Modal/Painel (base) */
 .perfil-modal{
   position: fixed;
   inset: 0;
@@ -350,7 +347,7 @@
 .perfil-modal__item .k{ display:block; font-size:12px; color:var(--muted) }
 .perfil-modal__item .v{ font-weight:600 }
 
-/* ===== Scroll interno da modal de edição ===== */
+/* Scroll interno da modal de edição */
 .perfil-modal__scroll{
   overflow:auto;
   padding-right:4px;
@@ -361,7 +358,7 @@
 .perfil-modal__scroll::-webkit-scrollbar-thumb{ background: color-mix(in oklab, var(--text) 35%, transparent); border-radius:999px }
 .perfil-modal__scroll::-webkit-scrollbar-track{ background:transparent }
 
-/* ===== Rodapé da modal (ações) ===== */
+/* Rodapé da modal (ações) */
 .perfil-modal__actions{
   position: sticky;
   bottom: 0;
@@ -376,7 +373,7 @@
   display:flex; gap:10px; justify-content:flex-end; margin-top:8px;
 }
 
-/* ====================== Form do modal de edição ====================== */
+/* Form do modal de edição */
 .perfil-form{ display:grid; gap:12px; }
 .perfil-form__row{ display:grid; gap:6px; }
 .perfil-form__row label{ font-size:12px; color:var(--muted); }
@@ -447,7 +444,7 @@
   opacity:.95;
 }
 
-/* ====================== Uploader clicável + preview ====================== */
+/* Uploader clicável + preview */
 .perfil-upload{
   background:var(--surface);
   border:1px solid var(--border-strong);
@@ -486,18 +483,18 @@
   font-size:14px;
 }
 
-/* ====================== Lista de alerta / checkbox ====================== */
+/* Lista de alerta / checkbox */
 .perfil-alerta{ margin:0 0 12px 18px; color: color-mix(in oklab, var(--text) 92%, var(--muted)); }
 .perfil-check{
   display:flex; align-items:flex-start; gap:8px; margin-top:6px; color:var(--muted);
 }
 .perfil-check input{ transform: translateY(2px); accent-color: var(--secondary); }
 
-/* ====================== Card inativa ====================== */
+/* Card inativa */
 .card.card--inativa{ opacity:.75; filter:grayscale(.15); }
 .card.card--inativa .badge{ background:#8b8f97; color:#0B0D10; }
 
-/* ====================== Upgrade cards ====================== */
+/* Upgrade cards */
 .perfil-upgrade-grid{
   display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin: 8px 0 10px;
 }
@@ -518,7 +515,7 @@
   margin:0 0 12px 0; padding-left: 18px; color: color-mix(in oklab, var(--text) 85%, var(--muted));
 }
 
-/* ---------- Filtro de status (ativas/inativas) ---------- */
+/* Filtro de status (ativas/inativas) */
 .perfil-filter-area {
   display: flex;
   align-items: center;
@@ -616,7 +613,7 @@
   color: #00c896;
 }
 
-/* ====================== Responsividade do filtro/botão ====================== */
+/* Responsividade do filtro/botão */
 @media (max-width: 640px) {
   .perfil-filter-area {
     flex-direction: column;
@@ -634,7 +631,7 @@
   }
 }
 
-/* ====================== Correção: scroll dentro das modais ====================== */
+/* Correção: scroll dentro das modais */
 .perfil-modal__card { display: flex; flex-direction: column; max-height: 92vh; overflow: hidden; }
 .perfil-modal__scroll, .perfil-upgrade-grid { overflow-y: auto; max-height: calc(92vh - 180px); padding-right: 6px; scrollbar-gutter: stable; }
 .perfil-modal__scroll::-webkit-scrollbar,
@@ -644,7 +641,7 @@
 .perfil-modal__scroll::-webkit-scrollbar-track,
 .perfil-upgrade-grid::-webkit-scrollbar-track { background: transparent; }
 
-/* ====================== Fieldset de detalhes do jogo ====================== */
+/* Fieldset de detalhes do jogo */
 .perfil-form__fieldset {
   border: 1px solid var(--border-strong);
   border-radius: 12px;
@@ -678,12 +675,12 @@
 .check { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: var(--text); }
 .check input[type="checkbox"] { accent-color: var(--secondary); transform: scale(1.1); }
 
-/* ====================== Mobile: planos roláveis ====================== */
+/* Mobile: planos roláveis */
 @media (max-width: 640px) {
   .perfil-upgrade-grid { grid-template-columns: 1fr; max-height: calc(88vh - 160px); overflow-y: auto; }
 }
 
-/* ===== Overrides de tema claro para dropdown custom de status ===== */
+/* Overrides de tema claro para dropdown custom de status */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .perfil-filter-select-display {
     background: #FFFFFF;

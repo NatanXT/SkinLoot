@@ -61,3 +61,6 @@ ALTER TABLE anuncio
 ALTER TABLE anuncio
     ADD CONSTRAINT anuncio_status_check
         CHECK (status IN ('ATIVO', 'INATIVO', 'PENDENTE', 'VENDIDO'));
+UPDATE usuario
+SET role = 'ADMIN'
+WHERE email = 'seu_email@teste.com';
