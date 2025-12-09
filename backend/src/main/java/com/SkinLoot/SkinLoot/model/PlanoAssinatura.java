@@ -8,9 +8,10 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
-public class PlanoAssinatura {
+public class PlanoAssinatura{
 
     @Id
+    @GeneratedValue(generator = "UUID") // <--- ADICIONAR ESTA LINHA
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
@@ -20,7 +21,9 @@ public class PlanoAssinatura {
     private TipoPlano nome;
 
     private BigDecimal precoMensal;
+
     private int limiteAnuncios;
+
     private boolean destaqueAnuncio;
 
     public PlanoAssinatura() {

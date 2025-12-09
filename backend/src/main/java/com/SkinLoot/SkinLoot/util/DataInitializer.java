@@ -12,6 +12,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -29,25 +33,76 @@ public class DataInitializer implements CommandLineRunner {
     private PasswordEncoder passwordEncoder; // Injeta o encoder de senha
 
     @Override
+    @Transactional // Garante que tudo seja salvo ou nada seja salvo em caso de erro
     public void run(String... args) {
-        // 1. Criar Planos se não existirem
+        inicializarPlanos();
+        inicializarJogos();
+        inicializarAdmin();
+    }
+
+    private void inicializarPlanos() {
         if (planoRepository.count() == 0) {
+            System.out.println("Inicializando Planos de Assinatura...");
+
+            // 1. Plano Gratuito (Baseado no seu dataPlano.sql)
             PlanoAssinatura gratuito = new PlanoAssinatura();
             gratuito.setNome(TipoPlano.GRATUITO);
+            gratuito.setPrecoMensal(BigDecimal.ZERO);
             gratuito.setLimiteAnuncios(5);
-            // ... setar outros campos
-            planoRepository.save(gratuito);
+            gratuito.setDestaqueAnuncio(false);
 
-            // Repetir para PRO, etc.
-        }
+            // 2. Plano Prata/Intermediário (Baseado no SQL 'INTERMEDIARIO' - R$ 19.90)
+            // OBS: Verifique se no seu Enum TipoPlano é PRATA ou INTERMEDIARIO
+            PlanoAssinatura prata = new PlanoAssinatura();
+            prata.setNome(TipoPlano.INTERMEDIARIO);
+            prata.setPrecoMensal(new BigDecimal("19.90"));
+            prata.setLimiteAnuncios(20);
+            prata.setDestaqueAnuncio(true);
 
-        // 2. Criar Jogos se não existirem
-        if (jogoRepository.findByNome("CS2").isEmpty()) {
-            Jogo cs2 = new Jogo();
-            cs2.setNome("CS2");
-            cs2.setCategorias(List.of(CategoriaJogo.FPS, CategoriaJogo.TATICO));
-            jogoRepository.save(cs2);
+            // 3. Plano Ouro/Plus (Baseado no SQL 'PLUS' - R$ 49.90)
+            PlanoAssinatura ouro = new PlanoAssinatura();
+            ouro.setNome(TipoPlano.PLUS);
+            ouro.setPrecoMensal(new BigDecimal("49.90"));
+            ouro.setLimiteAnuncios(100);
+            ouro.setDestaqueAnuncio(true);
+
+            planoRepository.saveAll(Arrays.asList(gratuito, prata, ouro));
         }
+    }
+
+    private void inicializarJogos() {
+        // Verifica se existem jogos, se não, cria a lista completa do seu dataJogos.sql
+        if (jogoRepository.count() == 0) {
+            System.out.println("Inicializando Jogos e Categorias...");
+
+            // CS2 (Antigo CS:GO)
+            criarJogoSeNaoExiste("CS2", List.of(CategoriaJogo.FPS, CategoriaJogo.TATICO, CategoriaJogo.COMPETITIVO));
+
+            // Valorant
+            criarJogoSeNaoExiste("Valorant", List.of(CategoriaJogo.FPS, CategoriaJogo.TATICO, CategoriaJogo.HERO_SHOOTER));
+
+            // League of Legends
+            criarJogoSeNaoExiste("League of Legends", List.of(CategoriaJogo.MOBA, CategoriaJogo.ESTRATEGIA, CategoriaJogo.COMPETITIVO));
+
+            // Dota 2
+            criarJogoSeNaoExiste("Dota 2", List.of(CategoriaJogo.MOBA, CategoriaJogo.ESTRATEGIA, CategoriaJogo.COMPETITIVO));
+
+            // Rust
+            criarJogoSeNaoExiste("Rust", List.of(CategoriaJogo.SOBREVIVENCIA, CategoriaJogo.MUNDO_ABERTO, CategoriaJogo.FPS));
+        }
+    }
+
+    private void criarJogoSeNaoExiste(String nome, List<CategoriaJogo> categorias) {
+        // Método auxiliar para evitar duplicação de código
+        if (jogoRepository.findByNome(nome).isEmpty()) {
+            Jogo jogo = new Jogo();
+            jogo.setNome(nome);
+            jogo.setCategorias(categorias);
+            jogoRepository.save(jogo);
+        }
+    }
+
+    private void inicializarAdmin() {
         String emailAdmin = "admin@skinloot.com";
 
         if (usuarioRepository.findByEmail(emailAdmin).isEmpty()) {
@@ -56,18 +111,17 @@ public class DataInitializer implements CommandLineRunner {
             Usuario admin = new Usuario();
             admin.setNome("Admin Master");
             admin.setEmail(emailAdmin);
-            admin.setSenha(passwordEncoder.encode("admin123")); // Senha criptografada
-            admin.setRole(Role.ADMIN); // <--- A MÁGICA ACONTECE AQUI
-            admin.setGenero(Genero.OUTRO);
-            // Defina outros campos obrigatórios (status, plano, etc) se necessário
-            admin.setStatusAssinatura(StatusAssinatura.ATIVA); // Já nasce ATIVO
+            admin.setSenha(passwordEncoder.encode("admin123"));
+            admin.setRole(Role.ADMIN);
+            admin.setGenero(Genero.OUTRO); // Assumindo enum Genero
+            admin.setStatusAssinatura(StatusAssinatura.ATIVA);
 
-            // Buscar um plano padrão para não ficar null
+            // Busca o plano Gratuito para associar
             PlanoAssinatura planoGratuito = planoRepository.findByNome(TipoPlano.GRATUITO)
-                    .orElse(null);
-            if (planoGratuito != null) {
-                admin.setPlanoAssinatura(planoGratuito);
-            }
+                    .orElseThrow(() -> new RuntimeException("Erro Crítico: Plano Gratuito não encontrado na inicialização!"));
+
+            admin.setPlanoAssinatura(planoGratuito);
+
             usuarioRepository.save(admin);
         }
     }

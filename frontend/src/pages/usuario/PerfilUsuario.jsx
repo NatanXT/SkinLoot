@@ -388,7 +388,7 @@ export default function PerfilUsuario() {
     const raw = skin?._raw || {}; // Pega os dados brutos da API
 
     // NOVO: Define o jogo selecionado
-    const jogoId = raw.jogo?.id || skin?.jogo?.id || '';
+    const jogoId = raw.jogfo?.id || skin?.jogo?.id || '';
 
     // Se já havia jogo, travamos o select; se não havia, deixamos editar.
     jogoInicialVazioRef.current = !jogoId;
@@ -556,7 +556,7 @@ export default function PerfilUsuario() {
 
         jogoId: selectedJogoId,
         detalhesCsgo:
-          selectedGameName === 'CS:GO' ? formEdicao.detalhesCsgo : null,
+            ['CS2', 'CS:GO', 'Counter Strike'].includes(selectedGameName) ? formEdicao.detalhesCsgo : null,
         detalhesLol:
           selectedGameName === 'League of Legends'
             ? formEdicao.detalhesLol
@@ -1265,9 +1265,9 @@ export default function PerfilUsuario() {
                 </div>
 
                 {/* Campos de CS:GO */}
-                {selectedGameName === 'CS:GO' && (
+                {['CS:GO', 'CS2', 'Counter Strike'].includes(selectedGameName) && (
                   <fieldset className="perfil-form__fieldset">
-                    <legend>Detalhes (CS:GO)</legend>
+                    <legend>Detalhes ({selectedGameName})</legend>
 
                     <div className="perfil-form__grid-2">
                       <div className="perfil-form__row">
