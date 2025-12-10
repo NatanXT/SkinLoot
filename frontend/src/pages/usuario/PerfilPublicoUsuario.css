@@ -870,9 +870,6 @@
   height: 6px;
   border-radius: 999px;
   overflow: hidden;
-  background: linear-gradient(90deg,
- color-mix(in oklab, #39FF14 95%, white) 0%, #39FF14 25%, #00C896 75%,
- color-mix(in oklab, #00C896 85%, black) 100%);
 }
 
 .vendedor-confianca-barra__fill-inner {
@@ -880,6 +877,9 @@
   width: var(--nivel-pct, 0%);
   max-width: 100%;
   transition: width .35s ease-out;
+  background: linear-gradient(90deg,
+ color-mix(in oklab, #39FF14 95%, white) 0%, #39FF14 25%, #00C896 75%,
+ color-mix(in oklab, #00C896 85%, black) 100%);
 }
 
 .perfil-publico__ranking-bar-legend {
