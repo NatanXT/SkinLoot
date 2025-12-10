@@ -347,7 +347,7 @@ export default function DashboardVitrine() {
 
     if (exigirLogin('ver_detalhes', { anuncioId: id })) return;
 
-    navigate(`/detalhes/${id}`);
+    navigate(`/anuncio/${id}`);
   }
 
   function comprarFora(anuncio) {
