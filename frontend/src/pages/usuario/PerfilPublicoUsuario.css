@@ -1106,6 +1106,32 @@
   box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.4);
 }
 
+/* Corrige contraste do botão "Avaliar este vendedor" no tema claro */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .perfil-publico__reviews-button {
+    background: #e8ffe8;       /* fundo verde super claro */
+    color: #065f46;            /* verde escuro legível */
+    border-color: #16a34a;     /* verde forte */
+  }
+
+  :root:not([data-theme="dark"]) .perfil-publico__reviews-button:hover {
+    background: #d1fad1;
+    box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.4);
+  }
+}
+
+/* Tema claro forçado */
+:root[data-theme="light"] .perfil-publico__reviews-button {
+  background: #e8ffe8;
+  color: #065f46;
+  border-color: #16a34a;
+}
+
+:root[data-theme="light"] .perfil-publico__reviews-button:hover {
+  background: #d1fad1;
+  box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.4);
+}
+
 .perfil-publico__reviews-pagination {
   font-size: 0.8rem;
   color: var(--muted);

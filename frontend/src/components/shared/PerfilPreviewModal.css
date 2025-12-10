@@ -1,95 +1,184 @@
-/* frontend/src/components/shared/PerfilPreviewModal.css */
+/* ================================
+      THEME VARIABLES (Light Default)
+================================ */
+:root {
+  --pp-bg: #ffffff;
+  --pp-text: #111;
+  --pp-border: rgba(0, 0, 0, 0.15);
+  --pp-avatar-bg: #e5e7eb;
+  --pp-avatar-color: #111;
+}
 
-.perfil-preview-backdrop {
+/* ================================
+      AUTO DARK MODE (Navegador)
+================================ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pp-bg: #0d0f14;
+    --pp-text: #f2f5f9;
+    --pp-border: rgba(255, 255, 255, 0.12);
+    --pp-avatar-bg: #111;
+    --pp-avatar-color: #39ff14;
+  }
+}
+
+/* ================================
+      BACKDROP
+================================ */
+.pp-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(4, 7, 15, 0.72);
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1400;
+  padding: 12px;
+  z-index: 1500;
 }
 
-.perfil-preview-modal {
-  background: #0e1117;
-  border-radius: 12px;
-  padding: 16px 20px 14px;
+/* ================================
+      MODAL
+================================ */
+.pp-modal {
+  background: var(--pp-bg);
+  color: var(--pp-text);
+  border: 1px solid var(--pp-border);
+  border-radius: 14px;
   width: 100%;
   max-width: 420px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #f5f7fb;
+  padding: 22px;
+  animation: pp-fade-in 0.14s ease-out;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.45);
 }
 
-.perfil-preview-header {
+/* ================================
+      HEADER
+================================ */
+.pp-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  align-items: center;
 }
 
-.perfil-preview-identidade {
+.pp-user {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-.perfil-preview-avatar {
-  width: 52px;
-  height: 52px;
+/* AVATAR IGUAL AO TOPO DO SITE */
+.pp-avatar {
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
-  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--pp-avatar-bg);
+  color: var(--pp-avatar-color);
+  font-size: 1.3rem;
+  font-weight: 700;
   border: 2px solid #39ff14;
+  user-select: none;
 }
 
-.perfil-preview-nome {
+.pp-name {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
 }
 
-.perfil-preview-plano {
-  display: inline-block;
-  margin-top: 2px;
-  font-size: 0.8rem;
-  color: #9ca3af;
-}
-
-.perfil-preview-fechar {
-  border: none;
+/* CLOSE BUTTON */
+.pp-close {
   background: transparent;
-  color: #9ca3af;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--pp-text);
   cursor: pointer;
-  font-size: 0.9rem;
+  opacity: 0.7;
+  transition: 0.2s;
+}
+.pp-close:hover {
+  opacity: 1;
 }
 
-.perfil-preview-fechar:hover {
-  color: #f9fafb;
+/* BODY (vazio agora, mas mantém espaçamento) */
+.pp-body {
+  margin: 10px 0 20px;
+  min-height: 10px;
 }
 
-.perfil-preview-corpo {
-  margin-bottom: 12px;
-}
-
-.perfil-preview-bio {
-  margin: 0 0 10px;
-  font-size: 0.9rem;
-  color: #e5e7eb;
-}
-
-.perfil-preview-status {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #d1d5db;
-}
-
-.perfil-preview-status--erro {
-  color: #f97373;
-}
-
-.perfil-preview-rodape {
+/* ================================
+      FOOTER
+================================ */
+.pp-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 10px;
+}
+
+.pp-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+/* GHOST BUTTON */
+.pp-btn-ghost {
+  background: transparent;
+  border: 1px solid var(--pp-border);
+  color: var(--pp-text);
+}
+.pp-btn-ghost:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* PRIMARY BUTTON */
+.pp-btn-primary {
+  background: #39ff14;
+  color: #000;
+  font-weight: 600;
+  border: none;
+}
+.pp-btn-primary:hover {
+  background: #2ce40f;
+}
+
+/* ================================
+      RESPONSIVE
+================================ */
+@media (max-width: 480px) {
+  .pp-modal {
+    padding: 18px;
+  }
+
+  .pp-avatar {
+    width: 46px;
+    height: 46px;
+    font-size: 1.1rem;
+  }
+
+  .pp-name {
+    font-size: 0.95rem;
+  }
+
+  .pp-btn {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Animation */
+@keyframes pp-fade-in {
+  from {
+    transform: translateY(5px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

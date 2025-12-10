@@ -14,19 +14,21 @@ export default function SkinCard({
   onLike,
   onContato,
   onComprarFora,
+  onVerDetalhes,
+  onVerPerfil,
 }) {
+  
   const navigate = useNavigate();
 
   //console.log('%c[SkinCard] DATA RECEBIDA:', 'color:#4CAF50', data);
 
-  const titulo =
-    data?.skinNome ?? data?.title ?? data?.nome ?? 'Skin';
+  const titulo = data?.skinNome ?? data?.title ?? data?.nome ?? 'Skin';
 
   const imagem =
     data?.image ??
     data?.imagemUrl ??
     data?.imagem ??
-    data?.skinIcon ??     // estava faltando
+    data?.skinIcon ?? // estava faltando
     '/img/placeholder.png';
 
   //console.log('%c[SkinCard] IMAGEM RESOLVIDA:', 'color:#03A9F4', imagem);
@@ -61,7 +63,9 @@ export default function SkinCard({
 
   const handleSellerClick = () => {
     if (!sellerId) return;
-    navigate(`/perfil-publico/${sellerId}`);
+    if (typeof onVerPerfil === 'function') {
+      onVerPerfil(data);
+    }
   };
 
   return (
@@ -140,7 +144,7 @@ export default function SkinCard({
             <button
               className="btn btn--ghost"
               type="button"
-              onClick={() => navigate(`/anuncio/${data.id || data._id}`)}
+              onClick={() => onVerDetalhes?.(data)}
             >
               Ver detalhes
             </button>

@@ -335,9 +335,19 @@ export default function DashboardVitrine() {
       skin: {
         id: idAnuncio, // <--- IMPORTANTE
         titulo: nomeSkin,
-        preco: precoSkin
-      },    });
+        preco: precoSkin,
+      },
+    });
     setUnreads(0);
+  }
+
+  function verDetalhes(anuncio) {
+    const id = anuncio?.id || anuncio?._id;
+    if (!id) return;
+
+    if (exigirLogin('ver_detalhes', { anuncioId: id })) return;
+
+    navigate(`/anuncio/${id}`);
   }
 
   function comprarFora(anuncio) {
@@ -356,13 +366,15 @@ export default function DashboardVitrine() {
     const id =
       anuncio?.usuarioId ?? anuncio?.seller?.id ?? anuncio?.vendedorId ?? null;
 
+    if (!id) return;
+
+    if (exigirLogin('ver_perfil', { usuarioId: id })) return;
+
     const nome =
       anuncio?.usuarioNome ??
       anuncio?.seller?.name ??
       anuncio?.vendedorNome ??
       'Usuário';
-
-    if (!id) return;
 
     const avatar =
       anuncio?.seller?.avatarUrl ??
@@ -378,7 +390,6 @@ export default function DashboardVitrine() {
   }
 
   /* Efeitos e sincronização */
-
   useEffect(() => {
     let ativo = true;
     (async () => {
@@ -918,6 +929,7 @@ export default function DashboardVitrine() {
             onContato={() => abrirChatPara(anuncio)}
             onComprarFora={() => comprarFora(anuncio)}
             onVerPerfil={() => abrirPerfilPreview(anuncio)}
+            onVerDetalhes={() => verDetalhes(anuncio)}
           />
         ))}
       </section>
