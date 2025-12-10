@@ -222,7 +222,6 @@ export default function PerfilUsuario() {
           );
 
           if (!cancel) setSkins(ordenadas);
-
         } catch {
           if (!cancel) setSkins([]);
         }
@@ -286,6 +285,9 @@ export default function PerfilUsuario() {
 
   function handleNovaSkin() {
     if (atingiuLimite) return;
+
+    jogoInicialVazioRef.current = true;
+
     setFormEdicao(DEFAULT_FORM_EDICAO);
     setSelectedJogoId(''); // Reseta a seleção de jogo
     setImagemFile(null);
@@ -578,7 +580,10 @@ export default function PerfilUsuario() {
 
         jogoId: selectedJogoId,
         detalhesCsgo:
-            ['CS2', 'CS:GO', 'Counter Strike'].includes(selectedGameName) ? formEdicao.detalhesCsgo : null,
+          selectedGameName === 'CS:GO' ? formEdicao.detalhesCsgo : null,
+
+        detalhesCs2: selectedGameName === 'CS2' ? formEdicao.detalhesCs2 : null,
+
         detalhesLol:
           selectedGameName === 'League of Legends'
             ? formEdicao.detalhesLol
@@ -1293,15 +1298,15 @@ export default function PerfilUsuario() {
                 </div>
 
                 {/* Campos de CS:GO */}
-                {['CS:GO', 'CS2', 'Counter Strike'].includes(selectedGameName) && (
+                {selectedGameName === 'CS:GO' && (
                   <fieldset className="perfil-form__fieldset">
-                    <legend>Detalhes ({selectedGameName})</legend>
+                    <legend>Detalhes (CS:GO)</legend>
 
                     <div className="perfil-form__grid-2">
                       <div className="perfil-form__row">
-                        <label htmlFor="f-cs-float">Desgaste (Float)</label>
+                        <label htmlFor="f-csgo-float">Desgaste (Float)</label>
                         <input
-                          id="f-cs-float"
+                          id="f-csgo-float"
                           type="number"
                           step="0.0001"
                           placeholder="Ex: 0.0712"
@@ -1319,10 +1324,11 @@ export default function PerfilUsuario() {
                           }
                         />
                       </div>
+
                       <div className="perfil-form__row">
-                        <label htmlFor="f-cs-pattern">Pattern Index</label>
+                        <label htmlFor="f-csgo-pattern">Pattern Index</label>
                         <input
-                          id="f-cs-pattern"
+                          id="f-csgo-pattern"
                           type="number"
                           step="1"
                           placeholder="Ex: 456"
@@ -1343,11 +1349,19 @@ export default function PerfilUsuario() {
                     </div>
 
                     <div className="perfil-form__row">
-                      <label htmlFor="f-cs-exterior">Exterior</label>
+                      <label htmlFor="f-csgo-exterior">Exterior</label>
                       <select
-                        id="f-cs-exterior"
+                        id="f-csgo-exterior"
                         value={formEdicao.detalhesCsgo.exterior}
-                        onChange={handleExteriorChange}
+                        onChange={(e) =>
+                          setFormEdicao((prev) => ({
+                            ...prev,
+                            detalhesCsgo: {
+                              ...prev.detalhesCsgo,
+                              exterior: e.target.value,
+                            },
+                          }))
+                        }
                       >
                         <option value="Factory New">Factory New</option>
                         <option value="Minimal Wear">Minimal Wear</option>
