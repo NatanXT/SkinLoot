@@ -394,3 +394,31 @@
 :root[data-theme="light"] .chat-topo,
 :root[data-theme="light"] .chat-form { background: #FFFFFF; border-color: #E2E8F0; }
 :root[data-theme="light"] .chat-form input { background: #FFFFFF; border-color: #CBD5E1; }
+
+/* Botão de avaliar (estrela) */
+.btn-avaliar {
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  border-radius: 10px;
+
+  background: var(--surface);      /* fundo adaptado ao tema */
+  color: var(--text);              /* cor adaptada ao tema */
+
+  border: 1px solid var(--border-strong);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.btn-avaliar:hover {
+  background: var(--secondary);
+  color: #0B0D10;
+  border-color: color-mix(in oklab, var(--secondary) 50%, var(--border-strong));
+}
+
+.btn-avaliar:active {
+  transform: scale(0.96);
+}

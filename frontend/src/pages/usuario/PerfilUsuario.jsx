@@ -41,6 +41,12 @@ const DEFAULT_CSGO_DETAILS = {
   statTrak: false,
   exterior: 'Factory New',
 };
+const DEFAULT_CS2_DETAILS = {
+  desgasteFloat: '',
+  patternIndex: '',
+  statTrak: false,
+  exterior: 'Factory New',
+};
 const DEFAULT_LOL_DETAILS = {
   chroma: '',
   tipoSkin: '',
@@ -53,6 +59,7 @@ const DEFAULT_FORM_EDICAO = {
   // REMOVIDO: O campo 'detalhes'
   // ADICIONADOS:
   detalhesCsgo: DEFAULT_CSGO_DETAILS,
+  detalhesCs2: DEFAULT_CS2_DETAILS,
   detalhesLol: DEFAULT_LOL_DETAILS,
 };
 const EXTERIOR_TO_FLOAT_MAP = {
@@ -196,7 +203,26 @@ export default function PerfilUsuario() {
 
         try {
           const s = await getMinhasSkins();
-          if (!cancel) setSkins(Array.isArray(s) ? s : s?.content || []);
+
+          // Ordenação por data mais recente -> mais antiga
+          const ordenadas = (Array.isArray(s) ? s : s?.content || []).sort(
+            (a, b) => {
+              const getTime = (obj) =>
+                Number(obj?.listedAt) ||
+                Number(
+                  obj?.dataCriacao ? new Date(obj.dataCriacao).getTime() : 0,
+                ) ||
+                Number(
+                  obj?.createdAt ? new Date(obj.createdAt).getTime() : 0,
+                ) ||
+                0;
+
+              return getTime(b) - getTime(a); // mais recente primeiro
+            },
+          );
+
+          if (!cancel) setSkins(ordenadas);
+
         } catch {
           if (!cancel) setSkins([]);
         }
@@ -397,6 +423,12 @@ export default function PerfilUsuario() {
       // Preenche os detalhes corretos, ou usa o padrão
       detalhesCsgo:
         raw.detalhesCsgo || skin?._raw?.detalhesCsgo || DEFAULT_CSGO_DETAILS,
+      detalhesCs2:
+        raw.detalhesCs2 ||
+        raw.cs2 ||
+        skin?._raw?.detalhesCs2 ||
+        skin?._raw?.cs2 ||
+        DEFAULT_CS2_DETAILS,
       detalhesLol:
         raw.detalhesLol || skin?._raw?.detalhesLol || DEFAULT_LOL_DETAILS,
     });
@@ -546,7 +578,7 @@ export default function PerfilUsuario() {
 
         jogoId: selectedJogoId,
         detalhesCsgo:
-          selectedGameName === 'CS:GO' ? formEdicao.detalhesCsgo : null,
+            ['CS2', 'CS:GO', 'Counter Strike'].includes(selectedGameName) ? formEdicao.detalhesCsgo : null,
         detalhesLol:
           selectedGameName === 'League of Legends'
             ? formEdicao.detalhesLol
@@ -670,6 +702,12 @@ export default function PerfilUsuario() {
       descricao: raw.descricao ?? '',
       detalhesCsgo:
         raw.detalhesCsgo || skin?._raw?.detalhesCsgo || DEFAULT_CSGO_DETAILS,
+      detalhesCs2:
+        raw.detalhesCs2 ||
+        raw.cs2 ||
+        skin?._raw?.detalhesCs2 ||
+        skin?._raw?.cs2 ||
+        DEFAULT_CS2_DETAILS,
       detalhesLol:
         raw.detalhesLol || skin?._raw?.detalhesLol || DEFAULT_LOL_DETAILS,
     });
@@ -1255,9 +1293,9 @@ export default function PerfilUsuario() {
                 </div>
 
                 {/* Campos de CS:GO */}
-                {selectedGameName === 'CS:GO' && (
+                {['CS:GO', 'CS2', 'Counter Strike'].includes(selectedGameName) && (
                   <fieldset className="perfil-form__fieldset">
-                    <legend>Detalhes (CS:GO)</legend>
+                    <legend>Detalhes ({selectedGameName})</legend>
 
                     <div className="perfil-form__grid-2">
                       <div className="perfil-form__row">
@@ -1328,6 +1366,99 @@ export default function PerfilUsuario() {
                             ...prev,
                             detalhesCsgo: {
                               ...prev.detalhesCsgo,
+                              statTrak: e.target.checked,
+                            },
+                          }))
+                        }
+                      />
+                      <span>StatTrak™</span>
+                    </label>
+                  </fieldset>
+                )}
+
+                {/* Campos de CS2 */}
+                {selectedGameName === 'CS2' && (
+                  <fieldset className="perfil-form__fieldset">
+                    <legend>Detalhes (CS2)</legend>
+
+                    <div className="perfil-form__grid-2">
+                      <div className="perfil-form__row">
+                        <label htmlFor="f-cs2-float">Desgaste (Float)</label>
+                        <input
+                          id="f-cs2-float"
+                          type="number"
+                          step="0.0001"
+                          placeholder="Ex: 0.0712"
+                          min="0"
+                          max="1"
+                          value={formEdicao.detalhesCs2.desgasteFloat}
+                          onChange={(e) =>
+                            setFormEdicao((prev) => ({
+                              ...prev,
+                              detalhesCs2: {
+                                ...prev.detalhesCs2,
+                                desgasteFloat: e.target.value,
+                              },
+                            }))
+                          }
+                        />
+                      </div>
+
+                      <div className="perfil-form__row">
+                        <label htmlFor="f-cs2-pattern">Pattern Index</label>
+                        <input
+                          id="f-cs2-pattern"
+                          type="number"
+                          step="1"
+                          placeholder="Ex: 456"
+                          min="0"
+                          max="999"
+                          value={formEdicao.detalhesCs2.patternIndex}
+                          onChange={(e) =>
+                            setFormEdicao((prev) => ({
+                              ...prev,
+                              detalhesCs2: {
+                                ...prev.detalhesCs2,
+                                patternIndex: e.target.value,
+                              },
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="perfil-form__row">
+                      <label htmlFor="f-cs2-exterior">Exterior</label>
+                      <select
+                        id="f-cs2-exterior"
+                        value={formEdicao.detalhesCs2.exterior}
+                        onChange={(e) =>
+                          setFormEdicao((prev) => ({
+                            ...prev,
+                            detalhesCs2: {
+                              ...prev.detalhesCs2,
+                              exterior: e.target.value,
+                            },
+                          }))
+                        }
+                      >
+                        <option value="Factory New">Factory New</option>
+                        <option value="Minimal Wear">Minimal Wear</option>
+                        <option value="Field-Tested">Field-Tested</option>
+                        <option value="Well-Worn">Well-Worn</option>
+                        <option value="Battle-Scarred">Battle-Scarred</option>
+                      </select>
+                    </div>
+
+                    <label className="check" style={{ marginTop: 12 }}>
+                      <input
+                        type="checkbox"
+                        checked={formEdicao.detalhesCs2.statTrak}
+                        onChange={(e) =>
+                          setFormEdicao((prev) => ({
+                            ...prev,
+                            detalhesCs2: {
+                              ...prev.detalhesCs2,
                               statTrak: e.target.checked,
                             },
                           }))

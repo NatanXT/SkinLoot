@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './PerfilPreviewModal.css';
-import api from '../../services/api';
+import api from '../../services/api.js';
 import ReputacaoVendedor from './ReputacaoVendedor.jsx';
 
 export default function PerfilPreviewModal({

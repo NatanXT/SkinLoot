@@ -870,21 +870,16 @@
   height: 6px;
   border-radius: 999px;
   overflow: hidden;
-  background: linear-gradient(
-    90deg,
-    #fecaca,
-    #fed7aa,
-    #fef9c3,
-    #bbf7d0
-  );
+  background: linear-gradient(90deg,
+ color-mix(in oklab, #39FF14 95%, white) 0%, #39FF14 25%, #00C896 75%,
+ color-mix(in oklab, #00C896 85%, black) 100%);
 }
 
-.perfil-publico__ranking-bar-fill {
+.vendedor-confianca-barra__fill-inner {
   height: 100%;
-  width: var(--nivel-pct, 40%);
+  width: var(--nivel-pct, 0%);
   max-width: 100%;
-  background: linear-gradient(90deg, #f97316, #eab308, #22c55e);
-  transition: width 0.35s ease-out;
+  transition: width .35s ease-out;
 }
 
 .perfil-publico__ranking-bar-legend {

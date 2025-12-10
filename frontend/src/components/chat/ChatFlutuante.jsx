@@ -5,7 +5,7 @@ import './ChatFlutuante.css';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useAuth } from '../../services/AuthContext';
-import api from '../../services/api';
+import api from '../../services/api.js';
 
 export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
   // CONTEXTO E ESTADOS PRINCIPAIS
@@ -391,7 +391,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
                   </div>
                 </div>
                 <div className="chat-topo-actions">
-                  {/* ✅ BOTÃO AVALIAR (Só aparece se tivermos um ID de anúncio) */}
+                  {/* BOTÃO AVALIAR (Só aparece se tivermos um ID de anúncio) */}
                   {anuncioIdAtivo && (
                       <button
                           className="btn-avaliar"

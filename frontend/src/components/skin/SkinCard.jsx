@@ -1,20 +1,13 @@
+// src/components/skin/SkinCard.jsx
 import { useNavigate } from 'react-router-dom';
 import './SkinCard.css';
 
-// Metadados dos planos disponíveis
 const plansMeta = {
   gratuito: { label: 'Gratuito', color: '#454B54' },
   intermediario: { label: 'Intermediário', color: '#00C896' },
   plus: { label: '+ Plus', color: '#39FF14' },
 };
 
-/**
- * @param {Object} data - Dados do anúncio (imagem, nome, preço, vendedor)
- * @param {boolean} liked - Indica se o item foi favoritado
- * @param {Function} onLike - Ação ao clicar em favorito
- * @param {Function} onContato - Ação ao clicar em "Contato"
- * @param {Function} onComprarFora - Ação ao clicar em "Comprar"
- */
 export default function SkinCard({
   data,
   liked,
@@ -24,10 +17,20 @@ export default function SkinCard({
 }) {
   const navigate = useNavigate();
 
-  // Normalização dos dados recebidos
-  const titulo = data?.skinNome ?? data?.title ?? data?.nome ?? 'Skin';
+  //console.log('%c[SkinCard] DATA RECEBIDA:', 'color:#4CAF50', data);
+
+  const titulo =
+    data?.skinNome ?? data?.title ?? data?.nome ?? 'Skin';
+
   const imagem =
-    data?.image ?? data?.imagemUrl ?? data?.imagem ?? '/img/placeholder.png';
+    data?.image ??
+    data?.imagemUrl ??
+    data?.imagem ??
+    data?.skinIcon ??     // estava faltando
+    '/img/placeholder.png';
+
+  //console.log('%c[SkinCard] IMAGEM RESOLVIDA:', 'color:#03A9F4', imagem);
+
   const vendedor =
     data?.usuarioNome ??
     data?.seller?.name ??
@@ -47,7 +50,6 @@ export default function SkinCard({
   ).toLowerCase();
   const planMeta = plansMeta[planKey] || { label: '—', color: '#999' };
 
-  // Tentativa de resolver o ID do vendedor a partir de vários campos possíveis.
   const sellerId =
     data?.usuarioId ??
     data?.seller?.id ??
@@ -57,26 +59,33 @@ export default function SkinCard({
     data?.userId ??
     null;
 
-  // Navega para a página de perfil público do vendedor, se o ID existir.
   const handleSellerClick = () => {
-    if (!sellerId) {
-      // Sem ID, não navega (componente continua funcional).
-      return;
-    }
+    if (!sellerId) return;
     navigate(`/perfil-publico/${sellerId}`);
   };
 
   return (
     <article className="card">
-      {/*  Imagem + Plano + Favorito  */}
       <div className="card__media">
         <img
           src={imagem}
           alt={titulo}
           loading="lazy"
           onError={(e) => {
+            // console.warn(
+            //   '%c[SkinCard] ERRO AO CARREGAR IMAGEM! CAIU NO FALLBACK:',
+            //   'color:red',
+            //   imagem,
+            // );
             e.currentTarget.src = '/img/placeholder.png';
           }}
+          // onLoad={() => {
+          //   console.log(
+          //     '%c[SkinCard] IMAGEM CARREGADA COM SUCESSO:',
+          //     'color:green',
+          //     imagem,
+          //   );
+          // }}
         />
 
         <span className="badge" style={{ background: planMeta.color }}>
@@ -98,7 +107,6 @@ export default function SkinCard({
         </button>
       </div>
 
-      {/*  Corpo do Card  */}
       <div className="card__body">
         <h3>{titulo}</h3>
 
@@ -106,9 +114,7 @@ export default function SkinCard({
           <span className="price">R$ {precoFmt}</span>
         </div>
 
-        {/*  Informações do vendedor  */}
         <div className="seller">
-          {/* Mesma base visual dos botões ghost (btn btn--ghost) */}
           <button
             type="button"
             className={`btn btn--ghost seller__name ${
@@ -116,11 +122,6 @@ export default function SkinCard({
             }`}
             onClick={sellerId ? handleSellerClick : undefined}
             disabled={!sellerId}
-            title={
-              sellerId
-                ? 'Ver perfil público do vendedor'
-                : 'Perfil do vendedor indisponível'
-            }
           >
             <span className="seller__avatar">
               {vendedor?.charAt(0)?.toUpperCase() ?? '?'}
@@ -133,11 +134,7 @@ export default function SkinCard({
           </button>
 
           <div className="cta">
-            <button
-              className="btn btn--ghost"
-              onClick={onContato}
-              type="button"
-            >
+            <button className="btn btn--ghost" onClick={onContato}>
               Contato
             </button>
             <button
@@ -150,7 +147,6 @@ export default function SkinCard({
           </div>
         </div>
 
-        {/*  Botão inferior  */}
         <div className="cta cta--bottom">
           <button
             className="btn btn--primary full"

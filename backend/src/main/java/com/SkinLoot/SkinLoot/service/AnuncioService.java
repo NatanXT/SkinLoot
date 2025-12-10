@@ -185,7 +185,7 @@ public class AnuncioService {
     }
 
     private void processarDetalhes(Anuncio anuncio, AnuncioRequest request, Jogo jogo) {
-        if(jogo.getNome().equals("CS:GO") && request.getDetalhesCsgo() != null){
+        if(jogo.getNome().equals("CS2") && request.getDetalhesCsgo() != null){
             Csgo2Request cs2 = request.getDetalhesCsgo();
             AnuncioCsgo2 detalhes = anuncio.getDetalhesCsgo() != null ? anuncio.getDetalhesCsgo() : new AnuncioCsgo2();
 
@@ -212,7 +212,7 @@ public class AnuncioService {
     }
 
     private void limparDetalhesAntigosSeNecessario(Anuncio anuncio, Jogo novoJogo) {
-        if (anuncio.getDetalhesCsgo() != null && (novoJogo == null || !novoJogo.getNome().equals("CS:GO"))) {
+        if (anuncio.getDetalhesCsgo() != null && (novoJogo == null || !novoJogo.getNome().equals("CS2"))) {
             anuncio.setDetalhesCsgo(null); // orphanRemoval=true deletará
         }
         if (anuncio.getDetalhesLol() != null && (novoJogo == null || !novoJogo.getNome().equals("League of Legends"))) {
