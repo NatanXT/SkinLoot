@@ -391,7 +391,7 @@ export default function ChatFlutuante({ usuarioAlvo, onFechar }) {
                   </div>
                 </div>
                 <div className="chat-topo-actions">
-                  {/* ✅ BOTÃO AVALIAR (Só aparece se tivermos um ID de anúncio) */}
+                  {/* BOTÃO AVALIAR (Só aparece se tivermos um ID de anúncio) */}
                   {anuncioIdAtivo && (
                       <button
                           className="btn-avaliar"
